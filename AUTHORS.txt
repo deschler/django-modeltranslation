@@ -1,0 +1,2 @@
+The author of django-modeltranslation is Peter Eschler <peschler@gmail.com> 
+http://pyjax.net
