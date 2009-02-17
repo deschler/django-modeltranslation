@@ -1,5 +1,6 @@
 
 from django.db import models
+from django.conf import settings
 
 from modeltranslation.translator import translator
 
@@ -9,12 +10,13 @@ from modeltranslation.translator import translator
 
 # Import the project's global "translation.py" which registers model 
 # classes and their translation options with the translator object. 
-# And because it must import the model classes for the registration
-# process, the models.py modules of these apps are fully imported
+# This requires an extra settings entry, because I see no other way
+# to determine the module name of the project
 try: 
-    translation_mod = __import__('translation', {}, {}, [''])
+    translation_mod = __import__(settings.TRANSLATION_REGISTRY, {}, {}, [''])
 except ImportError, exc:
-    raise ImportError("No translation.py found in the project directory: %s", exc)
+    print "No translation.py found in the project directory."
+    #raise ImportError("No translation.py found in the project directory.")
 
 # After importing all translation modules, all translation classes are 
 # registered with the translator. 
