@@ -14,7 +14,7 @@ from modeltranslation.translator import translator
 try: 
     translation_mod = __import__('translation', {}, {}, [''])
 except ImportError, exc:
-    print "No translation.py found in the project directory."
+    raise ImportError("No translation.py found in the project directory: %s", exc)
 
 # After importing all translation modules, all translation classes are 
 # registered with the translator. 
