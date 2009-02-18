@@ -12,12 +12,6 @@ class Command(BaseCommand):
         
     def handle(self, subscriber_list_slug, **options):        
         default_lang = settings.LANGUAGES[0][0]        
-        if 'settings' in options and options['settings']:
-            custom_settings = options['settings']
-            # print "Got custom settings:", custom_settings
-            default_lang = custom_settings.LANGUAGES[0][0]
-
-        # print "default lang:", default_lang
         
         for model, trans_opts in translator._registry.items():
             print model, trans_opts
