@@ -143,7 +143,7 @@ class Translator(object):
                     
             translation_opts.localized_fieldnames_rev = rev_dict                    
                         
-        print "Applying descriptor field for model %s" % model                        
+        # print "Applying descriptor field for model %s" % model                        
         for field_name in translation_opts.fields:
             setattr(model, field_name, TranslationFieldDescriptor(field_name))
                         

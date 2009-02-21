@@ -18,7 +18,7 @@ class TranslationAdmin(admin.ModelAdmin):
         
         # Hide the original field by making it non-editable.
         if db_field.name in trans_opts.fields:
-            db_field.editable = False                                        
+            db_field.editable = False            
             # field.widget.attrs['readonly'] = "true"
         
         # For every localized field copy the widget from the original field
@@ -31,7 +31,7 @@ class TranslationAdmin(admin.ModelAdmin):
             if db_field.language == settings.LANGUAGES[0][0] and orig_formfield.required:
                 orig_formfield.required = False
                 field.required = True
-                
+                                            
             field.widget = deepcopy(orig_formfield.widget) 
         
                 
