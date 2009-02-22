@@ -9,4 +9,5 @@ setup(name='django-modeltranslation',
       author_email='peschler@googlemail.com',
       url='http://code.google.com/p/django-modeltranslation/',
       packages=['modeltranslation', 'modeltranslation.management', 'modeltranslation.management.commands'],
+      liicense='New BSD' 
      )
