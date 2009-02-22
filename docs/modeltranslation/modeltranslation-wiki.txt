@@ -79,7 +79,9 @@ LANGUAGES = (
 
 Note that the `gettext` lambda function is not a feature of the modeltranslation app, but rather required for Django to be able to (statically) translate the verbose names of the languages using the standard `i18n` solution.
 
-*settings.TRANSLATION_REGISTRY*In order to be able to import the project's `translation.py` registration file the `TRANSLATION_REGISTRY` must be set to a value in the form `<PROJECT_MODULE>.translation`. E.g. if your project is located in a folder named `myproject` the `TRANSLATION_REGISTRY` must be set like this:
+*settings.TRANSLATION_REGISTRY*
+
+In order to be able to import the project's `translation.py` registration file the `TRANSLATION_REGISTRY` must be set to a value in the form `<PROJECT_MODULE>.translation`. E.g. if your project is located in a folder named `myproject` the `TRANSLATION_REGISTRY` must be set like this:
 
 {{{
 TRANSLATION_REGISTRY = "myproject.translation"
@@ -87,7 +89,7 @@ TRANSLATION_REGISTRY = "myproject.translation"
 
 == Registering models and their fields for translation ==
 
-The `modeltranslation` app can translate `CharField` and `TextField`based fields of any model class. For each model to translate a translation option class containg the fields to translate is registered with the `modeltranslation` app.
+The `modeltranslation` app can translate `CharField` and `TextField`based fields of any model class. For each model to translate a translation option class containing the fields to translate must be registered with the `modeltranslation` app.
 
 Registering models and their fields for translation requires the following steps:
 

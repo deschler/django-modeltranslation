@@ -11,11 +11,16 @@
 .. currentmodule:: modeltranslation.models
 .. moduleauthor:: P. Eschler <peschler@googlemail.com>
 
-The modeltranslation application can be used to translate existing models to 
-an arbitrary number of languages without having to change the original model
-classes. It uses a registration approach (comparable to Django's 
-admin app) to be able to add translations to existing or new projects and is 
-fully integrated into the Django admin backend.
+The modeltranslation application can be used to translate dynamic content of 
+existing models to an arbitrary number of languages without having to change 
+the original model classes. It uses a registration approach (comparable to 
+Django's admin app) to be able to add translations to existing or new projects 
+and is fully integrated into the Django admin backend.
+
+The advantage of a registration approach is the ability to add translations to
+models on a per-project basis. You can use the same app in different projects,
+may they use translations or not, and you never have to touch the original 
+model class.
 
 .. contents::
 
@@ -89,6 +94,7 @@ modeltranslation app, but rather required for Django to be able to
 ``i18n`` solution.
 
 **settings.TRANSLATION_REGISTRY**
+
 In order to be able to import the project's ``translation.py`` registration
 file the ``TRANSLATION_REGISTRY`` must be set to a value in the form
 ``<PROJECT_MODULE>.translation``. E.g. if your project is located in a folder
