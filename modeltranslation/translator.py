@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.contrib.contenttypes.models import ContentType
+#from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import signals
 from django.db.models.base import ModelBase
@@ -25,8 +25,8 @@ class TranslationOptions(object):
     on.
     """
     def __init__(self, *args, **kwargs):
-        # self.translation_model = None        
-        self.model_ct = None
+        # self.translation_model = None
+        #self.model_ct = None
         self.localized_fieldnames = list()
         
 #def get_localized_fieldnames(model):
@@ -123,11 +123,11 @@ class Translator(object):
             #validate(translation_opts, model)
 
             # Store the translation class associated to the model
-            self._registry[model] = translation_opts    
+            self._registry[model] = translation_opts
                     
             # Get the content type of the original model and store it on the
             # translation options for faster lookup later on.
-            translation_opts.model_ct = ContentType.objects.get_for_model(model)                    
+            #translation_opts.model_ct = ContentType.objects.get_for_model(model)                    
                                        
             # Add the localized fields to the model and store the names of these
             # fields in the model's translation options for faster lookup later
