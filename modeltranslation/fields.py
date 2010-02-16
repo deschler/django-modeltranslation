@@ -1,7 +1,6 @@
-    
+# -*- coding: utf-8 -*-
 from django.conf import settings
 from django.db.models.fields import Field, CharField
-
 from modeltranslation.utils import get_language, build_localized_fieldname
 
 class TranslationField(Field):
@@ -51,8 +50,8 @@ class TranslationField(Field):
     def pre_save(self, model_instance, add):              
         val = super(TranslationField, self).pre_save(model_instance, add)
         if get_language() == self.language and not add:            
-            # Rule is: 3. Assigning a value to a translation field of the default language
-            #             also updates the original field
+            # Rule is: 3. Assigning a value to a translation field of the
+            # default language also updates the original field
             model_instance.__dict__[self.translated_field.name] = val
             #setattr(model_instance, self.attname, orig_val)
             # Also return the original value
@@ -66,11 +65,21 @@ class TranslationField(Field):
         return self.translated_field.get_internal_type()
         
     def contribute_to_class(self, cls, name):                      
-        
         super(TranslationField, self).contribute_to_class(cls, name)
-        
         #setattr(cls, 'get_%s_display' % self.name, curry(cls._get_FIELD_display, field=self))
     
+    def south_field_triple(self):
+        """
+        Returns a suitable description of this field for South.
+        """
+        # We'll just introspect the _actual_ field.
+        from south.modelsinspector import introspector
+        field_class = self.translated_field.__class__.__module__ + "." + self.translated_field.__class__.__name__
+        args, kwargs = introspector(self.translated_field)
+        # That's our definition!
+        return (field_class, args, kwargs)
+    
+
 #class CurrentLanguageField(CharField):
     #def __init__(self, **kwargs):
         #super(CurrentLanguageField, self).__init__(null=True, max_length=5, **kwargs)
@@ -93,5 +102,4 @@ class TranslationField(Field):
     
     #def __contains__(self, model):
         #return model in self.__class__._registry
-    
         
