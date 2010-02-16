@@ -1,4 +1,4 @@
-
+# -*- coding: utf-8 -*-
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -10,6 +10,9 @@ from django.utils.thread_support import currentThread
 
 from modeltranslation import translator
 
+settings.LANGUAGES = (('de', 'Deutsch'),
+                      ('en', 'English'))
+
 class TestModel(models.Model):
     title = models.CharField(max_length=255)
     text = models.TextField(null=True)
@@ -17,6 +20,7 @@ class TestModel(models.Model):
 class TestTranslationOptions(translator.TranslationOptions):
     fields = ('title', 'text',)
 
+translator.translator._registry = {}
 translator.translator.register(TestModel, TestTranslationOptions)
 
 class ModelTranslationTest(TestCase):    
