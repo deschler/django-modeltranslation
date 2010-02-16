@@ -1,9 +1,8 @@
     
 from django.conf import settings
 from django.db.models.fields import Field, CharField
-from django.utils.translation import get_language
 
-from modeltranslation.utils import build_localized_fieldname
+from modeltranslation.utils import get_language, build_localized_fieldname
 
 class TranslationField(Field):
     """

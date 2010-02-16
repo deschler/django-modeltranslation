@@ -2,7 +2,22 @@ from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.models import ContentType
-from django.utils.translation import get_language
+from django.utils.translation import get_language as _get_language
+
+def get_language():
+    """
+    Return an active language code that is guaranteed to be in
+    settings.LANGUAGES (Django does not seem to guarantee this for
+    us.)
+    
+    """
+    lang = _get_language()
+    available_languages = [l[0] for l in settings.LANGUAGES]
+    if lang not in available_languages and '-' in lang:
+        lang = lang.split('-')[0]
+    if lang in available_languages:
+        return lang
+    return available_languages[0]
 
 class TranslationFieldDescriptor(object):
     """
@@ -18,7 +33,7 @@ class TranslationFieldDescriptor(object):
 
     def __set__(self, instance, value):                
         # print "Descriptor.__set__%s %s %s.%s: %s" % (id(instance), id(self), type(instance), self.name, value)
-        lang = get_language()              
+        lang = get_language()
         loc_field_name = build_localized_fieldname(self.name, lang)
         
         # also update the translation field of the current language        
@@ -100,4 +115,4 @@ def copy_field(field):
         
 
 def build_localized_fieldname(field_name, lang):
-    return '%s_%s' % (field_name, lang)
+    return '%s_%s' % (field_name, lang.replace('-', '_'))
