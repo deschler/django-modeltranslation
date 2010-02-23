@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -8,8 +9,7 @@ def get_language():
     """
     Return an active language code that is guaranteed to be in
     settings.LANGUAGES (Django does not seem to guarantee this for
-    us.)
-    
+    us.)    
     """
     lang = _get_language()
     available_languages = [l[0] for l in settings.LANGUAGES]
@@ -18,6 +18,14 @@ def get_language():
     if lang in available_languages:
         return lang
     return available_languages[0]
+
+
+def get_translation_fields(field):
+    """
+    Returns a list of localized fieldnames for a given field.
+    """
+    return [build_localized_fieldname(field, l[0]) for l in settings.LANGUAGES]
+
 
 class TranslationFieldDescriptor(object):
     """
@@ -103,10 +111,10 @@ def copy_field(field):
     
     This taken from http://www.djangosnippets.org/snippets/442/
     """    
-    base_kw = dict([(n, getattr(field,n, '_null')) for n in models.fields.Field.__init__.im_func.func_code.co_varnames])
+    base_kw = dict([(n, getattr(field, n, '_null')) for n in models.fields.Field.__init__.im_func.func_code.co_varnames])
     if isinstance(field, models.fields.related.RelatedField):
         rel = base_kw.get('rel')
-        rel_kw = dict([(n, getattr(rel,n, '_null')) for n in rel.__init__.im_func.func_code.co_varnames])
+        rel_kw = dict([(n, getattr(rel, n, '_null')) for n in rel.__init__.im_func.func_code.co_varnames])
         if isinstance(field, models.fields.related.ForeignKey):
             base_kw['to_field'] = rel_kw.pop('field_name')
         base_kw.update(rel_kw)

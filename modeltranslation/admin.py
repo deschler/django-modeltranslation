@@ -11,9 +11,36 @@ from django.shortcuts import get_object_or_404, render_to_response
 from django.utils.safestring import mark_safe
 
 from modeltranslation.translator import translator
-
+from modeltranslation.utils import get_translation_fields
 
 class TranslationAdmin(admin.ModelAdmin):
+    def __init__(self, *args, **kwargs):
+        super(TranslationAdmin, self).__init__(*args, **kwargs)
+      
+        # Replace original field with translation field for each language
+        if self.fields or self.fieldsets:
+            trans_opts = translator.get_options_for_model(self.model)
+            if self.fields:
+                fields_new = list(self.fields)
+                for field in self.fields:
+                    if field in trans_opts.fields:
+                        index = fields_new.index(field)
+                        translation_fields = get_translation_fields(field)
+                        fields_new = self.fields[:index] + translation_fields + self.fields[index+1:]
+                self.fields = fields_new
+            
+            if self.fieldsets:
+                fieldsets_new = list(self.fieldsets)
+                for (name, dct) in self.fieldsets:
+                    if 'fields' in dct:
+                        fields_new = list(dct['fields'])
+                        for field in dct['fields']:
+                            if field in trans_opts.fields:
+                                index = fields_new.index(field)
+                                translation_fields = get_translation_fields(field)
+                                fields_new = fields_new[:index] + translation_fields + fields_new[index+1:]
+                        dct['fields'] = fields_new
+                self.fieldsets = fieldsets_new
                 
     def patch_translation_field(self, db_field, field, **kwargs):
         trans_opts = translator.get_options_for_model(self.model)        
