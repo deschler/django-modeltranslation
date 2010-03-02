@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import sys
 from django.db import models
 from django.conf import settings
 from modeltranslation.translator import translator
@@ -12,7 +13,6 @@ from modeltranslation.translator import translator
 try: 
     import translation
 except ImportError:
-    import sys
     sys.stderr.write("modeltranslation: Error can't find the file " \
                      "'translation.py' in your project root.\n")
     sys.exit(1)
@@ -20,7 +20,11 @@ except ImportError:
 # After importing all translation modules, all translation classes are 
 # registered with the translator.
 if settings.DEBUG:
-    translated_model_names = ', '.join(
-        t.__name__ for t in translator._registry.keys())
-    print "modeltranslation: Registered %d models for translation (%s)." % (
-        len(translator._registry), translated_model_names)
+    try:
+        if sys.argv[1] in ('runserver', 'runserver_plus'):
+            translated_model_names = ', '.join(
+                t.__name__ for t in translator._registry.keys())
+            print "modeltranslation: Registered %d models for translation " \
+                  "(%s)." % (len(translator._registry), translated_model_names)
+    except IndexError:
+        pass

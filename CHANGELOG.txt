@@ -1,14 +1,24 @@
+  FIXED: Only print debug statements to stdout if the runserver or
+         runserver_plus management commands are used.
+         Resolves issue 16.
   FIXED: Removed print statements so that modeltranslation is usable with
          mod_wsgi.
+         Resolves issue 7.
   FIXED: Broken admin fields and fieldsets.
+         Resolves issue 9.
   FIXED: Creation of db fields with invalid python language code.
+         Resolves issue 4.
   FIXED: Tests to run from any project.
+         Resolves issue 6.
   FIXED: Removed unused dependency to content type which can break syncdb. 
+         Resolves issue 1.
     
 CHANGED: Removed TRANSLATION_REGISTRY setting.
 
   ADDED: Initial support for south.
+         Resolves issue 11.
   ADDED: Support for admin inlines. 
+         Resolves issue 12.
 
 
 v0.1
