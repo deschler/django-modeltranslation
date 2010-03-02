@@ -1,0 +1,19 @@
+  FIXED: Removed print statements so that modeltranslation is usable with
+         mod_wsgi.
+  FIXED: Broken admin fields and fieldsets.
+  FIXED: Creation of db fields with invalid python language code.
+  FIXED: Tests to run from any project.
+  FIXED: Removed unused dependency to content type which can break syncdb. 
+    
+CHANGED: Removed TRANSLATION_REGISTRY setting.
+
+  ADDED: Initial support for south.
+  ADDED: Support for admin inlines. 
+
+
+v0.1
+====
+
+Date: 2009-02-22
+
+Initial release packaged from revision 19. 
