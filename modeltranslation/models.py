@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 import sys
-from django.db import models
+
 from django.conf import settings
+from django.db import models
+
 from modeltranslation.translator import translator
 
 # Every model registered with the modeltranslation.translator.translator
@@ -25,6 +27,7 @@ if settings.DEBUG:
             translated_model_names = ', '.join(
                 t.__name__ for t in translator._registry.keys())
             print "modeltranslation: Registered %d models for translation " \
-                  "(%s)." % (len(translator._registry), translated_model_names)
+                  "(%s)." % (len(translator._registry),
+                             translated_model_names)
     except IndexError:
         pass

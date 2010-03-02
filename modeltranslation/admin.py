@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from copy import deepcopy
 
+from django import forms, template
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 from django.forms import widgets
-from django import forms, template
 from django.forms.fields import MultiValueField
 from django.shortcuts import get_object_or_404, render_to_response
 from django.utils.safestring import mark_safe

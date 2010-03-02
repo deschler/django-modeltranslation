@@ -1,4 +1,4 @@
-
+# -*- coding: utf-8 -*-
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError, NoArgsCommand
 
@@ -6,9 +6,8 @@ from modeltranslation.translator import translator
 from modeltranslation.utils import build_localized_fieldname
 
 class Command(NoArgsCommand):
-    help = 'Updates the default translation fields of all or the specified'\
+    help = 'Updates the default translation fields of all or the specified' \
            'translated application using the value of the original field.'
-    # args = '[app_name]'
         
     def handle(self, **options):        
         default_lang = settings.LANGUAGES[0][0]        

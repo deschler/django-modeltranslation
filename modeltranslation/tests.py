@@ -1,30 +1,34 @@
 # -*- coding: utf-8 -*-
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.test import TestCase
-from django.contrib.auth.models import User
+from django.utils.thread_support import currentThread
 from django.utils.translation import get_language
 from django.utils.translation import trans_real
-from django.utils.thread_support import currentThread
 
 from modeltranslation import translator
 
 settings.LANGUAGES = (('de', 'Deutsch'),
                       ('en', 'English'))
 
+
 class TestModel(models.Model):
     title = models.CharField(max_length=255)
     text = models.TextField(null=True)
 
+
 class TestTranslationOptions(translator.TranslationOptions):
     fields = ('title', 'text',)
+
 
 translator.translator._registry = {}
 translator.translator.register(TestModel, TestTranslationOptions)
 
+
 class ModelTranslationTest(TestCase):    
-    "Basic tests for the modeltranslation application."
+    """Basic tests for the modeltranslation application."""
     
     urls = 'modeltranslation.testurls'
     
@@ -50,15 +54,16 @@ class ModelTranslationTest(TestCase):
         self.failUnlessEqual(len(translator.translator._registry), 1)
                 
         # Try to unregister a model that is not registered
-        self.assertRaises(translator.NotRegistered, translator.translator.unregister, User)
+        self.assertRaises(translator.NotRegistered,
+                          translator.translator.unregister, User)
                         
         # Try to get options for a model that is not registered
-        self.assertRaises(translator.NotRegistered, translator.translator.get_options_for_model, User)
+        self.assertRaises(translator.NotRegistered,
+                          translator.translator.get_options_for_model, User)
                 
-                            
     def test_translated_models(self):        
         # First create an instance of the test model to play with
-        inst = TestModel.objects.create(title="Testtitle", text="Testtext")        
+        inst = TestModel.objects.create(title="Testtitle", text="Testtext")
         field_names = dir(inst)
         self.failUnless('id' in field_names)
         self.failUnless('title' in field_names)
@@ -75,10 +80,10 @@ class ModelTranslationTest(TestCase):
         # First create an instance of the test model to play with
         title1_de = "title de"
         title1_en = "title en"
-        title2_de = "title2 de"        
+        title2_de = "title2 de"
         inst1 = TestModel(title_en=title1_en, text="Testtext")
         inst1.title = title1_de
-        inst2 = TestModel(title=title2_de, text="Testtext")        
+        inst2 = TestModel(title=title2_de, text="Testtext")
         inst1.save()
         inst2.save()
         
@@ -162,7 +167,6 @@ class ModelTranslationTest(TestCase):
         self.failUnlessEqual(n.text, text_de)
         trans_real.deactivate()
                 
-                
     def test_rule2(self):                                            
         """
         Rule 2: Assigning a value to the original field also updates the value
@@ -195,7 +199,6 @@ class ModelTranslationTest(TestCase):
         
         trans_real.deactivate()                
                 
-                
     def test_rule3(self):
         """
         Rule 3: Assigning a value to a translation field of the default language
@@ -223,7 +226,6 @@ class ModelTranslationTest(TestCase):
         self.failUnlessEqual(n.title, n.title_en)
         trans_real.deactivate()
                 
-            
     def test_rule4(self):                                
         """
         Rule 4: If both fields - the original and the translation field of the 

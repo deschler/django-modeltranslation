@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.conf import settings
 from django.db.models.fields import Field, CharField
+
 from modeltranslation.utils import get_language, build_localized_fieldname
 
 class TranslationField(Field):
@@ -19,7 +20,8 @@ class TranslationField(Field):
     descriptor.
     
     The translation field needs to know which language it contains therefore
-    that needs to be specified when the field is created.            
+    that needs to be specified when the field is created.
+    
     """
     def __init__(self, translated_field, language, *args, **kwargs):
         # Store the originally wrapped field for later
@@ -36,7 +38,8 @@ class TranslationField(Field):
         self.blank = True
         
         # Adjust the name of this field to reflect the language
-        self.attname = build_localized_fieldname(translated_field.name, language)
+        self.attname = build_localized_fieldname(translated_field.name,
+                                                 language)
         self.name = self.attname
         
         # Copy the verbose name and append a language suffix (will e.g. in the
@@ -58,9 +61,6 @@ class TranslationField(Field):
             #return orig_val
         return val
                     
-    #def get_attname(self):
-        #return self.attname       
-                
     def get_internal_type(self):
         return self.translated_field.get_internal_type()
         
@@ -74,7 +74,8 @@ class TranslationField(Field):
         """
         # We'll just introspect the _actual_ field.
         from south.modelsinspector import introspector
-        field_class = self.translated_field.__class__.__module__ + "." + self.translated_field.__class__.__name__
+        field_class = '%s.%s' % (self.translated_field.__class__.__module__,
+                                 self.translated_field.__class__.__name__)
         args, kwargs = introspector(self.translated_field)
         # That's our definition!
         return (field_class, args, kwargs)

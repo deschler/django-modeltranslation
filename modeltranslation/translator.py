@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django.conf import settings
 #from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -10,9 +11,11 @@ from modeltranslation.utils import TranslationFieldDescriptor, build_localized_f
 
 class AlreadyRegistered(Exception):
     pass
+    
 
 class NotRegistered(Exception):
     pass
+
 
 class TranslationOptions(object):
     """
@@ -28,17 +31,16 @@ class TranslationOptions(object):
         # self.translation_model = None
         #self.model_ct = None
         self.localized_fieldnames = list()
-        
-#def get_localized_fieldnames(model):
-        
+
+
 def add_localized_fields(model):
     """
     Monkey patchs the original model class to provide additional fields for 
     every language. Only do that for fields which are defined in the 
     translation options of the model.
     
-    Returns a dict mapping the original fieldname to a list containing the names 
-    of the localized fields created for the original field.
+    Returns a dict mapping the original fieldname to a list containing the
+    names of the localized fields created for the original field.
     """
     localized_fields = dict()
     translation_opts = translator.get_options_for_model(model)
@@ -51,18 +53,17 @@ def add_localized_fields(model):
             if hasattr(model, localized_field_name):
                 raise ValueError("Error adding translation field. The model "\
                                  "'%s' already contains a field named '%s'. "\
-                                 % (instance.__class__.__name__, localized_field_name))
+                                 % (instance.__class__.__name__,
+                                    localized_field_name))
             
             # This approach implements the translation fields as full valid
             # django model fields and therefore adds them via add_to_class
             localized_field = model.add_to_class(localized_field_name,
-                                                 TranslationField(model._meta.get_field(field_name), 
-                                                                  l[0]))             
+                                                 TranslationField(model._meta.get_field(field_name),
+                                                                  l[0]))
             localized_fields[field_name].append(localized_field_name)
-            
-        
     return localized_fields        
-    # model.add_to_class('current_language', CurrentLanguageField())        
+    
     
 #def translated_model_initialized(field_names, instance, **kwargs):
     #print "translated_model_initialized instance:", instance, ", field:", field_names
@@ -71,6 +72,8 @@ def add_localized_fields(model):
         #print "  field: %s, initialval: %s" % (field_name, initial_val)
         #setattr(instance.__class__, field_name, TranslationFieldDescriptor(field_name,
                                                                            #initial_val))
+                                                                           
+                                                                           
 #def translated_model_initializing(sender, args, kwargs, **signal_kwargs):
     #print "translated_model_initializing", sender, args, kwargs    
     #trans_opts = translator.get_options_for_model(sender)
@@ -154,6 +157,7 @@ class Translator(object):
         Unregisters the given model(s).
 
         If a model isn't already registered, this will raise NotRegistered.
+        
         """
         if isinstance(model_or_iterable, ModelBase):
             model_or_iterable = [model_or_iterable]
@@ -166,6 +170,7 @@ class Translator(object):
         """
         Returns the translation options for the given ``model``. If the 
         ``model`` is not registered a ``NotRegistered`` exception is raised.
+        
         """
         try:
             return self._registry[model]

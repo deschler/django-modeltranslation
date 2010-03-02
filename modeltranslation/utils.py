@@ -8,8 +8,8 @@ from django.utils.translation import get_language as _get_language
 def get_language():
     """
     Return an active language code that is guaranteed to be in
-    settings.LANGUAGES (Django does not seem to guarantee this for
-    us.)    
+    settings.LANGUAGES (Django does not seem to guarantee this for us.)
+    
     """
     lang = _get_language()
     available_languages = [l[0] for l in settings.LANGUAGES]
@@ -21,16 +21,12 @@ def get_language():
 
 
 def get_translation_fields(field):
-    """
-    Returns a list of localized fieldnames for a given field.
-    """
+    """Returns a list of localized fieldnames for a given field."""
     return [build_localized_fieldname(field, l[0]) for l in settings.LANGUAGES]
 
 
 class TranslationFieldDescriptor(object):
-    """
-    A descriptor used for the original translated field.
-    """
+    """A descriptor used for the original translated field."""
     def __init__(self, name, initial_val=""):
         """
         The ``name`` is the name of the field (which is not available in the
@@ -51,7 +47,6 @@ class TranslationFieldDescriptor(object):
         # descriptor
         instance.__dict__[self.name] = value
         
-
     def __get__(self, instance, owner):
         # print "Descriptor.__get__%s %s %s.%s: %s" % (id(instance), id(self), type(instance), self.name, self.val)
         if not instance:
@@ -106,10 +101,12 @@ class TranslationFieldDescriptor(object):
    
    
 def copy_field(field):
-    """Instantiate a new field, with all of the values from the old one, except the    
+    """
+    Instantiate a new field, with all of the values from the old one, except the    
     to and to_field in the case of related fields.
     
     This taken from http://www.djangosnippets.org/snippets/442/
+    
     """    
     base_kw = dict([(n, getattr(field, n, '_null')) for n in models.fields.Field.__init__.im_func.func_code.co_varnames])
     if isinstance(field, models.fields.related.RelatedField):
