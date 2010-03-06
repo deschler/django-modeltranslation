@@ -15,8 +15,14 @@ from modeltranslation.translator import translator
 try: 
     import translation
 except ImportError:
-    sys.stderr.write("modeltranslation: Error can't find the file " \
-                     "'translation.py' in your project root.\n")
+    sys.stderr.write("modeltranslation: Can't import the file 'translation.py'"
+                     "from your project root.\n(If the file does indeed exist,"
+                     "it's causing an ImportError somehow.)\n")
+    # For some reason ImportErrors raised in translation.py or in modules
+    # that are included from there become swallowed. Work around this problem
+    # by printing the traceback explicitly.
+    import traceback
+    traceback.print_exc()
     sys.exit(1)
 
 # After importing all translation modules, all translation classes are 
