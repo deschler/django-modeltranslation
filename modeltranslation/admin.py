@@ -29,7 +29,9 @@ class TranslationAdminBase(object):
             # translation field required instead.
             if db_field.language == settings.LANGUAGES[0][0] and orig_formfield.required:
                 orig_formfield.required = False
+                orig_formfield.blank = True
                 field.required = True
+                field.blank = False
                                             
             field.widget = deepcopy(orig_formfield.widget) 
 
