@@ -56,22 +56,17 @@ class TranslationField(Field):
             # Rule is: 3. Assigning a value to a translation field of the
             # default language also updates the original field
             model_instance.__dict__[self.translated_field.name] = val
-            #setattr(model_instance, self.attname, orig_val)
-            # Also return the original value
-            #return orig_val
         return val
                     
     def get_internal_type(self):
         return self.translated_field.get_internal_type()
         
-    def contribute_to_class(self, cls, name):                      
-        super(TranslationField, self).contribute_to_class(cls, name)
-        #setattr(cls, 'get_%s_display' % self.name, curry(cls._get_FIELD_display, field=self))
+    #def contribute_to_class(self, cls, name):                      
+        #super(TranslationField, self).contribute_to_class(cls, name)
+        ##setattr(cls, 'get_%s_display' % self.name, curry(cls._get_FIELD_display, field=self))
     
     def south_field_triple(self):
-        """
-        Returns a suitable description of this field for South.
-        """
+        """Returns a suitable description of this field for South."""
         # We'll just introspect the _actual_ field.
         from south.modelsinspector import introspector
         field_class = '%s.%s' % (self.translated_field.__class__.__module__,
@@ -80,6 +75,13 @@ class TranslationField(Field):
         # That's our definition!
         return (field_class, args, kwargs)
     
+    def formfield(self, *args, **kwargs):
+        """Preserves the widget of the translated field."""
+        trans_formfield = self.translated_field.formfield(*args, **kwargs)
+        defaults = {'widget': type(trans_formfield.widget)}
+        defaults.update(kwargs)
+        return super(TranslationField, self).formfield(*args, **defaults)
+
 
 #class CurrentLanguageField(CharField):
     #def __init__(self, **kwargs):
