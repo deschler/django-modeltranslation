@@ -1,3 +1,7 @@
+  FIXED: Race condition between model import and translation registration in
+         production by ensuring that models are registered for translation
+         before TranslationAdmin runs.
+         (thanks to carl.j.meyer, resolves issue 19)
   FIXED: Added workaround for swallowed ImportErrors by printing a traceback
          explicitly.
          (resolves issue 17)
@@ -29,4 +33,4 @@ v0.1
 
 Date: 2009-02-22
 
-Initial release packaged from revision 19. 
+Initial release packaged from revision 19.
