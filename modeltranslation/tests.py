@@ -8,6 +8,8 @@ from django.utils.thread_support import currentThread
 from django.utils.translation import get_language
 from django.utils.translation import trans_real
 
+# TODO: tests for TranslationAdmin
+
 from modeltranslation import translator
 
 settings.LANGUAGES = (('de', 'Deutsch'),

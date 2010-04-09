@@ -40,35 +40,47 @@ class TranslationAdminBase(object):
                                             
             field.widget = deepcopy(orig_formfield.widget) 
 
-
 class TranslationAdmin(admin.ModelAdmin, TranslationAdminBase):
     def __init__(self, *args, **kwargs):
         super(TranslationAdmin, self).__init__(*args, **kwargs)
       
+        trans_opts = translator.get_options_for_model(self.model)
+        
         # Replace original field with translation field for each language
-        if self.fields or self.fieldsets:
-            trans_opts = translator.get_options_for_model(self.model)
-            if self.fields:
-                fields_new = list(self.fields)
-                for field in self.fields:
-                    if field in trans_opts.fields:
-                        index = fields_new.index(field)
-                        translation_fields = get_translation_fields(field)
-                        fields_new = self.fields[:index] + translation_fields + self.fields[index+1:]
-                self.fields = fields_new
-            
-            if self.fieldsets:
-                fieldsets_new = list(self.fieldsets)
-                for (name, dct) in self.fieldsets:
-                    if 'fields' in dct:
-                        fields_new = list(dct['fields'])
-                        for field in dct['fields']:
-                            if field in trans_opts.fields:
-                                index = fields_new.index(field)
-                                translation_fields = get_translation_fields(field)
-                                fields_new = fields_new[:index] + translation_fields + fields_new[index+1:]
-                        dct['fields'] = fields_new
-                self.fieldsets = fieldsets_new
+        if self.fields:
+            fields_new = list(self.fields)
+            for field in self.fields:
+                if field in trans_opts.fields:
+                    index = fields_new.index(field)
+                    translation_fields = get_translation_fields(field)
+                    fields_new[index:index+1] = translation_fields
+            self.fields = fields_new
+        
+        if self.fieldsets:
+            fieldsets_new = list(self.fieldsets)
+            for (name, dct) in self.fieldsets:
+                if 'fields' in dct:
+                    fields_new = list(dct['fields'])
+                    for field in dct['fields']:
+                        if field in trans_opts.fields:
+                            index = fields_new.index(field)
+                            translation_fields = get_translation_fields(field)
+                            fields_new[index:index+1] = translation_fields
+                    dct['fields'] = fields_new
+            self.fieldsets = fieldsets_new
+
+        if self.list_editable:
+            editable_new = list(self.list_editable)
+            display_new = list(self.list_display)
+            for field in self.list_editable:
+                if field in trans_opts.fields:
+                    index = editable_new.index(field)
+                    display_index = display_new.index(field)
+                    translation_fields = get_translation_fields(field)
+                    editable_new[index:index+1] = translation_fields
+                    display_new[display_index:display_index+1] = translation_fields
+            self.list_editable = editable_new
+            self.list_display = display_new
                 
     def formfield_for_dbfield(self, db_field, **kwargs):
         # Call the baseclass function to get the formfield        
