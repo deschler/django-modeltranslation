@@ -20,6 +20,8 @@
   FIXED: Removed unused dependency to content type which can break syncdb.
          (thanks carl.j.meyer, resolves issue 1)
 
+  ADDED: Support for admin prepopulated_fields.
+         (resolves issue 21)
   ADDED: Support for admin list_editable.
          (thanks carl.j.meyer, resolves issue 20)
   ADDED: Preserve the formfield widget of the translated field.

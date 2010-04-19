@@ -19,12 +19,12 @@ class TranslationAdminBase(object):
     Mixin class which adds patch_translation_field functionality.
     """
     def patch_translation_field(self, db_field, field, **kwargs):
-        trans_opts = translator.get_options_for_model(self.model)        
-        
+        trans_opts = translator.get_options_for_model(self.model)
+
         # Hide the original field by making it non-editable.
         if db_field.name in trans_opts.fields:
             db_field.editable = False
-        
+
         # For every localized field copy the widget from the original field
         if db_field.name in trans_opts.localized_fieldnames_rev:
             orig_fieldname = trans_opts.localized_fieldnames_rev[db_field.name]
@@ -37,15 +37,15 @@ class TranslationAdminBase(object):
                 orig_formfield.blank = True
                 field.required = True
                 field.blank = False
-                                            
-            field.widget = deepcopy(orig_formfield.widget) 
+
+            field.widget = deepcopy(orig_formfield.widget)
 
 class TranslationAdmin(admin.ModelAdmin, TranslationAdminBase):
     def __init__(self, *args, **kwargs):
         super(TranslationAdmin, self).__init__(*args, **kwargs)
-      
+
         trans_opts = translator.get_options_for_model(self.model)
-        
+
         # Replace original field with translation field for each language
         if self.fields:
             fields_new = list(self.fields)
@@ -55,7 +55,7 @@ class TranslationAdmin(admin.ModelAdmin, TranslationAdminBase):
                     translation_fields = get_translation_fields(field)
                     fields_new[index:index+1] = translation_fields
             self.fields = fields_new
-        
+
         if self.fieldsets:
             fieldsets_new = list(self.fieldsets)
             for (name, dct) in self.fieldsets:
@@ -81,41 +81,48 @@ class TranslationAdmin(admin.ModelAdmin, TranslationAdminBase):
                     display_new[display_index:display_index+1] = translation_fields
             self.list_editable = editable_new
             self.list_display = display_new
-                
+
+        if self.prepopulated_fields:
+            prepopulated_fields_new = dict(self.prepopulated_fields)
+            for (k, v) in self.prepopulated_fields.items():
+                translation_fields = get_translation_fields(v[0])
+                prepopulated_fields_new[k] = tuple([translation_fields[0]])
+            self.prepopulated_fields = prepopulated_fields_new
+
     def formfield_for_dbfield(self, db_field, **kwargs):
-        # Call the baseclass function to get the formfield        
-        field = super(TranslationAdmin, self).formfield_for_dbfield(db_field, **kwargs)        
+        # Call the baseclass function to get the formfield
+        field = super(TranslationAdmin, self).formfield_for_dbfield(db_field, **kwargs)
         self.patch_translation_field(db_field, field, **kwargs)
         return field
 
-    
+
 class TranslationTabularInline(admin.TabularInline, TranslationAdminBase):
     def formfield_for_dbfield(self, db_field, **kwargs):
-        # Call the baseclass function to get the formfield        
-        field = super(TranslationTabularInline, self).formfield_for_dbfield(db_field, **kwargs)        
+        # Call the baseclass function to get the formfield
+        field = super(TranslationTabularInline, self).formfield_for_dbfield(db_field, **kwargs)
         self.patch_translation_field(db_field, field, **kwargs)
-        return field            
+        return field
 
 
 class TranslationStackedInline(admin.StackedInline, TranslationAdminBase):
     def formfield_for_dbfield(self, db_field, **kwargs):
-        # Call the baseclass function to get the formfield        
-        field = super(TranslationStackedInline, self).formfield_for_dbfield(db_field, **kwargs)        
+        # Call the baseclass function to get the formfield
+        field = super(TranslationStackedInline, self).formfield_for_dbfield(db_field, **kwargs)
         self.patch_translation_field(db_field, field, **kwargs)
-        return field            
+        return field
 
 
 class TranslationGenericTabularInline(generic.GenericTabularInline, TranslationAdminBase):
     def formfield_for_dbfield(self, db_field, **kwargs):
-        # Call the baseclass function to get the formfield        
-        field = super(TranslationGenericTabularInline, self).formfield_for_dbfield(db_field, **kwargs)        
+        # Call the baseclass function to get the formfield
+        field = super(TranslationGenericTabularInline, self).formfield_for_dbfield(db_field, **kwargs)
         self.patch_translation_field(db_field, field, **kwargs)
-        return field            
+        return field
 
 
 class TranslationGenericStackedInline(generic.GenericStackedInline, TranslationAdminBase):
     def formfield_for_dbfield(self, db_field, **kwargs):
-        # Call the baseclass function to get the formfield        
-        field = super(TranslationGenericStackedInline, self).formfield_for_dbfield(db_field, **kwargs)        
+        # Call the baseclass function to get the formfield
+        field = super(TranslationGenericStackedInline, self).formfield_for_dbfield(db_field, **kwargs)
         self.patch_translation_field(db_field, field, **kwargs)
-        return field            
+        return field
