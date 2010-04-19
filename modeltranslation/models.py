@@ -8,13 +8,13 @@ from django.db import models
 from modeltranslation.translator import translator
 
 # Every model registered with the modeltranslation.translator.translator
-# is patched to contain additional localized versions for every 
+# is patched to contain additional localized versions for every
 # field specified in the model's translation options.
 
-# Import the project's global "translation.py" which registers model 
+# Import the project's global "translation.py" which registers model
 # classes and their translation options with the translator object.
 if getattr(settings, 'TRANSLATION_REGISTRY', False):
-    try: 
+    try:
         __import__(settings.TRANSLATION_REGISTRY, {}, {}, [''])
     except ImportError:
         sys.stderr.write("modeltranslation: Can't import module '%s'.\n"
@@ -27,7 +27,7 @@ if getattr(settings, 'TRANSLATION_REGISTRY', False):
         import traceback
         traceback.print_exc()
 
-    # After importing all translation modules, all translation classes are 
+    # After importing all translation modules, all translation classes are
     # registered with the translator.
     if settings.DEBUG:
         try:
