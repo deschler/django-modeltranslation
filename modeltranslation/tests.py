@@ -7,17 +7,18 @@ from django.test import TestCase
 from django.utils.thread_support import currentThread
 from django.utils.translation import get_language
 from django.utils.translation import trans_real
-
-# TODO: tests for TranslationAdmin
+from django.utils.translation import ugettext_lazy
 
 from modeltranslation import translator
+
+# TODO: tests for TranslationAdmin
 
 settings.LANGUAGES = (('de', 'Deutsch'),
                       ('en', 'English'))
 
 
 class TestModel(models.Model):
-    title = models.CharField(max_length=255)
+    title = models.CharField(ugettext_lazy('title'), max_length=255)
     text = models.TextField(null=True)
 
 
@@ -72,6 +73,14 @@ class ModelTranslationTest(TestCase):
         self.failUnless('title_en' in field_names)
         self.failUnless('text_de' in field_names)
         self.failUnless('text_en' in field_names)
+
+        inst.delete()
+
+    def test_verbose_name(self):
+        inst = TestModel.objects.create(title="Testtitle", text="Testtext")
+
+        self.assertEquals(\
+        unicode(inst._meta.get_field('title_de').verbose_name), u'Titel [de]')
 
         inst.delete()
 

@@ -1,3 +1,5 @@
+  FIXED: Verbose names of translated fields are not translated.
+         (thanks to carl.j.meyer, resolves issue 24).
   FIXED: Race condition between model import and translation registration in
          production by ensuring that models are registered for translation
          before TranslationAdmin runs.

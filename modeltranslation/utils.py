@@ -4,6 +4,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import get_language as _get_language
+from django.utils.functional import lazy
 
 
 def get_language():
@@ -28,6 +29,11 @@ def get_translation_fields(field):
 
 def build_localized_fieldname(field_name, lang):
     return '%s_%s' % (field_name, lang.replace('-', '_'))
+
+
+def _build_localized_verbose_name(verbose_name, lang):
+    return u'%s [%s]' % (verbose_name, lang)
+build_localized_verbose_name = lazy(_build_localized_verbose_name, unicode)
 
 
 class TranslationFieldDescriptor(object):

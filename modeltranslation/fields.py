@@ -2,7 +2,8 @@
 from django.conf import settings
 from django.db.models.fields import Field, CharField
 
-from modeltranslation.utils import get_language, build_localized_fieldname
+from modeltranslation.utils import (get_language, build_localized_fieldname,
+                                    build_localized_verbose_name)
 
 
 class TranslationField(Field):
@@ -42,14 +43,11 @@ class TranslationField(Field):
                                                  language)
         self.name = self.attname
 
-        # Copy the verbose name and append a language suffix (will e.g. in the
-        # admin). This might be a proxy function so we have to check that here.
-        if hasattr(translated_field.verbose_name, '_proxy____unicode_cast'):
-            verbose_name = \
-                translated_field.verbose_name._proxy____unicode_cast()
-        else:
-            verbose_name = translated_field.verbose_name
-        self.verbose_name = '%s [%s]' % (verbose_name, language)
+        # Copy the verbose name and append a language suffix
+        # (will show up e.g. in the admin).
+        self.verbose_name =\
+        build_localized_verbose_name(translated_field.verbose_name,
+                                     language)
 
     def pre_save(self, model_instance, add):
         val = super(TranslationField, self).pre_save(model_instance, add)
