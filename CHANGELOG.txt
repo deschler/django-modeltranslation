@@ -1,7 +1,18 @@
-  FIXED: Mangling of untranslated prepopulated fields
-         (thanks to carl.j.meyer, resolves issue 25).
+  ADDED: Support for admin prepopulated_fields.
+         (resolves issue 21)
+  ADDED: Support for admin list_editable.
+         (thanks carl.j.meyer, resolves issue 20)
+  ADDED: Preserve the formfield widget of the translated field.
+         (thanks piquadrat)
+  ADDED: Initial support for django-south.
+         (thanks andrewgodwin, resolves issue 11)
+  ADDED: Support for admin inlines, common and generic.
+         (resolves issue 12 and issue 18)
+
+  FIXED: Mangling of untranslated prepopulated fields.
+         (thanks to carl.j.meyer, resolves issue 25)
   FIXED: Verbose names of translated fields are not translated.
-         (thanks to carl.j.meyer, resolves issue 24).
+         (thanks to carl.j.meyer, resolves issue 24)
   FIXED: Race condition between model import and translation registration in
          production by ensuring that models are registered for translation
          before TranslationAdmin runs.
@@ -23,18 +34,6 @@
          (thanks carl.j.meyer, resolves issue 6)
   FIXED: Removed unused dependency to content type which can break syncdb.
          (thanks carl.j.meyer, resolves issue 1)
-
-  ADDED: Support for admin prepopulated_fields.
-         (resolves issue 21)
-  ADDED: Support for admin list_editable.
-         (thanks carl.j.meyer, resolves issue 20)
-  ADDED: Preserve the formfield widget of the translated field.
-         (thanks piquadrat)
-  ADDED: Initial support for django-south.
-         (thanks andrewgodwin, resolves issue 11)
-  ADDED: Support for admin inlines, common and generic.
-         (resolves issue 12 and issue 18)
-
 
 v0.1
 ====
