@@ -90,8 +90,9 @@ class TranslationAdmin(admin.ModelAdmin, TranslationAdminBase):
         if self.prepopulated_fields:
             prepopulated_fields_new = dict(self.prepopulated_fields)
             for (k, v) in self.prepopulated_fields.items():
-                translation_fields = get_translation_fields(v[0])
-                prepopulated_fields_new[k] = tuple([translation_fields[0]])
+                if v[0] in trans_opts.fields:
+                    translation_fields = get_translation_fields(v[0])
+                    prepopulated_fields_new[k] = tuple([translation_fields[0]])
             self.prepopulated_fields = prepopulated_fields_new
 
     def formfield_for_dbfield(self, db_field, **kwargs):
