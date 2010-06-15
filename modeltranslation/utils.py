@@ -11,7 +11,6 @@ def get_language():
     """
     Return an active language code that is guaranteed to be in
     settings.LANGUAGES (Django does not seem to guarantee this for us.)
-
     """
     lang = _get_language()
     available_languages = [l[0] for l in settings.LANGUAGES]
@@ -65,65 +64,11 @@ class TranslationFieldDescriptor(object):
         if hasattr(instance, loc_field_name):
             return getattr(instance, loc_field_name) or \
                    instance.__dict__[self.name]
-        return instance.__dict__[self.name]
+        #return instance.__dict__[self.name]
+        # FIXME: KeyError raised for ForeignKeyTanslationField
+        #        in admin list view
+        try:
+            return instance.__dict__[self.name]
+        except KeyError:
+            return None
 
-
-#def create_model(name, fields=None, app_label='', module='', options=None,
-                 #admin_opts=None):
-    #"""
-    #Create specified model.
-    #This is taken from http://code.djangoproject.com/wiki/DynamicModels
-    #"""
-    #class Meta:
-        ## Using type('Meta', ...) gives a dictproxy error during model
-        ## creation
-        #pass
-
-    #if app_label:
-        ## app_label must be set using the Meta inner class
-        #setattr(Meta, 'app_label', app_label)
-
-    ## Update Meta with any options that were provided
-    #if options is not None:
-        #for key, value in options.iteritems():
-            #setattr(Meta, key, value)
-
-    ## Set up a dictionary to simulate declarations within a class
-    #attrs = {'__module__': module, 'Meta': Meta}
-
-    ## Add in any fields that were provided
-    #if fields:
-        #attrs.update(fields)
-
-    ## Create the class, which automatically triggers ModelBase processing
-    #model = type(name, (models.Model,), attrs)
-
-    ## Create an Admin class if admin options were provided
-    #if admin_opts is not None:
-        #class Admin(admin.ModelAdmin):
-            #pass
-        #for key, value in admin_opts:
-            #setattr(Admin, key, value)
-        #admin.site.register(model, Admin)
-
-    #return model
-
-
-def copy_field(field):
-    """
-    Instantiate a new field, with all of the values from the old one, except
-    the to and to_field in the case of related fields.
-
-    This taken from http://www.djangosnippets.org/snippets/442/
-    """
-    base_kw = dict([(n, getattr(field, n, '_null')) for n in \
-              models.fields.Field.__init__.im_func.func_code.co_varnames])
-    if isinstance(field, models.fields.related.RelatedField):
-        rel = base_kw.get('rel')
-        rel_kw = dict([(n, getattr(rel, n, '_null')) for n in \
-                 rel.__init__.im_func.func_code.co_varnames])
-        if isinstance(field, models.fields.related.ForeignKey):
-            base_kw['to_field'] = rel_kw.pop('field_name')
-        base_kw.update(rel_kw)
-    base_kw.pop('self')
-    return field.__class__(**base_kw)

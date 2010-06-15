@@ -1,3 +1,8 @@
+  ADDED: Support for related fields - ForeignKey, ManyToManyField and
+         OneToOneField.
+         (resolves issue 15)
+
+
 v0.2
 ====
 Date: 2010-06-15

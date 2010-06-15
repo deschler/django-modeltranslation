@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from django.conf import settings
 from django.db.models.fields import Field, CharField
+from django.db.models.fields.related import (ForeignKey, OneToOneField,
+                                             ManyToManyField)
 
 from modeltranslation.utils import (get_language, build_localized_fieldname,
                                     build_localized_verbose_name)
@@ -25,13 +27,18 @@ class TranslationField(Field):
     that needs to be specified when the field is created.
     """
     def __init__(self, translated_field, language, *args, **kwargs):
-        # Store the originally wrapped field for later
-        self.translated_field = translated_field
-        self.language = language
-
         # Update the dict of this field with the content of the original one
         # This might be a bit radical?! Seems to work though...
         self.__dict__.update(translated_field.__dict__)
+
+        # Common init
+        self._post_init(translated_field, language)
+
+    def _post_init(self, translated_field, language):
+        """Common init for subclasses of TranslationField."""
+        # Store the originally wrapped field for later
+        self.translated_field = translated_field
+        self.language = language
 
         # Translation are always optional (for now - maybe add some parameters
         # to the translation options for configuring this)
@@ -39,8 +46,8 @@ class TranslationField(Field):
         self.blank = True
 
         # Adjust the name of this field to reflect the language
-        self.attname = build_localized_fieldname(translated_field.name,
-                                                 language)
+        self.attname = build_localized_fieldname(self.translated_field.name,
+                                                 self.language)
         self.name = self.attname
 
         # Copy the verbose name and append a language suffix
@@ -66,11 +73,6 @@ class TranslationField(Field):
     def get_internal_type(self):
         return self.translated_field.get_internal_type()
 
-    #def contribute_to_class(self, cls, name):
-        #super(TranslationField, self).contribute_to_class(cls, name)
-        ##setattr(cls, 'get_%s_display' % self.name,
-                ##curry(cls._get_FIELD_display, field=self))
-
     def south_field_triple(self):
         """Returns a suitable description of this field for South."""
         # We'll just introspect the _actual_ field.
@@ -89,26 +91,59 @@ class TranslationField(Field):
         return super(TranslationField, self).formfield(*args, **defaults)
 
 
-#class CurrentLanguageField(CharField):
-    #def __init__(self, **kwargs):
-        #super(CurrentLanguageField, self).__init__(null=True, max_length=5,
-              #**kwargs)
+class RelatedTranslationField(object):
+    """
+    Mixin class which handles shared init of a translated relation field.
+    """
+    def _related_pre_init(self, translated_field, language, *args, **kwargs):
+        self.translated_field = translated_field
+        self.language = language
 
-    #def contribute_to_class(self, cls, name):
-        #super(CurrentLanguageField, self).contribute_to_class(cls, name)
-        #registry = CurrentLanguageFieldRegistry()
-        #registry.add_field(cls, self)
+        self.field_name = self.translated_field.name
+        self.translated_field_name = \
+            build_localized_fieldname(self.translated_field.name,
+                                      self.language)
+
+        # Dynamically add a related_name to the original field
+        translated_field.rel.related_name = \
+            '%s%s' % (self.translated_field.model._meta.module_name,
+                      self.field_name)
+
+        TranslationField.__init__(self, self.translated_field, self.language,
+                                  *args, **kwargs)
+
+    def _related_post_init(self):
+        # Dynamically add a related_name to the translation fields
+        self.rel.related_name = \
+            '%s%s' % (self.translated_field.model._meta.module_name,
+                      self.translated_field_name)
+
+        # ForeignKey's init overrides some essential values from
+        # TranslationField, they have to be reassigned.
+        TranslationField._post_init(self, self.translated_field, self.language)
 
 
-#class CurrentLanguageFieldRegistry(object):
-    #_registry = {}
+class ForeignKeyTranslationField(ForeignKey, TranslationField,
+                                 RelatedTranslationField):
+    def __init__(self, translated_field, language, to, to_field=None, *args,
+                 **kwargs):
+        self._related_pre_init(translated_field, language, *args, **kwargs)
+        ForeignKey.__init__(self, to, to_field, **kwargs)
+        self._related_post_init()
 
-    #def add_field(self, model, field):
-        #reg = self.__class__._registry.setdefault(model, [])
-        #reg.append(field)
 
-    #def get_fields(self, model):
-        #return self.__class__._registry.get(model, [])
+class OneToOneTranslationField(OneToOneField, TranslationField,
+                               RelatedTranslationField):
+    def __init__(self, translated_field, language, to, to_field=None, *args,
+                 **kwargs):
+        self._related_pre_init(translated_field, language, *args, **kwargs)
+        OneToOneField.__init__(self, to, to_field, **kwargs)
+        self._related_post_init()
 
-    #def __contains__(self, model):
-        #return model in self.__class__._registry
+
+class ManyToManyTranslationField(ManyToManyField, TranslationField,
+                                 RelatedTranslationField):
+    def __init__(self, translated_field, language, to, *args, **kwargs):
+        self._related_pre_init(translated_field, language, *args, **kwargs)
+        ManyToManyField.__init__(self, to, **kwargs)
+        self._related_post_init()

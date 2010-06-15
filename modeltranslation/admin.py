@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from copy import deepcopy
+from copy import copy
 
 from django import forms, template
 from django.conf import settings
@@ -41,7 +41,7 @@ class TranslationAdminBase(object):
                 field.required = True
                 field.blank = False
 
-            field.widget = deepcopy(orig_formfield.widget)
+            field.widget = copy(orig_formfield.widget)
 
 
 class TranslationAdmin(admin.ModelAdmin, TranslationAdminBase):

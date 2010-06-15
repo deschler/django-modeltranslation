@@ -6,9 +6,15 @@ from django.db.models import signals
 from django.db.models.base import ModelBase
 from django.utils.functional import curry
 
-from modeltranslation.fields import TranslationField
+from modeltranslation.fields import (TranslationField,
+                                     ForeignKeyTranslationField,
+                                     OneToOneTranslationField,
+                                     ManyToManyTranslationField)
 from modeltranslation.utils import (TranslationFieldDescriptor,
                                     build_localized_fieldname)
+
+
+RELATED_CLASSES = ('ManyToOneRel', 'OneToOneRel', 'ManyToManyRel',)
 
 
 class AlreadyRegistered(Exception):
@@ -60,9 +66,26 @@ def add_localized_fields(model):
 
             # This approach implements the translation fields as full valid
             # django model fields and therefore adds them via add_to_class
-            localized_field = model.add_to_class( \
-                localized_field_name,
-                TranslationField(model._meta.get_field(field_name), l[0]))
+            field = model._meta.get_field(field_name)
+            field_class_name = field.rel.__class__.__name__
+            if field_class_name in RELATED_CLASSES:
+                to = field.rel.to._meta.object_name
+                if field_class_name == 'ManyToOneRel':
+                    translation_field = ForeignKeyTranslationField(\
+                                        translated_field=field,
+                                        language=l[0], to=to)
+                elif field_class_name == 'OneToOneRel':
+                    translation_field = OneToOneTranslationField(\
+                                        translated_field=field,
+                                        language=l[0], to=to)
+                elif field_class_name == 'ManyToManyRel':
+                    translation_field = ManyToManyTranslationField(\
+                                        translated_field=field,
+                                        language=l[0], to=to)
+            else:
+                translation_field = TranslationField(field, l[0])
+            localized_field = model.add_to_class(localized_field_name,
+                                                 translation_field)
             localized_fields[field_name].append(localized_field_name)
     return localized_fields
 
@@ -147,14 +170,14 @@ class Translator(object):
             # Create a reverse dict mapping the localized_fieldnames to the
             # original fieldname
             rev_dict = dict()
-            for orig_name, loc_names in \
+            for orig_name, loc_names in\
                 translation_opts.localized_fieldnames.items():
                 for ln in loc_names:
                     rev_dict[ln] = orig_name
 
             translation_opts.localized_fieldnames_rev = rev_dict
 
-        # print "Applying descriptor field for model %s" % model
+        #print "Applying descriptor field for model %s" % model
         for field_name in translation_opts.fields:
             setattr(model, field_name, TranslationFieldDescriptor(field_name))
 

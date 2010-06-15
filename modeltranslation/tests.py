@@ -11,7 +11,7 @@ from django.utils.translation import ugettext_lazy
 
 from modeltranslation import translator
 
-# TODO: tests for TranslationAdmin
+# TODO: Tests for TranslationAdmin, RelatedTranslationField and subclasses
 
 settings.LANGUAGES = (('de', 'Deutsch'),
                       ('en', 'English'))
