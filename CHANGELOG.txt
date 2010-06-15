@@ -9,6 +9,8 @@
   ADDED: Support for admin inlines, common and generic.
          (resolves issue 12 and issue 18)
 
+  FIXED: Admin form validation errors with empty translated values and unique=True.
+         (thanks to adamsc, resolves issue 26)
   FIXED: Mangling of untranslated prepopulated fields.
          (thanks to carl.j.meyer, resolves issue 25)
   FIXED: Verbose names of translated fields are not translated.
