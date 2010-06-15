@@ -1,3 +1,8 @@
+v0.2
+====
+Date: 2010-06-15
+Packaged from revision 56.
+
   ADDED: Support for admin prepopulated_fields.
          (resolves issue 21)
   ADDED: Support for admin list_editable.
@@ -9,7 +14,8 @@
   ADDED: Support for admin inlines, common and generic.
          (resolves issue 12 and issue 18)
 
-  FIXED: Admin form validation errors with empty translated values and unique=True.
+  FIXED: Admin form validation errors with empty translated values and
+         unique=True.
          (thanks to adamsc, resolves issue 26)
   FIXED: Mangling of untranslated prepopulated fields.
          (thanks to carl.j.meyer, resolves issue 25)
@@ -37,9 +43,8 @@
   FIXED: Removed unused dependency to content type which can break syncdb.
          (thanks carl.j.meyer, resolves issue 1)
 
+
 v0.1
 ====
-
 Date: 2009-02-22
-
 Initial release packaged from revision 19.
