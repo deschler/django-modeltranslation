@@ -1,7 +1,7 @@
 v0.2
 ====
 Date: 2010-06-15
-Packaged from revision 56.
+Packaged from revision 57.
 
   ADDED: Support for admin prepopulated_fields.
          (resolves issue 21)
