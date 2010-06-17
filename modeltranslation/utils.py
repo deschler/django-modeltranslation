@@ -21,6 +21,10 @@ def get_language():
     return available_languages[0]
 
 
+def get_default_language():
+    return settings.LANGUAGES[0][0]
+
+
 def get_translation_fields(field):
     """Returns a list of localized fieldnames for a given field."""
     return [build_localized_fieldname(field, l[0]) for l in settings.LANGUAGES]
@@ -71,4 +75,3 @@ class TranslationFieldDescriptor(object):
             return instance.__dict__[self.name]
         except KeyError:
             return None
-

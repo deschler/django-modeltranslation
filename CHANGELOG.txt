@@ -2,6 +2,9 @@
          OneToOneField.
          (resolves issue 15)
 
+  FIXED: TranslationField pre_save does not get the default language
+         correctly.
+         (thanks to jaap, resolves issue 31)
 
 v0.2
 ====
@@ -47,7 +50,6 @@ Packaged from revision 57.
          (thanks carl.j.meyer, resolves issue 6)
   FIXED: Removed unused dependency to content type which can break syncdb.
          (thanks carl.j.meyer, resolves issue 1)
-
 
 v0.1
 ====

@@ -4,7 +4,8 @@ from django.db.models.fields import Field, CharField
 from django.db.models.fields.related import (ForeignKey, OneToOneField,
                                              ManyToManyField)
 
-from modeltranslation.utils import (get_language, build_localized_fieldname,
+from modeltranslation.utils import (get_default_language,
+                                    build_localized_fieldname,
                                     build_localized_verbose_name)
 
 
@@ -58,7 +59,7 @@ class TranslationField(Field):
 
     def pre_save(self, model_instance, add):
         val = super(TranslationField, self).pre_save(model_instance, add)
-        if get_language() == self.language and not add:
+        if get_default_language() == self.language and not add:
             # Rule is: 3. Assigning a value to a translation field of the
             # default language also updates the original field
             model_instance.__dict__[self.translated_field.name] = val

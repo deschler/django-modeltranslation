@@ -4,7 +4,8 @@ from django.core.management.base import (BaseCommand, CommandError,
                                          NoArgsCommand)
 
 from modeltranslation.translator import translator
-from modeltranslation.utils import build_localized_fieldname
+from modeltranslation.utils import (build_localized_fieldname,
+                                    get_default_language)
 
 
 class Command(NoArgsCommand):
@@ -12,7 +13,7 @@ class Command(NoArgsCommand):
            'translated application using the value of the original field.'
 
     def handle(self, **options):
-        default_lang = settings.LANGUAGES[0][0]
+        default_lang = get_default_language()
         print "Using default language:", default_lang
 
         for model, trans_opts in translator._registry.items():
