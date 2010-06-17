@@ -79,7 +79,7 @@ class TranslationField(Field):
         from south.modelsinspector import introspector
         field_class = '%s.%s' % (self.translated_field.__class__.__module__,
                                  self.translated_field.__class__.__name__)
-        args, kwargs = introspector(self.translated_field)
+        args, kwargs = introspector(self)
         # That's our definition!
         return (field_class, args, kwargs)
 
