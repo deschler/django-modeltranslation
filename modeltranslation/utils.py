@@ -15,7 +15,7 @@ def get_available_languages():
 def get_language():
     """
     Return an active language code that is guaranteed to be in
-    settings.LANGUAGES (Django does not seem to guarantee this for us.)
+    settings.LANGUAGES (Django does not seem to guarantee this for us).
     """
     lang = _get_language()
     available_languages = get_available_languages()
@@ -85,15 +85,13 @@ class TranslationFieldDescriptor(object):
                               "a class." % self.name)
         lang = get_language()
         loc_field_name = build_localized_fieldname(self.name, lang)
-        if hasattr(instance, loc_field_name):
-            return getattr(instance, loc_field_name) or\
-                   (instance.__dict__[self.name] if\
-                    self.fallback_value is None else self.fallback_value)
-
-        #return instance.__dict__[self.name]
-        # FIXME: KeyError raised for ForeignKeyTanslationField
-        #        in admin list view
+        # FIXME: KeyError raised by ForeignKeyTanslationField
+        #        in admin list view.
         try:
-            return instance.__dict__[self.name]
+            name = instance.__dict__[self.name]
         except KeyError:
             return None
+        if hasattr(instance, loc_field_name):
+            return getattr(instance, loc_field_name) or\
+                   (name if self.fallback_value is None else\
+                    self.fallback_value)
