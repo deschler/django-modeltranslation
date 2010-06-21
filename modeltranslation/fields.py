@@ -65,11 +65,16 @@ class TranslationField(Field):
             model_instance.__dict__[self.translated_field.name] = val
         return val
 
-    def get_db_prep_value(self, value, connection, prepared=False):
-        if value == "":
-            return None
-        else:
-            return value
+    def get_prep_value(self, value):
+        if value == '':
+            value = None
+        return self.translated_field.get_prep_value(value)
+
+    def get_prep_lookup(self, lookup_type, value):
+        return self.translated_field.get_prep_lookup(lookup_type, value)
+
+    def to_python(self, value):
+        return self.translated_field.to_python(value)
 
     def get_internal_type(self):
         return self.translated_field.get_internal_type()

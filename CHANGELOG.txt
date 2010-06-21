@@ -1,9 +1,13 @@
+  ADDED: Support for NullBooleanField.
+         (thanks to jaap, resolves issue 34)
   ADDED: Setting to override the default language.
          (thanks to jaap, resolves issue 2)
   ADDED: Support for related fields - ForeignKey, ManyToManyField and
          OneToOneField.
          (resolves issue 15)
 
+  FIXED: Kept backwards compatibility with Django-1.0.
+         (thanks to jaap, resolves issue 34)
   FIXED: Regression in south_field_triple caused by r55.
          (thanks to jaap, resolves issue 29)
   FIXED: TranslationField pre_save does not get the default language
