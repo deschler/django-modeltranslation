@@ -60,13 +60,14 @@ build_localized_verbose_name = lazy(_build_localized_verbose_name, unicode)
 
 class TranslationFieldDescriptor(object):
     """A descriptor used for the original translated field."""
-    def __init__(self, name, initial_val=""):
+    def __init__(self, name, initial_val="", fallback_value=None):
         """
         The ``name`` is the name of the field (which is not available in the
         descriptor by default - this is Python behaviour).
         """
         self.name = name
         self.val = initial_val
+        self.fallback_value = fallback_value
 
     def __set__(self, instance, value):
         lang = get_language()
@@ -85,8 +86,10 @@ class TranslationFieldDescriptor(object):
         lang = get_language()
         loc_field_name = build_localized_fieldname(self.name, lang)
         if hasattr(instance, loc_field_name):
-            return getattr(instance, loc_field_name) or \
-                   instance.__dict__[self.name]
+            return getattr(instance, loc_field_name) or\
+                   (instance.__dict__[self.name] if\
+                    self.fallback_value is None else self.fallback_value)
+
         #return instance.__dict__[self.name]
         # FIXME: KeyError raised for ForeignKeyTanslationField
         #        in admin list view

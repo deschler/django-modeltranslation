@@ -1,3 +1,5 @@
+  ADDED: Configurable default value per field instance.
+         (thanks to bmihelac, resolves issue 28)
   ADDED: Support for NullBooleanField.
          (thanks to jaap, resolves issue 34)
   ADDED: Setting to override the default language.

@@ -174,12 +174,22 @@ class Translator(object):
                 translation_opts.localized_fieldnames.items():
                 for ln in loc_names:
                     rev_dict[ln] = orig_name
-
             translation_opts.localized_fieldnames_rev = rev_dict
 
-        #print "Applying descriptor field for model %s" % model
+        # TODO: Check if fallback_value is set to a type that the field
+        #       expects and raise ImproperlyConfigured in case it doesn't.
+        model_fallback_values = getattr(translation_opts, 'fallback_values',
+                                        None)
         for field_name in translation_opts.fields:
-            setattr(model, field_name, TranslationFieldDescriptor(field_name))
+            if model_fallback_values is None:
+                field_fallback_value = None
+            elif isinstance(model_fallback_values, dict):
+                field_fallback_value = model_fallback_values.get(field_name,
+                                                                 None)
+            else:
+                field_fallback_value = model_fallback_values
+            setattr(model, field_name, TranslationFieldDescriptor(field_name,
+                    fallback_value=field_fallback_value))
 
         #signals.pre_init.connect(translated_model_initializing, sender=model,
                                  #weak=False)

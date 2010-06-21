@@ -25,9 +25,35 @@ class TestModel(models.Model):
 class TestTranslationOptions(translator.TranslationOptions):
     fields = ('title', 'text',)
 
-
 translator.translator._registry = {}
 translator.translator.register(TestModel, TestTranslationOptions)
+
+
+class TestModelWithFallback(models.Model):
+    title = models.CharField(ugettext_lazy('title'), max_length=255)
+    text = models.TextField(null=True)
+
+
+class TestTranslationOptionsWithFallback(translator.TranslationOptions):
+    fields = ('title', 'text',)
+    fallback_values = ""
+
+translator.translator.register(TestModelWithFallback,
+                               TestTranslationOptionsWithFallback)
+
+
+class TestModelWithFallback2(models.Model):
+    title = models.CharField(ugettext_lazy('title'), max_length=255)
+    text = models.TextField(null=True)
+
+
+class TestTranslationOptionsWithFallback2(translator.TranslationOptions):
+    fields = ('title', 'text',)
+    fallback_values = {'text': ugettext_lazy('Sorry, translation is not '
+                                             'available.')}
+
+translator.translator.register(TestModelWithFallback2,
+                               TestTranslationOptionsWithFallback2)
 
 
 class ModelTranslationTest(TestCase):
@@ -51,8 +77,8 @@ class ModelTranslationTest(TestCase):
         self.failUnless('en' in langs)
         self.failUnless(translator.translator)
 
-        # Check that only one model is registered for translation
-        self.failUnlessEqual(len(translator.translator._registry), 1)
+        # Check that three models are registered for translation
+        self.failUnlessEqual(len(translator.translator._registry), 3)
 
         # Try to unregister a model that is not registered
         self.assertRaises(translator.NotRegistered,
@@ -265,3 +291,37 @@ class ModelTranslationTest(TestCase):
         self.failUnlessEqual(n.title, title_foo)
         self.failUnlessEqual(n.title_de, title_foo)
         self.failUnlessEqual(n.title_en, title2_en)
+
+    def test_fallback_values_1(self):
+        """
+        If `fallback_values' is set to string, all untranslated fields would
+        return this string.
+        """
+        title1_de = "title de"
+        n = TestModelWithFallback()
+        n.title = title1_de
+        n.save()
+        del n
+        n = TestModelWithFallback.objects.get(title=title1_de)
+        self.failUnlessEqual(n.title, title1_de)
+        trans_real.activate("en")
+        self.failUnlessEqual(n.title, "")
+
+    def test_fallback_values_2(self):
+        """
+        If `fallback_values' is set to `dic`, all untranslated fields`in `dic`
+        would return this mapped value.
+        Fields not in `dic` would return default translation.
+        """
+        title1_de = "title de"
+        text1_de = "text in german"
+        n = TestModelWithFallback2()
+        n.title = title1_de
+        n.text = text1_de
+        n.save()
+        del n
+        n = TestModelWithFallback2.objects.get(title=title1_de)
+        trans_real.activate("en")
+        self.failUnlessEqual(n.title, title1_de)
+        self.failUnlessEqual(n.text,\
+        TestTranslationOptionsWithFallback2.fallback_values['text'])

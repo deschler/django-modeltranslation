@@ -433,6 +433,11 @@ class TranslatedNewsAdmin(NewsAdmin, TranslationAdmin):
 admin.site.register(News, NewsAdmin)
 }}}
 
+Set a default value
+-------------------
+*New in developement version*
+TODO
+
 
 The ``update_translation_fields`` command
 =========================================
