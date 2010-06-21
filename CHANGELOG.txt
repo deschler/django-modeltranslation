@@ -1,3 +1,5 @@
+  ADDED: Setting to override the default language.
+         (thanks to jaap, resolves issue 2)
   ADDED: Support for related fields - ForeignKey, ManyToManyField and
          OneToOneField.
          (resolves issue 15)

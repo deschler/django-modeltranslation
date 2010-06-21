@@ -13,6 +13,7 @@ from modeltranslation.translator import translator
 
 # Import the project's global "translation.py" which registers model
 # classes and their translation options with the translator object.
+# TODO: Rename setting to MODELTRANSLATION_TRANSLATION_REGISTRY.
 if getattr(settings, 'TRANSLATION_REGISTRY', False):
     try:
         __import__(settings.TRANSLATION_REGISTRY, {}, {}, [''])

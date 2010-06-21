@@ -96,7 +96,16 @@ modeltranslation app, but rather required for Django to be able to
 (statically) translate the verbose names of the languages using the standard
 ``i18n`` solution.
 
+**settings.MODELTRANSLATION_DEFAULT_LANGUAGE**
+
+*New in development version*
+To override the default language as described in settings.LANGUAGES, define
+``MODELTRANSLATION_DEFAULT_LANGUAGE``. Note that the value has to be in
+settings.LANGUAGES, otherwise an exception will be raised.
+
 **settings.TRANSLATION_REGISTRY**
+
+TODO: Rename setting to MODELTRANSLATION_TRANSLATION_REGISTRY.
 
 In order to be able to import the project's ``translation.py`` registration
 file the ``TRANSLATION_REGISTRY`` must be set to a value in the form
@@ -366,7 +375,7 @@ custom admin class and that's done in the example above. After that the
 
 Inlines
 -------
-*New in development version*
+*New in 0.2*
 Support for tabular and stacked inlines, common and generic ones.
 
 A translated inline must derive from one of the following classes:
