@@ -4,6 +4,8 @@
          OneToOneField.
          (resolves issue 15)
 
+  FIXED: Regression in south_field_triple caused by r55.
+         (thanks to jaap, resolves issue 29)
   FIXED: TranslationField pre_save does not get the default language
          correctly.
          (thanks to jaap, resolves issue 31)
