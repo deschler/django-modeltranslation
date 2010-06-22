@@ -11,10 +11,9 @@ from modeltranslation.fields import (TranslationField,
                                      OneToOneTranslationField,
                                      ManyToManyTranslationField)
 from modeltranslation.utils import (TranslationFieldDescriptor,
+                                    RelatedTranslationFieldDescriptor,
+                                    ManyToManyTranslationFieldDescriptor,
                                     build_localized_fieldname)
-
-
-RELATED_CLASSES = ('ManyToOneRel', 'OneToOneRel', 'ManyToManyRel',)
 
 
 class AlreadyRegistered(Exception):
@@ -68,7 +67,8 @@ def add_localized_fields(model):
             # django model fields and therefore adds them via add_to_class
             field = model._meta.get_field(field_name)
             field_class_name = field.rel.__class__.__name__
-            if field_class_name in RELATED_CLASSES:
+            if field_class_name in ('ManyToOneRel', 'OneToOneRel',
+                                    'ManyToManyRel',):
                 to = field.rel.to._meta.object_name
                 if field_class_name == 'ManyToOneRel':
                     translation_field = ForeignKeyTranslationField(\
@@ -176,11 +176,11 @@ class Translator(object):
                     rev_dict[ln] = orig_name
             translation_opts.localized_fieldnames_rev = rev_dict
 
-        # TODO: Check if fallback_value is set to a type that the field
-        #       expects and raise ImproperlyConfigured in case it doesn't.
         model_fallback_values = getattr(translation_opts, 'fallback_values',
                                         None)
         for field_name in translation_opts.fields:
+            # TODO: Check if fallback_value is set to a type that the field
+            #       expects and raise ImproperlyConfigured in case it doesn't.
             if model_fallback_values is None:
                 field_fallback_value = None
             elif isinstance(model_fallback_values, dict):
@@ -188,8 +188,19 @@ class Translator(object):
                                                                  None)
             else:
                 field_fallback_value = model_fallback_values
-            setattr(model, field_name, TranslationFieldDescriptor(field_name,
-                    fallback_value=field_fallback_value))
+
+            field = model._meta.get_field(field_name)
+            field_class_name = field.rel.__class__.__name__
+            if field_class_name in ('ManyToOneRel', 'OneToOneRel'):
+                descriptor = RelatedTranslationFieldDescriptor(field_name,
+                             fallback_value=field_fallback_value)
+            elif field_class_name == 'ManyToManyRel':
+                descriptor = ManyToManyTranslationFieldDescriptor(field_name,
+                             fallback_value=field_fallback_value)
+            else:
+                descriptor = TranslationFieldDescriptor(field_name,
+                             fallback_value=field_fallback_value)
+            setattr(model, field_name, descriptor)
 
         #signals.pre_init.connect(translated_model_initializing, sender=model,
                                  #weak=False)

@@ -68,6 +68,7 @@ class TranslationFieldDescriptor(object):
         self.name = name
         self.val = initial_val
         self.fallback_value = fallback_value
+        self.loc_field_name = ""
 
     def __set__(self, instance, value):
         lang = get_language()
@@ -80,18 +81,40 @@ class TranslationFieldDescriptor(object):
 
     def __get__(self, instance, owner):
         if not instance:
-            raise ValueError(u"Translation field '%s' can only be "
-                              "accessed via an instance not via "
-                              "a class." % self.name)
-        lang = get_language()
-        loc_field_name = build_localized_fieldname(self.name, lang)
-        # FIXME: KeyError raised by ForeignKeyTanslationField
-        #        in admin list view.
-        try:
-            name = instance.__dict__[self.name]
-        except KeyError:
-            return None
-        if hasattr(instance, loc_field_name):
-            return getattr(instance, loc_field_name) or\
-                   (name if self.fallback_value is None else\
+            raise ValueError(u"Translation field '%s' can only be accessed "
+                              "via an instance not via a class." % self.name)
+        self.loc_field_name = build_localized_fieldname(self.name,
+                                                        get_language())
+        if hasattr(instance, self.loc_field_name):
+            return getattr(instance, self.loc_field_name) or\
+                   (self.get_default_instance(instance) if\
+                    self.fallback_value is None else\
                     self.fallback_value)
+
+    def get_default_instance(self, instance):
+        """
+        Returns default instance of the field. Supposed to be overidden by
+        related subclasses.
+        """
+        return instance.__dict__[self.name]
+        
+
+class RelatedTranslationFieldDescriptor(TranslationFieldDescriptor):
+    def __init__(self, name, initial_val="", fallback_value=None):
+        TranslationFieldDescriptor.__init__(self, name, initial_val="",
+                                            fallback_value=None)
+
+    def get_default_instance(self, instance):
+        # TODO: Implement
+        #instance_id = instance.__dict__['%s_id' % self.name]
+        pass
+
+
+class ManyToManyTranslationFieldDescriptor(TranslationFieldDescriptor):
+    def __init__(self, name, initial_val="", fallback_value=None):
+        TranslationFieldDescriptor.__init__(self, name, initial_val="",
+                                            fallback_value=None)
+
+    def get_default_instance(self, instance):
+        # TODO: Implement
+        pass
