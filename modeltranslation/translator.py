@@ -7,13 +7,14 @@ from django.db.models.base import ModelBase
 from django.utils.functional import curry
 
 from modeltranslation.fields import (TranslationField,
-                                     ForeignKeyTranslationField,
-                                     OneToOneTranslationField,
-                                     ManyToManyTranslationField)
-from modeltranslation.utils import (TranslationFieldDescriptor,
-                                    RelatedTranslationFieldDescriptor,
-                                    ManyToManyTranslationFieldDescriptor,
-                                    build_localized_fieldname)
+                                     TranslationForeignKey,
+                                     TranslationOneToOneField,
+                                     TranslationManyToManyField,
+                                     TranslationFieldDescriptor,
+                                     RelatedTranslationFieldDescriptor,
+                                     ManyToManyTranslationFieldDescriptor,
+                                     create_translation_field)
+from modeltranslation.utils import build_localized_fieldname
 
 
 class AlreadyRegistered(Exception):
@@ -58,32 +59,15 @@ def add_localized_fields(model):
             localized_field_name = build_localized_fieldname(field_name, l[0])
             # Check if the model already has a field by that name
             if hasattr(model, localized_field_name):
-                raise ValueError("Error adding translation field. The model "\
-                                 "'%s' already contains a field named '%s'. "\
-                                 % (instance.__class__.__name__,
-                                    localized_field_name))
-
+                raise ValueError("Error adding translation field. Model '%s' "
+                                 "already contains a field named '%s'." %\
+                                 (instance.__class__.__name__,
+                                  localized_field_name))
+            # Create a dynamic translation field
+            translation_field = create_translation_field(model=model,\
+                                field_name=field_name, lang=l[0])
             # This approach implements the translation fields as full valid
             # django model fields and therefore adds them via add_to_class
-            field = model._meta.get_field(field_name)
-            field_class_name = field.rel.__class__.__name__
-            if field_class_name in ('ManyToOneRel', 'OneToOneRel',
-                                    'ManyToManyRel',):
-                to = field.rel.to._meta.object_name
-                if field_class_name == 'ManyToOneRel':
-                    translation_field = ForeignKeyTranslationField(\
-                                        translated_field=field,
-                                        language=l[0], to=to)
-                elif field_class_name == 'OneToOneRel':
-                    translation_field = OneToOneTranslationField(\
-                                        translated_field=field,
-                                        language=l[0], to=to)
-                elif field_class_name == 'ManyToManyRel':
-                    translation_field = ManyToManyTranslationField(\
-                                        translated_field=field,
-                                        language=l[0], to=to)
-            else:
-                translation_field = TranslationField(field, l[0])
             localized_field = model.add_to_class(localized_field_name,
                                                  translation_field)
             localized_fields[field_name].append(localized_field_name)

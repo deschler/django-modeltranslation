@@ -8,6 +8,10 @@
          OneToOneField.
          (resolves issue 15)
 
+CHANGED: Refactored creation of translation fields and added handling of
+         supported fields.
+         (resolves issue 37)
+
   FIXED: Kept backwards compatibility with Django-1.0.
          (thanks to jaap, resolves issue 34)
   FIXED: Regression in south_field_triple caused by r55.
