@@ -7,14 +7,11 @@ from django.db.models.fields import Field, CharField
 from django.db.models.fields.related import (ForeignKey, OneToOneField,
                                              ManyToManyField)
 
+from modeltranslation.settings import STD_TRANSLATION_FIELDS
 from modeltranslation.utils import (get_language,
                                     get_default_language,
                                     build_localized_fieldname,
                                     build_localized_verbose_name)
-
-# List of fields which don't have to be subclassed to be supported
-STD_TRANSLATION_FIELDS = ('CharField', 'TextField', 'IntegerField',
-                          'BooleanField', 'NullBooleanField',)
 
 
 def create_translation_field(model, field_name, lang):

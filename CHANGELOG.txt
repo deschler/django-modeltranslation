@@ -8,6 +8,8 @@
          OneToOneField.
          (resolves issue 15)
 
+CHANGED: Factored out settings into a separate settings.py and consistently
+         used an app specific settings prefix.
 CHANGED: Refactored creation of translation fields and added handling of
          supported fields.
          (resolves issue 37)

@@ -49,7 +49,8 @@ in detail in the following sections:
 3. Create a ``translation.py`` in your project directory and register
    ``TranslationOptions`` for every model you want to translate.
 
-4. Configure the ``TRANSLATION_REGISTRY`` variable in your ``settings.py``.
+4. Configure the ``MODELTRANSLATION_TRANSLATION_REGISTRY`` variable in your
+   ``settings.py``.
 
 5. Sync the database using ``manage.py syncdb`` (note that this only applies
    if the models registered in the ``translations.py`` did not have been
@@ -103,16 +104,15 @@ To override the default language as described in settings.LANGUAGES, define
 ``MODELTRANSLATION_DEFAULT_LANGUAGE``. Note that the value has to be in
 settings.LANGUAGES, otherwise an exception will be raised.
 
-**settings.TRANSLATION_REGISTRY**
-
-TODO: Rename setting to MODELTRANSLATION_TRANSLATION_REGISTRY.
+**settings.MODELTRANSLATION_TRANSLATION_REGISTRY**
 
 In order to be able to import the project's ``translation.py`` registration
-file the ``TRANSLATION_REGISTRY`` must be set to a value in the form
-``<PROJECT_MODULE>.translation``. E.g. if your project is located in a folder
-named ``myproject`` the ``TRANSLATION_REGISTRY`` must be set like this::
+file the ``MODELTRANSLATION_TRANSLATION_REGISTRY`` must be set to a value in
+the form ``<PROJECT_MODULE>.translation``. E.g. if your project is located in a
+folder named ``myproject`` the ``MODELTRANSLATION_TRANSLATION_REGISTRY`` must
+be set like this::
 
-    TRANSLATION_REGISTRY = "myproject.translation"
+    MODELTRANSLATION_TRANSLATION_REGISTRY = "myproject.translation"
 
 
 Registering models and their fields for translation

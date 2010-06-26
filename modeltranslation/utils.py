@@ -6,6 +6,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import get_language as _get_language
 from django.utils.functional import lazy
 
+from modeltranslation.settings import DEFAULT_LANGUAGE
+
 
 def get_available_languages():
     """Returns a list of the language codes in settings.LANGUAGES"""
@@ -29,12 +31,11 @@ def get_language():
 def get_default_language():
     """
     Returns the language to use as the default language. This is either
-    the value of settings.DEFAULT_LANGUAGE (if it's in the list of
-    settings.LANGUAGES) or the first item in settings.LANGUAGES.
+    the value of settings.MODELTRANSLATION_DEFAULT_LANGUAGE (if it's in the
+    list of settings.LANGUAGES) or the first item in settings.LANGUAGES.
     """
     available_languages = get_available_languages()
-    default_language = getattr(settings,
-                               'MODELTRANSLATION_DEFAULT_LANGUAGE', None)
+    default_language = DEFAULT_LANGUAGE
     if default_language and default_language not in available_languages:
         raise ImproperlyConfigured('MODELTRANSLATION_DEFAULT_LANGUAGE not '
                                    'in LANGUAGES setting.')
