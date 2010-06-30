@@ -51,7 +51,7 @@ def get_translation_fields(field):
 
 
 def build_localized_fieldname(field_name, lang):
-    return '%s_%s' % (field_name, lang.replace('-', '_'))
+    return str('%s_%s' % (field_name, lang.replace('-', '_')))
 
 
 def _build_localized_verbose_name(verbose_name, lang):

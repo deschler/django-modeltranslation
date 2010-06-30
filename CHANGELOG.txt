@@ -1,11 +1,9 @@
   ADDED: Configurable default value per field instance.
          (thanks to bmihelac, resolves issue 28)
-  ADDED: Support for NullBooleanField.
-         (thanks to jaap, resolves issue 34)
   ADDED: Setting to override the default language.
          (thanks to jaap, resolves issue 2)
-  ADDED: Support for related fields - ForeignKey, ManyToManyField and
-         OneToOneField.
+  ADDED: Experimental support for related fields - ForeignKey,
+         ManyToManyField and OneToOneField.
          (resolves issue 15)
 
 CHANGED: Factored out settings into a separate settings.py and consistently
@@ -14,6 +12,8 @@ CHANGED: Refactored creation of translation fields and added handling of
          supported fields.
          (resolves issue 37)
 
+  FIXED: Fieldname isn't ensured to be string.
+         (resolves issue 41)
   FIXED: Kept backwards compatibility with Django-1.0.
          (thanks to jaap, resolves issue 34)
   FIXED: Regression in south_field_triple caused by r55.
