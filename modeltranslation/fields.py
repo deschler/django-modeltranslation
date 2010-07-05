@@ -216,10 +216,12 @@ class TranslationFieldDescriptor(object):
         loc_field_name = build_localized_fieldname(self.name,
                                                    get_language())
         if hasattr(instance, loc_field_name):
-            return getattr(instance, loc_field_name) or\
-                           (self.get_default_instance(instance) if\
-                            self.fallback_value is None else\
-                            self.fallback_value)
+            if getattr(instance, loc_field_name):
+                return getattr(instance, loc_field_name)
+            elif self.fallback_value is None:
+                return self.get_default_instance(instance)
+            else:
+                return self.fallback_value
 
     def get_default_instance(self, instance):
         """
