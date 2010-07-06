@@ -32,14 +32,14 @@ elif not DEFAULT_LANGUAGE:
 STD_TRANSLATION_FIELDS =\
 getattr(settings, 'MODELTRANSLATION_STD_TRANSLATION_FIELDS',
         ('CharField', 'TextField', 'URLField', 'EmailField', 'XMLField',))
-try:
-    if sys.argv[1] == 'test':
-        STD_TRANSLATION_FIELDS =\
-        getattr(settings, 'MODELTRANSLATION_STD_TRANSLATION_FIELDS',
-                ('CharField', 'TextField', 'URLField', 'EmailField',
-                 'XMLField', 'BooleanField', 'NullBooleanField',
-                 'IntegerField', 'BigIntegerField', 'PositiveIntegerField',
-                 'PositiveSmallIntegerField', 'SmallIntegerField',
-                 'CommaSeparatedIntegerField'))
-except IndexError:
-    pass
+#try:
+    #if sys.argv[1] == 'test':
+        #STD_TRANSLATION_FIELDS =\
+        #getattr(settings, 'MODELTRANSLATION_STD_TRANSLATION_FIELDS',
+                #('CharField', 'TextField', 'URLField', 'EmailField',
+                 #'XMLField', 'BooleanField', 'NullBooleanField',
+                 #'IntegerField', 'BigIntegerField', 'PositiveIntegerField',
+                 #'PositiveSmallIntegerField', 'SmallIntegerField',
+                 #'CommaSeparatedIntegerField'))
+#except IndexError:
+    #pass
