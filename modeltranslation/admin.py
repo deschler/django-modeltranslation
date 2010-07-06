@@ -6,8 +6,9 @@ from django.conf import settings
 from django.contrib import admin
 from django.contrib.contenttypes import generic
 
+from modeltranslation.settings import *
 from modeltranslation.translator import translator
-from modeltranslation.utils import get_translation_fields, get_default_language
+from modeltranslation.utils import get_translation_fields
 # Ensure that models are registered for translation before TranslationAdmin
 # runs. The import is supposed to resolve a race condition between model import
 # and translation registration in production (see issue 19).
@@ -28,13 +29,13 @@ class TranslationAdminBase(object):
         # For every localized field copy the widget from the original field
         if db_field.name in trans_opts.localized_fieldnames_rev:
             orig_fieldname = trans_opts.localized_fieldnames_rev[db_field.name]
-            orig_formfield = self.formfield_for_dbfield( \
-                                self.model._meta.get_field(orig_fieldname),
-                                                           **kwargs)
+            orig_formfield = self.formfield_for_dbfield(\
+                             self.model._meta.get_field(orig_fieldname),
+                                                        **kwargs)
 
             # In case the original form field was required, make the default
             # translation field required instead.
-            if db_field.language == get_default_language() and \
+            if db_field.language == DEFAULT_LANGUAGE and\
                orig_formfield.required:
                 orig_formfield.required = False
                 orig_formfield.blank = True
@@ -82,8 +83,8 @@ class TranslationAdmin(admin.ModelAdmin, TranslationAdminBase):
                     display_index = display_new.index(field)
                     translation_fields = get_translation_fields(field)
                     editable_new[index:index + 1] = translation_fields
-                    display_new[display_index:display_index + 1] = \
-                        translation_fields
+                    display_new[display_index:display_index + 1] =\
+                    translation_fields
             self.list_editable = editable_new
             self.list_display = display_new
 
