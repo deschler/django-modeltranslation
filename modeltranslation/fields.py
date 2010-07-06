@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
+from warnings import warn
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
@@ -39,6 +40,8 @@ def create_translation_field(model, field_name, lang):
                                    'modeltranslation.' % cls_name)
     # Handle related fields
     if cls_name in ('ForeignKey', 'OneToOneField', 'ManyToManyField'):
+        warn('Support for related fields is experimental and known to has '
+             'flaws. Only use it if you know what you are doing.', UserWarning)
         to = field.rel.to._meta.object_name
         return translation_field(translated_field=field, language=lang, to=to)
     # TODO: Should never be reached?
@@ -95,7 +98,7 @@ class TranslationField(Field):
         if DEFAULT_LANGUAGE == self.language and not add:
             # Rule is: 3. Assigning a value to a translation field of the
             # default language also updates the original field
-            model_instance.__dict__[self.translated_field.name] = val
+            model_instance.__dict__[self.translated_field.attname] = val
         return val
 
     def get_prep_value(self, value):
