@@ -2,6 +2,7 @@
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.test import TestCase
 from django.utils.thread_support import currentThread
@@ -24,13 +25,13 @@ class RelatedModel(models.Model):
 
 class TestModel(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
-    text = models.TextField(null=True)
-    url = models.URLField(verify_exists=False, null=True)
-    email = models.EmailField(null=True)
-    xml = models.XMLField(null=True)
-    fk = models.ForeignKey(RelatedModel, null=True)
-    o2o = models.OneToOneField(RelatedModel, null=True)
-    m2m = models.ManyToManyField(RelatedModel, null=True)
+    text = models.TextField(blank=True, null=True)
+    url = models.URLField(verify_exists=False, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    xml = models.XMLField(blank=True, null=True)
+    fk = models.ForeignKey(RelatedModel, blank=True, null=True)
+    o2o = models.OneToOneField(RelatedModel, blank=True, null=True)
+    m2m = models.ManyToManyField(RelatedModel, blank=True, null=True)
     #boolean = models.BooleanField()
     #nullboolean = models.NullBooleanField()
     #integer = models.IntegerField(null=True)
@@ -54,13 +55,13 @@ translator.translator.register(TestModel, TestTranslationOptions)
 
 class TestModelWithFallback(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
-    text = models.TextField(null=True)
-    url = models.URLField(verify_exists=False, null=True)
-    email = models.EmailField(null=True)
-    xml = models.XMLField(null=True)
-    fk = models.ForeignKey(RelatedModel, null=True)
-    o2o = models.OneToOneField(RelatedModel, null=True)
-    m2m = models.ManyToManyField(RelatedModel, null=True)
+    text = models.TextField(blank=True, null=True)
+    url = models.URLField(verify_exists=False, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    xml = models.XMLField(blank=True, null=True)
+    fk = models.ForeignKey(RelatedModel, blank=True, null=True)
+    o2o = models.OneToOneField(RelatedModel, blank=True, null=True)
+    m2m = models.ManyToManyField(RelatedModel, blank=True, null=True)
     #boolean = models.BooleanField()
     #nullboolean = models.NullBooleanField()
     #integer = models.IntegerField(null=True)
@@ -85,13 +86,13 @@ translator.translator.register(TestModelWithFallback,
 
 class TestModelWithFallback2(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
-    text = models.TextField(null=True)
-    url = models.URLField(verify_exists=False, null=True)
-    email = models.EmailField(null=True)
-    xml = models.XMLField(null=True)
-    fk = models.ForeignKey(RelatedModel, null=True)
-    o2o = models.OneToOneField(RelatedModel, null=True)
-    m2m = models.ManyToManyField(RelatedModel, null=True)
+    text = models.TextField(blank=True, null=True)
+    url = models.URLField(verify_exists=False, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    xml = models.XMLField(blank=True, null=True)
+    fk = models.ForeignKey(RelatedModel, blank=True, null=True)
+    o2o = models.OneToOneField(RelatedModel, blank=True, null=True)
+    m2m = models.ManyToManyField(RelatedModel, blank=True, null=True)
     #boolean = models.BooleanField()
     #nullboolean = models.NullBooleanField()
     #integer = models.IntegerField(null=True)
@@ -372,7 +373,7 @@ class ModeltranslationTestRule1(ModeltranslationTestBase):
         self.failUnlessEqual(get_language(), "de")
         self.failUnlessEqual(n.title, title1_de)
         self.failUnlessEqual(n.text, text_de)
-        
+
         trans_real.deactivate()
 
     def test_rule1_url_field(self):
@@ -1060,3 +1061,155 @@ class ModeltranslationTestRule4(ModeltranslationTestBase):
                          #value2_de='6,7,8',
                          #value2_en='9,8,10',
                          #value3='9,8,10,11')
+
+
+class ModeltranslationTestModelValidation(ModeltranslationTestBase):
+    """
+    Tests if a translation model field validates correctly.
+    """
+    def _test_model_validation(self, field_name, invalid_value, valid_value,
+                               invalid_value_de):
+        """
+        Generic model field validation test.
+        """
+        field_name_de = '%s_de' % field_name
+        params = {'title_de': 'title de',
+                  'title_en': 'title en'}
+        params[field_name] = invalid_value
+
+        has_error_key = False
+        # Create an object with an invalid url
+        #n = TestModel.objects.create(title='Title', url='foo')
+        n = TestModel.objects.create(**params)
+
+        # First check the original field
+        # Expect that the validation object contains an error for url
+        try:
+            n.full_clean()
+        except ValidationError, e:
+            if field_name in e.message_dict:
+                has_error_key = True
+        self.assertTrue(has_error_key)
+
+        # Check the translation field
+        # Language is set to "de" at this point
+        self.failUnlessEqual(get_language(), "de")
+        # Set translation field to a valid url
+        #n.url_de = 'http://code.google.com/p/django-modeltranslation/'
+        setattr(n, field_name_de, valid_value)
+        has_error_key = False
+        # Expect that the validation object contains no error for url
+        try:
+            n.full_clean()
+        except ValidationError, e:
+            if field_name_de in e.message_dict:
+                has_error_key = True
+        self.assertFalse(has_error_key)
+
+        # Set translation field to an invalid url
+        #n.url_de = 'foo'
+        setattr(n, field_name_de, invalid_value)
+        has_error_key = False
+        # Expect that the validation object contains an error for url_de
+        try:
+            n.full_clean()
+        except ValidationError, e:
+            #if 'url_de' in e.message_dict:
+            if field_name_de in e.message_dict:
+                has_error_key = True
+        self.assertTrue(has_error_key)
+
+    def test_model_validation(self):
+        """
+        General test for CharField and TextField.
+        """
+        has_error_key = False
+        # Create an object without title (which is required)
+        n = TestModel.objects.create(text='Testtext')
+
+        # First check the original field
+        # Expect that the validation object contains an error for title
+        try:
+            n.full_clean()
+        except ValidationError, e:
+            if 'title' in e.message_dict:
+                has_error_key = True
+        self.assertTrue(has_error_key)
+        n.save()
+
+        # Check the translation field
+        # Language is set to "de" at this point
+        self.failUnlessEqual(get_language(), "de")
+        # Set translation field to a valid title
+        n.title_de = 'Title'
+        has_error_key = False
+        # Expect that the validation object contains no error for title
+        try:
+            n.full_clean()
+        except ValidationError, e:
+            if 'title_de' in e.message_dict:
+                has_error_key = True
+        self.assertFalse(has_error_key)
+
+        # Set translation field to an empty title
+        n.title_de = None
+        has_error_key = False
+        # Even though the original field isn't optional, translation fields are
+        # per definition always optional. So we expect that the validation
+        # object contains no error for title_de.
+        try:
+            n.full_clean()
+        except ValidationError, e:
+            if 'title_de' in e.message_dict:
+                has_error_key = True
+        self.assertFalse(has_error_key)
+
+    def test_model_validation_url_field(self):
+        #has_error_key = False
+        ## Create an object with an invalid url
+        #n = TestModel.objects.create(title='Title', url='foo')
+
+        ## First check the original field
+        ## Expect that the validation object contains an error for url
+        #try:
+            #n.full_clean()
+        #except ValidationError, e:
+            #if 'url' in e.message_dict:
+                #has_error_key = True
+        #self.assertTrue(has_error_key)
+
+        ## Check the translation field
+        ## Language is set to "de" at this point
+        #self.failUnlessEqual(get_language(), "de")
+        ## Set translation field to a valid url
+        #n.url_de = 'http://code.google.com/p/django-modeltranslation/'
+        #has_error_key = False
+        ## Expect that the validation object contains no error for url
+        #try:
+            #n.full_clean()
+        #except ValidationError, e:
+            #if 'url_de' in e.message_dict:
+                #has_error_key = True
+        #self.assertFalse(has_error_key)
+
+        ## Set translation field to an invalid url
+        #n.url_de = 'foo'
+        #has_error_key = False
+        ## Expect that the validation object contains an error for url_de
+        #try:
+            #n.full_clean()
+        #except ValidationError, e:
+            #if 'url_de' in e.message_dict:
+                #has_error_key = True
+        #self.assertTrue(has_error_key)
+
+        self._test_model_validation(field_name='url',\
+        invalid_value='foo en',
+        valid_value='http://code.google.com/p/django-modeltranslation/',
+        invalid_value_de='foo de')
+
+    def test_model_validation_email_field(self):
+        self._test_model_validation(field_name='email',\
+        invalid_value='foo en',
+        valid_value='django-modeltranslation@googlecode.com',
+        invalid_value_de='foo de')
