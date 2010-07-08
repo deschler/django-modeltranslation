@@ -1,3 +1,6 @@
+  ADDED: CSS class to identify a translation field and the default translation
+         field in admin.
+         (thanks to jaap)
   ADDED: Configurable default value per field instance.
          (thanks to bmihelac, resolves issue 28)
   ADDED: Setting to override the default language.
