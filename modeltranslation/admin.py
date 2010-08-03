@@ -37,17 +37,17 @@ class TranslationAdminBase(object):
             css_classes = field.widget.attrs.get('class', '').split(' ')
             css_classes.append('modeltranslation')
 
-            # In case the original form field was required, make the default
-            # translation field required instead.
-            if db_field.language == DEFAULT_LANGUAGE and\
-               orig_formfield.required:
-                orig_formfield.required = False
-                orig_formfield.blank = True
-                field.required = True
-                field.blank = False
+            if db_field.language == DEFAULT_LANGUAGE:
                 # Add another css class to identify a default modeltranslation
                 # widget.
                 css_classes.append('modeltranslation-default')
+                if orig_formfield.required:
+                    # In case the original form field was required, make the default
+                    # translation field required instead.
+                    orig_formfield.required = False
+                    orig_formfield.blank = True
+                    field.required = True
+                    field.blank = False
 
             field.widget.attrs['class'] = ' '.join(css_classes)
 
