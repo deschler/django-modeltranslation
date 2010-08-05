@@ -1,3 +1,5 @@
+  ADDED: Jquery-ui based admin support for tabbed translation fields.
+         (thanks to jaap and adamsc, resolves issue 39)
   ADDED: CSS class to identify a translation field and the default translation
          field in admin.
          (thanks to jaap)

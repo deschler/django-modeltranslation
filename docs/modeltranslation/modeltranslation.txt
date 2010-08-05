@@ -57,6 +57,7 @@ in detail in the following sections:
    synced to the database before. If they did - read further down what to do
    in that case.
 
+
 Configure the project's ``settings.py``
 ---------------------------------------
 The following variables have to be added to or edited in the project's
@@ -250,6 +251,7 @@ The example above assumes that the default language is ``de``, therefore the
 fields*. If the default language is ``en``, the ``title_en`` and ``text_en``
 fields would be the *default translation fields*.
 
+
 Rules for translated field access
 ---------------------------------
 So now when it comes to setting and getting the value of the original and the
@@ -301,6 +303,12 @@ the ``django.utils.i18n.get_language`` function to determine the current
 language.
 
 
+Set a default value
+-------------------
+*New in development version*
+TODO
+
+
 Django admin backend integration
 ================================
 In order to be able to edit the translations via the admin backend you need to
@@ -316,9 +324,9 @@ patching on all your models registered for translation::
 
     admin.site.register(News, NewsAdmin)
 
+
 Tweaks applied to the admin
 ---------------------------
-
 The ``TranslationAdmin`` class does only implement one special method which is
 ``def formfield_for_dbfield(self, db_field, **kwargs)``. This method does the
 following:
@@ -328,6 +336,7 @@ following:
 2. Copies the widget of the original field to each of it's translation fields.
 3. Checks if the - now removed - original field was required and if so makes the
    default translation field required instead.
+
 
 TranslationAdmin in combination with other admin classes
 --------------------------------------------------------
@@ -433,10 +442,32 @@ class TranslatedNewsAdmin(NewsAdmin, TranslationAdmin):
 admin.site.register(News, NewsAdmin)
 }}}
 
-Set a default value
--------------------
-*New in developement version*
-TODO
+
+Using tabbed translation fields
+-------------------------------
+*New in development version*
+Modeltranslation supports separation of translation fields via jquery-ui tabs.
+The proposed way to include it is through the inner `Media` class of a
+`TranslationAdmin` class like this:
+
+{{{
+class NewsAdmin(TranslationAdmin):
+    class Media:
+        js = (
+          '/static/modeltranslation/js/force_jquery.js',
+          'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/jquery-ui.min.js',
+          '/static/modeltranslation/js/tabbed_translation_fields.js',
+        )
+        css = {
+          'screen': ('/static/modeltranslation/js/tabbed_translation_fields.css',),
+        }
+}}}
+
+The `force_jquery.js` script is necessary when using Django's built-in
+`django.jQuery` object. This and the static urls used are just an example and
+might have to be adopted to your setup of serving static files. Standard
+jquery-ui theming can be used to customize the look of tabs, the provided css
+file is supposed to work well with a default Django admin.
 
 
 The ``update_translation_fields`` command
@@ -488,6 +519,7 @@ field is updated::
     'foo'
     >>>
 
+
 Accessing translated fields outside views
 -----------------------------------------
 Since the ``modeltranslation`` mechanism relies on the current language as it
@@ -529,6 +561,7 @@ It is not possible to reuse existing models without modifying them.
 A much simpler version of the above `django-multilingual`.
 It works very similiar to the `django-multilingual` approach.
 
+
 `transdb`_
 ----------
 
@@ -536,6 +569,7 @@ It works very similiar to the `django-multilingual` approach.
 
 This approach uses a specialized ``Field`` class, which means one has to change
 existing models.
+
 
 `i18ndynamic`_
 --------------
