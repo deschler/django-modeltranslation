@@ -26,20 +26,13 @@ if DEFAULT_LANGUAGE and DEFAULT_LANGUAGE not in AVAILABLE_LANGUAGES:
 elif not DEFAULT_LANGUAGE:
     DEFAULT_LANGUAGE = AVAILABLE_LANGUAGES[0]
 
-# Only override this setting if you know what you are doing! It merely exist
-# to test currently unsupported fields.
 # FIXME: We can't seem to override this particular setting in tests.py
-STD_TRANSLATION_FIELDS =\
-getattr(settings, 'MODELTRANSLATION_STD_TRANSLATION_FIELDS',
-        ('CharField', 'TextField', 'URLField', 'EmailField', 'XMLField',))
-#try:
-    #if sys.argv[1] == 'test':
-        #STD_TRANSLATION_FIELDS =\
-        #getattr(settings, 'MODELTRANSLATION_STD_TRANSLATION_FIELDS',
-                #('CharField', 'TextField', 'URLField', 'EmailField',
-                 #'XMLField', 'BooleanField', 'NullBooleanField',
-                 #'IntegerField', 'BigIntegerField', 'PositiveIntegerField',
-                 #'PositiveSmallIntegerField', 'SmallIntegerField',
-                 #'CommaSeparatedIntegerField'))
-#except IndexError:
-    #pass
+CUSTOM_FIELDS =\
+getattr(settings, 'MODELTRANSLATION_CUSTOM_FIELDS', ())
+try:
+    if sys.argv[1] == 'test':
+        CUSTOM_FIELDS =\
+        getattr(settings, 'MODELTRANSLATION_CUSTOM_FIELDS',
+                ('BooleanField',))
+except IndexError:
+    pass

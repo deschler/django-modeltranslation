@@ -55,6 +55,9 @@ def add_localized_fields(model):
     for field_name in translation_opts.fields:
         localized_fields[field_name] = list()
         for l in settings.LANGUAGES:
+            # Create a dynamic translation field
+            translation_field = create_translation_field(model=model,\
+                                field_name=field_name, lang=l[0])
             # Construct the name for the localized field
             localized_field_name = build_localized_fieldname(field_name, l[0])
             # Check if the model already has a field by that name
@@ -63,9 +66,6 @@ def add_localized_fields(model):
                                  "already contains a field named '%s'." %\
                                  (instance.__class__.__name__,
                                   localized_field_name))
-            # Create a dynamic translation field
-            translation_field = create_translation_field(model=model,\
-                                field_name=field_name, lang=l[0])
             # This approach implements the translation fields as full valid
             # django model fields and therefore adds them via add_to_class
             localized_field = model.add_to_class(localized_field_name,

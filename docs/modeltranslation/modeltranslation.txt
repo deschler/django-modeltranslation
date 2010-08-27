@@ -303,6 +303,24 @@ the ``django.utils.i18n.get_language`` function to determine the current
 language.
 
 
+Supported fields
+----------------
+``Modeltranslation`` officially supports CharField and TextField.
+
+*New in development version*
+In most cases subclasses of these fields will work fine, too. Other fields
+aren't supported and will throw an ``ImproperlyConfigured`` exception.
+
+The list of supported fields can be extended. Just define a tuple of field names in your settings.py like this::
+
+    MODELTRANSLATION_CUSTOM_FIELDS = ('MyField', 'MyOtherField',)
+
+*Note:* This just prevents ``modeltranslation`` from throwing an
+``ImproperlyConfigured`` exception. Any non text-like field will most likely
+fail in one way or another. The feature is considered experimental and might be
+replaced by a more sophisticated mechanism in future versions.
+
+
 Set a default value
 -------------------
 *New in development version*
@@ -334,8 +352,8 @@ following:
 1. Removes the original field from every admin form by setting it
    ``editable=False``.
 2. Copies the widget of the original field to each of it's translation fields.
-3. Checks if the - now removed - original field was required and if so makes the
-   default translation field required instead.
+3. Checks if the - now removed - original field was required and if so makes
+   the default translation field required instead.
 
 
 TranslationAdmin in combination with other admin classes

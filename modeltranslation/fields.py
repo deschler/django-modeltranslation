@@ -4,7 +4,7 @@ from warnings import warn
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.db.models.fields import Field, CharField
+from django.db.models.fields import Field, CharField, TextField
 from django.db.models.fields.related import (ForeignKey, OneToOneField,
                                              ManyToManyField)
 
@@ -16,20 +16,28 @@ from modeltranslation.utils import (get_language,
 
 def create_translation_field(model, field_name, lang):
     """
-    Translation field factory.
+    Translation field factory. Returns a ``TranslationField`` based on a
+    fieldname and a language.
 
     Tries to create an object in the form  ``'Translation%s' % cls_name``
     (e.g. ``TranslationForeignKey``, ``TranslationManyToManyField``) based on
     ``model`` and ``field_name``. The class is usually a subclass of
-    ``TranslationField`` and is supposed to be implemented in this module. If
-    the class is listed in ``STD_TRANSLATION_FIELDS`` then ``TranslationField``
-    will be used to instantiate the object. If the class is neither implemented
-    nor in ``STD_TRANSLATION_FIELDS`` ``ImproperlyConfigured`` will be raised.
+    ``TranslationField`` and is supposed to be implemented in this module.
+
+    The list of supported fields can be extended. Just define a tuple of field
+    names in your settings.py like this::
+
+        MODELTRANSLATION_CUSTOM_FIELDS = ('MyField', 'MyOtherField',)
+
+    If the class is a subclass of CharField or TextField then the standard
+    ``TranslationField`` will be used to instantiate the object. If the class
+    is neither a subclass of CharField or TextField, nor implemented here, nor
+    in ``CUSTOM_FIELDS`` an ``ImproperlyConfigured`` exception will be raised.
     """
     field = model._meta.get_field(field_name)
     cls_name = field.__class__.__name__
-    # No subclass required for text fields
-    if cls_name in STD_TRANSLATION_FIELDS:
+    # No subclass required for text-like fields
+    if isinstance(field, (CharField, TextField)) or cls_name in CUSTOM_FIELDS:
         return TranslationField(translated_field=field, language=lang)
     # Try to instantiate translation field subclass
     try:
@@ -41,11 +49,11 @@ def create_translation_field(model, field_name, lang):
     # Handle related fields
     if cls_name in ('ForeignKey', 'OneToOneField', 'ManyToManyField'):
         warn('Support for related fields is experimental and known to has '
-             'flaws. Only use it if you know what you are doing.', UserWarning)
-        to = field.rel.to._meta.object_name
-        return translation_field(translated_field=field, language=lang, to=to)
-    # TODO: Should never be reached?
-    return TranslationField(field, lang)
+             'flaws. Only use it if you know what you are doing.',
+             FutureWarning)
+        return translation_field(translated_field=field, language=lang,
+                                 to=field.rel.to._meta.object_name)
+    return TranslationField(translated_field=field, language=lang)
 
 
 class TranslationField(Field):
