@@ -1,8 +1,8 @@
 .. _ref-topics-modeltranslation:
 
-===================
- Model translation
-===================
+==================
+ Modeltranslation
+==================
 
 .. admonition:: About this document
 
@@ -311,7 +311,8 @@ Supported fields
 In most cases subclasses of these fields will work fine, too. Other fields
 aren't supported and will throw an ``ImproperlyConfigured`` exception.
 
-The list of supported fields can be extended. Just define a tuple of field names in your settings.py like this::
+The list of supported fields can be extended. Just define a tuple of field
+names in your settings.py like this::
 
     MODELTRANSLATION_CUSTOM_FIELDS = ('MyField', 'MyOtherField',)
 
@@ -477,7 +478,7 @@ class NewsAdmin(TranslationAdmin):
           '/static/modeltranslation/js/tabbed_translation_fields.js',
         )
         css = {
-          'screen': ('/static/modeltranslation/js/tabbed_translation_fields.css',),
+          'screen': ('/static/modeltranslation/css/tabbed_translation_fields.css',),
         }
 }}}
 
