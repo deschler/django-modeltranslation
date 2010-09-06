@@ -7,13 +7,9 @@
          (thanks to bmihelac, resolves issue 28)
   ADDED: Setting to override the default language.
          (thanks to jaap, resolves issue 2)
-  ADDED: Experimental support for related fields - ForeignKey,
-         ManyToManyField and OneToOneField.
-         (resolves issue 15)
 
 CHANGED: Improved performance of update_translation_fields command.
          (thanks to adamsc, resolves issue 43)
-CHANGED: Custom fields are extended instead of overridden.
 CHANGED: Factored out settings into a separate settings.py and consistently
          used an app specific settings prefix.
 CHANGED: Refactored creation of translation fields and added handling of

@@ -5,8 +5,6 @@ from warnings import warn
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models.fields import Field, CharField, TextField
-from django.db.models.fields.related import (ForeignKey, OneToOneField,
-                                             ManyToManyField)
 
 from modeltranslation.settings import *
 from modeltranslation.utils import (get_language,
@@ -19,40 +17,21 @@ def create_translation_field(model, field_name, lang):
     Translation field factory. Returns a ``TranslationField`` based on a
     fieldname and a language.
 
-    Tries to create an object in the form  ``'Translation%s' % cls_name``
-    (e.g. ``TranslationForeignKey``, ``TranslationManyToManyField``) based on
-    ``model`` and ``field_name``. The class is usually a subclass of
-    ``TranslationField`` and is supposed to be implemented in this module.
-
-    The list of supported fields can be extended. Just define a tuple of field
-    names in your settings.py like this::
+    The list of supported fields can be extended by defining a tuple of field
+    names in the projects settings.py like this::
 
         MODELTRANSLATION_CUSTOM_FIELDS = ('MyField', 'MyOtherField',)
 
-    If the class is a subclass of CharField or TextField then the standard
-    ``TranslationField`` will be used to instantiate the object. If the class
-    is neither a subclass of CharField or TextField, nor implemented here, nor
+    If the class is neither a subclass of CharField or TextField, nor
     in ``CUSTOM_FIELDS`` an ``ImproperlyConfigured`` exception will be raised.
     """
     field = model._meta.get_field(field_name)
     cls_name = field.__class__.__name__
     # No subclass required for text-like fields
-    if isinstance(field, (CharField, TextField)) or cls_name in CUSTOM_FIELDS:
-        return TranslationField(translated_field=field, language=lang)
-    # Try to instantiate translation field subclass
-    try:
-        translation_field = getattr(sys.modules['modeltranslation.fields'],
-                                    'Translation%s' % cls_name)
-    except AttributeError:
+    if not (isinstance(field, (CharField, TextField)) or\
+            cls_name in CUSTOM_FIELDS):
         raise ImproperlyConfigured('%s is not supported by '
                                    'modeltranslation.' % cls_name)
-    # Handle related fields
-    if cls_name in ('ForeignKey', 'OneToOneField', 'ManyToManyField'):
-        warn('Support for related fields is experimental and known to has '
-             'flaws. Only use it if you know what you are doing.',
-             FutureWarning)
-        return translation_field(translated_field=field, language=lang,
-                                 to=field.rel.to._meta.object_name)
     return TranslationField(translated_field=field, language=lang)
 
 
@@ -141,64 +120,6 @@ class TranslationField(Field):
         return super(TranslationField, self).formfield(*args, **defaults)
 
 
-class RelatedTranslationField(object):
-    """
-    Mixin class which handles shared init of a translated relation field.
-    """
-    def _related_pre_init(self, translated_field, language, *args, **kwargs):
-        self.translated_field = translated_field
-        self.language = language
-
-        self.field_name = self.translated_field.name
-        self.translated_field_name =\
-        build_localized_fieldname(self.translated_field.name,
-                                  self.language)
-
-        # Dynamically add a related_name to the original field
-        translated_field.rel.related_name =\
-        '%s%s' % (self.translated_field.model._meta.module_name,
-                  self.field_name)
-
-        TranslationField.__init__(self, self.translated_field, self.language,
-                                  *args, **kwargs)
-
-    def _related_post_init(self):
-        # Dynamically add a related_name to the translation fields
-        self.rel.related_name =\
-        '%s%s' % (self.translated_field.model._meta.module_name,
-                  self.translated_field_name)
-
-        # ForeignKey's init overrides some essential values from
-        # TranslationField, they have to be reassigned.
-        TranslationField._post_init(self, self.translated_field, self.language)
-
-
-class TranslationForeignKey(ForeignKey, TranslationField,
-                            RelatedTranslationField):
-    def __init__(self, translated_field, language, to, to_field=None, *args,
-                 **kwargs):
-        self._related_pre_init(translated_field, language, *args, **kwargs)
-        ForeignKey.__init__(self, to, to_field, **kwargs)
-        self._related_post_init()
-
-
-class TranslationOneToOneField(OneToOneField, TranslationField,
-                               RelatedTranslationField):
-    def __init__(self, translated_field, language, to, to_field=None, *args,
-                 **kwargs):
-        self._related_pre_init(translated_field, language, *args, **kwargs)
-        OneToOneField.__init__(self, to, to_field, **kwargs)
-        self._related_post_init()
-
-
-class TranslationManyToManyField(ManyToManyField, TranslationField,
-                                 RelatedTranslationField):
-    def __init__(self, translated_field, language, to, *args, **kwargs):
-        self._related_pre_init(translated_field, language, *args, **kwargs)
-        ManyToManyField.__init__(self, to, **kwargs)
-        self._related_post_init()
-
-
 class TranslationFieldDescriptor(object):
     """A descriptor used for the original translated field."""
     def __init__(self, name, initial_val="", fallback_value=None):
@@ -239,23 +160,3 @@ class TranslationFieldDescriptor(object):
         related subclasses.
         """
         return instance.__dict__[self.name]
-
-
-class RelatedTranslationFieldDescriptor(TranslationFieldDescriptor):
-    def __init__(self, name, initial_val="", fallback_value=None):
-        TranslationFieldDescriptor.__init__(self, name, initial_val="",
-                                            fallback_value=None)
-
-    def get_default_instance(self, instance):
-        # TODO: Implement
-        pass
-
-
-class ManyToManyTranslationFieldDescriptor(TranslationFieldDescriptor):
-    def __init__(self, name, initial_val="", fallback_value=None):
-        TranslationFieldDescriptor.__init__(self, name, initial_val="",
-                                            fallback_value=None)
-
-    def get_default_instance(self, instance):
-        # TODO: Implement
-        pass

@@ -29,25 +29,10 @@ class TestModel(models.Model):
     url = models.URLField(verify_exists=False, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
     xml = models.XMLField(blank=True, null=True)
-    fk = models.ForeignKey(RelatedModel, blank=True, null=True)
-    o2o = models.OneToOneField(RelatedModel, blank=True, null=True)
-    m2m = models.ManyToManyField(RelatedModel, blank=True, null=True)
-    #boolean = models.BooleanField()
-    #nullboolean = models.NullBooleanField()
-    #integer = models.IntegerField(null=True)
-    #biginteger = models.BigIntegerField(null=True)
-    #positiveinteger = models.PositiveIntegerField(null=True)
-    #positivesmallinteger = models.PositiveSmallIntegerField(null=True)
-    #smallinteger = models.SmallIntegerField(null=True)
-    #csvinteger = models.CommaSeparatedIntegerField(max_length=255, null=True)
 
 
 class TestTranslationOptions(translator.TranslationOptions):
-    fields = ('title', 'text', 'url', 'email', 'xml', 'fk', 'o2o', 'm2m',)
-    #fields = ('title', 'text', 'url', 'email', 'xml', 'boolean',
-              #'nullboolean', 'integer', 'biginteger', 'positiveinteger',
-              #'positivesmallinteger', 'smallinteger',
-              #'csvinteger',)
+    fields = ('title', 'text', 'url', 'email', 'xml',)
 
 translator.translator._registry = {}
 translator.translator.register(TestModel, TestTranslationOptions)
@@ -59,25 +44,10 @@ class TestModelWithFallback(models.Model):
     url = models.URLField(verify_exists=False, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
     xml = models.XMLField(blank=True, null=True)
-    fk = models.ForeignKey(RelatedModel, blank=True, null=True)
-    o2o = models.OneToOneField(RelatedModel, blank=True, null=True)
-    m2m = models.ManyToManyField(RelatedModel, blank=True, null=True)
-    #boolean = models.BooleanField()
-    #nullboolean = models.NullBooleanField()
-    #integer = models.IntegerField(null=True)
-    #biginteger = models.BigIntegerField(null=True)
-    #positiveinteger = models.PositiveIntegerField(null=True)
-    #positivesmallinteger = models.PositiveSmallIntegerField(null=True)
-    #smallinteger = models.SmallIntegerField(null=True)
-    #csvinteger = models.CommaSeparatedIntegerField(max_length=255, null=True)
 
 
 class TestTranslationOptionsWithFallback(translator.TranslationOptions):
-    fields = ('title', 'text', 'url', 'email', 'xml', 'fk', 'o2o', 'm2m',)
-    #fields = ('title', 'text', 'url', 'email', 'xml', 'boolean',
-              #'nullboolean', 'integer', 'biginteger', 'positiveinteger',
-              #'positivesmallinteger', 'smallinteger',
-              #'csvinteger',)
+    fields = ('title', 'text', 'url', 'email', 'xml',)
     fallback_values = ""
 
 translator.translator.register(TestModelWithFallback,
@@ -90,25 +60,10 @@ class TestModelWithFallback2(models.Model):
     url = models.URLField(verify_exists=False, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
     xml = models.XMLField(blank=True, null=True)
-    fk = models.ForeignKey(RelatedModel, blank=True, null=True)
-    o2o = models.OneToOneField(RelatedModel, blank=True, null=True)
-    m2m = models.ManyToManyField(RelatedModel, blank=True, null=True)
-    #boolean = models.BooleanField()
-    #nullboolean = models.NullBooleanField()
-    #integer = models.IntegerField(null=True)
-    #biginteger = models.BigIntegerField(null=True)
-    #positiveinteger = models.PositiveIntegerField(null=True)
-    #positivesmallinteger = models.PositiveSmallIntegerField(null=True)
-    #smallinteger = models.SmallIntegerField(null=True)
-    #csvinteger = models.CommaSeparatedIntegerField(max_length=255, null=True)
 
 
 class TestTranslationOptionsWithFallback2(translator.TranslationOptions):
-    fields = ('title', 'text', 'url', 'email', 'xml', 'fk', 'o2o', 'm2m',)
-    #fields = ('title', 'text', 'url', 'email', 'xml', 'boolean',
-              #'nullboolean', 'integer', 'biginteger', 'positiveinteger',
-              #'positivesmallinteger', 'smallinteger',
-              #'csvinteger',)
+    fields = ('title', 'text', 'url', 'email', 'xml',)
     fallback_values = {'text': ugettext_lazy('Sorry, translation is not '
                                              'available.')}
 
@@ -170,39 +125,6 @@ class ModeltranslationTest(ModeltranslationTestBase):
         self.failUnless('xml' in field_names)
         self.failUnless('xml_de' in field_names)
         self.failUnless('xml_en' in field_names)
-        self.failUnless('fk' in field_names)
-        self.failUnless('fk_de' in field_names)
-        self.failUnless('fk_en' in field_names)
-        self.failUnless('o2o' in field_names)
-        self.failUnless('o2o_de' in field_names)
-        self.failUnless('o2o_en' in field_names)
-        self.failUnless('m2m' in field_names)
-        self.failUnless('m2m_de' in field_names)
-        self.failUnless('m2m_en' in field_names)
-        #self.failUnless('boolean' in field_names)
-        #self.failUnless('boolean_de' in field_names)
-        #self.failUnless('boolean_en' in field_names)
-        #self.failUnless('nullboolean' in field_names)
-        #self.failUnless('nullboolean_de' in field_names)
-        #self.failUnless('nullboolean_en' in field_names)
-        #self.failUnless('integer' in field_names)
-        #self.failUnless('integer_de' in field_names)
-        #self.failUnless('integer_en' in field_names)
-        #self.failUnless('biginteger' in field_names)
-        #self.failUnless('biginteger_de' in field_names)
-        #self.failUnless('biginteger_en' in field_names)
-        #self.failUnless('positiveinteger' in field_names)
-        #self.failUnless('positiveinteger_de' in field_names)
-        #self.failUnless('positiveinteger_en' in field_names)
-        #self.failUnless('positivesmallinteger' in field_names)
-        #self.failUnless('positivesmallinteger_de' in field_names)
-        #self.failUnless('positivesmallinteger_en' in field_names)
-        #self.failUnless('smallinteger' in field_names)
-        #self.failUnless('smallinteger_de' in field_names)
-        #self.failUnless('smallinteger_en' in field_names)
-        #self.failUnless('csvinteger' in field_names)
-        #self.failUnless('csvinteger_de' in field_names)
-        #self.failUnless('csvinteger_en' in field_names)
         inst.delete()
 
     def test_verbose_name(self):
@@ -391,79 +313,6 @@ class ModeltranslationTestRule1(ModeltranslationTestBase):
         value_de='<?xml version="1.0" encoding="UTF-8" ?><foo>bar</foo>',
         value_en='<?xml version="1.0" encoding="UTF-8" ?><foo>baz</foo>')
 
-    def test_rule1_foreignkey(self):
-        rel1 = RelatedModel.objects.create(reltitle='German related title')
-        rel2 = RelatedModel.objects.create(reltitle='English related title')
-        self._test_field(field_name='fk',
-                         value_de=rel1,
-                         value_en=rel2)
-
-    def test_rule1_onetoone_field(self):
-        # TODO: Required custom field test
-        rel1 = RelatedModel.objects.create(reltitle='German related title')
-        rel2 = RelatedModel.objects.create(reltitle='English related title')
-        self._test_field(field_name='o2o',
-                         value_de=rel1,
-                         value_en=rel2)
-
-    def test_rule1_manytomany_field(self):
-        # TODO: Required custom field test
-        rel1 = RelatedModel.objects.create(reltitle='German related title')
-        rel2 = RelatedModel.objects.create(reltitle='English related title')
-        self._test_field(field_name='m2m',
-                         value_de=rel1,
-                         value_en=rel2)
-
-    #def test_rule1_boolean_field(self):
-        #self._test_field(field_name='boolean',
-                         #value_de=True,
-                         #value_en=False,
-                         #deactivate=False)
-        ## Now with swapped values
-        #self._test_field(field_name='boolean',
-                         #value_de=False,
-                         #value_en=True)
-
-    #def test_rule1_nullboolean_field(self):
-        #self._test_field(field_name='nullboolean',
-                         #value_de=True,
-                         #value_en=False,
-                         #deactivate=False)
-        ## Now with swapped values
-        #self._test_field(field_name='nullboolean',
-                         #value_de=False,
-                         #value_en=True)
-
-    #def test_rule1_integer_field(self):
-        #self._test_field(field_name='integer',
-                         #value_de=42,
-                         #value_en=-42)
-
-    #def test_rule1_biginteger_field(self):
-        #self._test_field(field_name='biginteger',
-                         #value_de=1234567890,
-                         #value_en=-1234567890)
-
-    #def test_rule1_positiveinteger_field(self):
-        #self._test_field(field_name='positiveinteger',
-                         #value_de=23,
-                         #value_en=42)
-
-    #def test_rule1_positivesmallinteger_field(self):
-        #self._test_field(field_name='positivesmallinteger',
-                         #value_de=1,
-                         #value_en=2)
-
-    #def test_rule1_smallinteger_field(self):
-        #self._test_field(field_name='smallinteger',
-                         #value_de=1,
-                         #value_en=-1)
-
-    #def test_rule1_csvinteger_field(self):
-        #self._test_field(field_name='csvinteger',
-                         #value_de='1,2,3,4,5',
-                         #value_en='5,4,3,2,1')
-
 
 class ModeltranslationTestRule2(ModeltranslationTestBase):
     """
@@ -556,110 +405,6 @@ class ModeltranslationTestRule2(ModeltranslationTestBase):
         value2='<?xml version="1.0" encoding="UTF-8" ?><bar>foo</bar>',
         value3='<?xml version="1.0" encoding="UTF-8" ?><baz>foo</baz>')
 
-    def test_rule2_foreignkey(self):
-        rel1_de = RelatedModel.objects.create(reltitle='German related title')
-        rel1_en = RelatedModel.objects.create(reltitle='English related title')
-        rel2 = RelatedModel.objects.create(reltitle='Related title2')
-        rel3 = RelatedModel.objects.create(reltitle='Related title3')
-        self._test_field(field_name='fk',
-                         value1_de=rel1_de,
-                         value1_en=rel1_en,
-                         value2=rel2,
-                         value3=rel3)
-
-    def test_rule2_onetoone_field(self):
-        rel1_de = RelatedModel.objects.create(reltitle='German related title')
-        rel1_en = RelatedModel.objects.create(reltitle='English related title')
-        rel2 = RelatedModel.objects.create(reltitle='Related title2')
-        rel3 = RelatedModel.objects.create(reltitle='Related title3')
-        self._test_field(field_name='o2o',
-                         value1_de=rel1_de,
-                         value1_en=rel1_en,
-                         value2=rel2,
-                         value3=rel3)
-
-    def test_rule2_manytomany_field(self):
-        # TODO: Required custom field test
-        rel1_de = RelatedModel.objects.create(reltitle='German related title')
-        rel1_en = RelatedModel.objects.create(reltitle='English related title')
-        rel2 = RelatedModel.objects.create(reltitle='Related title2')
-        rel3 = RelatedModel.objects.create(reltitle='Related title3')
-        self._test_field(field_name='m2m',
-                         value1_de=rel1_de,
-                         value1_en=rel1_en,
-                         value2=rel2,
-                         value3=rel3)
-
-    #def test_rule2_boolean_field(self):
-        #self._test_field(field_name='boolean',
-                         #value1_de=True,
-                         #value1_en=False,
-                         #value2=True,
-                         #value3=False,
-                         #deactivate=False)
-        ## Now with swapped values
-        #self._test_field(field_name='boolean',
-                         #value1_de=False,
-                         #value1_en=True,
-                         #value2=False,
-                         #value3=True)
-
-    #def test_rule2_nullboolean_field(self):
-        #self._test_field(field_name='nullboolean',
-                         #value1_de=True,
-                         #value1_en=False,
-                         #value2=True,
-                         #value3=False,
-                         #deactivate=False)
-        ## Now with swapped values
-        #self._test_field(field_name='nullboolean',
-                         #value1_de=False,
-                         #value1_en=True,
-                         #value2=False,
-                         #value3=True)
-
-    #def test_rule2_integer_field(self):
-        #self._test_field(field_name='integer',
-                         #value1_de=42,
-                         #value1_en=-42,
-                         #value2=23,
-                         #value3=32)
-
-    #def test_rule2_biginteger_field(self):
-        #self._test_field(field_name='biginteger',
-                         #value1_de=1234567890,
-                         #value1_en=-1234567890,
-                         #value2=987654321,
-                         #value3=-987654321)
-
-    #def test_rule2_positiveinteger_field(self):
-        #self._test_field(field_name='positiveinteger',
-                         #value1_de=23,
-                         #value1_en=42,
-                         #value2=123,
-                         #value3=321)
-
-    #def test_rule2_positivesmallinteger_field(self):
-        #self._test_field(field_name='positivesmallinteger',
-                         #value1_de=1,
-                         #value1_en=2,
-                         #value2=3,
-                         #value3=4)
-
-    #def test_rule2_smallinteger_field(self):
-        #self._test_field(field_name='smallinteger',
-                         #value1_de=1,
-                         #value1_en=-1,
-                         #value2=2,
-                         #value3=-2)
-
-    #def test_rule2_csvinteger_field(self):
-        #self._test_field(field_name='csvinteger',
-                         #value1_de='1,2,3,4,5',
-                         #value1_en='5,4,3,2,1',
-                         #value2='6,7,8',
-                         #value3='9,8,10')
-
 
 class ModeltranslationTestRule3(ModeltranslationTestBase):
     """
@@ -744,110 +489,6 @@ class ModeltranslationTestRule3(ModeltranslationTestBase):
         value1_en='<?xml version="1.0" encoding="UTF-8" ?><foo>baz</foo>',
         value2='<?xml version="1.0" encoding="UTF-8" ?><bar>foo</bar>',
         value3='<?xml version="1.0" encoding="UTF-8" ?><baz>foo</baz>')
-
-    def test_rule3_foreignkey(self):
-        rel1_de = RelatedModel.objects.create(reltitle='German related title')
-        rel1_en = RelatedModel.objects.create(reltitle='English related title')
-        rel2 = RelatedModel.objects.create(reltitle='Related title2')
-        rel3 = RelatedModel.objects.create(reltitle='Related title3')
-        self._test_field(field_name='fk',
-                         value1_de=rel1_de,
-                         value1_en=rel1_en,
-                         value2=rel2,
-                         value3=rel3)
-
-    def test_rule3_onetoone_field(self):
-        rel1_de = RelatedModel.objects.create(reltitle='German related title')
-        rel1_en = RelatedModel.objects.create(reltitle='English related title')
-        rel2 = RelatedModel.objects.create(reltitle='Related title2')
-        rel3 = RelatedModel.objects.create(reltitle='Related title3')
-        self._test_field(field_name='o2o',
-                         value1_de=rel1_de,
-                         value1_en=rel1_en,
-                         value2=rel2,
-                         value3=rel3)
-
-    def test_rule3_manytomany_field(self):
-        # TODO: Required custom field test
-        rel1_de = RelatedModel.objects.create(reltitle='German related title')
-        rel1_en = RelatedModel.objects.create(reltitle='English related title')
-        rel2 = RelatedModel.objects.create(reltitle='Related title2')
-        rel3 = RelatedModel.objects.create(reltitle='Related title3')
-        self._test_field(field_name='m2m',
-                         value1_de=rel1_de,
-                         value1_en=rel1_en,
-                         value2=rel2,
-                         value3=rel3)
-
-    #def test_rule3_boolean_field(self):
-        #self._test_field(field_name='boolean',
-                         #value1_de=True,
-                         #value1_en=False,
-                         #value2=True,
-                         #value3=False,
-                         #deactivate=False)
-        ## Now with swapped values
-        #self._test_field(field_name='boolean',
-                         #value1_de=False,
-                         #value1_en=True,
-                         #value2=False,
-                         #value3=True)
-
-    #def test_rule3_nullboolean_field(self):
-        #self._test_field(field_name='nullboolean',
-                         #value1_de=True,
-                         #value1_en=False,
-                         #value2=True,
-                         #value3=False,
-                         #deactivate=False)
-        ## Now with swapped values
-        #self._test_field(field_name='nullboolean',
-                         #value1_de=False,
-                         #value1_en=True,
-                         #value2=False,
-                         #value3=True)
-
-    #def test_rule3_integer_field(self):
-        #self._test_field(field_name='integer',
-                         #value1_de=42,
-                         #value1_en=-42,
-                         #value2=23,
-                         #value3=32)
-
-    #def test_rule3_biginteger_field(self):
-        #self._test_field(field_name='biginteger',
-                         #value1_de=1234567890,
-                         #value1_en=-1234567890,
-                         #value2=987654321,
-                         #value3=-987654321)
-
-    #def test_rule3_positiveinteger_field(self):
-        #self._test_field(field_name='positiveinteger',
-                         #value1_de=23,
-                         #value1_en=42,
-                         #value2=123,
-                         #value3=321)
-
-    #def test_rule3_positivesmallinteger_field(self):
-        #self._test_field(field_name='positivesmallinteger',
-                         #value1_de=1,
-                         #value1_en=2,
-                         #value2=3,
-                         #value3=4)
-
-    #def test_rule3_smallinteger_field(self):
-        #self._test_field(field_name='smallinteger',
-                         #value1_de=1,
-                         #value1_en=-1,
-                         #value2=2,
-                         #value3=-2)
-
-    #def test_rule3_csvinteger_field(self):
-        #self._test_field(field_name='csvinteger',
-                         #value1_de='1,2,3,4,5',
-                         #value1_en='5,4,3,2,1',
-                         #value2='6,7,8',
-                         #value3='9,8,10')
 
 
 class ModeltranslationTestRule4(ModeltranslationTestBase):
@@ -941,126 +582,6 @@ class ModeltranslationTestRule4(ModeltranslationTestBase):
         value2_de='<?xml version="1.0" encoding="UTF-8" ?><bar>foo</bar>',
         value2_en='<?xml version="1.0" encoding="UTF-8" ?><baz>foo</baz>',
         value3='<?xml version="1.0" encoding="UTF-8" ?><baz>bar</baz>')
-
-    def test_rule4_foreignkey(self):
-        rel1_de = RelatedModel.objects.create(reltitle='German related title')
-        rel1_en = RelatedModel.objects.create(reltitle='English related title')
-        rel2_de = RelatedModel.objects.create(reltitle='Rel German title2')
-        rel2_en = RelatedModel.objects.create(reltitle='Rel English title2')
-        rel3 = RelatedModel.objects.create(reltitle='Rel title3')
-        self._test_field(field_name='fk',
-                         value1_de=rel1_de,
-                         value1_en=rel1_en,
-                         value2_de=rel2_de,
-                         value2_en=rel2_en,
-                         value3=rel3)
-
-    def test_rule4_onetoone_field(self):
-        rel1_de = RelatedModel.objects.create(reltitle='German related title')
-        rel1_en = RelatedModel.objects.create(reltitle='English related title')
-        rel2_de = RelatedModel.objects.create(reltitle='Rel German title2')
-        rel2_en = RelatedModel.objects.create(reltitle='Rel English title2')
-        rel3 = RelatedModel.objects.create(reltitle='Rel title3')
-        self._test_field(field_name='o2o',
-                         value1_de=rel1_de,
-                         value1_en=rel1_en,
-                         value2_de=rel2_de,
-                         value2_en=rel2_en,
-                         value3=rel3)
-
-    def test_rule4_manytomany_field(self):
-        # TODO: Required custom field test
-        rel1_de = RelatedModel.objects.create(reltitle='German related title')
-        rel1_en = RelatedModel.objects.create(reltitle='English related title')
-        rel2_de = RelatedModel.objects.create(reltitle='Rel German title2')
-        rel2_en = RelatedModel.objects.create(reltitle='Rel English title2')
-        rel3 = RelatedModel.objects.create(reltitle='Rel title3')
-        self._test_field(field_name='m2m',
-                         value1_de=rel1_de,
-                         value1_en=rel1_en,
-                         value2_de=rel2_de,
-                         value2_en=rel2_en,
-                         value3=rel3)
-
-    #def test_rule4_boolean_field(self):
-        #self._test_field(field_name='boolean',
-                         #value1_de=True,
-                         #value1_en=False,
-                         #value2_de=True,
-                         #value2_en=False,
-                         #value3=True,
-                         #deactivate=False)
-        ## Now with swapped values
-        #self._test_field(field_name='boolean',
-                         #value1_de=False,
-                         #value1_en=True,
-                         #value2_de=False,
-                         #value2_en=True,
-                         #value3=True)
-
-    #def test_rule4_nullboolean_field(self):
-        #self._test_field(field_name='nullboolean',
-                         #value1_de=True,
-                         #value1_en=False,
-                         #value2_de=True,
-                         #value2_en=False,
-                         #value3=True,
-                         #deactivate=False)
-        ## Now with swapped values
-        #self._test_field(field_name='nullboolean',
-                         #value1_de=False,
-                         #value1_en=True,
-                         #value2_de=False,
-                         #value2_en=True,
-                         #value3=False)
-
-    #def test_rule4_integer_field(self):
-        #self._test_field(field_name='integer',
-                         #value1_de=42,
-                         #value1_en=-42,
-                         #value2_de=23,
-                         #value2_en=32,
-                         #value3=33)
-
-    #def test_rule4_biginteger_field(self):
-        #self._test_field(field_name='biginteger',
-                         #value1_de=1234567890,
-                         #value1_en=-1234567890,
-                         #value2_de=987654321,
-                         #value2_en=-987654321,
-                         #value3=987654322)
-
-    #def test_rule4_positiveinteger_field(self):
-        #self._test_field(field_name='positiveinteger',
-                         #value1_de=23,
-                         #value1_en=42,
-                         #value2_de=123,
-                         #value2_en=321,
-                         #value3=322)
-
-    #def test_rule4_positivesmallinteger_field(self):
-        #self._test_field(field_name='positivesmallinteger',
-                         #value1_de=1,
-                         #value1_en=2,
-                         #value2_de=3,
-                         #value2_en=4,
-                         #value3=5)
-
-    #def test_rule4_smallinteger_field(self):
-        #self._test_field(field_name='smallinteger',
-                         #value1_de=1,
-                         #value1_en=-1,
-                         #value2_de=2,
-                         #value2_en=-2,
-                         #value3=3)
-
-    #def test_rule4_csvinteger_field(self):
-        #self._test_field(field_name='csvinteger',
-                         #value1_de='1,2,3,4,5',
-                         #value1_en='5,4,3,2,1',
-                         #value2_de='6,7,8',
-                         #value2_en='9,8,10',
-                         #value3='9,8,10,11')
 
 
 class ModeltranslationTestModelValidation(ModeltranslationTestBase):
