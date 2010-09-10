@@ -19,12 +19,19 @@ class TranslationAdminBase(object):
     """
     Mixin class which adds patch_translation_field functionality.
     """
+    orig_was_required = {}
+
     def patch_translation_field(self, db_field, field, **kwargs):
         trans_opts = translator.get_options_for_model(self.model)
 
         # Hide the original field by making it non-editable.
         if db_field.name in trans_opts.fields:
             db_field.editable = False
+
+            if field and field.required:
+                field.required = False
+                field.blank = True
+                self.orig_was_required[db_field.name] = True
 
         # For every localized field copy the widget from the original field
         # and add a css class to identify a modeltranslation widget.
@@ -41,9 +48,10 @@ class TranslationAdminBase(object):
                 # Add another css class to identify a default modeltranslation
                 # widget.
                 css_classes.append('modeltranslation-default')
-                if orig_formfield.required:
-                    # In case the original form field was required, make the default
-                    # translation field required instead.
+                if orig_formfield.required or\
+                   self.orig_was_required.get(orig_fieldname):
+                    # In case the original form field was required, make the
+                    # default translation field required instead.
                     orig_formfield.required = False
                     orig_formfield.blank = True
                     field.required = True
@@ -55,7 +63,6 @@ class TranslationAdminBase(object):
 class TranslationAdmin(admin.ModelAdmin, TranslationAdminBase):
     def __init__(self, *args, **kwargs):
         super(TranslationAdmin, self).__init__(*args, **kwargs)
-
         trans_opts = translator.get_options_for_model(self.model)
 
         # Replace original field with translation field for each language
