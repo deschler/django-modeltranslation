@@ -28,10 +28,11 @@ class TranslationAdminBase(object):
         if db_field.name in trans_opts.fields:
             db_field.editable = False
 
-            if field and field.required:
+            if field.required:
                 field.required = False
                 field.blank = True
-                self.orig_was_required[db_field.name] = True
+                self.orig_was_required[\
+                '%s.%s' % (db_field.model._meta, db_field.name)] = True
 
         # For every localized field copy the widget from the original field
         # and add a css class to identify a modeltranslation widget.
@@ -49,7 +50,8 @@ class TranslationAdminBase(object):
                 # widget.
                 css_classes.append('modeltranslation-default')
                 if orig_formfield.required or\
-                   self.orig_was_required.get(orig_fieldname):
+                   self.orig_was_required.get('%s.%s' % (db_field.model._meta,
+                                                         orig_fieldname)):
                     # In case the original form field was required, make the
                     # default translation field required instead.
                     orig_formfield.required = False
