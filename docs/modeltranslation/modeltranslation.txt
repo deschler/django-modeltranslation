@@ -17,8 +17,8 @@ model class.
 
 *Authors*
 
-- Peter Eschler <peschler@googlemail.com>
-- Dirk Eschler <eschler@gmail.com>
+- Peter Eschler <peschler@googlemail.com> (http://www.nmy.de)
+- Dirk Eschler <eschler@gmail.com> (http://www.nmy.de)
 
 .. contents::
 
