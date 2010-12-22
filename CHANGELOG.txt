@@ -16,6 +16,9 @@ CHANGED: Refactored creation of translation fields and added handling of
          supported fields.
          (resolves issue 37)
 
+  FIXED: Translations are not saved for tinymce HTMLField when using jquery
+         tabs.
+         (thanks to kottenator, resolves issue 41)
   FIXED: Fieldname isn't ensured to be string.
          (resolves issue 41)
   FIXED: Kept backwards compatibility with Django-1.0.

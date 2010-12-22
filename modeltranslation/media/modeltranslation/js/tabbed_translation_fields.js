@@ -62,6 +62,7 @@ var google, django, gettext;
                             'el': container.prev().length ? container.prev() : container.parent()
                         };
                     }
+                    container.find('script').remove();
                     panel = $('<div id="' + id + '"></div>').append(container);
                     tab = $('<li' + (label.hasClass('required') ? ' class="required"' : '') + '><a href="#' + id + '">' + lang + '</a></li>');
                     tabs_list.append(tab);
