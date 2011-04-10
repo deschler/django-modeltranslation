@@ -385,8 +385,16 @@ If there already exists a custom admin class for a translated model and you
 don't want or can't edit that class directly there is another solution.
 
 Taken the News example let's say there is a ``NewsAdmin`` class defined by the
-News app itself. This app is not yours or you don't want to touch it at all,
-but it has this nice admin class:
+News app itself. This app is not yours or you don't want to touch it at all.
+In the most common case you simply make use of Python's support for multiple
+inheritance like this:
+
+::
+
+    class MyTranslatedNewsAdmin(NewsAdmin, TranslationAdmin):
+        pass
+
+In a more complex setup the NewsAdmin might define its own class:
 
 ::
 
@@ -394,19 +402,11 @@ but it has this nice admin class:
         def formfield_for_dbfield(self, db_field, **kwargs):
             # does some funky stuff with the formfield here
 
-So a first attempt might be to create your own admin class which subclasses
-``NewsAdmin`` and ``TranslationAdmin`` to combine stuff like so:
-
-::
-
-    class MyTranslatedNewsAdmin(NewsAdmin, TranslationAdmin):
-        pass
-
-Unfortunately this won't work because Python can only execute one of the
-``formfield_for_dbfield`` methods. Since both admin class implement this method
-Python must make a decision and it chooses the first class ``NewsAdmin``. The
-functionality from ``TranslationAdmin`` will not be executed and translation in
-the admin will not work for this class.
+Unfortunately the first example won't work anymore because Python can only
+execute one of the ``formfield_for_dbfield`` methods. Since both admin class
+implement this method Python must make a decision and it chooses the first
+class ``NewsAdmin``. The functionality from ``TranslationAdmin`` will not be
+executed and translation in the admin will not work for this class.
 
 But don't panic, here's a solution:
 
