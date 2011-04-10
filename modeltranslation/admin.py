@@ -8,7 +8,7 @@ from django.contrib.contenttypes import generic
 
 from modeltranslation.settings import *
 from modeltranslation.translator import translator
-from modeltranslation.utils import get_translation_fields
+from modeltranslation.utils import get_translation_fields, build_localized_fieldname
 # Ensure that models are registered for translation before TranslationAdmin
 # runs. The import is supposed to resolve a race condition between model import
 # and translation registration in production (see issue 19).
@@ -111,6 +111,20 @@ class TranslationAdmin(admin.ModelAdmin, TranslationAdminBase):
                     translation_fields = get_translation_fields(v[0])
                     prepopulated_fields_new[k] = tuple([translation_fields[0]])
             self.prepopulated_fields = prepopulated_fields_new
+
+    def save_model(self, request, obj, form, change):
+        # Rule is: 3. Assigning a value to a translation field of the default language also
+        # updates the original field.
+        # Ensure that an empty default language field value clears the default field.
+        # See issue 47 for details.
+        trans_opts = translator.get_options_for_model(self.model)
+        for k, v in trans_opts.localized_fieldnames.items():
+            if getattr(obj, k):
+                default_lang_fieldname = build_localized_fieldname(k, DEFAULT_LANGUAGE)
+                if not getattr(obj, default_lang_fieldname):
+                    # TODO: Handle null values
+                    setattr(obj, k, "")
+        super(TranslationAdmin, self).save_model(request, obj, form, change)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         # Call the baseclass function to get the formfield

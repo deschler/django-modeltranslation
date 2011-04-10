@@ -19,7 +19,7 @@ def get_language():
         lang = lang.split('-')[0]
     if lang in AVAILABLE_LANGUAGES:
         return lang
-    return AVAILABLE_LANGUAGES[0]
+    return DEFAULT_LANGUAGE
 
 
 def get_translation_fields(field):
