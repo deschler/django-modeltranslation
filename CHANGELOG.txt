@@ -16,6 +16,9 @@ CHANGED: Refactored creation of translation fields and added handling of
          supported fields.
          (resolves issue 37)
 
+  FIXED: Clearing the default translation field in admin does not clear the
+         original field.
+         (resolves issue 47)
   FIXED: In some setups appears "This field is required" error for the
          original field.
          (resolves issue 5)
