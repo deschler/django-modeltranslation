@@ -5,7 +5,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.test import TestCase
-from django.utils.thread_support import currentThread
 from django.utils.translation import get_language
 from django.utils.translation import trans_real
 from django.utils.translation import ugettext_lazy
