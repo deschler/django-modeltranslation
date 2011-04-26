@@ -733,3 +733,99 @@ class ModeltranslationTestModelValidation(ModeltranslationTestBase):
         invalid_value='foo en',
         valid_value='django-modeltranslation@googlecode.com',
         invalid_value_de='foo de')
+
+
+class TestModelMultitableA(models.Model):
+    titlea = models.CharField(ugettext_lazy('title a'), max_length=255)
+
+
+class TestModelMultitableB(TestModelMultitableA):
+    titleb = models.CharField(ugettext_lazy('title b'), max_length=255)
+
+
+class TestModelMultitableC(TestModelMultitableB):
+    titlec = models.CharField(ugettext_lazy('title c'), max_length=255)
+
+
+class TestModelAbstractA(models.Model):
+    titlea = models.CharField(ugettext_lazy('title a'), max_length=255)
+    class Meta:
+        abstract = True
+
+
+class TestModelAbstractB(TestModelAbstractA):
+    titleb = models.CharField(ugettext_lazy('title b'), max_length=255)
+
+
+class TranslationOptionsTestModelMultitableA(translator.TranslationOptions):
+    fields = ('titlea',)
+
+
+class TranslationOptionsTestModelMultitableB(translator.TranslationOptions):
+    fields = ('titleb',)
+
+
+class TranslationOptionsTestModelMultitableC(translator.TranslationOptions):
+    fields = ('titlec',)
+
+
+class TranslationOptionsTestModelAbstractA(translator.TranslationOptions):
+    fields = ('titlea',)
+
+
+class TranslationOptionsTestModelAbstractB(translator.TranslationOptions):
+    fields = ('titleb',)
+
+
+translator.translator.register(TestModelMultitableA,
+                               TranslationOptionsTestModelMultitableA)
+translator.translator.register(TestModelMultitableB,
+                               TranslationOptionsTestModelMultitableB)
+translator.translator.register(TestModelMultitableC,
+                               TranslationOptionsTestModelMultitableC)
+translator.translator.register(TestModelAbstractA,
+                               TranslationOptionsTestModelAbstractA)
+translator.translator.register(TestModelAbstractB,
+                               TranslationOptionsTestModelAbstractB)
+
+
+class ModeltranslationInheritanceTest(ModeltranslationTestBase):
+    """Tests for inheritance support in modeltranslation."""
+    def test_abstract_inheritance(self):
+        b = TestModelAbstractB.objects.create(titleb_de='title d de',
+                                              titleb_en='title d en')
+
+        field_names_b = dir(b)
+        self.failIf('titled' in field_names_b)
+        self.failIf('titled_de' in field_names_b)
+        self.failIf('titled_en' in field_names_b)
+
+    def test_multitable_inheritance(self):
+        """
+        Test will fail until multi-table inheritance support is fixed in
+        modeltranslation.
+        """
+        a = TestModelMultitableA.objects.create(titlea_de='title a de',
+                                                titlea_en='title a en')
+        b = TestModelMultitableB.objects.create(titleb_de='title b de',
+                                                titleb_en='title b en')
+        c = TestModelMultitableC.objects.create(titleb_de='title c de',
+                                                titleb_en='title c en')
+
+        field_names_a = dir(a)
+        self.failUnless('titlea' in field_names_a)
+        self.failUnless('titlea_de' in field_names_a)
+        self.failUnless('titlea_en' in field_names_a)
+        self.failUnless('titleb' in field_names_a)
+        self.failUnless('titleb_de' in field_names_a)
+        self.failUnless('titleb_en' in field_names_a)
+
+        field_names_b = dir(b)
+        self.failIf('titleb' in field_names_b)
+        self.failIf('titleb_de' in field_names_b)
+        self.failIf('titleb_en' in field_names_b)
+
+        field_names_c = dir(c)
+        self.failIf('titlec' in field_names_c)
+        self.failIf('titlec_de' in field_names_c)
+        self.failIf('titlec_en' in field_names_c)
