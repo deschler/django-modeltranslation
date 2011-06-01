@@ -82,6 +82,20 @@ def add_localized_fields(model):
     #for field_name in trans_opts.fields:
         #setattr(sender, field_name, TranslationFieldDescriptor(field_name))
 
+def delete_cache_fields(model):
+    opts = model._meta
+    try:
+        del opts._field_cache
+    except AttributeError:
+        pass
+    try:
+        del opts._field_name_cache
+    except AttributeError:
+        pass
+    try:
+        del opts._name_map
+    except AttributeError:
+        pass
 
 class Translator(object):
     """
@@ -152,6 +166,10 @@ class Translator(object):
                     rev_dict[ln] = orig_name
             translation_opts.localized_fieldnames_rev = rev_dict
 
+            # Delete all fields cache for related model (parent and children)
+            for related_obj in model._meta.get_all_related_objects():
+                delete_cache_fields(related_obj.model)
+
         model_fallback_values =\
         getattr(translation_opts, 'fallback_values', None)
         for field_name in translation_opts.fields:
@@ -190,6 +208,30 @@ class Translator(object):
         try:
             return self._registry[model]
         except KeyError:
+            # Try to find a localized parent model and build a dedicated
+            # translation options class with the parent info.
+            # Useful when a ModelB inherits from ModelA and only ModelA fields
+            # are localized. No need to register ModelB.
+            fields = set()
+            localized_fieldnames = {}
+            localized_fieldnames_rev = {}
+            for parent in model._meta.parents.keys():
+                if parent in self._registry:
+                    trans_opts = self._registry[parent]
+                    fields.update(trans_opts.fields)
+                    localized_fieldnames.update(trans_opts.localized_fieldnames)
+                    localized_fieldnames_rev.update(trans_opts.localized_fieldnames_rev)
+            if fields and localized_fieldnames and localized_fieldnames_rev:
+                options = {
+                    '__module__': __name__,
+                    'fields': tuple(fields),
+                    'localized_fieldnames': localized_fieldnames,
+                    'localized_fieldnames_rev': localized_fieldnames_rev,
+                }
+                translation_opts = type("%sTranslation" % model.__name__,
+                                        (TranslationOptions,), options)
+                # delete_cache_fields(model)
+                return translation_opts
             raise NotRegistered('The model "%s" is not registered for '
                                 'translation' % model.__name__)
 

@@ -93,8 +93,8 @@ class ModeltranslationTest(ModeltranslationTestBase):
         self.failUnless('en' in langs)
         self.failUnless(translator.translator)
 
-        # Check that three models are registered for translation
-        self.failUnlessEqual(len(translator.translator._registry), 3)
+        # Check that eight models are registered for translation
+        self.failUnlessEqual(len(translator.translator._registry), 8)
 
         # Try to unregister a model that is not registered
         self.assertRaises(translator.NotRegistered,
@@ -129,7 +129,7 @@ class ModeltranslationTest(ModeltranslationTestBase):
     def test_verbose_name(self):
         inst = TestModel.objects.create(title="Testtitle", text="Testtext")
         self.assertEquals(\
-        unicode(inst._meta.get_field('title_de').verbose_name), u'Titel [de]')
+        unicode(inst._meta.get_field('title_de').verbose_name), u'title [de]')
         inst.delete()
 
     def test_set_translation(self):
@@ -747,6 +747,10 @@ class TestModelMultitableC(TestModelMultitableB):
     titlec = models.CharField(ugettext_lazy('title c'), max_length=255)
 
 
+class TestModelMultitableD(TestModelMultitableB):
+    titled = models.CharField(ugettext_lazy('title d'), max_length=255)
+
+
 class TestModelAbstractA(models.Model):
     titlea = models.CharField(ugettext_lazy('title a'), max_length=255)
     class Meta:
@@ -792,40 +796,41 @@ translator.translator.register(TestModelAbstractB,
 class ModeltranslationInheritanceTest(ModeltranslationTestBase):
     """Tests for inheritance support in modeltranslation."""
     def test_abstract_inheritance(self):
-        b = TestModelAbstractB.objects.create(titleb_de='title d de',
-                                              titleb_en='title d en')
-
-        field_names_b = dir(b)
+        field_names_b = TestModelAbstractB._meta.get_all_field_names()
         self.failIf('titled' in field_names_b)
         self.failIf('titled_de' in field_names_b)
         self.failIf('titled_en' in field_names_b)
 
     def test_multitable_inheritance(self):
-        """
-        Test will fail until multi-table inheritance support is fixed in
-        modeltranslation.
-        """
-        a = TestModelMultitableA.objects.create(titlea_de='title a de',
-                                                titlea_en='title a en')
-        b = TestModelMultitableB.objects.create(titleb_de='title b de',
-                                                titleb_en='title b en')
-        c = TestModelMultitableC.objects.create(titleb_de='title c de',
-                                                titleb_en='title c en')
-
-        field_names_a = dir(a)
+        field_names_a = TestModelMultitableA._meta.get_all_field_names()
         self.failUnless('titlea' in field_names_a)
         self.failUnless('titlea_de' in field_names_a)
         self.failUnless('titlea_en' in field_names_a)
-        self.failUnless('titleb' in field_names_a)
-        self.failUnless('titleb_de' in field_names_a)
-        self.failUnless('titleb_en' in field_names_a)
 
-        field_names_b = dir(b)
-        self.failIf('titleb' in field_names_b)
-        self.failIf('titleb_de' in field_names_b)
-        self.failIf('titleb_en' in field_names_b)
+        field_names_b = TestModelMultitableB._meta.get_all_field_names()
+        self.failUnless('titlea' in field_names_b)
+        self.failUnless('titlea_de' in field_names_b)
+        self.failUnless('titlea_en' in field_names_b)
+        self.failUnless('titleb' in field_names_b)
+        self.failUnless('titleb_de' in field_names_b)
+        self.failUnless('titleb_en' in field_names_b)
 
-        field_names_c = dir(c)
-        self.failIf('titlec' in field_names_c)
-        self.failIf('titlec_de' in field_names_c)
-        self.failIf('titlec_en' in field_names_c)
+        field_names_c = TestModelMultitableC._meta.get_all_field_names()
+        self.failUnless('titlea' in field_names_c)
+        self.failUnless('titlea_de' in field_names_c)
+        self.failUnless('titlea_en' in field_names_c)
+        self.failUnless('titleb' in field_names_c)
+        self.failUnless('titleb_de' in field_names_c)
+        self.failUnless('titleb_en' in field_names_c)
+        self.failUnless('titlec' in field_names_c)
+        self.failUnless('titlec_de' in field_names_c)
+        self.failUnless('titlec_en' in field_names_c)
+
+        field_names_d = TestModelMultitableD._meta.get_all_field_names()
+        self.failUnless('titlea' in field_names_d)
+        self.failUnless('titlea_de' in field_names_d)
+        self.failUnless('titlea_en' in field_names_d)
+        self.failUnless('titleb' in field_names_d)
+        self.failUnless('titleb_de' in field_names_d)
+        self.failUnless('titleb_en' in field_names_d)
+        self.failUnless('titled' in field_names_d)

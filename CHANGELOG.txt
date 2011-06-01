@@ -1,3 +1,5 @@
+  ADDED: Support for multi-table inheritance.
+         (thanks to Sébastien Fievet, resolves issues 50 and 51)
   ADDED: Jquery-ui based admin support for tabbed translation fields.
          (thanks to jaap and adamsc, resolves issue 39)
   ADDED: CSS class to identify a translation field and the default translation
