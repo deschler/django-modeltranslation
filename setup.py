@@ -2,7 +2,7 @@
 from distutils.core import setup
 
 setup(name='django-modeltranslation',
-      version='0.2',
+      version='0.3',
       description='Translates Django models using a registration approach.',
       long_description='The modeltranslation application can be used to '
                        'translate dynamic content of existing models to an '
