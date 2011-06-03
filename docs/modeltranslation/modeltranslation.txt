@@ -101,7 +101,7 @@ modeltranslation app, but rather required for Django to be able to
 
 **settings.MODELTRANSLATION_DEFAULT_LANGUAGE**
 
-*New in development version*
+*New in 0.3*
 
 To override the default language as described in settings.LANGUAGES, define
 ``MODELTRANSLATION_DEFAULT_LANGUAGE``. Note that the value has to be in
@@ -121,7 +121,7 @@ be set like this:
 
 **settings.MODELTRANSLATION_CUSTOM_FIELDS**
 
-*New in development version*
+*New in 0.3*
 
 ``Modeltranslation`` officially supports ``CharField`` and ``TextField``.
 
@@ -339,13 +339,6 @@ the ``django.utils.i18n.get_language`` function to determine the current
 language.
 
 
-Set a default value
--------------------
-*New in development version*
-
-TODO
-
-
 Django admin backend integration
 ================================
 In order to be able to edit the translations via the admin backend you need to
@@ -496,7 +489,7 @@ __ translationadmin_in_combination_with_other_admin_classes_
 
 Using tabbed translation fields
 -------------------------------
-*New in development version*
+*New in 0.3*
 
 Modeltranslation supports separation of translation fields via jquery-ui tabs.
 The proposed way to include it is through the inner `Media` class of a
