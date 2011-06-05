@@ -1,3 +1,10 @@
+CHANGED: Renamed media folder to static.
+
+v0.3
+====
+Date: 2011-06-03
+Packaged from revision 113.
+
   ADDED: Support for multi-table inheritance.
          (thanks to Sébastien Fievet, resolves issues 50 and 51)
   ADDED: Jquery-ui based admin support for tabbed translation fields.
