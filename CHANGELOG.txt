@@ -1,4 +1,5 @@
 CHANGED: Renamed media folder to static.
+         (resolves issue 61)
 
 v0.3
 ====

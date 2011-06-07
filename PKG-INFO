@@ -1,12 +1,12 @@
 Metadata-Version: 1.0
 Name: django-modeltranslation
-Version: 0.2
+Version: 0.3.1
 Summary: Translates Django models using a registration approach.
 Home-page: http://code.google.com/p/django-modeltranslation/
 Author: Peter Eschler,
         Dirk Eschler
-Author-email: "Peter Eschler" <peschler@googlemail.com>,
-              "Dirk Eschler" <eschler@gmail.com>
+Author-email: "Peter Eschler" <p.eschler@nmy.de>,
+              "Dirk Eschler" <d.eschler@nmy.de>
 License: New BSD
 Description: The modeltranslation application can be used to translate dynamic
              content of existing models to an arbitrary number of languages
