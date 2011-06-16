@@ -1,5 +1,12 @@
+FIXED: Static files not included during installation.
+       (resolves issue 61)
+
+v0.3.1
+======
+Date: 2011-06-07
+Packaged from revision 121.
+
 CHANGED: Renamed media folder to static.
-         (resolves issue 61)
 
 v0.3
 ====

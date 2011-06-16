@@ -2,7 +2,7 @@
 from distutils.core import setup
 
 setup(name='django-modeltranslation',
-      version='0.3.1',
+      version='0.3.2',
       description='Translates Django models using a registration approach.',
       long_description='The modeltranslation application can be used to '
                        'translate dynamic content of existing models to an '
@@ -19,8 +19,9 @@ setup(name='django-modeltranslation',
       url='http://code.google.com/p/django-modeltranslation/',
       packages=['modeltranslation', 'modeltranslation.management',
                 'modeltranslation.management.commands'],
+      include_package_data = True,
       requires=['django(>=1.0)'],
-      download_url='http://django-modeltranslation.googlecode.com/files/django-modeltranslation-0.3.1.tar.gz',
+      download_url='http://django-modeltranslation.googlecode.com/files/django-modeltranslation-0.3.2.tar.gz',
       classifiers=['Framework :: Django',
                    'Intended Audience :: Developers',
                    'License :: OSI Approved :: BSD License'],
