@@ -1,5 +1,15 @@
+FIXED: Tabs don't properly support two-part language codes.
+       (resolves issue 63)
+
+
+v0.3.2
+======
+Date: 2011-06-16
+Packaged from revision 122.
+
 FIXED: Static files not included during installation.
        (resolves issue 61)
+
 
 v0.3.1
 ======
@@ -7,6 +17,7 @@ Date: 2011-06-07
 Packaged from revision 121.
 
 CHANGED: Renamed media folder to static.
+
 
 v0.3
 ====
@@ -52,6 +63,7 @@ CHANGED: Refactored creation of translation fields and added handling of
          correctly.
          (thanks to jaap, resolves issue 31)
 
+
 v0.2
 ====
 Date: 2010-06-15
@@ -96,6 +108,7 @@ Packaged from revision 57.
          (thanks carl.j.meyer, resolves issue 6)
   FIXED: Removed unused dependency to content type which can break syncdb.
          (thanks carl.j.meyer, resolves issue 1)
+
 
 v0.1
 ====
