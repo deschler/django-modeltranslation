@@ -44,8 +44,8 @@ class TranslationAdminBase(object):
             field.widget = copy(orig_formfield.widget)
             css_classes = field.widget.attrs.get('class', '').split(' ')
             css_classes.append('modeltranslation')
-            css_classes.append('modeltranslation-field-%s__%s' % (orig_fieldname,
-                                                                  db_field.language))
+            #css_classes.append('modeltranslation-field-%s__%s' % (orig_fieldname,
+                                                                  #db_field.language))
 
             if db_field.language == DEFAULT_LANGUAGE:
                 # Add another css class to identify a default modeltranslation
