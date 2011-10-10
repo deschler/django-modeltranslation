@@ -83,13 +83,21 @@ class TranslationAdmin(admin.ModelAdmin, TranslationAdminBase):
             fieldsets_new = list(self.fieldsets)
             for (name, dct) in self.fieldsets:
                 if 'fields' in dct:
-                    fields_new = list(dct['fields'])
-                    for field in dct['fields']:
-                        if field in trans_opts.fields:
-                            index = fields_new.index(field)
-                            translation_fields = get_translation_fields(field)
-                            fields_new[index:index + 1] = translation_fields
-                    dct['fields'] = fields_new
+                    tfields_new = []
+                    for field in list(dct['fields']):
+                        if isinstance(field, tuple):
+                            tfields = []
+                            for f in field:
+                                if f in trans_opts.fields:
+                                    tfields.extend(get_translation_fields(f))
+                            # FIXME: Flatten nested tuples as they will break in the
+                            # current tabs implementation. Normally we want:
+                            # tfields_new.append(tuple(tfields))
+                            tfields_new.extend(tuple(tfields))
+                        else:
+                            if field in trans_opts.fields:
+                                tfields_new.extend(get_translation_fields(field))
+                    dct['fields'] = tuple(tfields_new)
             self.fieldsets = fieldsets_new
 
         if self.list_editable:

@@ -1,3 +1,5 @@
+FIXED: Grouped fieldsets translation is not displayed.
+       (resolves issue 52)
 FIXED: Tabs don't properly support two-part language codes.
        (resolves issue 63)
 
