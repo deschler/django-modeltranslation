@@ -27,11 +27,10 @@ class TestModel(models.Model):
     text = models.TextField(blank=True, null=True)
     url = models.URLField(verify_exists=False, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
-    xml = models.XMLField(blank=True, null=True)
 
 
 class TestTranslationOptions(translator.TranslationOptions):
-    fields = ('title', 'text', 'url', 'email', 'xml',)
+    fields = ('title', 'text', 'url', 'email',)
 
 translator.translator._registry = {}
 translator.translator.register(TestModel, TestTranslationOptions)
@@ -42,11 +41,10 @@ class TestModelWithFallback(models.Model):
     text = models.TextField(blank=True, null=True)
     url = models.URLField(verify_exists=False, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
-    xml = models.XMLField(blank=True, null=True)
 
 
 class TestTranslationOptionsWithFallback(translator.TranslationOptions):
-    fields = ('title', 'text', 'url', 'email', 'xml',)
+    fields = ('title', 'text', 'url', 'email',)
     fallback_values = ""
 
 translator.translator.register(TestModelWithFallback,
@@ -58,11 +56,10 @@ class TestModelWithFallback2(models.Model):
     text = models.TextField(blank=True, null=True)
     url = models.URLField(verify_exists=False, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
-    xml = models.XMLField(blank=True, null=True)
 
 
 class TestTranslationOptionsWithFallback2(translator.TranslationOptions):
-    fields = ('title', 'text', 'url', 'email', 'xml',)
+    fields = ('title', 'text', 'url', 'email',)
     fallback_values = {'text': ugettext_lazy('Sorry, translation is not '
                                              'available.')}
 
@@ -121,9 +118,6 @@ class ModeltranslationTest(ModeltranslationTestBase):
         self.failUnless('email' in field_names)
         self.failUnless('email_de' in field_names)
         self.failUnless('email_en' in field_names)
-        self.failUnless('xml' in field_names)
-        self.failUnless('xml_de' in field_names)
-        self.failUnless('xml_en' in field_names)
         inst.delete()
 
     def test_verbose_name(self):
@@ -307,11 +301,6 @@ class ModeltranslationTestRule1(ModeltranslationTestBase):
                          value_de='django-modeltranslation@googlecode.de',
                          value_en='django-modeltranslation@googlecode.com')
 
-    def test_rule1_xml_field(self):
-        self._test_field(field_name='xml',\
-        value_de='<?xml version="1.0" encoding="UTF-8" ?><foo>bar</foo>',
-        value_en='<?xml version="1.0" encoding="UTF-8" ?><foo>baz</foo>')
-
 
 class ModeltranslationTestRule2(ModeltranslationTestBase):
     """
@@ -397,13 +386,6 @@ class ModeltranslationTestRule2(ModeltranslationTestBase):
                          value2='django-modeltranslation@googlecode.at',
                          value3='django-modeltranslation@googlecode.co.uk')
 
-    def test_rule2_xml_field(self):
-        self._test_field(field_name='xml',\
-        value1_de='<?xml version="1.0" encoding="UTF-8" ?><foo>bar</foo>',
-        value1_en='<?xml version="1.0" encoding="UTF-8" ?><foo>baz</foo>',
-        value2='<?xml version="1.0" encoding="UTF-8" ?><bar>foo</bar>',
-        value3='<?xml version="1.0" encoding="UTF-8" ?><baz>foo</baz>')
-
 
 class ModeltranslationTestRule3(ModeltranslationTestBase):
     """
@@ -481,13 +463,6 @@ class ModeltranslationTestRule3(ModeltranslationTestBase):
                          value1_en='django-modeltranslation@googlecode.com',
                          value2='django-modeltranslation@googlecode.at',
                          value3='django-modeltranslation@googlecode.co.uk')
-
-    def test_rule3_xml_field(self):
-        self._test_field(field_name='xml',\
-        value1_de='<?xml version="1.0" encoding="UTF-8" ?><foo>bar</foo>',
-        value1_en='<?xml version="1.0" encoding="UTF-8" ?><foo>baz</foo>',
-        value2='<?xml version="1.0" encoding="UTF-8" ?><bar>foo</bar>',
-        value3='<?xml version="1.0" encoding="UTF-8" ?><baz>foo</baz>')
 
 
 class ModeltranslationTestRule4(ModeltranslationTestBase):
@@ -573,14 +548,6 @@ class ModeltranslationTestRule4(ModeltranslationTestBase):
                          value2_de='django-modeltranslation@googlecode.at',
                          value2_en='django-modeltranslation@googlecode.co.uk',
                          value3='django-modeltranslation@googlecode.net')
-
-    def test_rule4_xml_field(self):
-        self._test_field(field_name='xml',\
-        value1_de='<?xml version="1.0" encoding="UTF-8" ?><foo>bar</foo>',
-        value1_en='<?xml version="1.0" encoding="UTF-8" ?><foo>baz</foo>',
-        value2_de='<?xml version="1.0" encoding="UTF-8" ?><bar>foo</bar>',
-        value2_en='<?xml version="1.0" encoding="UTF-8" ?><baz>foo</baz>',
-        value3='<?xml version="1.0" encoding="UTF-8" ?><baz>bar</baz>')
 
 
 class ModeltranslationTestModelValidation(ModeltranslationTestBase):
