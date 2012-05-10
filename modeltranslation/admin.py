@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from copy import copy
+from copy import deepcopy
 
 from django import forms, template
 from django.conf import settings
@@ -41,7 +41,7 @@ class TranslationAdminBase(object):
             orig_formfield = self.formfield_for_dbfield(\
                              self.model._meta.get_field(orig_fieldname),
                                                         **kwargs)
-            field.widget = copy(orig_formfield.widget)
+            field.widget = deepcopy(orig_formfield.widget)
             css_classes = field.widget.attrs.get('class', '').split(' ')
             css_classes.append('modeltranslation')
             #css_classes.append('modeltranslation-field-%s__%s' % (orig_fieldname,

@@ -1,6 +1,9 @@
+  FIXED: Widgets for translated fields are not properly copied from original
+         fields.
+         (thanks to boris-chervenkov, resolves issue 74)
   FIXED: Removed XMLField test which is deprecated since Django 1.3 and
          broke tests in Django 1.4.
-         (resolves reopened issue 75)
+         (resolves issue 75)
 
 
 v0.3.3
