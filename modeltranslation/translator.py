@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.conf import settings
-from django.db import models
-from django.db.models import signals
 from django.db.models.base import ModelBase
-from django.utils.functional import curry
 
 from modeltranslation.fields import (TranslationField,
                                      TranslationFieldDescriptor,
@@ -82,6 +79,7 @@ def add_localized_fields(model):
     #for field_name in trans_opts.fields:
         #setattr(sender, field_name, TranslationFieldDescriptor(field_name))
 
+
 def delete_cache_fields(model):
     opts = model._meta
     try:
@@ -96,6 +94,7 @@ def delete_cache_fields(model):
         del opts._name_map
     except AttributeError:
         pass
+
 
 class Translator(object):
     """
@@ -219,8 +218,10 @@ class Translator(object):
                 if parent in self._registry:
                     trans_opts = self._registry[parent]
                     fields.update(trans_opts.fields)
-                    localized_fieldnames.update(trans_opts.localized_fieldnames)
-                    localized_fieldnames_rev.update(trans_opts.localized_fieldnames_rev)
+                    localized_fieldnames.update(
+                        trans_opts.localized_fieldnames)
+                    localized_fieldnames_rev.update(
+                        trans_opts.localized_fieldnames_rev)
             if fields and localized_fieldnames and localized_fieldnames_rev:
                 options = {
                     '__module__': __name__,

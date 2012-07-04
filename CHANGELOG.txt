@@ -1,3 +1,17 @@
+v0.4.0-alpha1
+=============
+
+  ADDED: New admin option exclude_languages to exclude certain translation
+         fields per admin class.
+CHANGED: Moved tests to separate folder and added tests for TranslationAdmin.
+         To run the tests the settings provided in model.tests.modeltranslation
+         have to be used (settings.LANGUAGES override doesn't work for
+         TranslationAdmin).
+CHANGED: Major refactoring of the admin integration. Subclassed BaseModelAdmin
+         and InlineModelAdmin. Patching options in init doesn't seem to be
+         thread safe. Instead used provided hooks like get_form, get_formset
+         and get_fieldsets. This should resolve several problems with the
+         exclude and fieldsets options and properly support options in inlines.
   FIXED: Widgets for translated fields are not properly copied from original
          fields.
          (thanks to boris-chervenkov, resolves issue 74)

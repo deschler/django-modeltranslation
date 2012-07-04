@@ -1,12 +1,8 @@
 # -*- coding: utf-8 -*-
-from django.db import models
-from django.conf import settings
-from django.core.exceptions import ValidationError, ImproperlyConfigured
-from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import get_language as _get_language
 from django.utils.functional import lazy
 
-from modeltranslation.settings import *
+from modeltranslation.settings import DEFAULT_LANGUAGE, AVAILABLE_LANGUAGES
 
 
 def get_language():
