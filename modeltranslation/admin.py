@@ -142,7 +142,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         if exclude_languages is None:
             exclude_languages = []
         if exclude_languages:
-             excl_languages = exclude_languages
+            excl_languages = exclude_languages
         else:
             for lang in self.exclude_languages:
                 # TODO: Not a good place for validation.
@@ -177,7 +177,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
             exclude_fields = tuple(self.exclude) + tuple(exclude_fields)
         if exclude_fields:
             kwargs.update({'exclude': getattr(
-                kwargs, 'exclude', tuple()) + exclude_fields,})
+                kwargs, 'exclude', tuple()) + exclude_fields})
         if kwargs.get('exclude_languages'):
             del kwargs['exclude_languages']
         return kwargs

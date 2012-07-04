@@ -19,7 +19,9 @@ def get_language():
 
 
 def get_translation_fields(field):
-    """Returns a list of localized fieldnames for a given field."""
+    """
+    Returns a list of localized fieldnames for a given field.
+    """
     return [build_localized_fieldname(field, l) for l in AVAILABLE_LANGUAGES]
 
 
