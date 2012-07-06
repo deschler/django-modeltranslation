@@ -3,6 +3,7 @@
 Tests have to be run with modeltranslation.tests.settings:
 ./manage.py test --settings=modeltranslation.tests.settings modeltranslation
 """
+from django import forms
 from django.conf import settings
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import User
@@ -829,7 +830,6 @@ class TranslationAdminTest(ModeltranslationTestBase):
             pass
 
         ma = TestModelAdmin(TestModel, self.site)
-
         self.assertEqual(ma.get_form(request).base_fields.keys(),
             ['title_de', 'title_en', 'text_de', 'text_en',
              'url_de', 'url_en', 'email_de', 'email_en'])
@@ -839,7 +839,6 @@ class TranslationAdminTest(ModeltranslationTestBase):
             pass
 
         ma = TestModelAdmin(TestModel, self.site)
-
         # We expect that the original field is excluded and only the
         # translation fields are included in fields
         fields = ['title_de', 'title_en', 'text_de', 'text_en',
@@ -849,50 +848,15 @@ class TranslationAdminTest(ModeltranslationTestBase):
         self.assertEqual(ma.get_fieldsets(request, self.test_obj),
             [(None, {'fields': fields})])
 
-    def test_fieldsets_with_exclude_languages_override(self):
-        class TestModelAdmin(TranslationAdmin):
-            pass
-
-        ma = TestModelAdmin(TestModel, self.site)
-
-        # We expect that the original field is excluded and only the
-        # translation fields are included in fields
-        exclude_languages = ['en']
-        fields = ['title_de', 'text_de', 'url_de', 'email_de']
-        self.assertEqual(ma.get_fieldsets(request,
-            exclude_languages=exclude_languages),
-            [(None, {'fields': fields})])
-        self.assertEqual(ma.get_fieldsets(request, obj=self.test_obj,
-            exclude_languages=exclude_languages),
-            [(None, {'fields': fields})])
-
-        # Now with option and override
-        class TestModelAdmin(TranslationAdmin):
-            exclude_languages = ['en']
-
-        ma = TestModelAdmin(TestModel, self.site)
-
-        # We expect that the original field is excluded and only the
-        # translation fields are included in fields
-        exclude_languages = ['en']
-        fields = ['title_de', 'text_de', 'url_de', 'email_de']
-        self.assertEqual(ma.get_fieldsets(request,
-            exclude_languages=exclude_languages),
-            [(None, {'fields': fields})])
-        self.assertEqual(ma.get_fieldsets(request, obj=self.test_obj,
-            exclude_languages=exclude_languages),
-            [(None, {'fields': fields})])
-
     def test_field_arguments(self):
         class TestModelAdmin(TranslationAdmin):
             fields = ['title']
 
         ma = TestModelAdmin(TestModel, self.site)
-
-        self.assertEqual(ma.get_fieldsets(request),
-            [(None, {'fields': ['title_de', 'title_en']})])
-        self.assertEqual(ma.get_fieldsets(request, self.test_obj),
-            [(None, {'fields': ['title_de', 'title_en']})])
+        fields = ['title_de', 'title_en']
+        self.assertEqual(ma.get_form(request).base_fields.keys(), fields)
+        self.assertEqual(ma.get_form(request,
+            self.test_obj).base_fields.keys(), fields)
 
     def test_field_arguments_restricted_on_form(self):
         # Using `fields`.
@@ -942,127 +906,66 @@ class TranslationAdminTest(ModeltranslationTestBase):
         self.assertEqual(ma.get_form(request).base_fields.keys(),
             ['title_de', 'title_en'])
 
-    def test_field_arguments_with_exclude_languages(self):
-        # Using `exclude_languages`.
+    def test_field_arguments_restricted_on_custom_form(self):
+        # Using `fields`.
+        class TestModelForm(forms.ModelForm):
+            class Meta:
+                model = TestModel
+                fields = ['url', 'email']
+
         class TestModelAdmin(TranslationAdmin):
-            exclude_languages = ('en',)
+            form = TestModelForm
 
         ma = TestModelAdmin(TestModel, self.site)
-        # Called directly with no kwargs we expect all english translation
-        # fields to be returned
-        self.assertEqual(ma.get_translation_field_excludes(),
-                        ('url_en', 'text_en', 'email_en', 'title_en',))
-
-        fields = ['title_de', 'text_de', 'url_de', 'email_de']
-        self.assertEqual(ma.get_form(request).base_fields.keys(), fields)
+        fields = ['url_de', 'url_en', 'email_de', 'email_en']
+        self.assertEqual(ma.get_form(request).base_fields.keys(),
+            fields)
         self.assertEqual(ma.get_form(request,
             self.test_obj).base_fields.keys(), fields)
 
-        # Using `exclude_languages` and `fields`.
+        # Using `exclude`.
+        class TestModelForm(forms.ModelForm):
+            class Meta:
+                model = TestModel
+                exclude = ['url', 'email']
+
         class TestModelAdmin(TranslationAdmin):
-            fields = ('title',)
-            exclude_languages = ('en',)
+            form = TestModelForm
 
         ma = TestModelAdmin(TestModel, self.site)
-        fields = ['title_de']
-        self.assertEqual(ma.get_form(request).base_fields.keys(), fields)
+        fields = ['title_de', 'title_en', 'text_de', 'text_en']
+        self.assertEqual(ma.get_form(request).base_fields.keys(),
+            fields)
         self.assertEqual(ma.get_form(request,
             self.test_obj).base_fields.keys(), fields)
 
-        # Using `exclude_languages` and `exclude`.
+        # If both, the custom form an the ModelAdmin define an `exclude`
+        # option, the ModelAdmin wins. This is Django behaviour.
         class TestModelAdmin(TranslationAdmin):
-            fields = ('title',)
-            exclude_languages = ('en',)
+            form = TestModelForm
+            exclude = ['url']
 
         ma = TestModelAdmin(TestModel, self.site)
-        fields = ['title_de']
-        self.assertEqual(ma.get_form(request).base_fields.keys(), fields)
+        fields = ['title_de', 'title_en', 'text_de', 'text_en', 'email_de',
+                  'email_en']
+        self.assertEqual(ma.get_form(request).base_fields.keys(),
+            fields)
         self.assertEqual(ma.get_form(request,
             self.test_obj).base_fields.keys(), fields)
 
-        # Using `exclude_languages` and `fieldsets`.
+        # Same for `fields`.
+        class TestModelForm(forms.ModelForm):
+            class Meta:
+                model = TestModel
+                fields = ['text', 'title']
+
         class TestModelAdmin(TranslationAdmin):
-            fieldsets = [(None, {'fields': ['title']})]
-            exclude_languages = ('en',)
+            form = TestModelForm
+            fields = ['email']
 
         ma = TestModelAdmin(TestModel, self.site)
-        fields = ['title_de']
-        self.assertEqual(ma.get_form(request).base_fields.keys(), fields)
-        self.assertEqual(ma.get_form(request,
-            self.test_obj).base_fields.keys(), fields)
-
-        # Using `exclude_languages` and `exclude` and `fields`.
-        class TestModelAdmin(TranslationAdmin):
-            fields = ('title', 'text',)
-            exclude = ('text',)
-            exclude_languages = ('en',)
-
-        ma = TestModelAdmin(TestModel, self.site)
-        fields = ['title_de']
-        self.assertEqual(ma.get_form(request).base_fields.keys(), fields)
-        self.assertEqual(ma.get_form(request,
-            self.test_obj).base_fields.keys(), fields)
-
-        # Using `exclude_languages` and `fields` and `fieldsets`.
-        # The `fieldsets` option is supposed to win over `fields`,
-        # `exclude` is still honoured.
-        class TestModelAdmin(TranslationAdmin):
-            fieldsets = [(None, {'fields': ['url', 'text']})]
-            exclude = ('text',)
-            exclude_languages = ('en',)
-
-        ma = TestModelAdmin(TestModel, self.site)
-        fields = ['url_de']
-        self.assertEqual(ma.get_form(request).base_fields.keys(), fields)
-        self.assertEqual(ma.get_form(request,
-            self.test_obj).base_fields.keys(), fields)
-
-        # Using `exclude_languages` and `exclude` and `fieldsets`.
-        # The `exclude` option is honoured.
-        class TestModelAdmin(TranslationAdmin):
-            fieldsets = [(None, {'fields': ['url']})]
-            exclude = ('url',)
-            exclude_languages = ('en',)
-
-        ma = TestModelAdmin(TestModel, self.site)
-        fields = []
-        self.assertEqual(ma.get_form(request).base_fields.keys(), fields)
-        self.assertEqual(ma.get_form(request,
-            self.test_obj).base_fields.keys(), fields)
-
-        # Using `exclude_languages` and `exclude` and `fields` and `fieldsets`.
-        # `fieldsets` is supposed to win in this case.
-        class TestModelAdmin(TranslationAdmin):
-            fieldsets = [(None, {'fields': ['title', 'url']})]
-            fields = ('title', 'text',)
-            exclude = ('url',)
-            exclude_languages = ('en',)
-
-        ma = TestModelAdmin(TestModel, self.site)
-        fields = ['title_de']
-        self.assertEqual(ma.get_form(request).base_fields.keys(), fields)
-        self.assertEqual(ma.get_form(request,
-            self.test_obj).base_fields.keys(), fields)
-
-        # Using `exclude_languages` and `exclude` with a translation field.
-        class TestModelAdmin(TranslationAdmin):
-            exclude = ('email_de',)
-            exclude_languages = ('en',)
-
-        ma = TestModelAdmin(TestModel, self.site)
-        fields = ['title_de', 'text_de', 'url_de']
-        self.assertEqual(ma.get_form(request).base_fields.keys(), fields)
-        self.assertEqual(ma.get_form(request,
-            self.test_obj).base_fields.keys(), fields)
-
-        # Using `exclude_languages` and `fieldsets` with a translation field.
-        # `exclude_languages` is supposed to win in this case.
-        class TestModelAdmin(TranslationAdmin):
-            fieldsets = [(None, {'fields': ['title_en', 'url']})]
-            exclude_languages = ('en',)
-
-        ma = TestModelAdmin(TestModel, self.site)
-        fields = ['url_de']
-        self.assertEqual(ma.get_form(request).base_fields.keys(), fields)
+        fields = ['email_de', 'email_en']
+        self.assertEqual(ma.get_form(request).base_fields.keys(),
+            fields)
         self.assertEqual(ma.get_form(request,
             self.test_obj).base_fields.keys(), fields)

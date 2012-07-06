@@ -20,19 +20,16 @@ import modeltranslation.models
 
 class TranslationBaseModelAdmin(BaseModelAdmin):
     _orig_was_required = {}
-    exclude_languages = []
 
     def __init__(self, *args, **kwargs):
         super(TranslationBaseModelAdmin, self).__init__(*args, **kwargs)
         self.trans_opts = translator.get_options_for_model(self.model)
-        # TODO: Handle fields and exclude in form option.
-        if hasattr(self.form, '_meta') and (getattr(self.form._meta, 'fields')
-            or getattr(self.form._meta, 'exclude')):
-            raise ImproperlyConfigured(
-                'The options fields and exclude in a custom ModelForm are '
-                'currently not supported by modeltranslation.')
 
     def _declared_fieldsets(self):
+        # Take custom modelform fields option into account
+        if not self.fields and hasattr(
+            self.form, '_meta') and self.form._meta.fields:
+            self.fields = self.form._meta.fields
         if self.fieldsets:
             return self._patch_fieldsets(self.fieldsets)
         elif self.fields:
@@ -116,47 +113,32 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
             option = option_new
         return option
 
-    def _patch_fieldsets(self, fieldsets, exclude_languages=None):
+    def _patch_fieldsets(self, fieldsets):
         # TODO: Handle nested lists to display multiple fields on same line.
-        if exclude_languages is None:
-            exclude_languages = []
         if fieldsets:
             fieldsets_new = list(fieldsets)
             for (name, dct) in fieldsets:
                 if 'fields' in dct:
-                    fields = self.replace_orig_field(dct['fields'])
-                    excludes = self.get_translation_field_excludes(
-                        exclude_languages)
-                    dct['fields'] = [f for f in fields if f not in excludes]
-                    #dct['fields'] = self.replace_orig_field(dct['fields'])
+                    dct['fields'] = self.replace_orig_field(dct['fields'])
             fieldsets = fieldsets_new
         return fieldsets
 
     def get_translation_field_excludes(self, exclude_languages=None):
         """
-        Returns a tuple of translation field names to exclude.
-
-        Defaults to ``self.exclude_languages`` in case ``exclude_languages``
-        parameter isn't set.
+        Returns a tuple of translation field names to exclude base on
+        `exclude_languages` arg.
         """
         if exclude_languages is None:
             exclude_languages = []
+        excl_languages = []
         if exclude_languages:
             excl_languages = exclude_languages
-        else:
-            for lang in self.exclude_languages:
-                # TODO: Not a good place for validation.
-                if lang not in [l[0] for l in settings.LANGUAGES]:
-                    raise ImproperlyConfigured(
-                        'Language %s not in LANGUAGES setting.' % lang)
-            excl_languages = self.exclude_languages
         exclude = []
         for orig_fieldname, translation_fields in \
             self.trans_opts.localized_fieldnames.iteritems():
             for tfield in translation_fields:
                 language = tfield.split('_')[-1]
-                if (language in excl_languages
-                    and tfield not in exclude):
+                if (language in excl_languages and tfield not in exclude):
                     exclude.append(tfield)
         return tuple(exclude)
 
@@ -164,50 +146,40 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         """
         Code shared among get_form and get_formset.
         """
+        if not self.exclude and hasattr(
+            self.form, '_meta') and self.form._meta.exclude:
+            # Take the custom ModelForm's Meta.exclude into account only if the
+            # ModelAdmin doesn't define its own.
+            kwargs.update({'exclude': getattr(
+                kwargs, 'exclude', tuple()) +
+                tuple(self.replace_orig_field(self.form._meta.exclude))})
         exclude = kwargs.get('exclude', [])
-        exclude_languages = kwargs.get('exclude_languages', [])
-        # self.exclude_languages = exclude_languages
         self.exclude = self.replace_orig_field(self.exclude)
-        self.fieldsets = self._patch_fieldsets(
-            self.fieldsets, exclude_languages)
+        #self.fieldsets = self._patch_fieldsets(self.fieldsets)
         exclude_fields = (
-            self.get_translation_field_excludes(self.exclude_languages) +
             self._exclude_original_fields(exclude))
         if self.exclude:
             exclude_fields = tuple(self.exclude) + tuple(exclude_fields)
         if exclude_fields:
             kwargs.update({'exclude': getattr(
                 kwargs, 'exclude', tuple()) + exclude_fields})
-        if kwargs.get('exclude_languages'):
-            del kwargs['exclude_languages']
+
         return kwargs
 
-    def _do_get_fieldsets_pre_form_or_formset(self, exclude_languages=None):
+    def _do_get_fieldsets_pre_form_or_formset(self):
         """
         Common get_fieldsets code shared among TranslationAdmin and
         TranslationInlineModelAdmin.
         """
-        if exclude_languages is None:
-            exclude_languages = []
-        fields = self.replace_orig_field(self._declared_fieldsets())
-        excludes = self.get_translation_field_excludes(
-            exclude_languages)
-        filtered_fields = [f for f in fields if f not in excludes]
-        return filtered_fields
+        return self.replace_orig_field(self._declared_fieldsets())
 
-    def _do_get_fieldsets_post_form_or_formset(self, request, form, obj=None,
-                                               exclude_languages=None):
+    def _do_get_fieldsets_post_form_or_formset(self, request, form, obj=None):
         """
         Common get_fieldsets code shared among TranslationAdmin and
         TranslationInlineModelAdmin.
         """
-        if exclude_languages is None:
-            exclude_languages = []
         base_fields = self.replace_orig_field(form.base_fields.keys())
-        excludes = self.get_translation_field_excludes(
-            exclude_languages)
-        filtered_fields = [f for f in base_fields if f not in excludes]
-        fields = filtered_fields + list(
+        fields = base_fields + list(
             self.get_readonly_fields(request, obj))
         return [(None, {'fields': self.replace_orig_field(fields)})]
 
@@ -246,29 +218,12 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
         kwargs = self._do_get_form_or_formset(**kwargs)
         return super(TranslationAdmin, self).get_form(request, obj, **kwargs)
 
-    def get_fieldsets(self, request, obj=None, exclude_languages=None):
-        if exclude_languages is None:
-            exclude_languages = []
-#        if self.declared_fieldsets:
-#            fields = self.replace_orig_field(self._declared_fieldsets())
-#            excludes = self.get_translation_field_excludes(
-#                exclude_languages)
-#            filtered_fields = [f for f in fields if f not in excludes]
-#            return filtered_fields
-#        form = self.get_form(request, obj)
-#        base_fields = self.replace_orig_field(form.base_fields.keys())
-#        excludes = self.get_translation_field_excludes(
-#            exclude_languages)
-#        filtered_fields = [f for f in base_fields if f not in excludes]
-#        fields = filtered_fields + list(
-#            self.get_readonly_fields(request, obj))
-#        return [(None, {'fields': self.replace_orig_field(fields)})]
+    def get_fieldsets(self, request, obj=None):
         if self.declared_fieldsets:
-            return self._do_get_fieldsets_pre_form_or_formset(
-                exclude_languages)
+            return self._do_get_fieldsets_pre_form_or_formset()
         form = self.get_form(request, obj)
         return self._do_get_fieldsets_post_form_or_formset(
-            request, form, obj, exclude_languages)
+            request, form, obj)
 
     def save_model(self, request, obj, form, change):
         # Rule is: 3. Assigning a value to a translation field of the default
@@ -292,15 +247,12 @@ class TranslationInlineModelAdmin(TranslationBaseModelAdmin, InlineModelAdmin):
         return super(TranslationInlineModelAdmin, self).get_formset(
             request, obj, **kwargs)
 
-    def get_fieldsets(self, request, obj=None, exclude_languages=None):
-        if exclude_languages is None:
-            exclude_languages = []
+    def get_fieldsets(self, request, obj=None):
         if self.declared_fieldsets:
-            return self._do_get_fieldsets_pre_form_or_formset(
-                exclude_languages)
+            return self._do_get_fieldsets_pre_form_or_formset()
         form = self.get_formset(request, obj).form
         return self._do_get_fieldsets_post_form_or_formset(
-            request, form, obj, exclude_languages)
+            request, form, obj)
 
 
 class TranslationTabularInline(TranslationInlineModelAdmin,
