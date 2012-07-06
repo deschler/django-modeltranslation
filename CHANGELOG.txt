@@ -1,8 +1,6 @@
 v0.4.0-alpha1
 =============
 
-  ADDED: New admin option exclude_languages to exclude certain translation
-         fields per admin class.
 CHANGED: Moved tests to separate folder and added tests for TranslationAdmin.
          To run the tests the settings provided in model.tests.modeltranslation
          have to be used (settings.LANGUAGES override doesn't work for
