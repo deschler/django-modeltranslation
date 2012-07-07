@@ -10,6 +10,7 @@ CHANGED: Major refactoring of the admin integration. Subclassed BaseModelAdmin
          thread safe. Instead used provided hooks like get_form, get_formset
          and get_fieldsets. This should resolve several problems with the
          exclude and fieldsets options and properly support options in inlines.
+         (resolves issue 72)
   FIXED: Widgets for translated fields are not properly copied from original
          fields.
          (thanks to boris-chervenkov, resolves issue 74)

@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
 from copy import deepcopy
 
-from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
 from django.contrib import admin
 from django.contrib.admin.options import BaseModelAdmin, InlineModelAdmin
 from django.contrib.contenttypes import generic
-from django import forms
 
 from modeltranslation.settings import DEFAULT_LANGUAGE
 from modeltranslation.translator import translator
@@ -24,6 +21,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
     def __init__(self, *args, **kwargs):
         super(TranslationBaseModelAdmin, self).__init__(*args, **kwargs)
         self.trans_opts = translator.get_options_for_model(self.model)
+        self._patch_prepopulated_fields()
 
     def _declared_fieldsets(self):
         # Take custom modelform fields option into account
@@ -123,24 +121,14 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
             fieldsets = fieldsets_new
         return fieldsets
 
-    def get_translation_field_excludes(self, exclude_languages=None):
-        """
-        Returns a tuple of translation field names to exclude base on
-        `exclude_languages` arg.
-        """
-        if exclude_languages is None:
-            exclude_languages = []
-        excl_languages = []
-        if exclude_languages:
-            excl_languages = exclude_languages
-        exclude = []
-        for orig_fieldname, translation_fields in \
-            self.trans_opts.localized_fieldnames.iteritems():
-            for tfield in translation_fields:
-                language = tfield.split('_')[-1]
-                if (language in excl_languages and tfield not in exclude):
-                    exclude.append(tfield)
-        return tuple(exclude)
+    def _patch_prepopulated_fields(self):
+        if self.prepopulated_fields:
+            prepopulated_fields_new = dict(self.prepopulated_fields)
+            for (k, v) in self.prepopulated_fields.items():
+                if v[0] in self.trans_opts.fields:
+                    translation_fields = get_translation_fields(v[0])
+                    prepopulated_fields_new[k] = tuple([translation_fields[0]])
+            self.prepopulated_fields = prepopulated_fields_new
 
     def _do_get_form_or_formset(self, **kwargs):
         """
@@ -171,7 +159,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         Common get_fieldsets code shared among TranslationAdmin and
         TranslationInlineModelAdmin.
         """
-        return self.replace_orig_field(self._declared_fieldsets())
+        return self._declared_fieldsets()
 
     def _do_get_fieldsets_post_form_or_formset(self, request, form, obj=None):
         """
@@ -183,12 +171,30 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
             self.get_readonly_fields(request, obj))
         return [(None, {'fields': self.replace_orig_field(fields)})]
 
+    def get_translation_field_excludes(self, exclude_languages=None):
+        """
+        Returns a tuple of translation field names to exclude base on
+        `exclude_languages` arg.
+        """
+        if exclude_languages is None:
+            exclude_languages = []
+        excl_languages = []
+        if exclude_languages:
+            excl_languages = exclude_languages
+        exclude = []
+        for orig_fieldname, translation_fields in\
+        self.trans_opts.localized_fieldnames.iteritems():
+            for tfield in translation_fields:
+                language = tfield.split('_')[-1]
+                if (language in excl_languages and tfield not in exclude):
+                    exclude.append(tfield)
+        return tuple(exclude)
+
 
 class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
     def __init__(self, *args, **kwargs):
         super(TranslationAdmin, self).__init__(*args, **kwargs)
         self._patch_list_editable()
-        self._patch_prepopulated_fields()
 
     def _patch_list_editable(self):
         if self.list_editable:
@@ -204,15 +210,6 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
                         translation_fields
             self.list_editable = editable_new
             self.list_display = display_new
-
-    def _patch_prepopulated_fields(self):
-        if self.prepopulated_fields:
-            prepopulated_fields_new = dict(self.prepopulated_fields)
-            for (k, v) in self.prepopulated_fields.items():
-                if v[0] in self.trans_opts.fields:
-                    translation_fields = get_translation_fields(v[0])
-                    prepopulated_fields_new[k] = tuple([translation_fields[0]])
-            self.prepopulated_fields = prepopulated_fields_new
 
     def get_form(self, request, obj=None, **kwargs):
         kwargs = self._do_get_form_or_formset(**kwargs)
