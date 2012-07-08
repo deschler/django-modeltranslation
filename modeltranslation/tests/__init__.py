@@ -5,6 +5,7 @@ Tests have to be run with modeltranslation.tests.settings:
 """
 from django import forms
 from django.conf import settings
+from django.contrib import admin
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -17,7 +18,8 @@ from django.utils.translation import ugettext_lazy
 
 from modeltranslation import translator
 try:
-    from modeltranslation.admin import TranslationAdmin
+    from modeltranslation.admin import (TranslationAdmin,
+                                        TranslationStackedInline)
 except ImportError:
     # Raised with --settings=modeltranslation.tests.settings, because we don't
     # have a real translation.py. For the tests we assume this is fine.
@@ -969,3 +971,33 @@ class TranslationAdminTest(ModeltranslationTestBase):
             fields)
         self.assertEqual(ma.get_form(request,
             self.test_obj).base_fields.keys(), fields)
+
+    def test_inline_fieldsets(self):
+        class DataModel(models.Model):
+            data = models.TextField(blank=True, null=True)
+
+        class DataInline(TranslationStackedInline):
+            model = DataModel
+            fieldsets = [
+                ('Test', {'fields': ('data',)})
+            ]
+
+        class TestModelAdmin(TranslationAdmin):
+            exclude = ('title', 'text',)
+            inlines = [DataInline]
+
+        class DataTranslationOptions(translator.TranslationOptions):
+            fields = ('data',)
+
+        translator.translator.register(DataModel,
+                                       DataTranslationOptions)
+        ma = TestModelAdmin(TestModel, self.site)
+
+        fieldsets = [('Test', {'fields': ['data_de', 'data_en']})]
+        self.assertEqual(
+            ma.get_inline_instances(request)[0].get_fieldsets(request),
+            fieldsets)
+        self.assertEqual(
+            ma.get_inline_instances(request)[0].get_fieldsets(
+                request, self.test_obj),
+            fieldsets)
