@@ -43,9 +43,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         return field
 
     def patch_translation_field(self, db_field, field, **kwargs):
-        trans_opts = translator.get_options_for_model(self.model)
-
-        if db_field.name in trans_opts.fields:
+        if db_field.name in self.trans_opts.fields:
             if field.required:
                 field.required = False
                 field.blank = True
@@ -54,8 +52,9 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
 
         # For every localized field copy the widget from the original field
         # and add a css class to identify a modeltranslation widget.
-        if db_field.name in trans_opts.localized_fieldnames_rev:
-            orig_fieldname = trans_opts.localized_fieldnames_rev[db_field.name]
+        if db_field.name in self.trans_opts.localized_fieldnames_rev:
+            orig_fieldname = self.trans_opts.localized_fieldnames_rev[
+                db_field.name]
             orig_formfield = self.formfield_for_dbfield(
                 self.model._meta.get_field(orig_fieldname), **kwargs)
             field.widget = deepcopy(orig_formfield.widget)
@@ -143,7 +142,6 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
                 tuple(self.replace_orig_field(self.form._meta.exclude))})
         exclude = kwargs.get('exclude', [])
         self.exclude = self.replace_orig_field(self.exclude)
-        #self.fieldsets = self._patch_fieldsets(self.fieldsets)
         exclude_fields = (
             self._exclude_original_fields(exclude))
         if self.exclude:
@@ -182,11 +180,11 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         if exclude_languages:
             excl_languages = exclude_languages
         exclude = []
-        for orig_fieldname, translation_fields in\
-        self.trans_opts.localized_fieldnames.iteritems():
+        for orig_fieldname, translation_fields in \
+            self.trans_opts.localized_fieldnames.iteritems():
             for tfield in translation_fields:
                 language = tfield.split('_')[-1]
-                if (language in excl_languages and tfield not in exclude):
+                if language in excl_languages and tfield not in exclude:
                     exclude.append(tfield)
         return tuple(exclude)
 
@@ -227,14 +225,13 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
         # language also updates the original field.
         # Ensure that an empty default language field value clears the default
         # field. See issue 47 for details.
-        trans_opts = translator.get_options_for_model(self.model)
-        for k, v in trans_opts.localized_fieldnames.items():
+        for k, v in self.trans_opts.localized_fieldnames.items():
             if getattr(obj, k):
                 default_lang_fieldname = build_localized_fieldname(
                     k, DEFAULT_LANGUAGE)
                 if not getattr(obj, default_lang_fieldname):
                     # TODO: Handle null values
-                    setattr(obj, k, "")
+                    setattr(obj, k, '')
         super(TranslationAdmin, self).save_model(request, obj, form, change)
 
 
@@ -245,6 +242,9 @@ class TranslationInlineModelAdmin(TranslationBaseModelAdmin, InlineModelAdmin):
             request, obj, **kwargs)
 
     def get_fieldsets(self, request, obj=None):
+        # FIXME: If fieldsets are declared on an inline some kind of ghost
+        # fieldset line with just the original model verbose_name of the model
+        # is displayed above the new fieldsets.
         if self.declared_fieldsets:
             return self._do_get_fieldsets_pre_form_or_formset()
         form = self.get_formset(request, obj).form
