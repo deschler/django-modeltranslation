@@ -238,7 +238,7 @@ def autodiscover():
     not present. This forces an import on them to register.
     Also import explicit modules.
     """
-    from django.conf import settings
+    import sys
     from django.utils.importlib import import_module
     from django.utils.module_loading import module_has_submodule
     from modeltranslation.settings import TRANSLATION_FILES
@@ -260,6 +260,18 @@ def autodiscover():
 
     for module in project_translations:
         import_module(module)
+
+    # In debug mode, print a list of registered models to stdout
+    if settings.DEBUG:
+        try:
+            if sys.argv[1] in ('runserver', 'runserver_plus'):
+                translated_model_names = ', '.join(
+                    t.__name__ for t in translator._registry.keys())
+                print('modeltranslation: Registered %d models for '
+                        'translation (%s).' % (len(translator._registry),
+                                                translated_model_names))
+        except IndexError:
+            pass
 
 
 # This global object represents the singleton translator object
