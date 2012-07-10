@@ -9,6 +9,11 @@ CHANGED: Use app-level translation files in favour of a single project-level
          registration is triggered. See documentation for details.
          (thanks to Jacek Tomaszewski, the author of modeltranslation-wrapper,
           resolves issues 58 and 71)
+         NOTE: If you are upgrading from an older version of modeltranslation
+         and upgrade directly from svn, make sure to delete a possible
+         models.pyc leftover in the modeltranslation directory. Otherwise you
+         might get a weird TypeError from Django trying to use the old file:
+         __import__() argument 1 must be string, not None.
 CHANGED: Moved tests to separate folder and added tests for TranslationAdmin.
          To run the tests the settings provided in model.tests.modeltranslation
          have to be used (settings.LANGUAGES override doesn't work for
