@@ -41,15 +41,17 @@ in detail in the following sections:
 1. Add the ``modeltranslation`` app to the ``INSTALLED_APPS`` variable of your
    project's ``settings.py``.
 
-2. Configure your languages in the ``settings.py``.
+2. Configure your ``LANGUAGES`` in ``settings.py``.
 
-3. Create a ``translation.py`` in your project directory and register
+3. Create a ``translation.py`` in your app directory and register
    ``TranslationOptions`` for every model you want to translate.
 
-4. Configure the ``MODELTRANSLATION_TRANSLATION_REGISTRY`` variable in your
+4. Configure the ``MODELTRANSLATION_TRANSLATION_FILES`` variable in your
    ``settings.py``.
 
-5. Sync the database using ``manage.py syncdb`` (note that this only applies
+5. Add ``translator.autoregister()`` to your project's ``urls.py``.
+
+6. Sync the database using ``manage.py syncdb`` (note that this only applies
    if the models registered in the ``translations.py`` did not have been
    synced to the database before. If they did - read further down what to do
    in that case.
@@ -107,17 +109,26 @@ To override the default language as described in settings.LANGUAGES, define
 ``MODELTRANSLATION_DEFAULT_LANGUAGE``. Note that the value has to be in
 settings.LANGUAGES, otherwise an exception will be raised.
 
-**settings.MODELTRANSLATION_TRANSLATION_REGISTRY**
+**settings.MODELTRANSLATION_TRANSLATION_FILES**
 
-In order to be able to import the project's ``translation.py`` registration
-file the ``MODELTRANSLATION_TRANSLATION_REGISTRY`` must be set to a value in
-the form ``<PROJECT_MODULE>.translation``. E.g. if your project is located in a
-folder named ``myproject`` the ``MODELTRANSLATION_TRANSLATION_REGISTRY`` must
-be set like this:
+*New in 0.4*
+
+In order to be able to import the ``translation.py`` registration files of your
+apps, ``MODELTRANSLATION_TRANSLATION_FILES`` must be set to a value in the
+form:
 
 ::
 
-    MODELTRANSLATION_TRANSLATION_REGISTRY = "myproject.translation"
+    ('<APP1_MODULE>.translation',
+     '<APP2_MODULE>.translation',)
+
+.. note:: Modeltranslation up to version 0.3 used a single project wide
+          registration file which was defined through
+          ``MODELTRANSLATION_TRANSLATION_REGISTRY = '<PROJECT_MODULE>.translation'``.
+          For backwards compatibiliy the module defined through this setting is
+          automatically added to ``MODELTRANSLATION_TRANSLATION_FILES``. A
+          DeprecationWarning is issued in this case.
+
 
 **settings.MODELTRANSLATION_CUSTOM_FIELDS**
 
@@ -152,13 +163,13 @@ option class containg the fields to translate is registered with the
 Registering models and their fields for translation requires the following
 steps:
 
-1. Create a ``translation.py`` in your project directory.
+1. Create a ``translation.py`` in your app directory.
 2. Create a translation option class for every model to translate.
 3. Register the model and the translation option class at the
    ``modeltranslation.translator.translator``
 
 The ``modeltranslation`` application reads the ``translation.py`` file in your
-project directory thereby triggering the registration of the translation
+app directory thereby triggering the registration of the translation
 options found in the file.
 
 A translation option is a class that declares which fields of a model to
@@ -166,10 +177,6 @@ translate. The class must derive from ``modeltranslation.ModelTranslation``
 and it must provide a ``fields`` attribute storing the list of fieldnames. The
 option class must be registered with the
 ``modeltranslation.translator.translator`` instance.
-
-.. note:: In contrast to the Django admin application which looks for
-          ``admin.py`` files in the project **and** application directories,
-          the modeltranslation app looks only for one ``translation.py`` file in the project directory.
 
 To illustrate this let's have a look at a simple example using a ``News``
 model. The news in this example only contains a ``title`` and a ``text`` field.
@@ -203,6 +210,27 @@ and it's translation options are registered at the ``translator`` object.
 At this point you are mostly done and the model classes registered for
 translation will have been added some auto-magical fields. The next section
 explains how things are working under the hood.
+
+
+Autoregister translation files
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Similiar to Django's admin, modeltranslation provides a mechanism to
+automatically register your translation files. It has to be hooked into your
+project's urls.py.
+
+::
+
+    from modeltranslation import translator
+    translator.autodiscover()
+
+    # ...
+    # Must be in in front of:
+
+    from django.contrib import admin
+    admin.autodiscover()
+
+.. note:: This step is basically optional if you prefer to register your models
+          programmatically.
 
 
 Changes automatically applied to the model class
@@ -359,21 +387,54 @@ patching on all your models registered for translation:
 
 Tweaks applied to the admin
 ---------------------------
-The ``TranslationAdmin`` class does only implement one special method which is
-``def formfield_for_dbfield(self, db_field, **kwargs)``. This method does the
-following:
 
-1. Removes the original field from every admin form by setting it
-   ``editable=False``.
-2. Copies the widget of the original field to each of it's translation fields.
-3. Checks if the - now removed - original field was required and if so makes
+formfield_for_dbfield
+~~~~~~~~~~~~~~~~~~~~~
+The ``TranslationBaseModelAdmin`` class, which ``TranslationAdmin`` and all
+inline related classes in modeltranslation derive from, implements a special
+method which is ``def formfield_for_dbfield(self, db_field, **kwargs)``. This
+method does the following:
+
+1. Copies the widget of the original field to each of it's translation fields.
+2. Checks if the original field was required and if so makes
    the default translation field required instead.
+
+
+get_form and get_fieldsets
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+The ``TranslationBaseModelAdmin`` class overrides ``get_form``,
+``get_fieldsets`` and ``_declared_fieldsets`` to make the options ``fields``,
+``exclude`` and ``fieldsets`` work in a transparent way. It basically does:
+
+1. Removes the original field from every admin form by adding it to
+   ``exclude`` under the hood.
+2. Replaces the - now removed - orginal fields with their corresponding
+   translation fields.
+
+Taken the ``fieldsets`` option as an example, where the ``title`` field is
+registered for translation but not the ``news`` field:
+
+::
+
+    class NewsAdmin(TranslationAdmin):
+        fieldsets = [
+            (u'News', {'fields': ('title', 'news',)})
+        ]
+
+In this case ``get_fieldsets`` will return a patched fieldset which contains
+the translation fields of ``title``, but not the original field:
+
+::
+
+    >>> a = NewsAdmin(NewsModel, site)
+    >>> a.get_fieldsets(request)
+    [(u'News', {'fields': ('title_de', 'title_en', 'news',)})]
 
 
 .. _translationadmin_in_combination_with_other_admin_classes:
 
-!TranslationAdmin in combination with other admin classes
----------------------------------------------------------
+TranslationAdmin in combination with other admin classes
+--------------------------------------------------------
 If there already exists a custom admin class for a translated model and you
 don't want or can't edit that class directly there is another solution.
 
@@ -387,7 +448,8 @@ inheritance like this:
     class MyTranslatedNewsAdmin(NewsAdmin, TranslationAdmin):
         pass
 
-In a more complex setup the NewsAdmin might define its own class:
+In a more complex setup the NewsAdmin itself might override
+formfield_for_dbfield:
 
 ::
 

@@ -2,6 +2,8 @@
 """
 Tests have to be run with modeltranslation.tests.settings:
 ./manage.py test --settings=modeltranslation.tests.settings modeltranslation
+
+TODO: Merge autoregister tests from django-modeltranslation-wrapper.
 """
 from django import forms
 from django.conf import settings
