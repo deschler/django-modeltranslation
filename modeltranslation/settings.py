@@ -34,3 +34,7 @@ try:
             settings, 'MODELTRANSLATION_CUSTOM_FIELDS', ('BooleanField',))
 except IndexError:
     pass
+
+# Don't change this setting unless you really know what you are doing
+ENABLE_REGISTRATIONS = getattr(
+    settings, 'MODELTRANSLATION_ENABLE_REGISTRATIONS', settings.USE_I18N)

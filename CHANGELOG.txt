@@ -4,16 +4,11 @@ v0.4.0-alpha1
 CHANGED: Use app-level translation files in favour of a single project-level
          one. Adds an autoregister feature similiar to the one provided by
          Django's admin. A new setting MODELTRANSLATION_TRANSLATION_FILES keeps
-         backwards compatibility with older versions. This is basically a merge
-         from django-modeltranslation-wrapper with a few changes regarding how
-         registration is triggered. See documentation for details.
-         (thanks to Jacek Tomaszewski, the author of modeltranslation-wrapper,
-          resolves issues 58 and 71)
-         NOTE: If you are upgrading from an older version of modeltranslation
-         and upgrade directly from svn, make sure to delete a possible
-         models.pyc leftover in the modeltranslation directory. Otherwise you
-         might get a weird TypeError from Django trying to use the old file:
-         __import__() argument 1 must be string, not None.
+         backwards compatibility with older versions. See documentation for
+         details. This is basically a merge from both
+         django-modeltranslation-wrapper and hyperweek's branch at github.
+         (thanks to Jacek Tomaszewski, hyperweek and haineault)
+          resolves issues 19, 58 and 71)
 CHANGED: Moved tests to separate folder and added tests for TranslationAdmin.
          To run the tests the settings provided in model.tests.modeltranslation
          have to be used (settings.LANGUAGES override doesn't work for
