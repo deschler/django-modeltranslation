@@ -1,14 +1,18 @@
 v0.4.0-alpha1
 =============
 
-  FIXED: Dynamic TranslationOptions model name.
+  ADDED: New management command sync_database_fields to sync the database after
+         a new model has been registered or a new language has been added.
+         (thanks to Sébastien Fievet and the authors of django-transmeta,
+          resolves issue 62)
+
 CHANGED: Use app-level translation files in favour of a single project-level
          one. Adds an autoregister feature similiar to the one provided by
          Django's admin. A new setting MODELTRANSLATION_TRANSLATION_FILES keeps
          backwards compatibility with older versions. See documentation for
          details. This is basically a merge from both
          django-modeltranslation-wrapper and hyperweek's branch at github.
-         (thanks to Jacek Tomaszewski, hyperweek and haineault)
+         (thanks to Jacek Tomaszewski, Sébastien Fievet and Maxime Haineault,
           resolves issues 19, 58 and 71)
 CHANGED: Moved tests to separate folder and added tests for TranslationAdmin.
          To run the tests the settings provided in model.tests.modeltranslation
@@ -20,6 +24,8 @@ CHANGED: Major refactoring of the admin integration. Subclassed BaseModelAdmin
          and get_fieldsets. This should resolve several problems with the
          exclude and fieldsets options and properly support options in inlines.
          (resolves issue 72)
+
+  FIXED: Dynamic TranslationOptions model name.
   FIXED: Widgets for translated fields are not properly copied from original
          fields.
          (thanks to boris-chervenkov, resolves issue 74)
@@ -35,6 +41,7 @@ Date: 2012-02-23
 CHANGED: jQuery search path in tabbed_translation_fields.js. This allows use of
          a version of jQuery other than the one provided by Django. Users who
          want to force the use of Django's jQuery can include force_jquery.js.
+
   FIXED: Another attempt to include static files during installation.
          (resolves reopened issue 61)
 
