@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# FIXME: autodiscover runs twice
+
 
 def autodiscover():
     """
@@ -7,13 +7,14 @@ def autodiscover():
     not present. This forces an import on them to register.
     Also import explicit modules.
     """
+    import os
     import sys
     import copy
     from django.conf import settings
     from django.utils.importlib import import_module
     from django.utils.module_loading import module_has_submodule
     from modeltranslation.translator import translator
-    from modeltranslation.settings import TRANSLATION_FILES
+    from modeltranslation.settings import TRANSLATION_FILES, DEBUG
 
     for app in settings.INSTALLED_APPS:
         mod = import_module(app)
@@ -37,15 +38,18 @@ def autodiscover():
     for module in TRANSLATION_FILES:
         import_module(module)
 
-    # In debug mode, print a list of registered models to stdout
-    if settings.DEBUG:
+    # In debug mode, print a list of registered models and pid to stdout.
+    # Note: Differing model order is fine, _registry is just a dict and we
+    # don't rely on a particular order.
+    if DEBUG:
         try:
             if sys.argv[1] in ('runserver', 'runserver_plus'):
                 translated_model_names = ', '.join(
                     t.__name__ for t in translator._registry.keys())
                 print('modeltranslation: Registered %d models for '
-                        'translation (%s).' % (len(translator._registry),
-                                                translated_model_names))
+                      'translation (%s) [pid:%d].' % (
+                        len(translator._registry), translated_model_names,
+                        os.getpid()))
         except IndexError:
             pass
 
@@ -59,6 +63,7 @@ def handle_translation_registrations(*args, **kwargs):
     but know nothing of modeltranslation.
     """
     import inspect
+    import os
     from django.conf import settings
     from modeltranslation.settings import ENABLE_REGISTRATIONS
 
