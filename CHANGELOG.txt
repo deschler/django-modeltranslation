@@ -25,6 +25,8 @@ CHANGED: Major refactoring of the admin integration. Subclassed BaseModelAdmin
          exclude and fieldsets options and properly support options in inlines.
          (resolves issue 72)
 
+  FIXED: Non-unicode verbose field names showing up empty in forms.
+         (resolves issue 35)
   FIXED: Dynamic TranslationOptions model name.
   FIXED: Widgets for translated fields are not properly copied from original
          fields.
