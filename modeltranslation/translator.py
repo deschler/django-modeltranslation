@@ -113,14 +113,6 @@ class Translator(object):
         If a model is already registered for translation, this will raise
         AlreadyRegistered.
         """
-        # Don't import the humongous validation code unless required
-        #if translation_opts and settings.DEBUG:
-            #from django.contrib.admin.validation import validate
-        #else:
-            #validate = lambda model, adminclass: None
-
-        #if not translation_opts:
-            #translation_opts = TranslationOptions
         if isinstance(model_or_iterable, ModelBase):
             model_or_iterable = [model_or_iterable]
 
@@ -137,10 +129,8 @@ class Translator(object):
                 # which causes issues later on.
                 options['__module__'] = __name__
                 translation_opts = type(
-                    "%sAdmin" % model.__name__, (translation_opts,), options)
-
-            # Validate (which might be a no-op)
-            #validate(translation_opts, model)
+                    "%sTranslationOptions" % model.__name__,
+                    (translation_opts,), options)
 
             # Store the translation class associated to the model
             self._registry[model] = translation_opts
