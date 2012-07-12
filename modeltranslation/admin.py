@@ -4,6 +4,7 @@ from copy import deepcopy
 from django.contrib import admin
 from django.contrib.admin.options import BaseModelAdmin, InlineModelAdmin
 from django.contrib.contenttypes import generic
+from django.utils import translation
 
 from modeltranslation.settings import DEFAULT_LANGUAGE
 from modeltranslation.translator import translator
@@ -219,7 +220,7 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         # Rule is: 3. Assigning a value to a translation field of the default
         # language also updates the original field.
-        # Ensure that an empty default language field value clears the default
+        # Ensure that an empty default language field value clears the original
         # field. See issue 47 for details.
         for k, v in self.trans_opts.localized_fieldnames.items():
             if getattr(obj, k):
@@ -228,7 +229,13 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
                 if not getattr(obj, default_lang_fieldname):
                     # TODO: Handle null values
                     setattr(obj, k, '')
+        # HACK: Force default language for save
+        # See issue 33 for details.
+        current_lang = translation.get_language()
+        translation.activate(DEFAULT_LANGUAGE)
         super(TranslationAdmin, self).save_model(request, obj, form, change)
+        # Restore the former current language, just in case.
+        translation.activate(current_lang)
 
 
 class TranslationInlineModelAdmin(TranslationBaseModelAdmin, InlineModelAdmin):
