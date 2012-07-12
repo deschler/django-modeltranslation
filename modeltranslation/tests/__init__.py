@@ -7,11 +7,9 @@ TODO: Merge autoregister tests from django-modeltranslation-wrapper.
 """
 from django import forms
 from django.conf import settings
-from django.contrib import admin
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from django.core.urlresolvers import reverse
 from django.db import models
 from django.test import TestCase
 from django.utils.translation import get_language
@@ -19,14 +17,13 @@ from django.utils.translation import trans_real
 from django.utils.translation import ugettext_lazy
 
 from modeltranslation import translator
-try:
-    from modeltranslation.admin import (TranslationAdmin,
-                                        TranslationStackedInline)
-except ImportError:
-    # Raised with --settings=modeltranslation.tests.settings, because we don't
-    # have a real translation.py. For the tests we assume this is fine.
-    pass
-from modeltranslation.settings import *
+from modeltranslation.admin import (TranslationAdmin,
+                                    TranslationStackedInline)
+from modeltranslation.tests.settings import DEFAULT_LANGUAGE
+
+# None of the following tests really depend on the content of the request,
+# so we'll just pass in None.
+request = None
 
 # Override LANGUAGES setting
 # FIXME: This works for ModeltranslationTest but not for TranslationAdminTest
@@ -444,13 +441,22 @@ class ModeltranslationTestRule3(ModeltranslationTestBase):
         title1_en = "title en"
         n = TestModel.objects.create(title_de=title1_de, title_en=title1_en)
         self.failUnlessEqual(get_language(), 'de')
+        self.failUnlessEqual(DEFAULT_LANGUAGE, 'de')
         self.failUnlessEqual(n.title, title1_de)
         self.failUnlessEqual(n.title_de, title1_de)
         self.failUnlessEqual(n.title_en, title1_en)
 
         n.title_de = "Neuer Titel"
         n.save()
+        # We expect that the original field holds the same value as the german
+        # one (german is the default language).
         self.failUnlessEqual(n.title, n.title_de)
+
+        # Fetch the updated object and verify all fields
+        updated_obj = TestModel.objects.get(id=n.id)
+        self.failUnlessEqual(updated_obj.title, 'Neuer Titel')
+        self.failUnlessEqual(updated_obj.title_de, 'Neuer Titel')
+        self.failUnlessEqual(updated_obj.title_en, 'title en')
 
         # Now switch to "en"
         trans_real.activate("en")
@@ -458,7 +464,21 @@ class ModeltranslationTestRule3(ModeltranslationTestBase):
         n.title_en = "New title"
         # the n.title field is not updated before the instance is saved
         n.save()
-        self.failUnlessEqual(n.title, n.title_en)
+        # We expect that the original field has *not* been changed as german
+        # is the default language and we only changed the value of the english
+        # field.
+        # FIXME: Demonstrates a wrong behaviour of save when the current
+        # language is different than the default language. In this case the
+        # original field is set to value of the current language's field.
+        # See issue 33 for details.
+        self.failUnlessEqual(n.title, n.title_de)
+
+        # Fetch the updated object and verify all fields
+        updated_obj = TestModel.objects.get(id=n.id)
+        self.failUnlessEqual(updated_obj.title, 'Neuer Titel')
+        self.failUnlessEqual(updated_obj.title_de, 'Neuer Titel')
+        self.failUnlessEqual(updated_obj.title_en, 'New title')
+
         trans_real.deactivate()
 
     def test_rule3_url_field(self):
@@ -812,12 +832,6 @@ class ModeltranslationInheritanceTest(ModeltranslationTestBase):
         self.failUnless('titled' in field_names_d)
 
 
-# None of the following tests really depend on the content of the request,
-# so we'll just pass in None.
-request = None
-
-#from django.test.utils import override_settings
-#@override_settings(LANGUAGES=(('de', 'Deutsch'), ('en', 'English')))
 class TranslationAdminTest(ModeltranslationTestBase):
     def setUp(self):
         trans_real.activate('de')
