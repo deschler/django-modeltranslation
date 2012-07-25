@@ -212,7 +212,7 @@ explains how things are working under the hood.
 
 Changes automatically applied to the model class
 ------------------------------------------------
-After registering the ``News`` model for transaltion an SQL dump of the
+After registering the ``News`` model for translation an SQL dump of the
 News app will look like this:
 
 ::
@@ -584,7 +584,7 @@ populated with initial data.
 
 Caveats
 =======
-Consider the following example (assuming the default lanuage is ``de``):
+Consider the following example (assuming the default language is ``de``):
 
 ::
 
