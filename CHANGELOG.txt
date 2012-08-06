@@ -6,6 +6,8 @@ v0.4.0-alpha1
          (thanks to Sébastien Fievet and the authors of django-transmeta,
           resolves issue 62)
 
+CHANGED: Excluded tabular inlines from jQuery tabs, as they are currently
+         not supported.
 CHANGED: Use app-level translation files in favour of a single project-level
          one. Adds an autoregister feature similiar to the one provided by
          Django's admin. A new setting MODELTRANSLATION_TRANSLATION_FILES keeps
