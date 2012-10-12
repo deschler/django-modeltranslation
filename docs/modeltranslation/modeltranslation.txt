@@ -134,8 +134,12 @@ form:
 
 ``Modeltranslation`` officially supports ``CharField`` and ``TextField``.
 
-In most cases subclasses of these fields will work fine, too. Other fields
-aren't supported and will throw an ``ImproperlyConfigured`` exception.
+*New in 0.4*
+
+Support for ``FileField`` and ``ImageField``.
+
+In most cases subclasses of the supported fields will work fine, too. Other
+fields aren't supported and will throw an ``ImproperlyConfigured`` exception.
 
 The list of supported fields can be extended. Just define a tuple of field
 names in your settings.py like this:
