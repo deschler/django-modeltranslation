@@ -1,6 +1,9 @@
 v0.4.0-alpha1
 =============
 
+  ADDED: Support for FileField and ImageField.
+         (thanks to Bruno Tavares,
+          resolves issue 30)
   ADDED: New management command sync_database_fields to sync the database after
          a new model has been registered or a new language has been added.
          (thanks to Sébastien Fievet and the authors of django-transmeta,

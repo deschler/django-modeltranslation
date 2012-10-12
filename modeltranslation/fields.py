@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
-import sys
-from warnings import warn
-
-from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.db.models.fields import Field, CharField, TextField
+from django.db.models.fields import CharField, TextField
+from django.db.models.fields.files import FileField, ImageField
 
-from modeltranslation.settings import *
+from modeltranslation.settings import CUSTOM_FIELDS, DEFAULT_LANGUAGE
 from modeltranslation.utils import (get_language,
                                     build_localized_fieldname,
                                     build_localized_verbose_name)
+
+
+SUPPORTED_FIELDS = (CharField, TextField, FileField, ImageField,)
 
 
 def create_translation_field(model, field_name, lang):
@@ -22,20 +22,26 @@ def create_translation_field(model, field_name, lang):
 
         MODELTRANSLATION_CUSTOM_FIELDS = ('MyField', 'MyOtherField',)
 
-    If the class is neither a subclass of CharField or TextField, nor
+    If the class is neither a subclass of fields in ``SUPPORTED_FIELDS``, nor
     in ``CUSTOM_FIELDS`` an ``ImproperlyConfigured`` exception will be raised.
     """
     field = model._meta.get_field(field_name)
     cls_name = field.__class__.__name__
-    # No subclass required for text-like fields
-    if not (isinstance(field, (CharField, TextField)) or
+    if not (isinstance(field, SUPPORTED_FIELDS) or
             cls_name in CUSTOM_FIELDS):
         raise ImproperlyConfigured('%s is not supported by '
                                    'modeltranslation.' % cls_name)
-    return TranslationField(translated_field=field, language=lang)
+    translation_class = field_factory(field.__class__)
+    return translation_class(translated_field=field, language=lang)
 
 
-class TranslationField(Field):
+def field_factory(baseclass):
+    class TranslationFieldSpecific(TranslationField, baseclass):
+        pass
+    return TranslationFieldSpecific
+
+
+class TranslationField(object):
     """
     The translation field functions as a proxy to the original field which is
     wrapped.
@@ -83,7 +89,8 @@ class TranslationField(Field):
             translated_field.verbose_name, language)
 
     def pre_save(self, model_instance, add):
-        val = super(TranslationField, self).pre_save(model_instance, add)
+        val = super(self.translated_field.__class__, self).pre_save(
+            model_instance, add)
         if DEFAULT_LANGUAGE == self.language and not add:
             # Rule is: 3. Assigning a value to a translation field of the
             # default language also updates the original field
