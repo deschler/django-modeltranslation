@@ -10,16 +10,17 @@ from django.conf import settings
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile
 from django.db import models
 from django.test import TestCase
 from django.utils.translation import get_language
 from django.utils.translation import trans_real
 from django.utils.translation import ugettext_lazy
 
+from modeltranslation import settings as mt_settings
 from modeltranslation import translator
 from modeltranslation.admin import (TranslationAdmin,
                                     TranslationStackedInline)
-from modeltranslation.tests.settings import DEFAULT_LANGUAGE
 
 # None of the following tests really depend on the content of the request,
 # so we'll just pass in None.
@@ -80,6 +81,19 @@ translator.translator.register(TestModelWithFallback2,
                                TestTranslationOptionsWithFallback2)
 
 
+class TestModelWithFileFields(models.Model):
+    title = models.CharField(ugettext_lazy('title'), max_length=255)
+    file  = models.FileField(upload_to='test', null=True, blank=True)
+    image = models.ImageField(upload_to='test', null=True, blank=True)
+
+
+class TestTranslationOptionsModelWithFileFields(translator.TranslationOptions):
+    fields = ('title', 'file', 'image')
+
+translator.translator.register(TestModelWithFileFields,
+                               TestTranslationOptionsModelWithFileFields)
+
+
 class ModeltranslationTestBase(TestCase):
     urls = 'modeltranslation.tests.urls'
 
@@ -104,7 +118,7 @@ class ModeltranslationTest(ModeltranslationTestBase):
         self.failUnless(translator.translator)
 
         # Check that eight models are registered for translation
-        self.failUnlessEqual(len(translator.translator._registry), 8)
+        self.failUnlessEqual(len(translator.translator._registry), 9)
 
         # Try to unregister a model that is not registered
         self.assertRaises(translator.NotRegistered,
@@ -219,6 +233,63 @@ class ModeltranslationTest(ModeltranslationTestBase):
             n.text,
             TestTranslationOptionsWithFallback2.fallback_values['text'])
 
+
+class ModeltranslationWithFileFields(ModeltranslationTestBase):
+    def test_translated_models(self):
+        # First create an instance of the test model to play with
+        inst = TestModelWithFileFields.objects.create(
+            title="Testtitle", file=None)
+        field_names = dir(inst)
+        self.failUnless('id' in field_names)
+        self.failUnless('title' in field_names)
+        self.failUnless('title_de' in field_names)
+        self.failUnless('title_en' in field_names)
+        self.failUnless('file' in field_names)
+        self.failUnless('file_de' in field_names)
+        self.failUnless('file_en' in field_names)
+        inst.delete()
+
+    def test_translated_models(self):
+        f_en = ContentFile("Just a really good file")
+        inst = TestModelWithFileFields(title="Testtitle", file=None)
+
+        trans_real.activate("en")
+        inst.title = 'title_en'
+
+        inst.file = 'a_en'
+        inst.file.save('b_en', ContentFile('file in english'))
+
+        inst.image = 'i_en.jpg'
+        inst.image.save('i_en.jpg', ContentFile('image in english'))
+
+        trans_real.activate("de")
+        inst.title = 'title_de'
+
+        inst.file  = 'a_de'
+        inst.file.save('b_de', ContentFile('file in german'))
+
+        inst.image = 'i_de.jpg'
+        inst.image.save('i_de.jpg', ContentFile('image in germany'))
+
+        inst.save()
+
+        trans_real.activate("en")
+
+        self.failUnlessEqual(inst.title, 'title_en')
+        self.failUnless(inst.file.name.count('b_en') > 0)
+        self.failUnless(inst.image.name.count('i_en') > 0)
+
+        trans_real.activate("de")
+        self.failUnlessEqual(inst.title, 'title_de')
+        self.failUnless(inst.file.name.count('b_de') > 0)
+        self.failUnless(inst.image.name.count('i_de') > 0)
+
+        inst.file_en.delete()
+        inst.image_en.delete()
+        inst.file_de.delete()
+        inst.image_de.delete()
+
+        inst.delete()
 
 class ModeltranslationTestRule1(ModeltranslationTestBase):
     """
@@ -441,7 +512,7 @@ class ModeltranslationTestRule3(ModeltranslationTestBase):
         title1_en = "title en"
         n = TestModel.objects.create(title_de=title1_de, title_en=title1_en)
         self.failUnlessEqual(get_language(), 'de')
-        self.failUnlessEqual(DEFAULT_LANGUAGE, 'de')
+        self.failUnlessEqual(mt_settings.DEFAULT_LANGUAGE, 'de')
         self.failUnlessEqual(n.title, title1_de)
         self.failUnlessEqual(n.title_de, title1_de)
         self.failUnlessEqual(n.title_en, title1_en)

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import sys
 from warnings import warn
 
 from django.conf import settings
@@ -26,14 +25,8 @@ if DEFAULT_LANGUAGE and DEFAULT_LANGUAGE not in AVAILABLE_LANGUAGES:
 elif not DEFAULT_LANGUAGE:
     DEFAULT_LANGUAGE = AVAILABLE_LANGUAGES[0]
 
-# FIXME: We can't seem to override this particular setting in tests.py
+# Load allowed CUSTOM_FIELDS from django settings
 CUSTOM_FIELDS = getattr(settings, 'MODELTRANSLATION_CUSTOM_FIELDS', ())
-try:
-    if sys.argv[1] == 'test':
-        CUSTOM_FIELDS = getattr(
-            settings, 'MODELTRANSLATION_CUSTOM_FIELDS', ('BooleanField',))
-except IndexError:
-    pass
 
 # Don't change this setting unless you really know what you are doing
 ENABLE_REGISTRATIONS = getattr(

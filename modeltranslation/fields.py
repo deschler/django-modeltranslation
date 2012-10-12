@@ -3,7 +3,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.db.models.fields import CharField, TextField
 from django.db.models.fields.files import FileField, ImageField
 
-from modeltranslation.settings import CUSTOM_FIELDS, DEFAULT_LANGUAGE
+from modeltranslation import settings as mt_settings
 from modeltranslation.utils import (get_language,
                                     build_localized_fieldname,
                                     build_localized_verbose_name)
@@ -28,9 +28,9 @@ def create_translation_field(model, field_name, lang):
     field = model._meta.get_field(field_name)
     cls_name = field.__class__.__name__
     if not (isinstance(field, SUPPORTED_FIELDS) or
-            cls_name in CUSTOM_FIELDS):
-        raise ImproperlyConfigured('%s is not supported by '
-                                   'modeltranslation.' % cls_name)
+            cls_name in mt_settings.CUSTOM_FIELDS):
+        raise ImproperlyConfigured(
+            '%s is not supported by modeltranslation.' % cls_name)
     translation_class = field_factory(field.__class__)
     return translation_class(translated_field=field, language=lang)
 
@@ -89,9 +89,9 @@ class TranslationField(object):
             translated_field.verbose_name, language)
 
     def pre_save(self, model_instance, add):
-        val = super(self.translated_field.__class__, self).pre_save(
-            model_instance, add)
-        if DEFAULT_LANGUAGE == self.language and not add:
+        val = self.translated_field.__class__.pre_save(
+            self, model_instance, add)
+        if mt_settings.DEFAULT_LANGUAGE == self.language and not add:
             # Rule is: 3. Assigning a value to a translation field of the
             # default language also updates the original field
             model_instance.__dict__[self.translated_field.attname] = val
