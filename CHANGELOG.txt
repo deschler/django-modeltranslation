@@ -1,3 +1,7 @@
+  FIXED: Setting MODELTRANSLATION_TRANSLATION_FILES should be optional.
+         (resolves issue 86)
+
+
 v0.4.0-alpha1
 =============
 Date: 2012-10-12

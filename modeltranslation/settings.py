@@ -13,9 +13,6 @@ if TRANSLATION_REGISTRY:
     TRANSLATION_FILES += (TRANSLATION_REGISTRY,)
     warn('The setting MODELTRANSLATION_TRANSLATION_REGISTRY is deprecated, '
          'use MODELTRANSLATION_TRANSLATION_FILES instead.', DeprecationWarning)
-if not TRANSLATION_FILES:
-    raise ImproperlyConfigured(
-        "You haven't set the MODELTRANSLATION_TRANSLATION_FILES setting yet.")
 
 AVAILABLE_LANGUAGES = [l[0] for l in settings.LANGUAGES]
 DEFAULT_LANGUAGE = getattr(settings, 'MODELTRANSLATION_DEFAULT_LANGUAGE', None)
