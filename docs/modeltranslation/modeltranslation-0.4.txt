@@ -35,7 +35,15 @@ Features
 Installation
 ============
 
-To install the application please follow these steps. Each step is described
+::
+
+    pip install django-modeltranslation
+
+
+Setup
+=====
+
+To setup the application please follow these steps. Each step is described
 in detail in the following sections:
 
 1. Add the ``modeltranslation`` app to the ``INSTALLED_APPS`` variable of your
@@ -46,10 +54,7 @@ in detail in the following sections:
 3. Create a ``translation.py`` in your app directory and register
    ``TranslationOptions`` for every model you want to translate.
 
-4. Configure the ``MODELTRANSLATION_TRANSLATION_FILES`` variable in your
-   ``settings.py``.
-
-5. Sync the database using ``manage.py syncdb`` (note that this only applies
+4. Sync the database using ``manage.py syncdb`` (note that this only applies
    if the models registered in the ``translations.py`` did not have been
    synced to the database before. If they did - read further down what to do
    in that case.
@@ -111,9 +116,12 @@ settings.LANGUAGES, otherwise an exception will be raised.
 
 *New in 0.4*
 
-In order to be able to import the ``translation.py`` registration files of your
-apps, ``MODELTRANSLATION_TRANSLATION_FILES`` must be set to a value in the
-form:
+Modeltranslation uses an autoregister feature similiar to the one in Django's
+admin. The autoregistration process will look for a ``translation.py``
+file in the root directory of each application that is in ``INSTALLED_APPS``.
+
+A setting ``MODELTRANSLATION_TRANSLATION_FILES`` is provided to limit or extend
+the modules that are taken into account. It uses the following syntax:
 
 ::
 
@@ -126,7 +134,6 @@ form:
           For backwards compatibiliy the module defined through this setting is
           automatically added to ``MODELTRANSLATION_TRANSLATION_FILES``. A
           DeprecationWarning is issued in this case.
-
 
 **settings.MODELTRANSLATION_CUSTOM_FIELDS**
 
@@ -158,9 +165,10 @@ names in your settings.py like this:
 Registering models and their fields for translation
 ---------------------------------------------------
 The ``modeltranslation`` app can translate ``CharField`` and ``TextField``
-based fields of any model class. For each model to translate a translation
-option class containg the fields to translate is registered with the
-``modeltranslation`` app.
+based fields (as well as ``FileField`` and ``ImageField`` as of version 0.4)
+of any model class. For each model to translate a translation option class
+containing the fields to translate is registered with the ``modeltranslation``
+app.
 
 Registering models and their fields for translation requires the following
 steps:
@@ -191,13 +199,13 @@ Instead of a news, this could be any Django model class:
         text = models.TextField()
 
 In order to tell the ``modeltranslation`` app to translate the ``title`` and
-``text`` field, create a ``translation.py`` file in your project directory and
+``text`` field, create a ``translation.py`` file in your news app directory and
 add the following:
 
 ::
 
     from modeltranslation.translator import translator, TranslationOptions
-    from some.news.models import News
+    from news.models import News
 
     class NewsTranslationOptions(TranslationOptions):
         fields = ('title', 'text',)
@@ -207,7 +215,7 @@ add the following:
 Note that this does not require to change the ``News`` model in any way, it's
 only imported. The ``NewsTranslationOptions`` derives from
 ``TranslationOptions`` and provides the ``fields`` attribute. Finally the model
-and it's translation options are registered at the ``translator`` object.
+and its translation options are registered at the ``translator`` object.
 
 At this point you are mostly done and the model classes registered for
 translation will have been added some auto-magical fields. The next section
@@ -543,12 +551,12 @@ The proposed way to include it is through the inner `Media` class of a
     class NewsAdmin(TranslationAdmin):
         class Media:
             js = (
-                '/static/modeltranslation/js/force_jquery.js',
+                'modeltranslation/js/force_jquery.js',
                 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/jquery-ui.min.js',
-                '/static/modeltranslation/js/tabbed_translation_fields.js',
+                'modeltranslation/js/tabbed_translation_fields.js',
             )
             css = {
-                'screen': ('/static/modeltranslation/css/tabbed_translation_fields.css',),
+                'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
             }
 
 The `force_jquery.js` script is necessary when using Django's built-in
@@ -584,6 +592,13 @@ is copied.
 
 All translated models (as specified in the project's ``translation.py`` will be
 populated with initial data.
+
+
+The ``sync_translation_fields`` command
+=======================================
+*New in 0.4*
+
+TODO
 
 
 Caveats
