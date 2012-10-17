@@ -23,15 +23,14 @@ Features
 - Supports inherited models
 
 
+Project home
+------------
+https://github.com/deschler/django-modeltranslation
+
 Documentation
-=============
+-------------
+https://readthedocs.org/projects/django-modeltranslation
 
-* https://github.com/deschler/django-modeltranslation/blob/master/docs/modeltranslation/modeltranslation.txt
-
-
-Getting Help
-============
-
-A mailing list is available at:
-
-* http://groups.google.com/group/django-modeltranslation
+Mailing list
+------------
+http://groups.google.com/group/django-modeltranslation
