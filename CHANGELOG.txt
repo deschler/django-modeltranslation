@@ -1,5 +1,13 @@
+v0.4.0-beta2
+============
+
+  FIXED: Release doesn't include rst files.
+
+
 v0.4.0-beta1
 ============
+Date: 2012-10-17
+Packaged from revision 09a0c4434a676c6fd753e6dcde95056c424db62e.
 
 CHANGED: Refactored documentation using sphinx.
          (resolves issue 81)
