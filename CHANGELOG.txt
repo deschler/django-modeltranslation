@@ -1,5 +1,7 @@
 v0.4.0-beta2
 ============
+Date: 2012-10-17
+Packaged from revision 7b8cafbde7b14afc8e85235e9b087889a6bfa86e.
 
   FIXED: Release doesn't include rst files.
 
