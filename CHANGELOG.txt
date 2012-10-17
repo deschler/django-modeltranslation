@@ -1,3 +1,6 @@
+CHANGED: Refactored documentation using sphinx.
+         (resolves issue 81)
+
   FIXED: Setting MODELTRANSLATION_TRANSLATION_FILES should be optional.
          (resolves issue 86)
 
