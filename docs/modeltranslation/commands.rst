@@ -1,5 +1,9 @@
+.. _commands:
+
 Management commands
 ===================
+
+.. _commands-update_translation_fields:
 
 The ``update_translation_fields`` command
 -----------------------------------------
@@ -37,4 +41,4 @@ The ``sync_translation_fields`` command
 
     $ ./manage.py sync_translation_fields
 
-TODO
+.. todo:: Explain

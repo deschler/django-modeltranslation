@@ -1,3 +1,5 @@
+.. _caveats:
+
 Caveats
 =======
 
@@ -46,7 +48,9 @@ current language and return the appropriate value.
 Outside a view (or a template), i.e. in normal Python code, a call to the
 ``get_language`` function still returns a value, but it might not what you
 expect. Since no request is involved, Django's machinery for discovering the
-user's preferred language is not activated. *todo: explain more*
+user's preferred language is not activated.
+
+.. todo:: Explain more
 
 The unittests in ``tests.py`` use the ``django.utils.translation.trans_real``
 functions to activate and deactive a specific language outside a view function.

@@ -1,3 +1,5 @@
+.. _related_projects:
+
 Related projects
 ================
 
@@ -33,6 +35,7 @@ existing models.
 
 `i18ndynamic`_
 --------------
+
 This approach is not developed any more.
 
 

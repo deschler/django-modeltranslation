@@ -1,9 +1,11 @@
+.. _usage:
+
 Accessing translated and translation fields
 ===========================================
 
-The ``modeltranslation`` app changes the behaviour of the translated fields. To
-explain this consider the News example again. The original ``News`` model
-looked like this:
+The modeltranslation app changes the behaviour of the translated fields. To
+explain this consider the news example from the :ref:`registration` chapter
+again. The original ``News`` model looked like this:
 
 .. code-block:: python
 
@@ -37,24 +39,24 @@ translation fields the following rules apply:
 
 **Rule 1**
 
-Reading the value from the original field returns the value translated to the
-*current language*.
+    Reading the value from the original field returns the value translated to
+    the *current language*.
 
 **Rule 2**
 
-Assigning a value to the original field also updates the value in the
-associated default translation field.
+    Assigning a value to the original field also updates the value in the
+    associated default translation field.
 
 **Rule 3**
 
-Assigning a value to the default translation field also updates the original
-field - note that the value of the original field will not be updated until the
-model instance is saved.
+    Assigning a value to the default translation field also updates the
+    original field - note that the value of the original field will not be
+    updated until the model instance is saved.
 
 **Rule 4**
 
-If both fields - the original and the default translation field - are updated
-at the same time, the default translation field wins.
+    If both fields - the original and the default translation field - are
+    updated at the same time, the default translation field wins.
 
 
 Examples for translated field access
@@ -81,3 +83,6 @@ This feature is implemented using Python descriptors making it happen without
 the need to touch the original model classes in any way. The descriptor uses
 the ``django.utils.i18n.get_language`` function to determine the current
 language.
+
+
+.. _set_language: https://docs.djangoproject.com/en/dev/topics/i18n/translation/#set-language-redirect-view

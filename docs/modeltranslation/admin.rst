@@ -1,5 +1,8 @@
+.. _admin:
+
 Django admin integration
 ========================
+
 In order to be able to edit the translations via the admin backend you need to
 register a special admin class for the translated models. The admin class must
 derive from ``modeltranslation.admin.TranslationAdmin`` which does some funky
@@ -21,6 +24,7 @@ Tweaks applied to the admin
 
 formfield_for_dbfield
 *********************
+
 The ``TranslationBaseModelAdmin`` class, which ``TranslationAdmin`` and all
 inline related classes in modeltranslation derive from, implements a special
 method which is ``def formfield_for_dbfield(self, db_field, **kwargs)``. This
@@ -31,8 +35,9 @@ method does the following:
    the default translation field required instead.
 
 
-get_form and get_fieldsets
-**************************
+get_form/get_fieldsets/_declared_fieldsets
+******************************************
+
 The ``TranslationBaseModelAdmin`` class overrides ``get_form``,
 ``get_fieldsets`` and ``_declared_fieldsets`` to make the options ``fields``,
 ``exclude`` and ``fieldsets`` work in a transparent way. It basically does:
@@ -64,14 +69,14 @@ the translation fields of ``title``, but not the original field:
 
 .. _translationadmin_in_combination_with_other_admin_classes:
 
-
 TranslationAdmin in combination with other admin classes
 --------------------------------------------------------
+
 If there already exists a custom admin class for a translated model and you
 don't want or can't edit that class directly there is another solution.
 
-Taken the News example let's say there is a ``NewsAdmin`` class defined by the
-News app itself. This app is not yours or you don't want to touch it at all.
+Taken the news example let's say there is a ``NewsAdmin`` class defined by the
+news app itself. This app is not yours or you don't want to touch it at all.
 In the most common case you simply make use of Python's support for multiple
 inheritance like this:
 
@@ -81,7 +86,7 @@ inheritance like this:
         pass
 
 In a more complex setup the NewsAdmin itself might override
-formfield_for_dbfield:
+``formfield_for_dbfield``:
 
 .. code-block:: python
 
@@ -90,7 +95,7 @@ formfield_for_dbfield:
             # does some funky stuff with the formfield here
 
 Unfortunately the first example won't work anymore because Python can only
-execute one of the ``formfield_for_dbfield`` methods. Since both admin class
+execute one of the ``formfield_for_dbfield`` methods. Since both admin classes
 implement this method Python must make a decision and it chooses the first
 class ``NewsAdmin``. The functionality from ``TranslationAdmin`` will not be
 executed and translation in the admin will not work for this class.
@@ -116,8 +121,9 @@ custom admin class and that's done in the example above. After that the
 ``field`` is fully patched for translation and finally returned.
 
 
-Inlines
--------
+Admin Inlines
+-------------
+
 .. versionadded:: 0.2
 
 Support for tabular and stacked inlines, common and generic ones.
@@ -132,7 +138,7 @@ A translated inline must derive from one of the following classes:
 Just like ``TranslationAdmin`` these classes implement a special method
 ``formfield_for_dbfield`` which does all the patching.
 
-For our example we assume that there is new model called ``Image``. It's
+For our example we assume that there is new model called ``Image``. Its
 definition is left out for simplicity. Our ``News`` model inlines the new
 model:
 
@@ -184,6 +190,7 @@ __ translationadmin_in_combination_with_other_admin_classes_
 
 Using tabbed translation fields
 -------------------------------
+
 .. versionadded:: 0.3
 
 Modeltranslation supports separation of translation fields via jquery-ui tabs.
@@ -205,6 +212,7 @@ The proposed way to include it is through the inner ``Media`` class of a
 
 The ``force_jquery.js`` script is necessary when using Django's built-in
 ``django.jQuery`` object. This and the static urls used are just an example and
-might have to be adopted to your setup of serving static files. Standard
-jquery-ui theming can be used to customize the look of tabs, the provided css
-file is supposed to work well with a default Django admin.
+might have to be adopted to your setup of serving static files.
+
+Standard jquery-ui theming can be used to customize the look of tabs, the
+provided css file is supposed to work well with a default Django admin.

@@ -1,3 +1,5 @@
+.. _registration:
+
 Registering models and their fields for translation
 ===================================================
 
@@ -60,8 +62,9 @@ explains how things are working under the hood.
 
 Changes automatically applied to the model class
 ------------------------------------------------
+
 After registering the ``News`` model for translation an SQL dump of the
-News app will look like this:
+news app will look like this:
 
 .. code-block:: console
 
@@ -94,8 +97,6 @@ As these fields are added to the registered model class as fully valid Django
 model fields, they will appear in the db schema for the model although it has
 not been specified on the model explicitly.
 
-.. _set_language: http://docs.djangoproject.com/en/dev/topics/i18n/#the-set-language-redirect-view
-
 If you are starting a fresh project and have considered your translation needs
 in the beginning then simply sync your database and you are ready to use
 the translated models.
@@ -106,5 +107,5 @@ and add these additional translation fields. Note that all added fields are
 declared ``null=True`` not matter if the original field is required. In other
 words - all translations are optional. To populate the default translation
 fields added by the modeltranslation application you can use the
-``update_translation_fields`` command below. See the `The
-update_translation_fields command` section for more infos on this.
+``update_translation_fields`` command below. See
+:ref:`commands-update_translation_fields` section for more infos on this.

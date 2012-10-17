@@ -86,6 +86,10 @@ pygments_style = 'sphinx'
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []
 
+# Todos produce output
+# FIXME: Doesn't seem to work
+todo_include_todos = True
+
 
 # -- Options for HTML output ---------------------------------------------------
 
