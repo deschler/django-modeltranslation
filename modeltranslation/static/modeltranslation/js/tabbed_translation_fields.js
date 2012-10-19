@@ -34,12 +34,12 @@ var google, django, gettext;
               grouped_translations = {};
 
             translation_fields.each(function (i, el) {
-                var field_suffix = 'mt-field-',
+                var field_prefix = 'mt-field-',
                     name = '',
                     lang = '';
                 $.each($(el).attr('class').split(' '), function(j, cls) {
-                    if (cls.substring(0, field_suffix.length) === field_suffix) {
-                        var v = cls.substring(field_suffix.length,
+                    if (cls.substring(0, field_prefix.length) === field_prefix) {
+                        var v = cls.substring(field_prefix.length,
                                               cls.length).split('-');
                         name = v[0];
                         lang = v[1];
