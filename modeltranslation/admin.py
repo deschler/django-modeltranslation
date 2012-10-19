@@ -9,7 +9,8 @@ from django.utils import translation
 from modeltranslation.settings import DEFAULT_LANGUAGE
 from modeltranslation.translator import translator
 from modeltranslation.utils import (get_translation_fields,
-                                    build_localized_fieldname)
+                                    build_localized_fieldname,
+                                    build_css_class)
 
 
 class TranslationBaseModelAdmin(BaseModelAdmin):
@@ -56,12 +57,15 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
                 self.model._meta.get_field(orig_fieldname), **kwargs)
             field.widget = deepcopy(orig_formfield.widget)
             css_classes = field.widget.attrs.get('class', '').split(' ')
-            css_classes.append('modeltranslation')
+            css_classes.append('mt')
+            # Add localized fieldname css class
+            css_classes.append(
+                build_css_class(db_field.name, 'mt-field'))
 
             if db_field.language == DEFAULT_LANGUAGE:
                 # Add another css class to identify a default modeltranslation
                 # widget.
-                css_classes.append('modeltranslation-default')
+                css_classes.append('mt-default')
                 if (orig_formfield.required or
                     self._orig_was_required.get(
                         '%s.%s' % (db_field.model._meta, orig_fieldname))):

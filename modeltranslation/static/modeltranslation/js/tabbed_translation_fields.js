@@ -16,44 +16,35 @@ var google, django, gettext;
             /** Returns a grouped set of all text based model translation fields.
              * The returned datastructure will look something like this:
              * {
-             *   'title': {
-             *     'en': HTMLInputElement,
-             *     'de': HTMLInputElement,
-             *     'fr': HTMLInputElement
-             *   },
-             *   'body': {
-             *     'en': HTMLTextAreaElement,
-             *     'de': HTMLTextAreaElement,
-             *     'fr': HTMLTextAreaElement
-             *   }
+             *     'title': {
+             *         'en': HTMLInputElement,
+             *         'de': HTMLInputElement,
+             *         'zh_tw': HTMLInputElement
+             *     },
+             *     'body': {
+             *         'en': HTMLTextAreaElement,
+             *         'de': HTMLTextAreaElement,
+             *         'zh_tw': HTMLTextAreaElement
+             *     }
              * }
              */
-            var translation_fields = $('.modeltranslation').filter(
+            var translation_fields = $('.mt').filter(
                 'input[type=text]:visible, textarea:visible').filter(
                 ':parents(.tabular)'), // exclude tabular inlines
               grouped_translations = {};
 
             translation_fields.each(function (i, el) {
-                /*
-                // FIXME: Fails if there's an inline which has the same field name as
-                //        the edited object.
-
-                // Extract fieldname and original language code from class attribute
-                var css_lang_suffix = 'modeltranslation-field-';
-                var name = '';
-                var lang = '';
+                var field_suffix = 'mt-field-',
+                    name = '',
+                    lang = '';
                 $.each($(el).attr('class').split(' '), function(j, cls) {
-                    if (cls.substring(0, css_lang_suffix.length) === css_lang_suffix) {
-                        var v = cls.substring(css_lang_suffix.length,
-                                              cls.length).split('__');
+                    if (cls.substring(0, field_suffix.length) === field_suffix) {
+                        var v = cls.substring(field_suffix.length,
+                                              cls.length).split('-');
                         name = v[0];
                         lang = v[1];
                     }
                 });
-                */
-                var name = $(el).attr('name').split('_'),
-                  lang = name.pop();
-                name = name.join('_');
                 if (!grouped_translations[name]) {
                     grouped_translations[name] = {};
                 }
@@ -89,7 +80,7 @@ var google, django, gettext;
                     }
                     container.find('script').remove();
                     panel = $('<div id="' + id + '"></div>').append(container);
-                    tab = $('<li' + (label.hasClass('required') ? ' class="required"' : '') + '><a href="#' + id + '">' + lang + '</a></li>');
+                    tab = $('<li' + (label.hasClass('required') ? ' class="required"' : '') + '><a href="#' + id + '">' + lang.replace('_', '-') + '</a></li>');
                     tabs_list.append(tab);
                     tabs_container.append(panel);
                 });
@@ -112,7 +103,7 @@ var google, django, gettext;
                 });
             });
             $.each(unique_languages, function (i, language) {
-                select.append($('<option value="' + i + '">' + language + '</option>'));
+                select.append($('<option value="' + i + '">' + language.replace('_', '-') + '</option>'));
             });
             select.change(function (e) {
                 $.each(tabs, function (i, tab) {
