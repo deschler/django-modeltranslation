@@ -3,14 +3,15 @@
 Installation
 ============
 
-Using pip
+Using Pip
 ---------
 
 .. code-block:: console
 
     $ pip install django-modeltranslation
 
-Using the source
+
+Using the Source
 ----------------
 
 Get a source tarball from `github`_ or `pypi`_, unpack, then install with:
@@ -47,17 +48,19 @@ in detail in the following sections:
    in that case.
 
 
-Configure the project's ``settings.py``
+Configure the Project's ``settings.py``
 ---------------------------------------
 
-Required settings
+Required Settings
 *****************
 
 The following variables have to be added to or edited in the project's
 ``settings.py``:
 
+
 ``INSTALLED_APPS``
 ^^^^^^^^^^^^^^^^^^
+
 Make sure that the ``modeltranslation`` app is listed in your
 ``INSTALLED_APPS`` variable:
 
@@ -72,10 +75,12 @@ Make sure that the ``modeltranslation`` app is listed in your
 .. note:: Also make sure that the app can be found on a path contained in your
           ``PYTHONPATH`` environment variable.
 
+
 .. _settings-languages:
 
 ``LANGUAGES``
 ^^^^^^^^^^^^^
+
 The ``LANGUAGES`` variable must contain all languages used for translation. The
 first language is treated as the *default language*.
 
@@ -97,12 +102,15 @@ modeltranslation app, but rather required for Django to be able to
 (statically) translate the verbose names of the languages using the standard
 ``i18n`` solution.
 
-Advanced settings
+
+Advanced Settings
 *****************
+
 Modeltranslation also has some advanced settings to customize its behaviour:
 
 ``MODELTRANSLATION_DEFAULT_LANGUAGE``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 .. versionadded:: 0.3
 
 Default: ``None``
@@ -121,6 +129,7 @@ Example:
 
 ``MODELTRANSLATION_TRANSLATION_FILES``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 .. versionadded:: 0.4
 
 Default: ``()`` (empty tuple)
@@ -157,8 +166,12 @@ Example:
           automatically added to ``MODELTRANSLATION_TRANSLATION_FILES``. A
           ``DeprecationWarning`` is issued in this case.
 
+
 ``MODELTRANSLATION_CUSTOM_FIELDS``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Default: ``()`` (empty tuple)
+
 .. versionadded:: 0.3
 
 ``Modeltranslation`` officially supports ``CharField`` and ``TextField``.

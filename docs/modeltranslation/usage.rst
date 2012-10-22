@@ -1,6 +1,6 @@
 .. _usage:
 
-Accessing translated and translation fields
+Accessing Translated and Translation Fields
 ===========================================
 
 The modeltranslation app changes the behaviour of the translated fields. To
@@ -32,8 +32,9 @@ fields*. If the default language is ``en``, the ``title_en`` and ``text_en``
 fields would be the *default translation fields*.
 
 
-Rules for translated field access
+Rules for Translated Field Access
 ---------------------------------
+
 So now when it comes to setting and getting the value of the original and the
 translation fields the following rules apply:
 
@@ -59,8 +60,9 @@ translation fields the following rules apply:
     updated at the same time, the default translation field wins.
 
 
-Examples for translated field access
+Examples for Translated Field Access
 ------------------------------------
+
 Because the whole point of using the modeltranslation app is translating
 dynamic content, the fields marked for translation are somehow special when it
 comes to accessing them. The value returned by a translated field is depending

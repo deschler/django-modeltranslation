@@ -1,6 +1,6 @@
 .. _admin:
 
-Django admin integration
+Django Admin Integration
 ========================
 
 In order to be able to edit the translations via the ``django.contrib.admin``
@@ -21,7 +21,7 @@ the most simple case would look like:
     admin.site.register(News, NewsAdmin)
 
 
-Tweaks applied to the admin
+Tweaks Applied to the Admin
 ---------------------------
 
 formfield_for_dbfield
@@ -71,7 +71,7 @@ the translation fields of ``title``, but not the original field:
 
 .. _translationadmin_in_combination_with_other_admin_classes:
 
-TranslationAdmin in combination with other admin classes
+TranslationAdmin in Combination with Other Admin Classes
 --------------------------------------------------------
 
 If there already exists a custom admin class for a translated model and you
@@ -99,7 +99,7 @@ through the blog app, it has to be unregistered first:
     admin.site.register(Entry, MyTranslatedEntryAdmin)
 
 
-Admin classes that override ``formfield_for_dbfield``
+Admin Classes that Override ``formfield_for_dbfield``
 *****************************************************
 
 In a more complex setup the original ``EntryAdmin`` might override
@@ -205,7 +205,7 @@ __ translationadmin_in_combination_with_other_admin_classes_
     admin.site.register(News, NewsAdmin)
 
 
-Using tabbed translation fields
+Using Tabbed Translation Fields
 -------------------------------
 
 .. versionadded:: 0.3
@@ -228,8 +228,10 @@ The proposed way to include it is through the inner ``Media`` class of a
             }
 
 The ``force_jquery.js`` script is necessary when using Django's built-in
-``django.jQuery`` object. This and the static urls used are just an example and
-might have to be adopted to your setup of serving static files.
+``django.jQuery`` object.
+
+.. note:: This is just an example and might have to be adopted to your setup of
+          serving static files.
 
 Standard jquery-ui theming can be used to customize the look of tabs, the
 provided css file is supposed to work well with a default Django admin.

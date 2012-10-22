@@ -1,6 +1,6 @@
 .. _related_projects:
 
-Related projects
+Related Projects
 ================
 
 .. note:: This list is horribly outdated and only covers apps that where

@@ -23,7 +23,7 @@ Features
 - Supports inherited models
 
 
-Project home
+Project Home
 ------------
 https://github.com/deschler/django-modeltranslation
 
@@ -31,6 +31,6 @@ Documentation
 -------------
 https://readthedocs.org/projects/django-modeltranslation
 
-Mailing list
+Mailing List
 ------------
 http://groups.google.com/group/django-modeltranslation

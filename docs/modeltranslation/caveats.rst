@@ -29,9 +29,10 @@ field is updated:
     >>>
 
 
-Accessing translated fields outside views
+Accessing Translated Fields Outside Views
 -----------------------------------------
-Since the ``modeltranslation`` mechanism relies on the current language as it
+
+Since the modeltranslation mechanism relies on the current language as it
 is returned by the ``get_language`` function care must be taken when accessing
 translated fields outside a view function.
 

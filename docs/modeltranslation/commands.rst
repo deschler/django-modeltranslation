@@ -1,12 +1,13 @@
 .. _commands:
 
-Management commands
+Management Commands
 ===================
 
 .. _commands-update_translation_fields:
 
-The ``update_translation_fields`` command
+The ``update_translation_fields`` Command
 -----------------------------------------
+
 In case the modeltranslation app was installed on an existing project and you
 have specified to translate fields of models which are already synced to the
 database, you have to update your database schema manually.
@@ -33,8 +34,9 @@ All translated models (as specified in the project's ``translation.py`` will be
 populated with initial data.
 
 
-The ``sync_translation_fields`` command
+The ``sync_translation_fields`` Command
 ---------------------------------------
+
 .. versionadded:: 0.4
 
 .. code-block:: console

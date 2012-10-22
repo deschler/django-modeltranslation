@@ -1,7 +1,7 @@
 .. _registration:
 
-Registering models and their fields for translation
-===================================================
+Registering Models for Translation
+==================================
 
 The ``modeltranslation`` app can translate ``CharField`` and ``TextField``
 based fields (as well as ``FileField`` and ``ImageField`` as of version 0.4)
@@ -60,7 +60,7 @@ translation will have been added some auto-magical fields. The next section
 explains how things are working under the hood.
 
 
-Changes automatically applied to the model class
+Changes Automatically Applied to the Model Class
 ------------------------------------------------
 
 After registering the ``News`` model for translation an SQL dump of the
