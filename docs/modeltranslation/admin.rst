@@ -3,10 +3,12 @@
 Django admin integration
 ========================
 
-In order to be able to edit the translations via the admin backend you need to
-register a special admin class for the translated models. The admin class must
-derive from ``modeltranslation.admin.TranslationAdmin`` which does some funky
-patching on all your models registered for translation:
+In order to be able to edit the translations via the ``django.contrib.admin``
+application you need to register a special admin class for the translated
+models. The admin class must derive from
+``modeltranslation.admin.TranslationAdmin`` which does some funky
+patching on all your models registered for translation. Taken the news example
+the most simple case would look like:
 
 .. code-block:: python
 
@@ -14,7 +16,7 @@ patching on all your models registered for translation:
     from modeltranslation.admin import TranslationAdmin
 
     class NewsAdmin(TranslationAdmin):
-        list_display = ('title',)
+        pass
 
     admin.site.register(News, NewsAdmin)
 
@@ -38,7 +40,7 @@ method does the following:
 get_form/get_fieldsets/_declared_fieldsets
 ******************************************
 
-The ``TranslationBaseModelAdmin`` class overrides ``get_form``,
+In addition the ``TranslationBaseModelAdmin`` class overrides ``get_form``,
 ``get_fieldsets`` and ``_declared_fieldsets`` to make the options ``fields``,
 ``exclude`` and ``fieldsets`` work in a transparent way. It basically does:
 
@@ -75,50 +77,65 @@ TranslationAdmin in combination with other admin classes
 If there already exists a custom admin class for a translated model and you
 don't want or can't edit that class directly there is another solution.
 
-Taken the news example let's say there is a ``NewsAdmin`` class defined by the
-news app itself. This app is not yours or you don't want to touch it at all.
+Taken a (fictional) reusable blog app which defines a model ``Entry`` and a
+corresponding admin class called ``EntryAdmin``. This app is not yours and you
+don't want to touch it at all.
+
 In the most common case you simply make use of Python's support for multiple
 inheritance like this:
 
 .. code-block:: python
 
-    class MyTranslatedNewsAdmin(NewsAdmin, TranslationAdmin):
+    class MyTranslatedEntryAdmin(EntryAdmin, TranslationAdmin):
         pass
 
-In a more complex setup the NewsAdmin itself might override
-``formfield_for_dbfield``:
+The class is then registered for the ``admin.site`` (not to be confused with
+modeltranslation's ``translator``). If ``EntryAdmin`` is already registered
+through the blog app, it has to be unregistered first:
 
 .. code-block:: python
 
-    class NewsAdmin(model.Admin):
+    admin.site.unregister(Entry)
+    admin.site.register(Entry, MyTranslatedEntryAdmin)
+
+
+Admin classes that override ``formfield_for_dbfield``
+*****************************************************
+
+In a more complex setup the original ``EntryAdmin`` might override
+``formfield_for_dbfield`` itself:
+
+.. code-block:: python
+
+    class EntryAdmin(model.Admin):
         def formfield_for_dbfield(self, db_field, **kwargs):
             # does some funky stuff with the formfield here
 
 Unfortunately the first example won't work anymore because Python can only
 execute one of the ``formfield_for_dbfield`` methods. Since both admin classes
 implement this method Python must make a decision and it chooses the first
-class ``NewsAdmin``. The functionality from ``TranslationAdmin`` will not be
+class ``EntryAdmin``. The functionality from ``TranslationAdmin`` will not be
 executed and translation in the admin will not work for this class.
 
 But don't panic, here's a solution:
 
 .. code-block:: python
 
-    class MyTranslatedNewsAdmin(NewsAdmin, TranslationAdmin):
+    class MyTranslatedEntryAdmin(EntryAdmin, TranslationAdmin):
         def formfield_for_dbfield(self, db_field, **kwargs):
-            field = super(MyTranslatedNewsAdmin, self).formfield_for_dbfield(db_field, **kwargs)
+            field = super(MyTranslatedEntryAdmin, self).formfield_for_dbfield(db_field, **kwargs)
             self.patch_translation_field(db_field, field, **kwargs)
             return field
 
 This implements the ``formfield_for_dbfield`` such that both functionalities
 will be executed. The first line calls the superclass method which in this case
-will be the one of ``NewsAdmin`` because it is the first class inherited from.
-The ``TranslationAdmin`` capsulates all it's functionality in the
-``patch_translation_field(db_field, field, **kwargs)`` method and the
-``formfield_for_dbfield`` implementation of the ``TranslationAdmin`` class
-simply calls it. You can copy this behaviour by calling it from a
-custom admin class and that's done in the example above. After that the
-``field`` is fully patched for translation and finally returned.
+will be the one of ``EntryAdmin`` because it is the first class inherited from.
+The ``TranslationAdmin`` capsulates its functionality in the
+``patch_translation_field`` method and the ``formfield_for_dbfield``
+implementation of the ``TranslationAdmin`` class simply calls it. You can copy
+this behaviour by calling it from a custom admin class and that's done in the
+example above. After that the ``field`` is fully patched for translation and
+finally returned.
 
 
 Admin Inlines
