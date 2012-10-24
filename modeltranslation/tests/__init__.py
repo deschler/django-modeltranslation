@@ -11,7 +11,6 @@ from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
-from django.db import models
 from django.test import TestCase
 from django.utils.translation import get_language
 from django.utils.translation import trans_real
@@ -21,6 +20,12 @@ from modeltranslation import settings as mt_settings
 from modeltranslation import translator
 from modeltranslation.admin import (TranslationAdmin,
                                     TranslationStackedInline)
+from modeltranslation.tests.models import (
+    DataModel, TestModel, TestModelWithFallback, TestModelWithFallback2,
+    TestModelWithFileFields, TestModelAbstractA, TestModelAbstractB,
+    TestModelMultitableA, TestModelMultitableB, TestModelMultitableC,
+    TestModelMultitableD)
+
 
 # None of the following tests really depend on the content of the request,
 # so we'll just pass in None.
@@ -32,64 +37,29 @@ settings.LANGUAGES = (('de', 'Deutsch'),
                       ('en', 'English'))
 
 
-class RelatedModel(models.Model):
-    reltitle = models.CharField(ugettext_lazy('Related Title'), max_length=255)
-
-
-class TestModel(models.Model):
-    title = models.CharField(ugettext_lazy('title'), max_length=255)
-    text = models.TextField(blank=True, null=True)
-    url = models.URLField(verify_exists=False, blank=True, null=True)
-    email = models.EmailField(blank=True, null=True)
-
-
 class TestTranslationOptions(translator.TranslationOptions):
     fields = ('title', 'text', 'url', 'email',)
-
 translator.translator._registry = {}
 translator.translator.register(TestModel, TestTranslationOptions)
-
-
-class TestModelWithFallback(models.Model):
-    title = models.CharField(ugettext_lazy('title'), max_length=255)
-    text = models.TextField(blank=True, null=True)
-    url = models.URLField(verify_exists=False, blank=True, null=True)
-    email = models.EmailField(blank=True, null=True)
 
 
 class TestTranslationOptionsWithFallback(translator.TranslationOptions):
     fields = ('title', 'text', 'url', 'email',)
     fallback_values = ""
-
 translator.translator.register(TestModelWithFallback,
                                TestTranslationOptionsWithFallback)
-
-
-class TestModelWithFallback2(models.Model):
-    title = models.CharField(ugettext_lazy('title'), max_length=255)
-    text = models.TextField(blank=True, null=True)
-    url = models.URLField(verify_exists=False, blank=True, null=True)
-    email = models.EmailField(blank=True, null=True)
 
 
 class TestTranslationOptionsWithFallback2(translator.TranslationOptions):
     fields = ('title', 'text', 'url', 'email',)
     fallback_values = {'text': ugettext_lazy('Sorry, translation is not '
                                              'available.')}
-
 translator.translator.register(TestModelWithFallback2,
                                TestTranslationOptionsWithFallback2)
 
 
-class TestModelWithFileFields(models.Model):
-    title = models.CharField(ugettext_lazy('title'), max_length=255)
-    file = models.FileField(upload_to='test', null=True, blank=True)
-    image = models.ImageField(upload_to='test', null=True, blank=True)
-
-
 class TestTranslationOptionsModelWithFileFields(translator.TranslationOptions):
     fields = ('title', 'file', 'image')
-
 translator.translator.register(TestModelWithFileFields,
                                TestTranslationOptionsModelWithFileFields)
 
@@ -803,33 +773,6 @@ class ModeltranslationTestModelValidation(ModeltranslationTestBase):
             invalid_value_de='foo de')
 
 
-class TestModelMultitableA(models.Model):
-    titlea = models.CharField(ugettext_lazy('title a'), max_length=255)
-
-
-class TestModelMultitableB(TestModelMultitableA):
-    titleb = models.CharField(ugettext_lazy('title b'), max_length=255)
-
-
-class TestModelMultitableC(TestModelMultitableB):
-    titlec = models.CharField(ugettext_lazy('title c'), max_length=255)
-
-
-class TestModelMultitableD(TestModelMultitableB):
-    titled = models.CharField(ugettext_lazy('title d'), max_length=255)
-
-
-class TestModelAbstractA(models.Model):
-    titlea = models.CharField(ugettext_lazy('title a'), max_length=255)
-
-    class Meta:
-        abstract = True
-
-
-class TestModelAbstractB(TestModelAbstractA):
-    titleb = models.CharField(ugettext_lazy('title b'), max_length=255)
-
-
 class TranslationOptionsTestModelMultitableA(translator.TranslationOptions):
     fields = ('titlea',)
 
@@ -1064,9 +1007,6 @@ class TranslationAdminTest(ModeltranslationTestBase):
             ma.get_form(request, self.test_obj).base_fields.keys(), fields)
 
     def test_inline_fieldsets(self):
-        class DataModel(models.Model):
-            data = models.TextField(blank=True, null=True)
-
         class DataInline(TranslationStackedInline):
             model = DataModel
             fieldsets = [

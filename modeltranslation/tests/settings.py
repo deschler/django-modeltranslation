@@ -21,14 +21,16 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.staticfiles',
     'django.contrib.redirects',
-    'modeltranslation',)
+    'modeltranslation',
+    'modeltranslation.tests',
+)
 
 STATIC_URL = '/static/'
 
 ROOT_URLCONF = 'modeltranslation.tests.urls'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(os.path.dirname(__file__), 'media/')
+MEDIA_ROOT = os.path.join(DIRNAME, 'media/')
 
 SITE_ID = 1
 
