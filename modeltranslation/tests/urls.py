@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 try:
     from django.conf.urls import include, patterns, url
+    assert (include, patterns, url)  # Workaround for pyflakes issue #13
 except ImportError:  # Django 1.3 fallback
     from django.conf.urls.defaults import include, patterns, url
 from django.contrib import admin
