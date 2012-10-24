@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import django
 
 
 DIRNAME = os.path.dirname(__file__)
@@ -19,11 +20,12 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.admin',
     'django.contrib.sites',
-    'django.contrib.staticfiles',
     'django.contrib.redirects',
     'modeltranslation',
     'modeltranslation.tests',
 )
+if django.VERSION[0] >= 1 and django.VERSION[1] >= 3:
+    INSTALLED_APPS += ('django.contrib.staticfiles',)
 
 STATIC_URL = '/static/'
 
