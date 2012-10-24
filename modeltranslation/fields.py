@@ -157,8 +157,9 @@ class TranslationFieldDescriptor(object):
 
     def __get__(self, instance, owner):
         if not instance:
-            raise ValueError(u"Translation field '%s' can only be accessed "
-                              "via an instance not via a class." % self.name)
+            raise ValueError(
+                "Translation field '%s' can only be accessed via an instance "
+                "not via a class." % self.name)
         loc_field_name = build_localized_fieldname(
             self.name, get_language())
         if hasattr(instance, loc_field_name):

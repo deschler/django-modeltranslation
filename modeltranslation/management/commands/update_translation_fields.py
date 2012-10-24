@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-from django.conf import settings
 from django.db.models import F, Q
-from django.core.management.base import (BaseCommand, CommandError,
-                                         NoArgsCommand)
+from django.core.management.base import NoArgsCommand
 
 from modeltranslation.settings import DEFAULT_LANGUAGE
 from modeltranslation.translator import translator

@@ -24,7 +24,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
     def _declared_fieldsets(self):
         # Take custom modelform fields option into account
         if not self.fields and hasattr(
-            self.form, '_meta') and self.form._meta.fields:
+                self.form, '_meta') and self.form._meta.fields:
             self.fields = self.form._meta.fields
         if self.fieldsets:
             return self._patch_fieldsets(self.fieldsets)
@@ -135,7 +135,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         Code shared among get_form and get_formset.
         """
         if not self.exclude and hasattr(
-            self.form, '_meta') and self.form._meta.exclude:
+                self.form, '_meta') and self.form._meta.exclude:
             # Take the custom ModelForm's Meta.exclude into account only if the
             # ModelAdmin doesn't define its own.
             kwargs.update({'exclude': getattr(
@@ -182,7 +182,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
             excl_languages = exclude_languages
         exclude = []
         for orig_fieldname, translation_fields in \
-            self.trans_opts.localized_fieldnames.iteritems():
+                self.trans_opts.localized_fieldnames.iteritems():
             for tfield in translation_fields:
                 language = tfield.split('_')[-1]
                 if language in excl_languages and tfield not in exclude:

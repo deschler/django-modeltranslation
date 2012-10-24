@@ -83,7 +83,7 @@ translator.translator.register(TestModelWithFallback2,
 
 class TestModelWithFileFields(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
-    file  = models.FileField(upload_to='test', null=True, blank=True)
+    file = models.FileField(upload_to='test', null=True, blank=True)
     image = models.ImageField(upload_to='test', null=True, blank=True)
 
 
@@ -249,8 +249,8 @@ class ModeltranslationWithFileFields(ModeltranslationTestBase):
         self.failUnless('file_en' in field_names)
         inst.delete()
 
-    def test_translated_models(self):
-        f_en = ContentFile("Just a really good file")
+    def test_translated_models_instance(self):
+        #f_en = ContentFile("Just a really good file")
         inst = TestModelWithFileFields(title="Testtitle", file=None)
 
         trans_real.activate("en")
@@ -265,7 +265,7 @@ class ModeltranslationWithFileFields(ModeltranslationTestBase):
         trans_real.activate("de")
         inst.title = 'title_de'
 
-        inst.file  = 'a_de'
+        inst.file = 'a_de'
         inst.file.save('b_de', ContentFile('file in german'))
 
         inst.image = 'i_de.jpg'
@@ -290,6 +290,7 @@ class ModeltranslationWithFileFields(ModeltranslationTestBase):
         inst.image_de.delete()
 
         inst.delete()
+
 
 class ModeltranslationTestRule1(ModeltranslationTestBase):
     """
@@ -820,6 +821,7 @@ class TestModelMultitableD(TestModelMultitableB):
 
 class TestModelAbstractA(models.Model):
     titlea = models.CharField(ugettext_lazy('title a'), max_length=255)
+
     class Meta:
         abstract = True
 
@@ -919,9 +921,10 @@ class TranslationAdminTest(ModeltranslationTestBase):
             pass
 
         ma = TestModelAdmin(TestModel, self.site)
-        self.assertEqual(ma.get_form(request).base_fields.keys(),
-            ['title_de', 'title_en', 'text_de', 'text_en',
-             'url_de', 'url_en', 'email_de', 'email_en'])
+        self.assertEqual(
+            ma.get_form(request).base_fields.keys(),
+            ['title_de', 'title_en', 'text_de', 'text_en', 'url_de', 'url_en',
+             'email_de', 'email_en'])
 
     def test_default_fieldsets(self):
         class TestModelAdmin(TranslationAdmin):
@@ -932,9 +935,10 @@ class TranslationAdminTest(ModeltranslationTestBase):
         # translation fields are included in fields
         fields = ['title_de', 'title_en', 'text_de', 'text_en',
                   'url_de', 'url_en', 'email_de', 'email_en']
-        self.assertEqual(ma.get_fieldsets(request),
-            [(None, {'fields': fields})])
-        self.assertEqual(ma.get_fieldsets(request, self.test_obj),
+        self.assertEqual(
+            ma.get_fieldsets(request), [(None, {'fields': fields})])
+        self.assertEqual(
+            ma.get_fieldsets(request, self.test_obj),
             [(None, {'fields': fields})])
 
     def test_field_arguments(self):
@@ -944,8 +948,8 @@ class TranslationAdminTest(ModeltranslationTestBase):
         ma = TestModelAdmin(TestModel, self.site)
         fields = ['title_de', 'title_en']
         self.assertEqual(ma.get_form(request).base_fields.keys(), fields)
-        self.assertEqual(ma.get_form(request,
-            self.test_obj).base_fields.keys(), fields)
+        self.assertEqual(
+            ma.get_form(request, self.test_obj).base_fields.keys(), fields)
 
     def test_field_arguments_restricted_on_form(self):
         # Using `fields`.
@@ -955,8 +959,8 @@ class TranslationAdminTest(ModeltranslationTestBase):
         ma = TestModelAdmin(TestModel, self.site)
         fields = ['title_de', 'title_en']
         self.assertEqual(ma.get_form(request).base_fields.keys(), fields)
-        self.assertEqual(ma.get_form(request,
-            self.test_obj).base_fields.keys(), fields)
+        self.assertEqual(
+            ma.get_form(request, self.test_obj).base_fields.keys(), fields)
 
         # Using `fieldsets`.
         class TestModelAdmin(TranslationAdmin):
@@ -964,8 +968,8 @@ class TranslationAdminTest(ModeltranslationTestBase):
 
         ma = TestModelAdmin(TestModel, self.site)
         self.assertEqual(ma.get_form(request).base_fields.keys(), fields)
-        self.assertEqual(ma.get_form(request,
-            self.test_obj).base_fields.keys(), fields)
+        self.assertEqual(
+            ma.get_form(request, self.test_obj).base_fields.keys(), fields)
 
         # Using `exclude`.
         class TestModelAdmin(TranslationAdmin):
@@ -973,18 +977,18 @@ class TranslationAdminTest(ModeltranslationTestBase):
 
         ma = TestModelAdmin(TestModel, self.site)
         fields = ['title_de', 'title_en', 'text_de', 'text_en']
-        self.assertEqual(ma.get_form(request).base_fields.keys(),
-            fields)
+        self.assertEqual(
+            ma.get_form(request).base_fields.keys(), fields)
 
         # You can also pass a tuple to `exclude`.
         class TestModelAdmin(TranslationAdmin):
             exclude = ('url', 'email')
 
         ma = TestModelAdmin(TestModel, self.site)
-        self.assertEqual(ma.get_form(request).base_fields.keys(),
-            fields)
-        self.assertEqual(ma.get_form(request,
-            self.test_obj).base_fields.keys(), fields)
+        self.assertEqual(
+            ma.get_form(request).base_fields.keys(), fields)
+        self.assertEqual(
+            ma.get_form(request, self.test_obj).base_fields.keys(), fields)
 
         # Using `fields` and `exclude`.
         class TestModelAdmin(TranslationAdmin):
@@ -992,8 +996,8 @@ class TranslationAdminTest(ModeltranslationTestBase):
             exclude = ['url']
 
         ma = TestModelAdmin(TestModel, self.site)
-        self.assertEqual(ma.get_form(request).base_fields.keys(),
-            ['title_de', 'title_en'])
+        self.assertEqual(
+            ma.get_form(request).base_fields.keys(), ['title_de', 'title_en'])
 
     def test_field_arguments_restricted_on_custom_form(self):
         # Using `fields`.
@@ -1007,10 +1011,10 @@ class TranslationAdminTest(ModeltranslationTestBase):
 
         ma = TestModelAdmin(TestModel, self.site)
         fields = ['url_de', 'url_en', 'email_de', 'email_en']
-        self.assertEqual(ma.get_form(request).base_fields.keys(),
-            fields)
-        self.assertEqual(ma.get_form(request,
-            self.test_obj).base_fields.keys(), fields)
+        self.assertEqual(
+            ma.get_form(request).base_fields.keys(), fields)
+        self.assertEqual(
+            ma.get_form(request, self.test_obj).base_fields.keys(), fields)
 
         # Using `exclude`.
         class TestModelForm(forms.ModelForm):
@@ -1023,10 +1027,10 @@ class TranslationAdminTest(ModeltranslationTestBase):
 
         ma = TestModelAdmin(TestModel, self.site)
         fields = ['title_de', 'title_en', 'text_de', 'text_en']
-        self.assertEqual(ma.get_form(request).base_fields.keys(),
-            fields)
-        self.assertEqual(ma.get_form(request,
-            self.test_obj).base_fields.keys(), fields)
+        self.assertEqual(
+            ma.get_form(request).base_fields.keys(), fields)
+        self.assertEqual(
+            ma.get_form(request, self.test_obj).base_fields.keys(), fields)
 
         # If both, the custom form an the ModelAdmin define an `exclude`
         # option, the ModelAdmin wins. This is Django behaviour.
@@ -1037,10 +1041,10 @@ class TranslationAdminTest(ModeltranslationTestBase):
         ma = TestModelAdmin(TestModel, self.site)
         fields = ['title_de', 'title_en', 'text_de', 'text_en', 'email_de',
                   'email_en']
-        self.assertEqual(ma.get_form(request).base_fields.keys(),
-            fields)
-        self.assertEqual(ma.get_form(request,
-            self.test_obj).base_fields.keys(), fields)
+        self.assertEqual(
+            ma.get_form(request).base_fields.keys(), fields)
+        self.assertEqual(
+            ma.get_form(request, self.test_obj).base_fields.keys(), fields)
 
         # Same for `fields`.
         class TestModelForm(forms.ModelForm):
@@ -1054,10 +1058,10 @@ class TranslationAdminTest(ModeltranslationTestBase):
 
         ma = TestModelAdmin(TestModel, self.site)
         fields = ['email_de', 'email_en']
-        self.assertEqual(ma.get_form(request).base_fields.keys(),
-            fields)
-        self.assertEqual(ma.get_form(request,
-            self.test_obj).base_fields.keys(), fields)
+        self.assertEqual(
+            ma.get_form(request).base_fields.keys(), fields)
+        self.assertEqual(
+            ma.get_form(request, self.test_obj).base_fields.keys(), fields)
 
     def test_inline_fieldsets(self):
         class DataModel(models.Model):

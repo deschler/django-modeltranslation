@@ -58,8 +58,9 @@ class Command(BaseCommand):
         for model in all_models:
             try:
                 options = translator.get_options_for_model(model)
-                # options returns full-wide spectrum of localized fields but
-                # we only to synchronize the local fields attached to the model.
+                # Options returns full-wide spectrum of localized fields but
+                # we only want to synchronize the local fields attached to the
+                # model.
                 local_field_names = [field.name for field
                                      in model._meta.local_fields]
                 translatable_fields = [field for field
@@ -109,7 +110,7 @@ class Command(BaseCommand):
         db_table_fields = self.get_table_fields(db_table)
         for lang_code, lang_name in settings.LANGUAGES:
             if build_localized_fieldname(
-                field_name, lang_code) not in db_table_fields:
+                    field_name, lang_code) not in db_table_fields:
                 yield lang_code
 
     def get_sync_sql(self, field_name, missing_langs, model):
@@ -131,7 +132,8 @@ class Command(BaseCommand):
                 "ALTER TABLE %s ADD COLUMN %s;" % (
                     qn(db_table), ' '.join(field_sql)))
             if not f.null and lang == settings.LANGUAGE_CODE:
-                sql_output.append("ALTER TABLE %s MODIFY COLUMN %s %s %s;" % \
-                                  (qn(db_table), qn(f.column), col_type,
-                                  style.SQL_KEYWORD('NOT NULL')))
+                sql_output.append(
+                    ("ALTER TABLE %s MODIFY COLUMN %s %s %s;" % (
+                        qn(db_table), qn(f.column), col_type,
+                        style.SQL_KEYWORD('NOT NULL'))))
         return sql_output

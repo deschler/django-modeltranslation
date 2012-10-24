@@ -2,8 +2,7 @@
 from django.conf import settings
 from django.db.models.base import ModelBase
 
-from modeltranslation.fields import (TranslationField,
-                                     TranslationFieldDescriptor,
+from modeltranslation.fields import (TranslationFieldDescriptor,
                                      create_translation_field)
 from modeltranslation.utils import build_localized_fieldname
 
@@ -54,7 +53,7 @@ def add_localized_fields(model):
                 raise ValueError(
                     "Error adding translation field. Model '%s' already "
                     "contains a field named '%s'." % (
-                        instance.__class__.__name__, localized_field_name))
+                        model._meta.object_name, localized_field_name))
             # This approach implements the translation fields as full valid
             # django model fields and therefore adds them via add_to_class
             model.add_to_class(localized_field_name, translation_field)
@@ -144,7 +143,7 @@ class Translator(object):
             # original fieldname
             rev_dict = dict()
             for orig_name, loc_names in \
-                translation_opts.localized_fieldnames.items():
+                    translation_opts.localized_fieldnames.items():
                 for ln in loc_names:
                     rev_dict[ln] = orig_name
             translation_opts.localized_fieldnames_rev = rev_dict
