@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-from django.conf.urls import include, patterns, url
+try:
+    from django.conf.urls import include, patterns, url
+except ImportError:  # Django 1.3 fallback
+    from django.conf.urls.defaults import include, patterns, url
 from django.contrib import admin
 
 

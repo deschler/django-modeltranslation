@@ -1028,10 +1028,19 @@ class TranslationAdminTest(ModeltranslationTestBase):
         ma = TestModelAdmin(TestModel, self.site)
 
         fieldsets = [('Test', {'fields': ['data_de', 'data_en']})]
-        self.assertEqual(
-            ma.get_inline_instances(request)[0].get_fieldsets(request),
-            fieldsets)
-        self.assertEqual(
-            ma.get_inline_instances(request)[0].get_fieldsets(
-                request, self.test_obj),
-            fieldsets)
+
+        try:
+            ma_fieldsets = ma.get_inline_instances(
+                request)[0].get_fieldsets(request)
+        except AttributeError:  # Django 1.3 fallback
+            ma_fieldsets = ma.inlines[0](
+                TestModel, self.site).get_fieldsets(request)
+        self.assertEqual(ma_fieldsets, fieldsets)
+
+        try:
+            ma_fieldsets = ma.get_inline_instances(
+                request)[0].get_fieldsets(request, self.test_obj)
+        except AttributeError:  # Django 1.3 fallback
+            ma_fieldsets = ma.inlines[0](
+                TestModel, self.site).get_fieldsets(request, self.test_obj)
+        self.assertEqual(ma_fieldsets, fieldsets)
