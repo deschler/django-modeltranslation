@@ -14,6 +14,10 @@ may they use translations or not, and you never have to touch the original
 model class.
 
 
+.. image:: https://travis-ci.org/deschler/django-modeltranslation.png
+    :target: https://travis-ci.org/deschler/django-modeltranslation
+
+
 Features
 ========
 
