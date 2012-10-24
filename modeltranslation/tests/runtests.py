@@ -11,6 +11,12 @@ from django.conf import settings
 
 
 def runtests():
+    # Potential workaround for 'duplicate column name' error when using
+    # travis-ci and different django environments.
+    from django.db import connection
+    cursor = connection.cursor()
+    cursor.execute("DROP TABLE IF EXISTS 'tests';")
+
     TestRunner = get_runner(settings)
     test_runner = TestRunner(verbosity=2, failfast=False)
     failures = test_runner.run_tests(['modeltranslation'])
