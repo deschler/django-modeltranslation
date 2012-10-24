@@ -39,5 +39,3 @@ SITE_ID = 1
 LANGUAGES = (('de', 'Deutsch'),
              ('en', 'English'))
 DEFAULT_LANGUAGE = 'de'
-
-MODELTRANSLATION_TRANSLATION_REGISTRY = 'modeltranslation.tests'
