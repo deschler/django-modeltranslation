@@ -7,9 +7,9 @@ env:
   - DJANGO=1.3.4 DB=sqlite
   - DJANGO=1.3.4 DB=postgres
   - DJANGO=1.3.4 DB=mysql
-  - DJANGO=1.4.2 DB=sqlite
-  - DJANGO=1.4.2 DB=postgres
-  - DJANGO=1.4.2 DB=mysql
+  #- DJANGO=1.4.2 DB=sqlite
+  #- DJANGO=1.4.2 DB=postgres
+  #- DJANGO=1.4.2 DB=mysql
 before_script:
   - pep8 modeltranslation
   - pyflakes modeltranslation
