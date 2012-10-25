@@ -17,7 +17,8 @@ def runtests():
 #        verbosity=2, failfast=False).run_tests(['modeltranslation'])
 #    sys.exit(bool(failures))
     failures = call_command(
-        'test', 'modeltranslation', verbosity=2, failfast=False)
+        'test', 'modeltranslation', interactive=False, failfast=False,
+        verbosity=2)
     sys.exit(bool(failures))
 
 
