@@ -10,9 +10,25 @@ DEBUG = False
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(DIRNAME, 'test.db')
+        'NAME': os.path.join(DIRNAME, 'modeltranslation.db')
     }
 }
+test_db = os.environ.get('DB', 'sqlite')
+if test_db == 'mysql':
+    DATABASES['default'].update({
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'modeltranslation',
+        'USER': 'root',
+    })
+elif test_db == 'postgres':
+    DATABASES['default'].update({
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'USER': 'postgres',
+        'NAME': 'modeltranslation',
+        'OPTIONS': {
+            'autocommit': True,
+        }
+    })
 
 INSTALLED_APPS = (
     'django.contrib.auth',
