@@ -2,9 +2,7 @@
   plusplus: true, bitwise: true, regexp: true, newcap: true, immed: true */
 var google, django, gettext;
 
-(function () {
-    var jQuery = jQuery || $ || django.jQuery;
-
+(function (jQuery) {
     /* Add a new selector to jQuery that excludes parent items which match a
        given selector */
     jQuery.expr[':'].parents = function(a, i, m) {
@@ -117,4 +115,4 @@ var google, django, gettext;
             createMainSwitch(createTabs());
         }
     });
-}());
+}(django.jQuery));
