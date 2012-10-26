@@ -10,7 +10,7 @@ DEBUG = False
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(DIRNAME, 'modeltranslation.db')
+        'NAME': ':memory:'
     }
 }
 test_db = os.environ.get('DB', 'sqlite')

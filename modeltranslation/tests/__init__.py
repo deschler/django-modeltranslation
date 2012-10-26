@@ -5,13 +5,17 @@ Tests have to be run with modeltranslation.tests.settings:
 
 TODO: Merge autoregister tests from django-modeltranslation-wrapper.
 """
+from copy import copy
+
 from django import forms
 from django.conf import settings
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
+from django.db.models.loading import AppCache
 from django.test import TestCase
+from django.utils.datastructures import SortedDict
 from django.utils.translation import get_language
 from django.utils.translation import trans_real
 from django.utils.translation import ugettext_lazy
@@ -31,15 +35,11 @@ from modeltranslation.tests.models import (
 # so we'll just pass in None.
 request = None
 
-# Override LANGUAGES setting
-# FIXME: This works for ModeltranslationTest but not for TranslationAdminTest
-settings.LANGUAGES = (('de', 'Deutsch'),
-                      ('en', 'English'))
+translator.translator._registry = {}
 
 
 class TestTranslationOptions(translator.TranslationOptions):
     fields = ('title', 'text', 'url', 'email',)
-translator.translator._registry = {}
 translator.translator.register(TestModel, TestTranslationOptions)
 
 
@@ -66,6 +66,47 @@ translator.translator.register(TestModelWithFileFields,
 
 class ModeltranslationTestBase(TestCase):
     urls = 'modeltranslation.tests.urls'
+    cache = AppCache()
+
+    @classmethod
+    def clear_cache(cls):
+        """
+        It is necessary to clear cache - otherwise model reloading won't
+        recreate models, but just use old ones.
+        """
+        cls.cache.app_store = SortedDict()
+        cls.cache.app_models = SortedDict()
+        cls.cache.app_errors = {}
+        cls.cache.handled = {}
+        cls.cache.loaded = False
+
+    @classmethod
+    def reset_cache(cls):
+        """
+        Rebuild whole cache, import all models again
+        """
+        cls.clear_cache()
+        cls.cache._populate()
+        for m in cls.cache.get_apps():
+            reload(m)
+
+    @classmethod
+    def setUpClass(cls):
+        """
+        Save registry (and restore it after tests)
+
+        It is mainly needed for not spoiling modeltranslation tests.
+        But it is good to clean after yourself anyway...
+        """
+        super(ModeltranslationTestBase, cls).setUpClass()
+        from modeltranslation.translator import translator
+        cls.registry_cpy = copy(translator._registry)
+
+    @classmethod
+    def tearDownClass(cls):
+        from modeltranslation.translator import translator
+        translator._registry = cls.registry_cpy
+        super(ModeltranslationTestBase, cls).tearDownClass()
 
     def setUp(self):
         trans_real.activate('de')
