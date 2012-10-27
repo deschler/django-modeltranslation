@@ -6,21 +6,21 @@ from django.utils.translation import ugettext_lazy
 class TestModel(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
     text = models.TextField(blank=True, null=True)
-    url = models.URLField(verify_exists=False, blank=True, null=True)
+    url = models.URLField(blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
 
 
 class TestModelWithFallback(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
     text = models.TextField(blank=True, null=True)
-    url = models.URLField(verify_exists=False, blank=True, null=True)
+    url = models.URLField(blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
 
 
 class TestModelWithFallback2(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
     text = models.TextField(blank=True, null=True)
-    url = models.URLField(verify_exists=False, blank=True, null=True)
+    url = models.URLField(blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
 
 
