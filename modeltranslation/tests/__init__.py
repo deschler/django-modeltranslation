@@ -5,6 +5,8 @@ Tests have to be run with modeltranslation.tests.settings:
 
 TODO: Merge autoregister tests from django-modeltranslation-wrapper.
 """
+from copy import copy
+
 from django import forms
 from django.conf import settings
 from django.contrib.admin.sites import AdminSite
@@ -16,6 +18,7 @@ from django.test import TestCase
 from django.utils.datastructures import SortedDict
 from django.utils.translation import get_language
 from django.utils.translation import trans_real
+from django.utils.translation import ugettext_lazy
 
 from modeltranslation import settings as mt_settings
 from modeltranslation import translator
@@ -23,15 +26,42 @@ from modeltranslation.admin import (TranslationAdmin,
                                     TranslationStackedInline)
 from modeltranslation.tests.models import (
     DataModel, TestModel, TestModelWithFallback, TestModelWithFallback2,
-    TestModelWithFileFields, TestModelAbstractB, TestModelMultitableA,
-    TestModelMultitableB, TestModelMultitableC, TestModelMultitableD)
-from modeltranslation.tests.translation import (
-    TestTranslationOptionsWithFallback2)
+    TestModelWithFileFields, TestModelAbstractA, TestModelAbstractB,
+    TestModelMultitableA, TestModelMultitableB, TestModelMultitableC,
+    TestModelMultitableD)
 
 
 # None of the following tests really depend on the content of the request,
 # so we'll just pass in None.
 request = None
+
+translator.translator._registry = {}
+
+
+class TestTranslationOptions(translator.TranslationOptions):
+    fields = ('title', 'text', 'url', 'email',)
+translator.translator.register(TestModel, TestTranslationOptions)
+
+
+class TestTranslationOptionsWithFallback(translator.TranslationOptions):
+    fields = ('title', 'text', 'url', 'email',)
+    fallback_values = ""
+translator.translator.register(TestModelWithFallback,
+                               TestTranslationOptionsWithFallback)
+
+
+class TestTranslationOptionsWithFallback2(translator.TranslationOptions):
+    fields = ('title', 'text', 'url', 'email',)
+    fallback_values = {'text': ugettext_lazy('Sorry, translation is not '
+                                             'available.')}
+translator.translator.register(TestModelWithFallback2,
+                               TestTranslationOptionsWithFallback2)
+
+
+class TestTranslationOptionsModelWithFileFields(translator.TranslationOptions):
+    fields = ('title', 'file', 'image')
+translator.translator.register(TestModelWithFileFields,
+                               TestTranslationOptionsModelWithFileFields)
 
 
 class ModeltranslationTestBase(TestCase):
@@ -59,6 +89,24 @@ class ModeltranslationTestBase(TestCase):
         cls.cache._populate()
         for m in cls.cache.get_apps():
             reload(m)
+
+    @classmethod
+    def setUpClass(cls):
+        """
+        Save registry (and restore it after tests)
+
+        It is mainly needed for not spoiling modeltranslation tests.
+        But it is good to clean after yourself anyway...
+        """
+        super(ModeltranslationTestBase, cls).setUpClass()
+        from modeltranslation.translator import translator
+        cls.registry_cpy = copy(translator._registry)
+
+    @classmethod
+    def tearDownClass(cls):
+        from modeltranslation.translator import translator
+        translator._registry = cls.registry_cpy
+        super(ModeltranslationTestBase, cls).tearDownClass()
 
     def setUp(self):
         trans_real.activate('de')
@@ -767,6 +815,38 @@ class ModeltranslationTestModelValidation(ModeltranslationTestBase):
             field_name='email', invalid_value='foo en',
             valid_value='django-modeltranslation@googlecode.com',
             invalid_value_de='foo de')
+
+
+class TranslationOptionsTestModelMultitableA(translator.TranslationOptions):
+    fields = ('titlea',)
+
+
+class TranslationOptionsTestModelMultitableB(translator.TranslationOptions):
+    fields = ('titleb',)
+
+
+class TranslationOptionsTestModelMultitableC(translator.TranslationOptions):
+    fields = ('titlec',)
+
+
+class TranslationOptionsTestModelAbstractA(translator.TranslationOptions):
+    fields = ('titlea',)
+
+
+class TranslationOptionsTestModelAbstractB(translator.TranslationOptions):
+    fields = ('titleb',)
+
+
+translator.translator.register(TestModelMultitableA,
+                               TranslationOptionsTestModelMultitableA)
+translator.translator.register(TestModelMultitableB,
+                               TranslationOptionsTestModelMultitableB)
+translator.translator.register(TestModelMultitableC,
+                               TranslationOptionsTestModelMultitableC)
+translator.translator.register(TestModelAbstractA,
+                               TranslationOptionsTestModelAbstractA)
+translator.translator.register(TestModelAbstractB,
+                               TranslationOptionsTestModelAbstractB)
 
 
 class ModeltranslationInheritanceTest(ModeltranslationTestBase):
