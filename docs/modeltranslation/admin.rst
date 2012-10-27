@@ -7,12 +7,13 @@ In order to be able to edit the translations via the ``django.contrib.admin``
 application you need to register a special admin class for the translated
 models. The admin class must derive from
 ``modeltranslation.admin.TranslationAdmin`` which does some funky
-patching on all your models registered for translation. Taken the news example
-the most simple case would look like:
+patching on all your models registered for translation. Taken the
+:ref:`news example <registration>` the most simple case would look like:
 
 .. code-block:: python
 
     from django.contrib import admin
+    from news.models import News
     from modeltranslation.admin import TranslationAdmin
 
     class NewsAdmin(TranslationAdmin):

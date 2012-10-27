@@ -3,6 +3,18 @@
 Installation
 ============
 
+Requirements
+------------
+
++------------------+------------+-----------+
+| Modeltranslation | Python     | Django    |
++==================+============+===========+
+| >=0.4            | 2.5 - 2-7  | 1.3 - 1.4 |
++------------------+------------+-----------+
+| <=0.3            | 2.4 - 2.7  | 1.0 - 1.4 |
++------------------+------------+-----------+
+
+
 Using Pip
 ---------
 
@@ -97,10 +109,10 @@ and ``en`` in your project, set the ``LANGUAGES`` variable like this (where
         ('en', gettext('English')),
     )
 
-Note that the ``gettext`` lambda function is not a feature of the
-modeltranslation app, but rather required for Django to be able to
-(statically) translate the verbose names of the languages using the standard
-``i18n`` solution.
+.. note::
+    The ``gettext`` lambda function is not a feature of modeltranslation, but
+    rather required for Django to be able to (statically) translate the verbose
+    names of the languages using the standard ``i18n`` solution.
 
 
 Advanced Settings
@@ -183,7 +195,7 @@ Support for ``FileField`` and ``ImageField``.
 In most cases subclasses of the supported fields will work fine, too. Other
 fields aren't supported and will throw an ``ImproperlyConfigured`` exception.
 
-The list of supported fields can be extended. Just define a tuple of field
+The list of supported fields can be extended by defining a tuple of field
 names in your ``settings.py``.
 
 Example:
@@ -192,11 +204,11 @@ Example:
 
     MODELTRANSLATION_CUSTOM_FIELDS = ('MyField', 'MyOtherField',)
 
-.. note:: This just prevents modeltranslation from throwing an
-          ``ImproperlyConfigured`` exception. Any non text-like field will most
-          likely fail in one way or another. The feature is considered
-          experimental and might be replaced by a more sophisticated mechanism
-          in future versions.
+.. warning::
+    This just prevents modeltranslation from throwing an
+    ``ImproperlyConfigured`` exception. Any non text-like field will most
+    likely fail in one way or another. The feature is considered experimental
+    and might be replaced by a more sophisticated mechanism in future versions.
 
 
 ``MODELTRANSLATION_DEBUG``
