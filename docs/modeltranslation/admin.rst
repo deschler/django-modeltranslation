@@ -163,6 +163,7 @@ model:
 .. code-block:: python
 
     from django.contrib import admin
+    from news.models import Image, News
     from modeltranslation.admin import TranslationTabularInline
 
     class ImageInline(TranslationTabularInline):
@@ -174,35 +175,50 @@ model:
 
     admin.site.register(News, NewsAdmin)
 
-.. note:: In this example only the ``Image`` model is registered in
-          ``translation.py``. It's not a requirement that ``NewsAdmin`` derives
-          from ``TranslationAdmin`` in order to inline a model which is
-          registered for translation.
+.. note::
+    In this example only the ``Image`` model is registered in
+    ``translation.py``. It's not a requirement that ``NewsAdmin`` derives from
+    ``TranslationAdmin`` in order to inline a model which is registered for
+    translation.
+
+
+Complex Example with Admin Inlines
+**********************************
 
 In this more complex example we assume that the ``News`` and ``Image`` models
 are registered in ``translation.py``. The ``News`` model has an own custom
-admin class and the Image model an own generic stacked inline class. It uses
-the technique described in
-`TranslationAdmin in combination with other admin classes`__.:
+admin class called ``NewsAdmin`` and the ``Image`` model an own generic stacked
+inline class called ``ImageInline``. Furthermore we assume that ``NewsAdmin``
+overrides ``formfield_for_dbfield`` itself and the admin class is already
+registered through the news app.
+
+.. note::
+    The example uses the technique described in
+    `TranslationAdmin in combination with other admin classes`__.
 
 __ translationadmin_in_combination_with_other_admin_classes_
+
+Bringing it all together our code might look like this:
 
 .. code-block:: python
 
     from django.contrib import admin
+    from news.admin import ImageInline
+    from news.models import Image, News
     from modeltranslation.admin import TranslationAdmin, TranslationGenericStackedInline
 
     class TranslatedImageInline(ImageInline, TranslationGenericStackedInline):
         model = Image
 
     class TranslatedNewsAdmin(NewsAdmin, TranslationAdmin):
+        inlines = [TranslatedImageInline,]
+
         def formfield_for_dbfield(self, db_field, **kwargs):
             field = super(TranslatedNewsAdmin, self).formfield_for_dbfield(db_field, **kwargs)
             self.patch_translation_field(db_field, field, **kwargs)
             return field
 
-        inlines = [TranslatedImageInline,]
-
+    admin.site.unregister(News)
     admin.site.register(News, NewsAdmin)
 
 
@@ -221,7 +237,7 @@ The proposed way to include it is through the inner ``Media`` class of a
         class Media:
             js = (
                 'modeltranslation/js/force_jquery.js',
-                'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/jquery-ui.min.js',
+                'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/jquery-ui.min.js',
                 'modeltranslation/js/tabbed_translation_fields.js',
             )
             css = {
@@ -229,10 +245,38 @@ The proposed way to include it is through the inner ``Media`` class of a
             }
 
 The ``force_jquery.js`` script is necessary when using Django's built-in
-``django.jQuery`` object.
-
-.. note:: This is just an example and might have to be adopted to your setup of
-          serving static files.
+``django.jQuery`` object. Otherwise the *normal* ``jQuery`` object won't be
+available to the included (non-namespaced) jquery-ui library.
 
 Standard jquery-ui theming can be used to customize the look of tabs, the
 provided css file is supposed to work well with a default Django admin.
+
+.. note:: This is just an example and might have to be adopted to your setup.
+
+
+Using a Custom jQuery Library
+-----------------------------
+
+If you don't want to use the jquery library shipped with Django, you can also
+include a standard one. While this adds some redundancy it could be useful in
+situations where you need certain features from a newer version of jquery
+that is not yet included in Django or you rely on a non-namespaced version of
+jquery somewhere in your custom admin frontend code or included plugins.
+
+In this case you don't need the ``force_jquery.js`` static provided by
+modeltranslation but include the standard jquery library before jquery-ui like
+this:
+
+.. code-block:: python
+
+    class NewsAdmin(TranslationAdmin):
+        class Media:
+            js = (
+                'http://code.jquery.com/jquery-1.8.2.min.js',
+                'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/jquery-ui.min.js',
+                'modeltranslation/js/tabbed_translation_fields.js',
+            )
+            css = {
+                'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
+            }
+
