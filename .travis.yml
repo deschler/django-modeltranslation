@@ -16,7 +16,11 @@ env:
 matrix:
   exclude:
     - python: "2.5"
-      env: DJANGO=https://github.com/django/django/zipball/master
+      env: DJANGO=https://github.com/django/django/zipball/master DB=sqlite
+    - python: "2.5"
+      env: DJANGO=https://github.com/django/django/zipball/master DB=postgres
+    - python: "2.5"
+      env: DJANGO=https://github.com/django/django/zipball/master DB=mysql
 before_script:
   - pep8 modeltranslation
   - pyflakes modeltranslation
