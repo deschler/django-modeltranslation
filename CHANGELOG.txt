@@ -1,7 +1,9 @@
 CHANGED: Modeltranslation related css class prefix to 'mt'.
 
+  FIXED: Race condition during initialization.
+         (resolves issue #91)
   FIXED: Tabs don't properly support two-part language codes.
-         (resolves issue 63)
+         (resolves issue #63)
 
 
 v0.4.0-beta2
@@ -18,10 +20,10 @@ Date: 2012-10-17
 Packaged from revision 09a0c4434a676c6fd753e6dcde95056c424db62e.
 
 CHANGED: Refactored documentation using sphinx.
-         (resolves issue 81)
+         (resolves issue #81)
 
   FIXED: Setting MODELTRANSLATION_TRANSLATION_FILES should be optional.
-         (resolves issue 86)
+         (resolves issue #86)
 
 
 v0.4.0-alpha1
@@ -31,11 +33,11 @@ Packaged from revision 170.
 
   ADDED: Support for FileField and ImageField.
          (thanks to Bruno Tavares,
-          resolves issue 30)
+          resolves issue #30)
   ADDED: New management command sync_database_fields to sync the database after
          a new model has been registered or a new language has been added.
          (thanks to Sébastien Fievet and the authors of django-transmeta,
-          resolves issue 62)
+          resolves issue #62)
 
 CHANGED: Excluded tabular inlines from jQuery tabs, as they are currently
          not supported.
@@ -46,7 +48,7 @@ CHANGED: Use app-level translation files in favour of a single project-level
          details. This is basically a merge from both
          django-modeltranslation-wrapper and hyperweek's branch at github.
          (thanks to Jacek Tomaszewski, Sébastien Fievet and Maxime Haineault,
-          resolves issues 19, 58 and 71)
+          resolves issues #19, #58 and #71)
 CHANGED: Moved tests to separate folder and added tests for TranslationAdmin.
          To run the tests the settings provided in model.tests.modeltranslation
          have to be used (settings.LANGUAGES override doesn't work for
@@ -56,17 +58,17 @@ CHANGED: Major refactoring of the admin integration. Subclassed BaseModelAdmin
          thread safe. Instead used provided hooks like get_form, get_formset
          and get_fieldsets. This should resolve several problems with the
          exclude and fieldsets options and properly support options in inlines.
-         (resolves issue 72)
+         (resolves issue #72)
 
   FIXED: Non-unicode verbose field names showing up empty in forms.
-         (resolves issue 35)
+         (resolves issue #35)
   FIXED: Dynamic TranslationOptions model name.
   FIXED: Widgets for translated fields are not properly copied from original
          fields.
-         (thanks to boris-chervenkov, resolves issue 74)
+         (thanks to boris-chervenkov, resolves issue #74)
   FIXED: Removed XMLField test which is deprecated since Django 1.3 and
          broke tests in Django 1.4.
-         (resolves issue 75)
+         (resolves issue #75)
 
 
 v0.3.3
@@ -79,7 +81,7 @@ CHANGED: jQuery search path in tabbed_translation_fields.js. This allows use of
          want to force the use of Django's jQuery can include force_jquery.js.
 
   FIXED: Another attempt to include static files during installation.
-         (resolves reopened issue 61)
+         (resolves reopened issue #61)
 
 
 v0.3.2
@@ -88,7 +90,7 @@ Date: 2011-06-16
 Packaged from revision 122.
 
   FIXED: Static files not included during installation.
-         (resolves issue 61)
+         (resolves issue #61)
 
 
 v0.3.1
@@ -105,43 +107,43 @@ Date: 2011-06-03
 Packaged from revision 113.
 
   ADDED: Support for multi-table inheritance.
-         (thanks to Sébastien Fievet, resolves issues 50 and 51)
+         (thanks to Sébastien Fievet, resolves issues #50 and #51)
   ADDED: Jquery-ui based admin support for tabbed translation fields.
-         (thanks to jaap and adamsc, resolves issue 39)
+         (thanks to jaap and adamsc, resolves issue #39)
   ADDED: CSS class to identify a translation field and the default translation
          field in admin.
          (thanks to jaap)
   ADDED: Configurable default value per field instance.
-         (thanks to bmihelac, resolves issue 28)
+         (thanks to bmihelac, resolves issue #28)
   ADDED: Setting to override the default language.
-         (thanks to jaap, resolves issue 2)
+         (thanks to jaap, resolves issue #2)
 
 CHANGED: Improved performance of update_translation_fields command.
-         (thanks to adamsc, resolves issue 43)
+         (thanks to adamsc, resolves issue #43)
 CHANGED: Factored out settings into a separate settings.py and consistently
          used an app specific settings prefix.
 CHANGED: Refactored creation of translation fields and added handling of
          supported fields.
-         (resolves issue 37)
+         (resolves issue #37)
 
   FIXED: Clearing the default translation field in admin does not clear the
          original field.
-         (resolves issue 47)
+         (resolves issue #47)
   FIXED: In some setups appears "This field is required" error for the
          original field.
-         (resolves issue 5)
+         (resolves issue #5)
   FIXED: Translations are not saved for tinymce HTMLField when using jquery
          tabs.
-         (thanks to kottenator, resolves issue 41)
+         (thanks to kottenator, resolves issue #41)
   FIXED: Fieldname isn't ensured to be string.
-         (resolves issue 41)
+         (resolves issue #41)
   FIXED: Kept backwards compatibility with Django-1.0.
-         (thanks to jaap, resolves issue 34)
+         (thanks to jaap, resolves issue #34)
   FIXED: Regression in south_field_triple caused by r55.
-         (thanks to jaap, resolves issue 29)
+         (thanks to jaap, resolves issue #29)
   FIXED: TranslationField pre_save does not get the default language
          correctly.
-         (thanks to jaap, resolves issue 31)
+         (thanks to jaap, resolves issue #31)
 
 
 v0.2
@@ -150,44 +152,44 @@ Date: 2010-06-15
 Packaged from revision 57.
 
   ADDED: Support for admin prepopulated_fields.
-         (resolves issue 21)
+         (resolves issue #21)
   ADDED: Support for admin list_editable.
-         (thanks carl.j.meyer, resolves issue 20)
+         (thanks carl.j.meyer, resolves issue #20)
   ADDED: Preserve the formfield widget of the translated field.
          (thanks piquadrat)
   ADDED: Initial support for django-south.
-         (thanks andrewgodwin, resolves issue 11)
+         (thanks andrewgodwin, resolves issue #11)
   ADDED: Support for admin inlines, common and generic.
-         (resolves issue 12 and issue 18)
+         (resolves issue #12 and issue #18)
 
   FIXED: Admin form validation errors with empty translated values and
          unique=True.
-         (thanks to adamsc, resolves issue 26)
+         (thanks to adamsc, resolves issue #26)
   FIXED: Mangling of untranslated prepopulated fields.
-         (thanks to carl.j.meyer, resolves issue 25)
+         (thanks to carl.j.meyer, resolves issue #25)
   FIXED: Verbose names of translated fields are not translated.
-         (thanks to carl.j.meyer, resolves issue 24)
+         (thanks to carl.j.meyer, resolves issue #24)
   FIXED: Race condition between model import and translation registration in
          production by ensuring that models are registered for translation
          before TranslationAdmin runs.
-         (thanks to carl.j.meyer, resolves issue 19)
+         (thanks to carl.j.meyer, resolves issue #19)
   FIXED: Added workaround for swallowed ImportErrors by printing a traceback
          explicitly.
-         (resolves issue 17)
+         (resolves issue #17)
   FIXED: Only print debug statements to stdout if the runserver or
          runserver_plus management commands are used.
-         (resolves issue 16)
+         (resolves issue #16)
   FIXED: Removed print statements so that modeltranslation is usable with
          mod_wsgi.
-         (resolves issue 7)
+         (resolves issue #7)
   FIXED: Broken admin fields and fieldsets.
-         (thanks simoncelen, resolves issue 9)
+         (thanks simoncelen, resolves issue #9)
   FIXED: Creation of db fields with invalid python language code.
-         (resolves issue 4)
+         (resolves issue #4)
   FIXED: Tests to run from any project.
-         (thanks carl.j.meyer, resolves issue 6)
+         (thanks carl.j.meyer, resolves issue #6)
   FIXED: Removed unused dependency to content type which can break syncdb.
-         (thanks carl.j.meyer, resolves issue 1)
+         (thanks carl.j.meyer, resolves issue #1)
 
 
 v0.1
