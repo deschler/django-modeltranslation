@@ -11,6 +11,10 @@ from modeltranslation.translator import translator
 from modeltranslation.utils import (get_translation_fields,
                                     build_localized_fieldname,
                                     build_css_class)
+# Ensure that models are registered for translation before TranslationAdmin
+# runs. The import is supposed to resolve a race condition between model import
+# and translation registration in production (see issue #19).
+import modeltranslation.models
 
 
 class TranslationBaseModelAdmin(BaseModelAdmin):
