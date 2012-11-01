@@ -9,8 +9,7 @@ from django.utils import translation
 # Ensure that models are registered for translation before TranslationAdmin
 # runs. The import is supposed to resolve a race condition between model import
 # and translation registration in production (see issue #19).
-import modeltranslation.models
-assert modeltranslation.models  # silence pyflakes
+import modeltranslation.models  # NOQA
 from modeltranslation.settings import DEFAULT_LANGUAGE
 from modeltranslation.translator import translator
 from modeltranslation.utils import (get_translation_fields,
