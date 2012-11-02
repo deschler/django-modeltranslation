@@ -22,8 +22,7 @@ def get_version(version=None, pep386=True, short=False):
     if pep386:
         # Now build the two parts of the version number:
         # main = X.Y[.Z]
-        # sub = .devN - for pre-alpha releases
-        #     | {a|b|c}N - for alpha, beta and rc releases
+        # sub = {a|b|c}N - for alpha, beta and rc releases
         parts = 2 if version[2] == 0 else 3
         main = '.'.join(str(x) for x in version[:parts])
         sub = ''
@@ -35,8 +34,9 @@ def get_version(version=None, pep386=True, short=False):
         return main + sub
 
     if short:
-        return '{0:d}.{0:d}'.format(*version)
-    return '{0:d}.{1:d}.{2:d}-{3:s}{4:d}'.format(*version)
+        return '%d.%d'.format(version[0], version[1])
+    return '%d.%d.%d-%s%d' % (
+        version[0], version[1], version[2], version[3], version[4])
 
 
 __version__ = get_version()
