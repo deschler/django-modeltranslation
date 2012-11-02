@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 from distutils.core import setup
 
+# Dynamically calculate the version based on modeltranslation.VERSION.
+version = __import__('modeltranslation').get_version(pep386=False)
+
 
 setup(
     name='django-modeltranslation',
-    version='0.4.0-beta2',
+    version=version,
     description='Translates Django models using a registration approach.',
     long_description=(
         'The modeltranslation application can be used to translate dynamic '
@@ -23,7 +26,7 @@ setup(
     package_data={'modeltranslation': ['static/modeltranslation/css/*.css',
                                        'static/modeltranslation/js/*.js']},
     requires=['django(>=1.3)'],
-    download_url='https://github.com/downloads/deschler/django-modeltranslation/django-modeltranslation-0.4.0-beta2.tar.gz',
+    download_url='https://github.com/downloads/deschler/django-modeltranslation/django-modeltranslation-%s.tar.gz' % version,
     classifiers=[
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.5',
