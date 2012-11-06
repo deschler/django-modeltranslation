@@ -14,19 +14,17 @@ from django.core.files.base import ContentFile
 from django.db.models.loading import AppCache
 from django.test import TestCase
 from django.utils.datastructures import SortedDict
-from django.utils.translation import get_language
-from django.utils.translation import trans_real
+from django.utils.translation import get_language, trans_real
 
 from modeltranslation import settings as mt_settings
 from modeltranslation import translator
 from modeltranslation.admin import (TranslationAdmin,
                                     TranslationStackedInline)
 from modeltranslation.tests.models import (
-    DataModel, TestModel, TestModelWithFallback, TestModelWithFallback2,
-    TestModelWithFileFields, TestModelAbstractB, TestModelMultitableA,
-    TestModelMultitableB, TestModelMultitableC, TestModelMultitableD)
-from modeltranslation.tests.translation import (
-    TestTranslationOptionsWithFallback2)
+    AbstractModelB, MultitableModelA, DataModel, FallbackModel, FallbackModel2,
+    FileFieldsModel, TestModel, MultitableBModelA, MultitableModelC,
+    MultitableDTestModel)
+from modeltranslation.tests.translation import FallbackModel2TranslationOptions
 
 
 # None of the following tests really depend on the content of the request,
@@ -167,11 +165,11 @@ class ModeltranslationTest(ModeltranslationTestBase):
         return this string.
         """
         title1_de = "title de"
-        n = TestModelWithFallback()
+        n = FallbackModel()
         n.title = title1_de
         n.save()
         del n
-        n = TestModelWithFallback.objects.get(title=title1_de)
+        n = FallbackModel.objects.get(title=title1_de)
         self.failUnlessEqual(n.title, title1_de)
         trans_real.activate("en")
         self.failUnlessEqual(n.title, "")
@@ -184,23 +182,23 @@ class ModeltranslationTest(ModeltranslationTestBase):
         """
         title1_de = "title de"
         text1_de = "text in german"
-        n = TestModelWithFallback2()
+        n = FallbackModel2()
         n.title = title1_de
         n.text = text1_de
         n.save()
         del n
-        n = TestModelWithFallback2.objects.get(title=title1_de)
+        n = FallbackModel2.objects.get(title=title1_de)
         trans_real.activate("en")
         self.failUnlessEqual(n.title, title1_de)
         self.failUnlessEqual(
             n.text,
-            TestTranslationOptionsWithFallback2.fallback_values['text'])
+            FallbackModel2TranslationOptions.fallback_values['text'])
 
 
-class ModeltranslationWithFileFields(ModeltranslationTestBase):
+class FileFieldsTest(ModeltranslationTestBase):
     def test_translated_models(self):
         # First create an instance of the test model to play with
-        inst = TestModelWithFileFields.objects.create(
+        inst = FileFieldsModel.objects.create(
             title="Testtitle", file=None)
         field_names = dir(inst)
         self.failUnless('id' in field_names)
@@ -214,7 +212,7 @@ class ModeltranslationWithFileFields(ModeltranslationTestBase):
 
     def test_translated_models_instance(self):
         #f_en = ContentFile("Just a really good file")
-        inst = TestModelWithFileFields(title="Testtitle", file=None)
+        inst = FileFieldsModel(title="Testtitle", file=None)
 
         trans_real.activate("en")
         inst.title = 'title_en'
@@ -617,7 +615,7 @@ class ModeltranslationTestRule4(ModeltranslationTestBase):
                          value3='django-modeltranslation@googlecode.net')
 
 
-class ModeltranslationTestModelValidation(ModeltranslationTestBase):
+class ModelValidationTest(ModeltranslationTestBase):
     """
     Tests if a translation model field validates correctly.
     """
@@ -769,21 +767,21 @@ class ModeltranslationTestModelValidation(ModeltranslationTestBase):
             invalid_value_de='foo de')
 
 
-class ModeltranslationInheritanceTest(ModeltranslationTestBase):
+class ModelInheritanceTest(ModeltranslationTestBase):
     """Tests for inheritance support in modeltranslation."""
     def test_abstract_inheritance(self):
-        field_names_b = TestModelAbstractB._meta.get_all_field_names()
+        field_names_b = AbstractModelB._meta.get_all_field_names()
         self.failIf('titled' in field_names_b)
         self.failIf('titled_de' in field_names_b)
         self.failIf('titled_en' in field_names_b)
 
     def test_multitable_inheritance(self):
-        field_names_a = TestModelMultitableA._meta.get_all_field_names()
+        field_names_a = MultitableModelA._meta.get_all_field_names()
         self.failUnless('titlea' in field_names_a)
         self.failUnless('titlea_de' in field_names_a)
         self.failUnless('titlea_en' in field_names_a)
 
-        field_names_b = TestModelMultitableB._meta.get_all_field_names()
+        field_names_b = MultitableBModelA._meta.get_all_field_names()
         self.failUnless('titlea' in field_names_b)
         self.failUnless('titlea_de' in field_names_b)
         self.failUnless('titlea_en' in field_names_b)
@@ -791,7 +789,7 @@ class ModeltranslationInheritanceTest(ModeltranslationTestBase):
         self.failUnless('titleb_de' in field_names_b)
         self.failUnless('titleb_en' in field_names_b)
 
-        field_names_c = TestModelMultitableC._meta.get_all_field_names()
+        field_names_c = MultitableModelC._meta.get_all_field_names()
         self.failUnless('titlea' in field_names_c)
         self.failUnless('titlea_de' in field_names_c)
         self.failUnless('titlea_en' in field_names_c)
@@ -802,7 +800,7 @@ class ModeltranslationInheritanceTest(ModeltranslationTestBase):
         self.failUnless('titlec_de' in field_names_c)
         self.failUnless('titlec_en' in field_names_c)
 
-        field_names_d = TestModelMultitableD._meta.get_all_field_names()
+        field_names_d = MultitableDTestModel._meta.get_all_field_names()
         self.failUnless('titlea' in field_names_d)
         self.failUnless('titlea_de' in field_names_d)
         self.failUnless('titlea_en' in field_names_d)

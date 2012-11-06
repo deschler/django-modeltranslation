@@ -3,9 +3,9 @@ from django.utils.translation import ugettext_lazy
 
 from modeltranslation.translator import translator, TranslationOptions
 from modeltranslation.tests.models import (
-    TestModel, TestModelWithFallback, TestModelWithFallback2,
-    TestModelWithFileFields, TestModelAbstractA, TestModelAbstractB,
-    TestModelMultitableA, TestModelMultitableB, TestModelMultitableC)
+    TestModel, FallbackModel, FallbackModel2,
+    FileFieldsModel, AbstractModelA, AbstractModelB,
+    MultitableModelA, MultitableBModelA, MultitableModelC)
 
 
 class TestTranslationOptions(TranslationOptions):
@@ -13,52 +13,44 @@ class TestTranslationOptions(TranslationOptions):
 translator.register(TestModel, TestTranslationOptions)
 
 
-class TestTranslationOptionsWithFallback(TranslationOptions):
+class FallbackModelTranslationOptions(TranslationOptions):
     fields = ('title', 'text', 'url', 'email',)
     fallback_values = ""
-translator.register(TestModelWithFallback,
-                    TestTranslationOptionsWithFallback)
+translator.register(FallbackModel, FallbackModelTranslationOptions)
 
 
-class TestTranslationOptionsWithFallback2(TranslationOptions):
+class FallbackModel2TranslationOptions(TranslationOptions):
     fields = ('title', 'text', 'url', 'email',)
     fallback_values = {'text': ugettext_lazy('Sorry, translation is not '
                                              'available.')}
-translator.register(TestModelWithFallback2,
-                    TestTranslationOptionsWithFallback2)
+translator.register(FallbackModel2, FallbackModel2TranslationOptions)
 
 
-class TestTranslationOptionsModelWithFileFields(TranslationOptions):
+class FileFieldsModelTranslationOptions(TranslationOptions):
     fields = ('title', 'file', 'image')
-translator.register(TestModelWithFileFields,
-                    TestTranslationOptionsModelWithFileFields)
+translator.register(FileFieldsModel, FileFieldsModelTranslationOptions)
 
 
-class TranslationOptionsTestModelMultitableA(TranslationOptions):
+class MultitableModelATranslationOptions(TranslationOptions):
     fields = ('titlea',)
-translator.register(TestModelMultitableA,
-                    TranslationOptionsTestModelMultitableA)
+translator.register(MultitableModelA, MultitableModelATranslationOptions)
 
 
-class TranslationOptionsTestModelMultitableB(TranslationOptions):
+class MultitableModelBTranslationOptions(TranslationOptions):
     fields = ('titleb',)
-translator.register(TestModelMultitableB,
-                    TranslationOptionsTestModelMultitableB)
+translator.register(MultitableBModelA, MultitableModelBTranslationOptions)
 
 
-class TranslationOptionsTestModelMultitableC(TranslationOptions):
+class MultitableModelCTranslationOptions(TranslationOptions):
     fields = ('titlec',)
-translator.register(TestModelMultitableC,
-                    TranslationOptionsTestModelMultitableC)
+translator.register(MultitableModelC, MultitableModelCTranslationOptions)
 
 
-class TranslationOptionsTestModelAbstractA(TranslationOptions):
+class AbstractModelATranslationOptions(TranslationOptions):
     fields = ('titlea',)
-translator.register(TestModelAbstractA,
-                    TranslationOptionsTestModelAbstractA)
+translator.register(AbstractModelA, AbstractModelATranslationOptions)
 
 
-class TranslationOptionsTestModelAbstractB(TranslationOptions):
+class AbstractModelBTranslationOptions(TranslationOptions):
     fields = ('titleb',)
-translator.register(TestModelAbstractB,
-                    TranslationOptionsTestModelAbstractB)
+translator.register(AbstractModelB, AbstractModelBTranslationOptions)
