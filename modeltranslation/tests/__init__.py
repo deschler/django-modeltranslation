@@ -5,6 +5,8 @@ Tests have to be run with modeltranslation.tests.settings:
 
 TODO: Merge autoregister tests from django-modeltranslation-wrapper.
 """
+import os
+
 from django import forms
 from django.conf import settings
 from django.contrib.admin.sites import AdminSite
@@ -196,6 +198,20 @@ class ModeltranslationTest(ModeltranslationTestBase):
 
 
 class FileFieldsTest(ModeltranslationTestBase):
+    test_media_root = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), 'media')
+    test_media = os.path.join(test_media_root, 'test')
+
+    def tearDown(self):
+        # File tests create a temporary media directory structure. While the
+        # files are automatically deleted by the storage, the directories will
+        # stay. So we clean up a bit...
+        if os.path.isdir(self.test_media):
+            os.rmdir(self.test_media)
+        if os.path.isdir(self.test_media_root):
+            os.rmdir(self.test_media_root)
+        trans_real.deactivate()
+
     def test_translated_models(self):
         # First create an instance of the test model to play with
         inst = FileFieldsModel.objects.create(
