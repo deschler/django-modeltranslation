@@ -152,18 +152,18 @@ class Translator(object):
             for related_obj in model._meta.get_all_related_objects():
                 delete_cache_fields(related_obj.model)
 
-        model_fallback_values = getattr(
-            translation_opts, 'fallback_values', None)
-        for field_name in translation_opts.fields:
-            if model_fallback_values is None:
-                field_fallback_value = None
-            elif isinstance(model_fallback_values, dict):
-                field_fallback_value = model_fallback_values.get(
-                    field_name, None)
-            else:
-                field_fallback_value = model_fallback_values
-            setattr(model, field_name, TranslationFieldDescriptor(
-                field_name, fallback_value=field_fallback_value))
+            model_fallback_values = getattr(
+                translation_opts, 'fallback_values', None)
+            for field_name in translation_opts.fields:
+                if model_fallback_values is None:
+                    field_fallback_value = None
+                elif isinstance(model_fallback_values, dict):
+                    field_fallback_value = model_fallback_values.get(
+                        field_name, None)
+                else:
+                    field_fallback_value = model_fallback_values
+                setattr(model, field_name, TranslationFieldDescriptor(
+                    field_name, fallback_value=field_fallback_value))
 
         #signals.pre_init.connect(translated_model_initializing, sender=model,
                                  #weak=False)
