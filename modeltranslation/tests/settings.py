@@ -3,7 +3,6 @@
 Settings overrided for test time
 """
 import os
-import django
 from django.conf import settings
 
 
