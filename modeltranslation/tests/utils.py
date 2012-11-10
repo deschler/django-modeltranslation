@@ -4,6 +4,8 @@ This is Django 1.4 override_settings decorator backported for compatibility with
 The only difference is that this version does not use settings_changes signal
 (because there is no such signal).
 """
+from __future__ import with_statement  # Python 2.5 compatibility
+
 from django.utils.functional import wraps
 from django.conf import settings, UserSettingsHolder
 

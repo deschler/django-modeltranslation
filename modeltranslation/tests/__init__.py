@@ -6,6 +6,7 @@ NOTE: Perhaps ModeltranslationTestBase in tearDownClass should reload some modul
       so that tests for other apps are in the same environment.
 
 """
+from __future__ import with_statement  # Python 2.5 compatibility
 import os
 import shutil
 
@@ -41,7 +42,6 @@ except ImportError:
 request = None
 
 
-@override_settings(**TEST_SETTINGS)
 class ModeltranslationTestBase(TestCase):
     urls = 'modeltranslation.tests.urls'
     cache = AppCache()
@@ -137,6 +137,8 @@ class ModeltranslationTestBase(TestCase):
 
     def tearDown(self):
         trans_real.deactivate()
+
+ModeltranslationTestBase = override_settings(**TEST_SETTINGS)(ModeltranslationTestBase)
 
 
 class ModeltranslationTest(ModeltranslationTestBase):
