@@ -33,4 +33,4 @@ install:
   - pip install -q $DJANGO
   - pip install -e . --use-mirrors
 script:
-  - python modeltranslation/tests/runtests.py
+  - ./runtests.py
