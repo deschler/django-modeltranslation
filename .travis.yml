@@ -22,7 +22,7 @@ matrix:
     - python: "2.5"
       env: DJANGO=https://github.com/django/django/zipball/master DB=mysql
 before_script:
-  - flake8 modeltranslation
+  - flake8 --max-line-length=100 modeltranslation
   - mysql -e 'create database modeltranslation;'
   - psql -c 'create database modeltranslation;' -U postgres
 install:
@@ -33,4 +33,4 @@ install:
   - pip install -q $DJANGO
   - pip install -e . --use-mirrors
 script:
-  - python modeltranslation/tests/runtests.py
+  - ./runtests.py
