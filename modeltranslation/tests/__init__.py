@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 """
-Tests have to be run with modeltranslation.tests.settings:
-./manage.py test --settings=modeltranslation.tests.settings modeltranslation
-
 TODO: Merge autoregister tests from django-modeltranslation-wrapper.
+
+NOTE: Perhaps ModeltranslationTestBase in tearDownClass should reload some modules,
+      so that tests for other apps are in the same environment.
+
 """
+from __future__ import with_statement  # Python 2.5 compatibility
 import os
 import shutil
 
 from django import forms
-from django.conf import settings
+from django.conf import settings as django_settings
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -28,7 +30,12 @@ from modeltranslation.tests.models import (
     FileFieldsModel, TestModel, MultitableBModelA, MultitableModelC,
     MultitableDTestModel)
 from modeltranslation.tests.translation import FallbackModel2TranslationOptions
+from modeltranslation.tests.test_settings import TEST_SETTINGS
 
+try:
+    from django.test.utils import override_settings
+except ImportError:
+    from modeltranslation.tests.utils import override_settings
 
 # None of the following tests really depend on the content of the request,
 # so we'll just pass in None.
@@ -38,6 +45,70 @@ request = None
 class ModeltranslationTestBase(TestCase):
     urls = 'modeltranslation.tests.urls'
     cache = AppCache()
+    synced = False
+
+    @classmethod
+    def setUpClass(cls):
+        """
+        Prepare database:
+        * Call syncdb to create tables for tests.models (since during
+        default testrunner's db creation modeltranslation.tests was not in INSTALLED_APPS
+        """
+        super(ModeltranslationTestBase, cls).setUpClass()
+        if not ModeltranslationTestBase.synced:
+            # In odred to perform only one syncdb
+            ModeltranslationTestBase.synced = True
+            with override_settings(**TEST_SETTINGS):
+                import sys
+
+                # 1. Reload translation in case USE_I18N was False
+                from django.utils import translation
+                reload(translation)
+
+                # 2. Reload MT because LANGUAGES likely changed.
+                reload(mt_settings)
+                reload(translator)
+                from modeltranslation import admin, utils
+                reload(admin)
+                reload(utils)
+
+                # 3. Reset test models (because autodiscover have already run, those models
+                #    have translation fields, but for languages previously defined. We want
+                #    to be sure that 'de' and 'en' are available)
+                del cls.cache.app_models['tests']
+                from modeltranslation.tests import models
+                reload(models)
+                cls.cache.load_app('modeltranslation.tests')
+                sys.modules.pop('modeltranslation.tests.translation', None)
+
+                # 4. Autodiscover
+                from modeltranslation import models
+                reload(models)
+
+                # 5. Reload some imported classes
+                cls.reload_globals('modeltranslation.tests.models')
+                cls.reload_globals('modeltranslation.admin')
+
+                # 6. Syncdb (``migrate=False`` in case of south)
+                from django.db import connections, DEFAULT_DB_ALIAS
+                from django.core.management import call_command
+                call_command('syncdb', verbosity=0, migrate=False, interactive=False,
+                             database=connections[DEFAULT_DB_ALIAS].alias, load_initial_data=False)
+
+    @staticmethod
+    def reload_globals(module):
+        """
+        Very ugly method for reloading things imported from module.
+
+        It wouldn't be needed if eg. ``TestModel`` calls would be replaced by ``models.TestModel``.
+        """
+        names = []
+        for name, item in globals().items():
+            if hasattr(item, '__module__') and item.__module__ == module:
+                names.append(name)
+        _temp = __import__(module, globals(), locals(), names, -1)
+        for name in names:
+            globals()[name] = getattr(_temp, name)
 
     @classmethod
     def clear_cache(cls):
@@ -67,21 +138,19 @@ class ModeltranslationTestBase(TestCase):
     def tearDown(self):
         trans_real.deactivate()
 
+ModeltranslationTestBase = override_settings(**TEST_SETTINGS)(ModeltranslationTestBase)
+
 
 class ModeltranslationTest(ModeltranslationTestBase):
     """Basic tests for the modeltranslation application."""
     def test_registration(self):
-        self.client.post('/set_language/', data={'language': 'de'})
-        #self.client.session['django_language'] = 'de-de'
-        #self.client.cookies[settings.LANGUAGE_COOKIE_NAME] = 'de-de'
-
-        langs = tuple(l[0] for l in settings.LANGUAGES)
+        langs = tuple(l[0] for l in django_settings.LANGUAGES)
         self.failUnlessEqual(2, len(langs))
         self.failUnless('de' in langs)
         self.failUnless('en' in langs)
         self.failUnless(translator.translator)
 
-        # Check that eight models are registered for translation
+        # Check that nine models are registered for translation
         self.failUnlessEqual(len(translator.translator._registry), 9)
 
         # Try to unregister a model that is not registered
