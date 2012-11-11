@@ -1,5 +1,6 @@
 """
-This is Django 1.4 override_settings decorator backported for compatibility with Django 1.3.
+This are Django 1.4 override_settings decorator and override (language) context manager
+backported for compatibility with Django 1.3.
 
 The only difference is that this version does not use settings_changes signal
 (because there is no such signal).
@@ -8,6 +9,7 @@ from __future__ import with_statement  # Python 2.5 compatibility
 
 from django.utils.functional import wraps
 from django.conf import settings, UserSettingsHolder
+from django.utils.translation import get_language, activate, deactivate, deactivate_all
 
 
 class override_settings(object):
@@ -58,3 +60,22 @@ class override_settings(object):
 
     def disable(self):
         settings._wrapped = self.wrapped
+
+
+class override(object):
+    def __init__(self, language, deactivate=False):
+        self.language = language
+        self.deactivate = deactivate
+        self.old_language = get_language()
+
+    def __enter__(self):
+        if self.language is not None:
+            activate(self.language)
+        else:
+            deactivate_all()
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if self.deactivate:
+            deactivate()
+        else:
+            activate(self.old_language)
