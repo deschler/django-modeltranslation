@@ -1,3 +1,10 @@
+v0.4.0
+======
+Date: 2012-11-11
+
+CHANGED: Refactored tests to allow test runs with other apps. Includes a
+         "backport" of override_settings to ensure Django 1.3 support.
+         (thanks to Jacek Tomaszewski)
 CHANGED: Modeltranslation related css class prefix to 'mt'.
 
   FIXED: Race condition during initialization.

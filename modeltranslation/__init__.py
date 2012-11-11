@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-VERSION = (0, 4, 0, 'beta', 2)
+VERSION = (0, 4, 0, 'final', 0)
 
 
 def get_version(version=None, pep386=True, short=False):
@@ -11,7 +11,7 @@ def get_version(version=None, pep386=True, short=False):
     will be used (e.g. 0.4.0-rc1).
 
     If the ``short`` parameter is ``True``, the release style naming version
-    will omit the patch level and sub (e.g. 0.4). The is for example used for
+    will omit the patch level and sub (e.g. 0.4). This is for example used for
     sphinx.
     """
     if version is None:
@@ -35,8 +35,10 @@ def get_version(version=None, pep386=True, short=False):
 
     if short:
         return '%d.%d'.format(version[0], version[1])
-    return '%d.%d.%d-%s%d' % (
-        version[0], version[1], version[2], version[3], version[4])
+    if version[3] != 'final':
+        return '%d.%d.%d-%s%d' % (
+            version[0], version[1], version[2], version[3], version[4])
+    return '%d.%d.%d' % (version[0], version[1], version[2])
 
 
 __version__ = get_version()
