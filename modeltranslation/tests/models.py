@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.core import validators
 from django.db import models
 from django.utils.translation import ugettext_lazy
 
@@ -30,6 +31,15 @@ class FileFieldsModel(models.Model):
     image = models.ImageField(upload_to='test', null=True, blank=True)
 
 
+class OtherFieldsModel(models.Model):
+    """
+    This class is supposed to include other newly added fields types, so that
+    adding new supported field doesn't end in adding new test model.
+    """
+    # That's rich! PositiveIntegerField is only validated in forms, not in models.
+    int = models.PositiveIntegerField(default=42, validators=[validators.MinValueValidator(0)])
+
+
 class MultitableModelA(models.Model):
     titlea = models.CharField(ugettext_lazy('title a'), max_length=255)
 
@@ -59,3 +69,21 @@ class AbstractModelB(AbstractModelA):
 
 class DataModel(models.Model):
     data = models.TextField(blank=True, null=True)
+
+
+class ManagerTestModel(models.Model):
+    title = models.CharField(ugettext_lazy('title'), max_length=255)
+    visits = models.IntegerField(ugettext_lazy('visits'), default=0)
+
+
+class CustomManager(models.Manager):
+    def get_query_set(self):
+        return super(CustomManager, self).get_query_set().filter(title__contains='a')
+
+    def foo(self):
+        return 'bar'
+
+
+class CustomManagerTestModel(models.Model):
+    title = models.CharField(ugettext_lazy('title'), max_length=255)
+    objects = CustomManager()

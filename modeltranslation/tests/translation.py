@@ -4,8 +4,9 @@ from django.utils.translation import ugettext_lazy
 from modeltranslation.translator import translator, TranslationOptions
 from modeltranslation.tests.models import (
     TestModel, FallbackModel, FallbackModel2,
-    FileFieldsModel, AbstractModelA, AbstractModelB,
-    MultitableModelA, MultitableBModelA, MultitableModelC)
+    FileFieldsModel, OtherFieldsModel, AbstractModelA, AbstractModelB,
+    MultitableModelA, MultitableBModelA, MultitableModelC,
+    ManagerTestModel, CustomManagerTestModel)
 
 
 class TestTranslationOptions(TranslationOptions):
@@ -31,6 +32,11 @@ class FileFieldsModelTranslationOptions(TranslationOptions):
 translator.register(FileFieldsModel, FileFieldsModelTranslationOptions)
 
 
+class OtherFieldsModelTranslationOptions(TranslationOptions):
+    fields = ('int',)
+translator.register(OtherFieldsModel, OtherFieldsModelTranslationOptions)
+
+
 class MultitableModelATranslationOptions(TranslationOptions):
     fields = ('titlea',)
 translator.register(MultitableModelA, MultitableModelATranslationOptions)
@@ -54,3 +60,13 @@ translator.register(AbstractModelA, AbstractModelATranslationOptions)
 class AbstractModelBTranslationOptions(TranslationOptions):
     fields = ('titleb',)
 translator.register(AbstractModelB, AbstractModelBTranslationOptions)
+
+
+class ManagerTestModelTranslationOptions(TranslationOptions):
+    fields = ('title', 'visits')
+translator.register(ManagerTestModel, ManagerTestModelTranslationOptions)
+
+
+class CustomManagerTestModelTranslationOptions(TranslationOptions):
+    fields = ('title',)
+translator.register(CustomManagerTestModel, CustomManagerTestModelTranslationOptions)

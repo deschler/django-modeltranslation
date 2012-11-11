@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.core.exceptions import ImproperlyConfigured
-from django.db.models.fields import CharField, TextField
+from django.db.models import fields
 from django.db.models.fields.files import FileField, ImageField
 
 from modeltranslation import settings as mt_settings
@@ -9,7 +9,17 @@ from modeltranslation.utils import (get_language,
                                     build_localized_verbose_name)
 
 
-SUPPORTED_FIELDS = (CharField, TextField, FileField, ImageField,)
+SUPPORTED_FIELDS = (
+    fields.CharField,
+    fields.TextField,
+    fields.BigIntegerField,
+    fields.IntegerField,
+    fields.SmallIntegerField,
+    fields.PositiveIntegerField,
+    fields.PositiveSmallIntegerField,
+    FileField,
+    ImageField,
+)
 
 
 def create_translation_field(model, field_name, lang):
