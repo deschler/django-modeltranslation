@@ -69,3 +69,21 @@ class AbstractModelB(AbstractModelA):
 
 class DataModel(models.Model):
     data = models.TextField(blank=True, null=True)
+
+
+class ManagerTestModel(models.Model):
+    title = models.CharField(ugettext_lazy('title'), max_length=255)
+    visits = models.IntegerField(ugettext_lazy('visits'), default=0)
+
+
+class CustomManager(models.Manager):
+    def get_query_set(self):
+        return super(CustomManager, self).get_query_set().filter(title__contains='a')
+
+    def foo(self):
+        return 'bar'
+
+
+class CustomManagerTestModel(models.Model):
+    title = models.CharField(ugettext_lazy('title'), max_length=255)
+    objects = CustomManager()

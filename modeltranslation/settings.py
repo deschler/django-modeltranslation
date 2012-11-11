@@ -32,3 +32,6 @@ ENABLE_REGISTRATIONS = getattr(
 # Modeltranslation specific debug setting
 DEBUG = getattr(
     settings, 'MODELTRANSLATION_DEBUG', settings.DEBUG)
+
+AUTO_POPULATE = getattr(
+    settings, 'MODELTRANSLATION_AUTO_POPULATE', False)

@@ -5,7 +5,8 @@ from modeltranslation.translator import translator, TranslationOptions
 from modeltranslation.tests.models import (
     TestModel, FallbackModel, FallbackModel2,
     FileFieldsModel, OtherFieldsModel, AbstractModelA, AbstractModelB,
-    MultitableModelA, MultitableBModelA, MultitableModelC)
+    MultitableModelA, MultitableBModelA, MultitableModelC,
+    ManagerTestModel, CustomManagerTestModel)
 
 
 class TestTranslationOptions(TranslationOptions):
@@ -59,3 +60,13 @@ translator.register(AbstractModelA, AbstractModelATranslationOptions)
 class AbstractModelBTranslationOptions(TranslationOptions):
     fields = ('titleb',)
 translator.register(AbstractModelB, AbstractModelBTranslationOptions)
+
+
+class ManagerTestModelTranslationOptions(TranslationOptions):
+    fields = ('title', 'visits')
+translator.register(ManagerTestModel, ManagerTestModelTranslationOptions)
+
+
+class CustomManagerTestModelTranslationOptions(TranslationOptions):
+    fields = ('title',)
+translator.register(CustomManagerTestModel, CustomManagerTestModelTranslationOptions)

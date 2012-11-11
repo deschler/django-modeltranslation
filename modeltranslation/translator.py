@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from django.conf import settings
+from django.db.models import Manager
 from django.db.models.base import ModelBase
 
 from modeltranslation.fields import (TranslationFieldDescriptor,
                                      create_translation_field)
+from modeltranslation.manager import MultilingualManager
 from modeltranslation.utils import build_localized_fieldname
 
 
@@ -31,7 +33,7 @@ class TranslationOptions(object):
 
 def add_localized_fields(model):
     """
-    Monkey patchs the original model class to provide additional fields for
+    Monkey patches the original model class to provide additional fields for
     every language. Only do that for fields which are defined in the
     translation options of the model.
 
@@ -59,6 +61,26 @@ def add_localized_fields(model):
             model.add_to_class(localized_field_name, translation_field)
             localized_fields[field_name].append(localized_field_name)
     return localized_fields
+
+
+def add_manager(model):
+    """
+    Monkey patches the original model to use MultilingualManager instead of
+    default manager (``objects``).
+
+    If model has a custom manager, then merge it with MultilingualManager.
+    """
+    if not hasattr(model, 'objects'):
+        return
+    current_manager = model.objects
+    if isinstance(current_manager, MultilingualManager):
+        return
+    if current_manager.__class__ is Manager:
+        current_manager.__class__ = MultilingualManager
+    else:
+        class NewMultilingualManager(current_manager.__class__, MultilingualManager):
+            pass
+        current_manager.__class__ = NewMultilingualManager
 
 
 #def translated_model_initialized(field_names, instance, **kwargs):
@@ -152,6 +174,10 @@ class Translator(object):
             for related_obj in model._meta.get_all_related_objects():
                 delete_cache_fields(related_obj.model)
 
+            # Set MultilingualManager
+            add_manager(model)
+
+            # Substitute original field with descriptor
             model_fallback_values = getattr(
                 translation_opts, 'fallback_values', None)
             for field_name in translation_opts.fields:
