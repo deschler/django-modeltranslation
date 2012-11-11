@@ -27,7 +27,7 @@ from modeltranslation.admin import (TranslationAdmin,
                                     TranslationStackedInline)
 from modeltranslation.tests.models import (
     AbstractModelB, MultitableModelA, DataModel, FallbackModel, FallbackModel2,
-    FileFieldsModel, TestModel, MultitableBModelA, MultitableModelC,
+    FileFieldsModel, OtherFieldsModel, TestModel, MultitableBModelA, MultitableModelC,
     MultitableDTestModel)
 from modeltranslation.tests.translation import FallbackModel2TranslationOptions
 from modeltranslation.tests.test_settings import TEST_SETTINGS
@@ -150,8 +150,8 @@ class ModeltranslationTest(ModeltranslationTestBase):
         self.failUnless('en' in langs)
         self.failUnless(translator.translator)
 
-        # Check that nine models are registered for translation
-        self.failUnlessEqual(len(translator.translator._registry), 9)
+        # Check that all models are registered for translation
+        self.failUnlessEqual(len(translator.translator._registry), 10)
 
         # Try to unregister a model that is not registered
         self.assertRaises(translator.NotRegistered,
@@ -334,6 +334,41 @@ class FileFieldsTest(ModeltranslationTestBase):
         inst.image_de.delete()
 
         inst.delete()
+
+
+class OtherFieldsTest(ModeltranslationTestBase):
+    def test_translated_models(self):
+        inst = OtherFieldsModel.objects.create()
+        field_names = dir(inst)
+        self.failUnless('id' in field_names)
+        self.failUnless('int' in field_names)
+        self.failUnless('int_de' in field_names)
+        self.failUnless('int_en' in field_names)
+        inst.delete()
+
+    def test_translated_models_instance(self):
+        inst = OtherFieldsModel()
+        inst.int = 7
+        self.assertEqual('de', get_language())
+        self.assertEqual(7, inst.int)
+        self.assertEqual(7, inst.int_de)
+        self.assertEqual(42, inst.int_en) # default value is honored
+
+        inst.int += 2
+        inst.save()
+        self.assertEqual(9, inst.int)
+        self.assertEqual(9, inst.int_de)
+        self.assertEqual(42, inst.int_en)
+
+        trans_real.activate('en')
+        inst.int -= 1
+        self.assertEqual(41, inst.int)
+        self.assertEqual(9, inst.int_de)
+        self.assertEqual(41, inst.int_en)
+
+        # this field has validator - let's try to make it below 0!
+        inst.int -= 50
+        self.assertRaises(ValidationError, inst.full_clean)
 
 
 class ModeltranslationTestRule1(ModeltranslationTestBase):

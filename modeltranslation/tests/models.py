@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.core import validators
 from django.db import models
 from django.utils.translation import ugettext_lazy
 
@@ -28,6 +29,15 @@ class FileFieldsModel(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
     file = models.FileField(upload_to='test', null=True, blank=True)
     image = models.ImageField(upload_to='test', null=True, blank=True)
+
+
+class OtherFieldsModel(models.Model):
+    """
+    This class is supposed to include other newly added fields types, so that
+    adding new supported field doesn't end in adding new test model.
+    """
+    # That's rich! PositiveIntegerField is only validated in forms, not in models.
+    int = models.PositiveIntegerField(default=42, validators=[validators.MinValueValidator(0)])
 
 
 class MultitableModelA(models.Model):

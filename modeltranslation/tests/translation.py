@@ -4,7 +4,7 @@ from django.utils.translation import ugettext_lazy
 from modeltranslation.translator import translator, TranslationOptions
 from modeltranslation.tests.models import (
     TestModel, FallbackModel, FallbackModel2,
-    FileFieldsModel, AbstractModelA, AbstractModelB,
+    FileFieldsModel, OtherFieldsModel, AbstractModelA, AbstractModelB,
     MultitableModelA, MultitableBModelA, MultitableModelC)
 
 
@@ -29,6 +29,11 @@ translator.register(FallbackModel2, FallbackModel2TranslationOptions)
 class FileFieldsModelTranslationOptions(TranslationOptions):
     fields = ('title', 'file', 'image')
 translator.register(FileFieldsModel, FileFieldsModelTranslationOptions)
+
+
+class OtherFieldsModelTranslationOptions(TranslationOptions):
+    fields = ('int',)
+translator.register(OtherFieldsModel, OtherFieldsModelTranslationOptions)
 
 
 class MultitableModelATranslationOptions(TranslationOptions):
