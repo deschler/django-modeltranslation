@@ -88,6 +88,7 @@ def patch_constructor(model):
     Monkey patches the original model to rewrite fields names in __init__
     """
     old_init = model.__init__
+
     def new_init(self, *args, **kwargs):
         for key, val in kwargs.items():
             new_key = rewrite_lookup_key(model, key)
