@@ -101,10 +101,6 @@ class TranslationField(object):
     def pre_save(self, model_instance, add):
         val = self.translated_field.__class__.pre_save(
             self, model_instance, add)
-        if mt_settings.DEFAULT_LANGUAGE == self.language and not add:
-            # Rule is: 3. Assigning a value to a translation field of the
-            # default language also updates the original field
-            model_instance.__dict__[self.translated_field.attname] = val
         return val
 
     def get_prep_value(self, value):
@@ -147,42 +143,31 @@ class TranslationFieldDescriptor(object):
     """
     A descriptor used for the original translated field.
     """
-    def __init__(self, name, initial_val='', fallback_value=None):
+    def __init__(self, field, fallback_value=None):
         """
         The ``name`` is the name of the field (which is not available in the
         descriptor by default - this is Python behaviour).
         """
-        self.name = name
-        self.val = initial_val
+        self.field = field
         self.fallback_value = fallback_value
 
     def __set__(self, instance, value):
         lang = get_language()
-        loc_field_name = build_localized_fieldname(self.name, lang)
+        loc_field_name = build_localized_fieldname(self.field.name, lang)
         # also update the translation field of the current language
         setattr(instance, loc_field_name, value)
-        # update the original field via the __dict__ to prevent calling the
-        # descriptor
-        instance.__dict__[self.name] = value
 
     def __get__(self, instance, owner):
         if not instance:
             raise ValueError(
                 "Translation field '%s' can only be accessed via an instance "
-                "not via a class." % self.name)
+                "not via a class." % self.field.name)
         loc_field_name = build_localized_fieldname(
-            self.name, get_language())
+            self.field.name, get_language())
         if hasattr(instance, loc_field_name):
             if getattr(instance, loc_field_name):
                 return getattr(instance, loc_field_name)
             elif self.fallback_value is None:
-                return self.get_default_instance(instance)
+                return self.field.get_default()
             else:
                 return self.fallback_value
-
-    def get_default_instance(self, instance):
-        """
-        Returns default instance of the field. Supposed to be overidden by
-        related subclasses.
-        """
-        return instance.__dict__[self.name]
