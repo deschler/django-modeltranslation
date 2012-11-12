@@ -135,7 +135,7 @@ class MultilingualQuerySet(models.query.QuerySet):
             for key, val in kwargs.items():
                 new_key = rewrite_lookup_key(self.model, key)
                 del kwargs[key]
-                kwargs[new_key] = val
+                kwargs.setdefault(new_key, val)
         return super(MultilingualQuerySet, self).create(**kwargs)
 
 

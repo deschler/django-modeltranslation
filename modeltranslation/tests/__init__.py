@@ -221,17 +221,8 @@ class ModeltranslationTest(ModeltranslationTestBase):
     def test_titleonly(self):
         title1_de = "title de"
         n = TestModel(title=title1_de)
-        self.failUnlessEqual(n.title, title1_de)
-        # Because the original field "title" was specified in the constructor
-        # it is directly passed into the instance's __dict__ and the descriptor
-        # which updates the associated default translation field is not called
-        # and the default translation will be None.
-        self.failUnlessEqual(n.title_de, None)
-        self.failUnlessEqual(n.title_en, None)
-
-        # Now assign the title, that triggers the descriptor and the default
-        # translation field is updated
-        n.title = title1_de
+        # The original field "title" passed in the constructor is also
+        # populated for the current language field: "title_de".
         self.failUnlessEqual(n.title, title1_de)
         self.failUnlessEqual(n.title_de, title1_de)
         self.failUnlessEqual(n.title_en, None)
@@ -270,6 +261,46 @@ class ModeltranslationTest(ModeltranslationTestBase):
         self.failUnlessEqual(
             n.text,
             FallbackModel2TranslationOptions.fallback_values['text'])
+
+    def _compare_instances(self, x, y, field):
+        self.assertEqual(getattr(x, field), getattr(y, field),
+                         "Constructor diff on field %s." % field)
+
+    def _test_constructor(self, keywords):
+        n = TestModel(**keywords)
+        m = TestModel.objects.create(**keywords)
+        fields = translator.translator.get_options_for_model(TestModel).localized_fieldnames
+        for base_field, trans_fields in fields.iteritems():
+            self._compare_instances(n, m, base_field)
+            for lang_field in trans_fields:
+                self._compare_instances(n, m, lang_field)
+
+    def test_constructor(self):
+        """
+        Ensure that model constructor behaves exactly the same as objects.create
+        """
+        # test different arguments compositions
+        keywords = dict(
+            # original only
+            title='title',
+            # both languages + original
+            email='q@q.qq', email_de='d@d.dd', email_en='e@e.ee',
+            # both languages without original
+            text_en='text en', text_de='text de',
+        )
+        self._test_constructor(keywords)
+
+        keywords = dict(
+            # only current language
+            title_de='title',
+            # only not current language
+            url_en='http://www.google.com',
+            # original + current
+            text='text def', text_de='text de',
+            # original + not current
+            email='q@q.qq', email_en='e@e.ee',
+        )
+        self._test_constructor(keywords)
 
 
 class FileFieldsTest(ModeltranslationTestBase):
@@ -1233,6 +1264,12 @@ class TestManager(ModeltranslationTestBase):
 
         # The same result
         n = ManagerTestModel.objects.create(title_en='foo')
+        self.assertEqual('foo', n.title_en)
+        self.assertEqual(None, n.title_de)
+        self.assertEqual('foo', n.title)
+
+        # Language suffixed version wins
+        n = ManagerTestModel.objects.create(title='bar', title_en='foo')
         self.assertEqual('foo', n.title_en)
         self.assertEqual(None, n.title_de)
         self.assertEqual('foo', n.title)

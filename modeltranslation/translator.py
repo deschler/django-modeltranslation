@@ -5,7 +5,7 @@ from django.db.models.base import ModelBase
 
 from modeltranslation.fields import (TranslationFieldDescriptor,
                                      create_translation_field)
-from modeltranslation.manager import MultilingualManager
+from modeltranslation.manager import MultilingualManager, rewrite_lookup_key
 from modeltranslation.utils import build_localized_fieldname
 
 
@@ -81,6 +81,20 @@ def add_manager(model):
         class NewMultilingualManager(current_manager.__class__, MultilingualManager):
             pass
         current_manager.__class__ = NewMultilingualManager
+
+
+def patch_constructor(model):
+    """
+    Monkey patches the original model to rewrite fields names in __init__
+    """
+    old_init = model.__init__
+    def new_init(self, *args, **kwargs):
+        for key, val in kwargs.items():
+            new_key = rewrite_lookup_key(model, key)
+            # Old key is intentionally left in case old_init wants to play with it
+            kwargs.setdefault(new_key, val)
+        old_init(self, *args, **kwargs)
+    model.__init__ = new_init
 
 
 #def translated_model_initialized(field_names, instance, **kwargs):
@@ -176,6 +190,9 @@ class Translator(object):
 
             # Set MultilingualManager
             add_manager(model)
+
+            # Patch __init__ to rewrite fields
+            patch_constructor(model)
 
             # Substitute original field with descriptor
             model_fallback_values = getattr(
