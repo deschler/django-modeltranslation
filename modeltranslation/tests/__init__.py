@@ -257,7 +257,7 @@ class ModeltranslationTest(ModeltranslationTestBase):
         del n
         n = FallbackModel2.objects.get(title=title1_de)
         trans_real.activate("en")
-        self.failUnlessEqual(n.title, title1_de)
+        self.failUnlessEqual(n.title, '')  # Falling back to default field value
         self.failUnlessEqual(
             n.text,
             FallbackModel2TranslationOptions.fallback_values['text'])
