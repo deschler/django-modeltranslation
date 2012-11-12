@@ -1237,6 +1237,12 @@ class TestManager(ModeltranslationTestBase):
         self.assertEqual(None, n.title_de)
         self.assertEqual('foo', n.title)
 
+        # Language suffixed version wins
+        n = ManagerTestModel.objects.create(title='bar', title_en='foo')
+        self.assertEqual('foo', n.title_en)
+        self.assertEqual(None, n.title_de)
+        self.assertEqual('foo', n.title)
+
     def test_creation_population(self):
         """Test if language fields are populated with default value on creation."""
         n = ManagerTestModel.objects.create(title='foo', _populate=True)
