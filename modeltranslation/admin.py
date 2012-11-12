@@ -4,7 +4,6 @@ from copy import deepcopy
 from django.contrib import admin
 from django.contrib.admin.options import BaseModelAdmin, InlineModelAdmin
 from django.contrib.contenttypes import generic
-from django.utils import translation
 
 # Ensure that models are registered for translation before TranslationAdmin
 # runs. The import is supposed to resolve a race condition between model import
@@ -13,7 +12,6 @@ import modeltranslation.models  # NOQA
 from modeltranslation.settings import DEFAULT_LANGUAGE
 from modeltranslation.translator import translator
 from modeltranslation.utils import (get_translation_fields,
-                                    build_localized_fieldname,
                                     build_css_class)
 
 
@@ -224,26 +222,6 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
         form = self.get_form(request, obj)
         return self._do_get_fieldsets_post_form_or_formset(
             request, form, obj)
-
-    def save_model(self, request, obj, form, change):
-        # Rule is: 3. Assigning a value to a translation field of the default
-        # language also updates the original field.
-        # Ensure that an empty default language field value clears the original
-        # field. See issue 47 for details.
-        for k, v in self.trans_opts.localized_fieldnames.items():
-            if getattr(obj, k):
-                default_lang_fieldname = build_localized_fieldname(
-                    k, DEFAULT_LANGUAGE)
-                if not getattr(obj, default_lang_fieldname):
-                    # TODO: Handle null values
-                    setattr(obj, k, '')
-        # HACK: Force default language for save
-        # See issue 33 for details.
-        current_lang = translation.get_language()
-        translation.activate(DEFAULT_LANGUAGE)
-        super(TranslationAdmin, self).save_model(request, obj, form, change)
-        # Restore the former current language, just in case.
-        translation.activate(current_lang)
 
 
 class TranslationInlineModelAdmin(TranslationBaseModelAdmin, InlineModelAdmin):
