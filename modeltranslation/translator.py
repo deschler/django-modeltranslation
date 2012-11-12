@@ -207,7 +207,7 @@ class Translator(object):
                 else:
                     field_fallback_value = model_fallback_values
                 setattr(model, field_name, TranslationFieldDescriptor(
-                    field_name, fallback_value=field_fallback_value))
+                    model._meta.get_field(field_name), fallback_value=field_fallback_value))
 
         #signals.pre_init.connect(translated_model_initializing, sender=model,
                                  #weak=False)
