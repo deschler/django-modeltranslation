@@ -35,3 +35,25 @@ DEBUG = getattr(
 
 AUTO_POPULATE = getattr(
     settings, 'MODELTRANSLATION_AUTO_POPULATE', False)
+
+# FALLBACK_LANGUAGES should be in either format:
+# MODELTRANSLATION_FALLBACK_LANGUAGES = ('en', 'de')
+# MODELTRANSLATION_FALLBACK_LANGUAGES = {'default': ('en', 'de'), 'fr': ('de',)}
+# By default there is no fallback language
+FALLBACK_LANGUAGES = getattr(settings, 'MODELTRANSLATION_FALLBACK_LANGUAGES', ())
+if isinstance(FALLBACK_LANGUAGES, (tuple, list)):
+    FALLBACK_LANGUAGES = {'default': FALLBACK_LANGUAGES}
+if 'default' not in FALLBACK_LANGUAGES:
+    raise ImproperlyConfigured('MODELTRANSLATION_FALLBACK_LANGUAGES '
+                               'does not contain "default" key.')
+for key, value in FALLBACK_LANGUAGES.iteritems():
+    if key != 'default' and key not in AVAILABLE_LANGUAGES:
+        raise ImproperlyConfigured('MODELTRANSLATION_FALLBACK_LANGUAGES: "%s" '
+                                   'not in LANGUAGES setting.' % key)
+    if not isinstance(value, (tuple, list)):
+        raise ImproperlyConfigured('MODELTRANSLATION_FALLBACK_LANGUAGES: value for key "%s" '
+                                   'is not list nor tuple.' % key)
+    for lang in value:
+        if lang not in AVAILABLE_LANGUAGES:
+            raise ImproperlyConfigured('MODELTRANSLATION_FALLBACK_LANGUAGES: "%s" '
+                                       'not in LANGUAGES setting.' % lang)

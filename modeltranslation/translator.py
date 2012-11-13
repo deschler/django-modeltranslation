@@ -198,6 +198,8 @@ class Translator(object):
             # Substitute original field with descriptor
             model_fallback_values = getattr(
                 translation_opts, 'fallback_values', None)
+            model_fallback_languages = getattr(
+                translation_opts, 'fallback_languages', None)
             for field_name in translation_opts.fields:
                 if model_fallback_values is None:
                     field_fallback_value = None
@@ -206,8 +208,11 @@ class Translator(object):
                         field_name, None)
                 else:
                     field_fallback_value = model_fallback_values
-                setattr(model, field_name, TranslationFieldDescriptor(
-                    model._meta.get_field(field_name), fallback_value=field_fallback_value))
+                descriptor = TranslationFieldDescriptor(
+                    model._meta.get_field(field_name),
+                    fallback_value=field_fallback_value,
+                    fallback_languages=model_fallback_languages)
+                setattr(model, field_name, descriptor)
 
         #signals.pre_init.connect(translated_model_initializing, sender=model,
                                  #weak=False)
