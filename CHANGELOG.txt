@@ -1,6 +1,18 @@
+v0.4.1
+======
+Date: 2012-11-13
+
+  FIXED: Pypi wants to install beta version. Happened because pypi treats
+         0.4.0-beta2 as latest release. This also effectively resulted in a
+         downgrade when using 'pip --upgrade' and 0.4.0 was already installed.
+         (thanks to jmagnusson for the report,
+          resolves issue #103)
+
+
 v0.4.0
 ======
 Date: 2012-11-11
+Packaged from revision c44f9cfee59f1b440f022422f917f247e16bbc6b.
 
 CHANGED: Refactored tests to allow test runs with other apps. Includes a
          "backport" of override_settings to ensure Django 1.3 support.
