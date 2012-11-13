@@ -76,3 +76,26 @@ def build_css_class(localized_fieldname, prefix=''):
             # 'foo_bar_baz_de' --> 'foo_bar_baz-de'
             css_class = _join_css_class(bits, 1)
     return '%s-%s' % (prefix, css_class) if prefix else css_class
+
+
+def unique(seq):
+    """
+    >>> list(unique([1, 2, 3, 2, 2, 4, 1]))
+    [1, 2, 3, 4]
+    """
+    seen = set()
+    return (x for x in seq if x not in seen and not seen.add(x))
+
+
+def resolution_order(lang, override=None):
+    """
+    Return order of languages which should be checked for parameter language.
+    First is always the parameter language, later are fallback languages.
+    Override parameter has priority over FALLBACK_LANGUAGES.
+    """
+    if override is None:
+        override = {}
+    fallback_for_lang = override.get(lang, settings.FALLBACK_LANGUAGES.get(lang, ()))
+    fallback_def = override.get('default', settings.FALLBACK_LANGUAGES['default'])
+    order = (lang,) + fallback_for_lang + fallback_def
+    return tuple(unique(order))

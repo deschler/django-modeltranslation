@@ -6,7 +6,8 @@ from django.db.models.fields.files import FileField, ImageField
 from modeltranslation import settings as mt_settings
 from modeltranslation.utils import (get_language,
                                     build_localized_fieldname,
-                                    build_localized_verbose_name)
+                                    build_localized_verbose_name,
+                                    resolution_order)
 
 
 SUPPORTED_FIELDS = (
@@ -143,13 +144,14 @@ class TranslationFieldDescriptor(object):
     """
     A descriptor used for the original translated field.
     """
-    def __init__(self, field, fallback_value=None):
+    def __init__(self, field, fallback_value=None, fallback_languages=None):
         """
         The ``name`` is the name of the field (which is not available in the
         descriptor by default - this is Python behaviour).
         """
         self.field = field
         self.fallback_value = fallback_value
+        self.fallback_languages = fallback_languages
 
     def __set__(self, instance, value):
         lang = get_language()
@@ -162,12 +164,14 @@ class TranslationFieldDescriptor(object):
             raise ValueError(
                 "Translation field '%s' can only be accessed via an instance "
                 "not via a class." % self.field.name)
-        loc_field_name = build_localized_fieldname(
-            self.field.name, get_language())
-        if hasattr(instance, loc_field_name):
-            if getattr(instance, loc_field_name):
-                return getattr(instance, loc_field_name)
-            elif self.fallback_value is None:
-                return self.field.get_default()
-            else:
-                return self.fallback_value
+        langs = resolution_order(get_language(), self.fallback_languages)
+        for lang in langs:
+            loc_field_name = build_localized_fieldname(self.field.name, lang)
+            val = getattr(instance, loc_field_name, None)
+            # Here we check only for None and '', because e.g. 0 should not fall back.
+            if val is not None and val != '':
+                return val
+        if self.fallback_value is None:
+            return self.field.get_default()
+        else:
+            return self.fallback_value

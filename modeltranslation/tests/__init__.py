@@ -14,7 +14,7 @@ from django import forms
 from django.conf import settings as django_settings
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ImproperlyConfigured
 from django.core.files.base import ContentFile
 from django.db.models import Q, F
 from django.db.models.loading import AppCache
@@ -300,6 +300,52 @@ class ModeltranslationTest(ModeltranslationTestBase):
             email='q@q.qq', email_en='e@e.ee',
         )
         self._test_constructor(keywords)
+
+
+class FallbackTests(ModeltranslationTestBase):
+    test_fallback = {
+        'default': ('de',),
+        'de': ('en',)
+    }
+
+    def tearDown(self):
+        trans_real.deactivate()
+        reload(mt_settings)  # Return to previous state
+
+    def test_settings(self):
+        # Initial
+        self.assertEqual(mt_settings.FALLBACK_LANGUAGES, {'default': ()})
+        # Tuple/list
+        with override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=('de',)):
+            reload(mt_settings)
+            self.assertEqual(mt_settings.FALLBACK_LANGUAGES, {'default': ('de',)})
+        # Whole dict
+        with override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=self.test_fallback):
+            reload(mt_settings)
+            self.assertEqual(mt_settings.FALLBACK_LANGUAGES, self.test_fallback)
+        # Improper language raises error
+        config = {'default': (), 'fr': ('en',)}
+        with override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=config):
+            self.assertRaises(ImproperlyConfigured, lambda: reload(mt_settings))
+
+    def test_resolution_order(self):
+        from modeltranslation.utils import resolution_order
+        with override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=self.test_fallback):
+            reload(mt_settings)
+            self.assertEqual(('en', 'de'), resolution_order('en'))
+            self.assertEqual(('de', 'en'), resolution_order('de'))
+            # Overriding
+            config = {'default': ()}
+            self.assertEqual(('en',), resolution_order('en', config))
+            self.assertEqual(('de', 'en'), resolution_order('de', config))
+            # Uniqueness
+            config = {'de': ('en', 'de')}
+            self.assertEqual(('en', 'de'), resolution_order('en', config))
+            self.assertEqual(('de', 'en'), resolution_order('de', config))
+            # To completely override settings, one should override all keys
+            config = {'default': (), 'de': ()}
+            self.assertEqual(('en',), resolution_order('en', config))
+            self.assertEqual(('de',), resolution_order('de', config))
 
 
 class FileFieldsTest(ModeltranslationTestBase):
