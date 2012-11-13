@@ -73,9 +73,8 @@ class ModeltranslationTestBase(TestCase):
                 # 2. Reload MT because LANGUAGES likely changed.
                 reload(mt_settings)
                 reload(translator)
-                from modeltranslation import admin, utils
+                from modeltranslation import admin
                 reload(admin)
-                reload(utils)
 
                 # 3. Reset test models (because autodiscover have already run, those models
                 #    have translation fields, but for languages previously defined. We want
