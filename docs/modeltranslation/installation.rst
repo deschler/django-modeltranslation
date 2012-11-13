@@ -84,9 +84,6 @@ Make sure that the ``modeltranslation`` app is listed in your
         ....
     )
 
-.. note:: Also make sure that the app can be found on a path contained in your
-          ``PYTHONPATH`` environment variable.
-
 
 .. _settings-languages:
 
