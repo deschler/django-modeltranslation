@@ -347,6 +347,28 @@ class FallbackTests(ModeltranslationTestBase):
             self.assertEqual(('en',), resolution_order('en', config))
             self.assertEqual(('de',), resolution_order('de', config))
 
+    def test_fallback_languages(self):
+        with override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=self.test_fallback):
+            reload(mt_settings)
+            title_de = 'title de'
+            title_en = 'title en'
+            n = TestModel(title=title_de)
+            self.assertEqual(n.title_de, title_de)
+            self.assertEqual(n.title_en, None)
+            self.assertEqual(n.title, title_de)
+            trans_real.activate('en')
+            self.assertEqual(n.title, title_de)  # since default fallback is de
+
+            n = TestModel(title=title_en)
+            self.assertEqual(n.title_de, None)
+            self.assertEqual(n.title_en, title_en)
+            self.assertEqual(n.title, title_en)
+            trans_real.activate('de')
+            self.assertEqual(n.title, title_en)  # since fallback for de is en
+
+            n.title_en = None
+            self.assertEqual(n.title, '')  # if all fallbacks fail, return field.get_default()
+
 
 class FileFieldsTest(ModeltranslationTestBase):
     test_media_root = os.path.join(
