@@ -6,10 +6,9 @@ https://github.com/zmathew/django-linguo
 """
 from django.db import models
 from django.db.models.fields.related import RelatedField
-from django.utils.translation import get_language
 from django.utils.tree import Node
 
-from modeltranslation.utils import build_localized_fieldname
+from modeltranslation.utils import build_localized_fieldname, get_language
 from modeltranslation import settings
 
 
