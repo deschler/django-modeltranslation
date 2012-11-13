@@ -342,6 +342,16 @@ class FallbackTests(ModeltranslationTestBase):
             config = {'de': ('en', 'de')}
             self.assertEqual(('en', 'de'), resolution_order('en', config))
             self.assertEqual(('de', 'en'), resolution_order('de', config))
+
+            # Default fallbacks are always used at the end
+            # That's it: fallbacks specified for a language don't replace defaults,
+            # but just are prepended
+            config = {'default': ('en', 'de'), 'de': ()}
+            self.assertEqual(('en', 'de'), resolution_order('en', config))
+            self.assertEqual(('de', 'en'), resolution_order('de', config))
+            # What one may have expected
+            self.assertNotEqual(('de',), resolution_order('de', config))
+
             # To completely override settings, one should override all keys
             config = {'default': (), 'de': ()}
             self.assertEqual(('en',), resolution_order('en', config))
