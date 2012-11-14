@@ -28,12 +28,12 @@ translator.register(FallbackModel2, FallbackModel2TranslationOptions)
 
 
 class FileFieldsModelTranslationOptions(TranslationOptions):
-    fields = ('title', 'file', 'image')
+    fields = ('title', 'file', 'image',)
 translator.register(FileFieldsModel, FileFieldsModelTranslationOptions)
 
 
 class OtherFieldsModelTranslationOptions(TranslationOptions):
-    fields = ('int',)
+    fields = ('int', 'boolean', 'nullboolean',)
 translator.register(OtherFieldsModel, OtherFieldsModelTranslationOptions)
 
 

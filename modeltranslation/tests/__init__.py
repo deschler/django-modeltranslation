@@ -457,9 +457,15 @@ class OtherFieldsTest(ModeltranslationTestBase):
         self.failUnless('int' in field_names)
         self.failUnless('int_de' in field_names)
         self.failUnless('int_en' in field_names)
+        self.failUnless('boolean' in field_names)
+        self.failUnless('boolean_de' in field_names)
+        self.failUnless('boolean_en' in field_names)
+        self.failUnless('nullboolean' in field_names)
+        self.failUnless('nullboolean_de' in field_names)
+        self.failUnless('nullboolean_en' in field_names)
         inst.delete()
 
-    def test_translated_models_instance(self):
+    def test_translated_models_int_instance(self):
         inst = OtherFieldsModel()
         inst.int = 7
         self.assertEqual('de', get_language())
@@ -482,6 +488,46 @@ class OtherFieldsTest(ModeltranslationTestBase):
         # this field has validator - let's try to make it below 0!
         inst.int -= 50
         self.assertRaises(ValidationError, inst.full_clean)
+
+    def test_translated_models_boolean_instance(self):
+        inst = OtherFieldsModel()
+        inst.boolean = True
+        self.assertEqual('de', get_language())
+        self.assertEqual(True, inst.boolean)
+        self.assertEqual(True, inst.boolean_de)
+        self.assertEqual(False, inst.boolean_en)
+
+        inst.boolean = False
+        inst.save()
+        self.assertEqual(False, inst.boolean)
+        self.assertEqual(False, inst.boolean_de)
+        self.assertEqual(False, inst.boolean_en)
+
+        trans_real.activate('en')
+        inst.boolean = True
+        self.assertEqual(True, inst.boolean)
+        self.assertEqual(False, inst.boolean_de)
+        self.assertEqual(True, inst.boolean_en)
+
+    def test_translated_models_nullboolean_instance(self):
+        inst = OtherFieldsModel()
+        inst.nullboolean = True
+        self.assertEqual('de', get_language())
+        self.assertEqual(True, inst.nullboolean)
+        self.assertEqual(True, inst.nullboolean_de)
+        self.assertEqual(None, inst.nullboolean_en)
+
+        inst.nullboolean = False
+        inst.save()
+        self.assertEqual(False, inst.nullboolean)
+        self.assertEqual(False, inst.nullboolean_de)
+        self.assertEqual(None, inst.nullboolean_en)
+
+        trans_real.activate('en')
+        inst.nullboolean = True
+        self.assertEqual(True, inst.nullboolean)
+        self.assertEqual(False, inst.nullboolean_de)
+        self.assertEqual(True, inst.nullboolean_en)
 
 
 class ModeltranslationTestRule1(ModeltranslationTestBase):

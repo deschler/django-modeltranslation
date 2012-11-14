@@ -18,6 +18,8 @@ SUPPORTED_FIELDS = (
     fields.SmallIntegerField,
     fields.PositiveIntegerField,
     fields.PositiveSmallIntegerField,
+    fields.BooleanField,
+    fields.NullBooleanField,
     FileField,
     ImageField,
 )
@@ -85,7 +87,11 @@ class TranslationField(object):
 
         # Translation are always optional (for now - maybe add some parameters
         # to the translation options for configuring this)
-        self.null = True
+
+        if not isinstance(self, fields.BooleanField):
+            # TODO: Do we really want to enforce null *at all*? Shouldn't this
+            # better honour the null setting of the translated field?
+            self.null = True
         self.blank = True
 
         # Adjust the name of this field to reflect the language

@@ -38,6 +38,8 @@ class OtherFieldsModel(models.Model):
     """
     # That's rich! PositiveIntegerField is only validated in forms, not in models.
     int = models.PositiveIntegerField(default=42, validators=[validators.MinValueValidator(0)])
+    boolean = models.BooleanField()
+    nullboolean = models.NullBooleanField()
 
 
 class MultitableModelA(models.Model):
