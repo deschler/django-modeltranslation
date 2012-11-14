@@ -33,7 +33,7 @@ https://github.com/deschler/django-modeltranslation
 
 Documentation
 -------------
-https://readthedocs.org/projects/django-modeltranslation
+https://django-modeltranslation.readthedocs.org/en/latest/
 
 Mailing List
 ------------
