@@ -4,7 +4,7 @@ from django.utils.encoding import force_unicode
 from django.utils.translation import get_language as _get_language
 from django.utils.functional import lazy
 
-from modeltranslation.settings import DEFAULT_LANGUAGE, AVAILABLE_LANGUAGES
+from modeltranslation import settings
 
 
 def get_language():
@@ -13,18 +13,18 @@ def get_language():
     settings.LANGUAGES (Django does not seem to guarantee this for us).
     """
     lang = _get_language()
-    if lang not in AVAILABLE_LANGUAGES and '-' in lang:
+    if lang not in settings.AVAILABLE_LANGUAGES and '-' in lang:
         lang = lang.split('-')[0]
-    if lang in AVAILABLE_LANGUAGES:
+    if lang in settings.AVAILABLE_LANGUAGES:
         return lang
-    return DEFAULT_LANGUAGE
+    return settings.DEFAULT_LANGUAGE
 
 
 def get_translation_fields(field):
     """
     Returns a list of localized fieldnames for a given field.
     """
-    return [build_localized_fieldname(field, l) for l in AVAILABLE_LANGUAGES]
+    return [build_localized_fieldname(field, l) for l in settings.AVAILABLE_LANGUAGES]
 
 
 def build_localized_fieldname(field_name, lang):
@@ -76,3 +76,26 @@ def build_css_class(localized_fieldname, prefix=''):
             # 'foo_bar_baz_de' --> 'foo_bar_baz-de'
             css_class = _join_css_class(bits, 1)
     return '%s-%s' % (prefix, css_class) if prefix else css_class
+
+
+def unique(seq):
+    """
+    >>> list(unique([1, 2, 3, 2, 2, 4, 1]))
+    [1, 2, 3, 4]
+    """
+    seen = set()
+    return (x for x in seq if x not in seen and not seen.add(x))
+
+
+def resolution_order(lang, override=None):
+    """
+    Return order of languages which should be checked for parameter language.
+    First is always the parameter language, later are fallback languages.
+    Override parameter has priority over FALLBACK_LANGUAGES.
+    """
+    if override is None:
+        override = {}
+    fallback_for_lang = override.get(lang, settings.FALLBACK_LANGUAGES.get(lang, ()))
+    fallback_def = override.get('default', settings.FALLBACK_LANGUAGES['default'])
+    order = (lang,) + fallback_for_lang + fallback_def
+    return tuple(unique(order))
