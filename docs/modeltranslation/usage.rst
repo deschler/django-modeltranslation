@@ -48,8 +48,8 @@ translation fields the following rules apply:
 
 **Rule 2**
 
-    Assigning a value to the original field also updates the value in the
-    associated current language translation field.
+    Assigning a value to the original field updates the value in the associated
+    current language translation field.
 
 **Rule 3**
 
