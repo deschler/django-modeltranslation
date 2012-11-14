@@ -1,3 +1,7 @@
+  ADDED: Support for fallback languages. Allows fine grained configuration
+         through project settings and translation options on model basis.
+         (thanks to Jacek Tomaszewski,
+          resolves issue #104)
   ADDED: Multilingual manager which is aware of the current language.
          (thanks to Jacek Tomaszewski,
           resolves issues #45, #78 and #84)
@@ -10,6 +14,16 @@ CHANGED: Constructor rewrites fields to be language aware.
          implies the new language aware manager and constructor rewrite.
          (resolves issue #85)
 
+
+v0.4.1
+======
+Date: 2012-11-13
+
+  FIXED: Pypi wants to install beta version. Happened because pypi treats
+         0.4.0-beta2 as latest release. This also effectively resulted in a
+         downgrade when using 'pip --upgrade' and 0.4.0 was already installed.
+         (thanks to jmagnusson for the report,
+          resolves issue #103)
 
 v0.4.0
 ======
