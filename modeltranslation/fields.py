@@ -49,6 +49,10 @@ def create_translation_field(model, field_name, lang):
 def field_factory(baseclass):
     class TranslationFieldSpecific(TranslationField, baseclass):
         pass
+
+    # Reflect baseclass name of returned subclass
+    TranslationFieldSpecific.__name__ = 'Translation%s' % baseclass.__name__
+
     return TranslationFieldSpecific
 
 
