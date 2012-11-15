@@ -28,7 +28,18 @@ try:
     version = '.'.join(str(i) for i in modeltranslation.VERSION[:2])
     # The full PEP386-compliant version number version, including
     # normalized alpha/beta/rc/dev tags (e.g. '0.5a1').
-    release = modeltranslation.get_version()
+    try:
+        # FIXME: Can we make this work on services like read-the-docs?
+        # The build script on rtf bails out early with:
+        #
+        #     Failed to import project; skipping build.
+        #     Please make sure your repo is correct and you have a conf.py
+        #
+        release = modeltranslation.get_version()
+    except:
+        # We are broad here with the exception handling because we don't know
+        # the environment we build on.
+        release = version
 except ImportError:
     version = 'dev'
     release = 'dev'
