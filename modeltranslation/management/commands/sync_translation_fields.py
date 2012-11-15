@@ -124,7 +124,7 @@ class Command(BaseCommand):
         for lang in missing_langs:
             new_field = build_localized_fieldname(field_name, lang)
             f = model._meta.get_field(new_field)
-            col_type = f.db_type(connection)
+            col_type = f.db_type(connection=connection)
             field_sql = [style.SQL_FIELD(qn(f.column)),
                          style.SQL_COLTYPE(col_type)]
             # column creation
