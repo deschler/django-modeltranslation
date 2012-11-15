@@ -12,9 +12,19 @@ from modeltranslation.utils import build_localized_fieldname
 class AlreadyRegistered(Exception):
     pass
 
-
 class NotRegistered(Exception):
     pass
+
+class FieldsAggregationMetaClass(type):
+    """
+    Meta class to handle inheritance of fields between classes
+    """
+    def __new__(cls, name, bases, attrs=dict()):
+        if bases and len(bases):
+            base = bases[0]
+            if hasattr( base, 'abstract' ) and base.abstract == True:
+                attrs.update( {'fields': list(base.fields) + attrs.get('fields',[])} )
+        return super(FieldsAggregationMetaClass, cls).__new__(cls, name, bases, attrs)
 
 
 class TranslationOptions(object):
@@ -27,6 +37,9 @@ class TranslationOptions(object):
     It caches the content type of the translated model for faster lookup later
     on.
     """
+
+    __metaclass__ = FieldsAggregationMetaClass
+
     def __init__(self, *args, **kwargs):
         self.localized_fieldnames = []
 

@@ -30,7 +30,9 @@ from modeltranslation.tests.models import (
     AbstractModelB, MultitableModelA, DataModel, FallbackModel, FallbackModel2,
     FileFieldsModel, OtherFieldsModel, TestModel, MultitableBModelA, MultitableModelC,
     MultitableDTestModel, ManagerTestModel, CustomManagerTestModel)
-from modeltranslation.tests.translation import FallbackModel2TranslationOptions
+from modeltranslation.tests.translation import ( FallbackModel2TranslationOptions,
+    FieldInheritanceAbstractModelBTranslationOptions, 
+    FieldInheritanceAbstractModelCTranslationOptions)
 from modeltranslation.tests.test_settings import TEST_SETTINGS
 
 try:
@@ -155,7 +157,7 @@ class ModeltranslationTest(ModeltranslationTestBase):
         self.failUnless(translator.translator)
 
         # Check that all models are registered for translation
-        self.failUnlessEqual(len(translator.translator._registry), 12)
+        self.failUnlessEqual(len(translator.translator._registry), 14)
 
         # Try to unregister a model that is not registered
         self.assertRaises(translator.NotRegistered,
@@ -1085,6 +1087,16 @@ class ModelInheritanceTest(ModeltranslationTestBase):
         self.failUnless('titleb_de' in field_names_d)
         self.failUnless('titleb_en' in field_names_d)
         self.failUnless('titled' in field_names_d)
+
+class ModelInheritanceFieldAggregationTest(ModeltranslationTestBase):
+    """
+    Tests for inheritance support with field aggregation 
+    in modeltranslation.
+    """
+    def test_field_aggregation(self):
+        clsb = FieldInheritanceAbstractModelBTranslationOptions
+        self.failUnless('titlea' in clsb.fields)
+        self.failUnless('titleb' in clsb.fields)
 
 
 class TranslationAdminTest(ModeltranslationTestBase):
