@@ -70,3 +70,24 @@ translator.register(ManagerTestModel, ManagerTestModelTranslationOptions)
 class CustomManagerTestModelTranslationOptions(TranslationOptions):
     fields = ('title',)
 translator.register(CustomManagerTestModel, CustomManagerTestModelTranslationOptions)
+
+
+class FieldInheritanceATranslationOptions(TranslationOptions):
+    fields = ['titlea']
+
+
+class FieldInheritanceBTranslationOptions(FieldInheritanceATranslationOptions):
+    fields = ['titleb']
+
+
+class FieldInheritanceCTranslationOptions(FieldInheritanceBTranslationOptions):
+    fields = ['titlec']
+
+
+class FieldInheritanceDTranslationOptions(FieldInheritanceBTranslationOptions):
+    fields = ('titled',)
+
+
+class FieldInheritanceETranslationOptions(FieldInheritanceCTranslationOptions,
+                                          FieldInheritanceDTranslationOptions):
+    fields = ('titlee',)
