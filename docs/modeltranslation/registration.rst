@@ -109,3 +109,42 @@ words - all translations are optional. To populate the default translation
 fields added by the modeltranslation application you can use the
 ``update_translation_fields`` command below. See
 :ref:`commands-update_translation_fields` section for more infos on this.
+
+
+Supported Field Matrix
+----------------------
+
+=============================== === ===
+Model Field                     0.4 0.5
+=============================== === ===
+``AutoField``
+``BigIntegerField``                 x
+``BooleanField``                    x
+``CharField``                   x   x
+``CommaSeparatedIntegerField``
+``DateField``
+``DateTimeField``
+``DecimalField``
+``EmailField``                  \*  \*
+``FileField``                   x   x
+``FilePathField``
+``FloatField``
+``ImageField``                  x   x
+``IntegerField``                    x
+``IPAddressField``
+``GenericIPAddressField``
+``NullBooleanField``                x
+``PositiveIntegerField``            x
+``PositiveSmallIntegerField``       x
+``SlugField``                   \*  \*
+``SmallIntegerField``               x
+``TextField``                   x   x
+``TimeField``
+``URLField``                    \*  \*
+``ForeignKey``
+``OneToOneField``
+``ManyToManyField``
+=============================== === ===
+
+- x: Officially supported
+- \*: Implicitly supported (as it is a subclass of ``CharField``)
