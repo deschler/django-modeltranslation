@@ -60,6 +60,36 @@ translation will have been added some auto-magical fields. The next section
 explains how things are working under the hood.
 
 
+``TranslationOptions`` fields inheritance
+----------------------------------
+
+.. versionadded:: 0.5
+
+A subclass of any ``TranslationOptions`` will "inherit" fields from its bases
+(somehow similarly to the way Django Models inherit fields, but with different syntax).
+
+.. code-block:: python
+
+    from modeltranslation.translator import translator, TranslationOptions
+    from news.models import News, NewsWithImage
+
+    class NewsTranslationOptions(TranslationOptions):
+        fields = ('title', 'text',)
+
+    class NewsWithImageTranslationOptions(NewsTranslationOptions):
+        fields = ('image',)
+
+    assert NewsWithImageTranslationOptions.fields == ('title', 'text', 'image')
+
+    translator.register(News, NewsTranslationOptions)
+    translator.register(NewsWithImage, NewsWithImageTranslationOptions)
+
+Of course multiple inheritance and inheritance chains (A > B > C) also work as expected.
+
+.. note:: When upgrading from previous modeltranslation version, please review your
+    ``TranslationOptions`` classes and see if introducing `fields inheritance` broke
+    the project (if you had always subclassed ``TranslationOptions`` only, there is no risk).
+
 Changes Automatically Applied to the Model Class
 ------------------------------------------------
 
