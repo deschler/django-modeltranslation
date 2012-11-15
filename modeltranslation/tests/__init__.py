@@ -30,9 +30,9 @@ from modeltranslation.tests.models import (
     AbstractModelB, MultitableModelA, DataModel, FallbackModel, FallbackModel2,
     FileFieldsModel, OtherFieldsModel, TestModel, MultitableBModelA, MultitableModelC,
     MultitableDTestModel, ManagerTestModel, CustomManagerTestModel)
-from modeltranslation.tests.translation import ( FallbackModel2TranslationOptions,
-    FieldInheritanceAbstractModelBTranslationOptions, 
-    FieldInheritanceAbstractModelCTranslationOptions)
+from modeltranslation.tests.translation import (FallbackModel2TranslationOptions,
+                                                FieldInheritanceCTranslationOptions,
+                                                FieldInheritanceETranslationOptions)
 from modeltranslation.tests.test_settings import TEST_SETTINGS
 
 try:
@@ -157,7 +157,7 @@ class ModeltranslationTest(ModeltranslationTestBase):
         self.failUnless(translator.translator)
 
         # Check that all models are registered for translation
-        self.failUnlessEqual(len(translator.translator._registry), 14)
+        self.failUnlessEqual(len(translator.translator._registry), 12)
 
         # Try to unregister a model that is not registered
         self.assertRaises(translator.NotRegistered,
@@ -1088,15 +1088,28 @@ class ModelInheritanceTest(ModeltranslationTestBase):
         self.failUnless('titleb_en' in field_names_d)
         self.failUnless('titled' in field_names_d)
 
+
 class ModelInheritanceFieldAggregationTest(ModeltranslationTestBase):
     """
-    Tests for inheritance support with field aggregation 
+    Tests for inheritance support with field aggregation
     in modeltranslation.
     """
     def test_field_aggregation(self):
-        clsb = FieldInheritanceAbstractModelBTranslationOptions
+        clsb = FieldInheritanceCTranslationOptions
         self.failUnless('titlea' in clsb.fields)
         self.failUnless('titleb' in clsb.fields)
+        self.failUnless('titlec' in clsb.fields)
+        self.failUnlessEqual(3, len(clsb.fields))
+        self.failUnlessEqual(tuple, type(clsb.fields))
+
+    def test_multi_inheritance(self):
+        clsb = FieldInheritanceETranslationOptions
+        self.failUnless('titlea' in clsb.fields)
+        self.failUnless('titleb' in clsb.fields)
+        self.failUnless('titlec' in clsb.fields)
+        self.failUnless('titled' in clsb.fields)
+        self.failUnless('titlee' in clsb.fields)
+        self.failUnlessEqual(5, len(clsb.fields))  # there are no repetitions
 
 
 class TranslationAdminTest(ModeltranslationTestBase):

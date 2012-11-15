@@ -6,8 +6,7 @@ from modeltranslation.tests.models import (
     TestModel, FallbackModel, FallbackModel2,
     FileFieldsModel, OtherFieldsModel, AbstractModelA, AbstractModelB,
     MultitableModelA, MultitableBModelA, MultitableModelC,
-    ManagerTestModel, CustomManagerTestModel,
-    FieldInheritanceAbstractModelB, FieldInheritanceAbstractModelC)
+    ManagerTestModel, CustomManagerTestModel)
 
 
 class TestTranslationOptions(TranslationOptions):
@@ -72,14 +71,23 @@ class CustomManagerTestModelTranslationOptions(TranslationOptions):
     fields = ('title',)
 translator.register(CustomManagerTestModel, CustomManagerTestModelTranslationOptions)
 
-class FieldInheritanceAbstractModelBaseTranslationOptions(TranslationOptions):
-    fields  = [ 'titlea' ]
-    abstract= True
 
-class FieldInheritanceAbstractModelBTranslationOptions(FieldInheritanceAbstractModelBaseTranslationOptions):
-    fields  = [ 'titleb' ]
-translator.register(FieldInheritanceAbstractModelB, FieldInheritanceAbstractModelBTranslationOptions)
+class FieldInheritanceATranslationOptions(TranslationOptions):
+    fields = ['titlea']
 
-class FieldInheritanceAbstractModelCTranslationOptions(FieldInheritanceAbstractModelBaseTranslationOptions):
-    fields  = [ 'titlec' ]
-translator.register(FieldInheritanceAbstractModelC, FieldInheritanceAbstractModelCTranslationOptions)
+
+class FieldInheritanceBTranslationOptions(FieldInheritanceATranslationOptions):
+    fields = ['titleb']
+
+
+class FieldInheritanceCTranslationOptions(FieldInheritanceBTranslationOptions):
+    fields = ['titlec']
+
+
+class FieldInheritanceDTranslationOptions(FieldInheritanceBTranslationOptions):
+    fields = ('titled',)
+
+
+class FieldInheritanceETranslationOptions(FieldInheritanceCTranslationOptions,
+                                          FieldInheritanceDTranslationOptions):
+    fields = ('titlee',)

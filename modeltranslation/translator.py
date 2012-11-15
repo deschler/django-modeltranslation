@@ -6,24 +6,29 @@ from django.db.models.base import ModelBase
 from modeltranslation.fields import (TranslationFieldDescriptor,
                                      create_translation_field)
 from modeltranslation.manager import MultilingualManager, rewrite_lookup_key
-from modeltranslation.utils import build_localized_fieldname
+from modeltranslation.utils import build_localized_fieldname, unique
 
 
 class AlreadyRegistered(Exception):
     pass
 
+
 class NotRegistered(Exception):
     pass
+
 
 class FieldsAggregationMetaClass(type):
     """
     Meta class to handle inheritance of fields between classes
     """
-    def __new__(cls, name, bases, attrs=dict()):
-        if bases and len(bases):
-            base = bases[0]
-            if hasattr( base, 'abstract' ) and base.abstract == True:
-                attrs.update( {'fields': list(base.fields) + attrs.get('fields',[])} )
+    def __new__(cls, name, bases, attrs):
+        parents = [b for b in bases if isinstance(b, FieldsAggregationMetaClass)]
+        if not parents:
+            return super(FieldsAggregationMetaClass, cls).__new__(cls, name, bases, attrs)
+        attrs['fields'] = tuple(attrs.get('fields', ()))
+        for base in parents:
+            attrs['fields'] += tuple(base.fields)
+        attrs['fields'] = tuple(unique(attrs['fields']))
         return super(FieldsAggregationMetaClass, cls).__new__(cls, name, bases, attrs)
 
 
@@ -39,6 +44,7 @@ class TranslationOptions(object):
     """
 
     __metaclass__ = FieldsAggregationMetaClass
+    fields = ()
 
     def __init__(self, *args, **kwargs):
         self.localized_fieldnames = []

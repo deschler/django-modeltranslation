@@ -89,15 +89,3 @@ class CustomManager(models.Manager):
 class CustomManagerTestModel(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
     objects = CustomManager()
-
-class FieldInheritanceAbstractModelA(models.Model):
-    titlea = models.CharField(ugettext_lazy('title a'), max_length=255)
-
-    class Meta:
-        abstract = True
-
-class FieldInheritanceAbstractModelB(AbstractModelA):
-    titleb = models.CharField(ugettext_lazy('title b'), max_length=255)
-
-class FieldInheritanceAbstractModelC(AbstractModelA):
-    titlec = models.CharField(ugettext_lazy('title c'), max_length=255)
