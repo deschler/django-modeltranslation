@@ -24,12 +24,11 @@ try:
     # for |version| and |release|, also used in various other places throughout
     # the built documents.
     #
-    # The short X.Y version.
-    #version = '0.4'
-    version = modeltranslation.get_version(pep386=False, short=True)
-    # The full version, including alpha/beta/rc tags.
-    #release = '0.4.0-rc1'
-    release = modeltranslation.get_version(pep386=False)
+    # The short X.Y version (e.g.'0.5').
+    version = '.'.join(str(i) for i in modeltranslation.VERSION[:2])
+    # The full PEP386-compliant version number version, including
+    # normalized alpha/beta/rc/dev tags (e.g. '0.5a1').
+    release = modeltranslation.get_version()
 except ImportError:
     version = 'dev'
     release = 'dev'
