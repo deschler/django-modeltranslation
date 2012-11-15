@@ -61,12 +61,12 @@ explains how things are working under the hood.
 
 
 ``TranslationOptions`` fields inheritance
-----------------------------------
+-----------------------------------------
 
 .. versionadded:: 0.5
 
-A subclass of any ``TranslationOptions`` will "inherit" fields from its bases
-(somehow similarly to the way Django Models inherit fields, but with different syntax).
+A subclass of any ``TranslationOptions`` will inherit fields from its bases
+(similar to the way Django models inherit fields, but with a different syntax).
 
 .. code-block:: python
 
@@ -79,22 +79,31 @@ A subclass of any ``TranslationOptions`` will "inherit" fields from its bases
     class NewsWithImageTranslationOptions(NewsTranslationOptions):
         fields = ('image',)
 
-    assert NewsWithImageTranslationOptions.fields == ('title', 'text', 'image')
-
     translator.register(News, NewsTranslationOptions)
     translator.register(NewsWithImage, NewsWithImageTranslationOptions)
 
-Of course multiple inheritance and inheritance chains (A > B > C) also work as expected.
+The above example adds the fields ``title`` and ``text`` from the
+``NewsTranslationOptions`` class to ``NewsWithImageTranslationOptions``, or to
+say it in code:
 
-.. note:: When upgrading from previous modeltranslation version, please review your
-    ``TranslationOptions`` classes and see if introducing `fields inheritance` broke
-    the project (if you had always subclassed ``TranslationOptions`` only, there is no risk).
+.. code-block:: python
+
+    assert NewsWithImageTranslationOptions.fields == ('title', 'text', 'image')
+
+Of course multiple inheritance and inheritance chains (A > B > C) also work as
+expected.
+
+.. note:: When upgrading from a previous modeltranslation version, please
+    review your ``TranslationOptions`` classes and see if introducing `fields
+    inheritance` broke the project (if you had always subclassed
+    ``TranslationOptions`` only, there is no risk).
+
 
 Changes Automatically Applied to the Model Class
 ------------------------------------------------
 
-After registering the ``News`` model for translation an SQL dump of the
-news app will look like this:
+After registering the ``News`` model for translation an SQL dump of the news
+app will look like this:
 
 .. code-block:: console
 
@@ -110,7 +119,6 @@ news app will look like this:
         `text_en` longtext NULL,
     )
     ;
-    ALTER TABLE `news_news` ADD CONSTRAINT page_id_refs_id_3edd1f0d FOREIGN KEY (`page_id`) REFERENCES `page_page` (`id`);
     CREATE INDEX `news_news_page_id` ON `news_news` (`page_id`);
     COMMIT;
 
