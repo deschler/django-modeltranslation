@@ -33,7 +33,7 @@ translator.register(FileFieldsModel, FileFieldsModelTranslationOptions)
 
 
 class OtherFieldsModelTranslationOptions(TranslationOptions):
-    fields = ('int', 'boolean', 'nullboolean',)
+    fields = ('int', 'boolean', 'nullboolean', 'csi',)
 translator.register(OtherFieldsModel, OtherFieldsModelTranslationOptions)
 
 

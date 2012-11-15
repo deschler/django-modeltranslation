@@ -121,7 +121,7 @@ Model Field                     0.4 0.5
 ``BigIntegerField``                 x
 ``BooleanField``                    x
 ``CharField``                   x   x
-``CommaSeparatedIntegerField``
+``CommaSeparatedIntegerField``  \*  \*
 ``DateField``
 ``DateTimeField``
 ``DecimalField``

@@ -40,6 +40,7 @@ class OtherFieldsModel(models.Model):
     int = models.PositiveIntegerField(default=42, validators=[validators.MinValueValidator(0)])
     boolean = models.BooleanField()
     nullboolean = models.NullBooleanField()
+    csi = models.CommaSeparatedIntegerField(max_length=255)
 
 
 class MultitableModelA(models.Model):

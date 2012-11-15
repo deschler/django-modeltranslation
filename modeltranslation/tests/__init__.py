@@ -463,9 +463,12 @@ class OtherFieldsTest(ModeltranslationTestBase):
         self.failUnless('nullboolean' in field_names)
         self.failUnless('nullboolean_de' in field_names)
         self.failUnless('nullboolean_en' in field_names)
+        self.failUnless('csi' in field_names)
+        self.failUnless('csi_de' in field_names)
+        self.failUnless('csi_en' in field_names)
         inst.delete()
 
-    def test_translated_models_int_instance(self):
+    def test_translated_models_integer_instance(self):
         inst = OtherFieldsModel()
         inst.int = 7
         self.assertEqual('de', get_language())
@@ -528,6 +531,33 @@ class OtherFieldsTest(ModeltranslationTestBase):
         self.assertEqual(True, inst.nullboolean)
         self.assertEqual(False, inst.nullboolean_de)
         self.assertEqual(True, inst.nullboolean_en)
+
+    def test_translated_models_commaseparatedinteger_instance(self):
+        inst = OtherFieldsModel()
+        inst.csi = '4,8,15,16,23,42'
+        self.assertEqual('de', get_language())
+        self.assertEqual('4,8,15,16,23,42', inst.csi)
+        self.assertEqual('4,8,15,16,23,42', inst.csi_de)
+        self.assertEqual(None, inst.csi_en)
+
+        inst.csi = '23,42'
+        inst.save()
+        self.assertEqual('23,42', inst.csi)
+        self.assertEqual('23,42', inst.csi_de)
+        self.assertEqual(None, inst.csi_en)
+
+        trans_real.activate('en')
+        inst.csi = '4,8,15,16,23,42'
+        self.assertEqual('4,8,15,16,23,42', inst.csi)
+        self.assertEqual('23,42', inst.csi_de)
+        self.assertEqual('4,8,15,16,23,42', inst.csi_en)
+
+        # Now that we have covered csi, lost, illuminati and hitchhiker
+        # compliance in a single test, do something useful...
+
+        # Check if validation is preserved
+        inst.csi = '1;2'
+        self.assertRaises(ValidationError, inst.full_clean)
 
 
 class ModeltranslationTestRule1(ModeltranslationTestBase):
