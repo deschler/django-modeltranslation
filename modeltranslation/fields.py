@@ -12,11 +12,9 @@ from modeltranslation.utils import (get_language,
 SUPPORTED_FIELDS = (
     fields.CharField,
     fields.TextField,
-    fields.BigIntegerField,
     fields.IntegerField,
-    fields.SmallIntegerField,
-    fields.PositiveIntegerField,
-    fields.PositiveSmallIntegerField,
+    # Above imply also BigIntegerField, SmallIntegerField, PositiveIntegerField and
+    # PositiveSmallIntegerField, as they are subclasses of IntegerField
     fields.BooleanField,
     fields.NullBooleanField,
     fields.files.FileField,
