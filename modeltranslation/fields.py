@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import fields
-from django.db.models.fields.files import FileField, ImageField
 
 from modeltranslation import settings as mt_settings
 from modeltranslation.utils import (get_language,
@@ -20,8 +19,8 @@ SUPPORTED_FIELDS = (
     fields.PositiveSmallIntegerField,
     fields.BooleanField,
     fields.NullBooleanField,
-    FileField,
-    ImageField,
+    fields.files.FileField,
+    fields.files.ImageField,
 )
 
 
