@@ -149,40 +149,48 @@ fields added by the modeltranslation application you can use the
 :ref:`commands-update_translation_fields` section for more infos on this.
 
 
-Supported Field Matrix
-----------------------
+Supported Fields Matrix
+-----------------------
+
+While the main purpose of modeltranslation is to translate text-like fields, translating other
+fields can be useful in several situations. The table lists all model fields available in Django and
+gives an overview about their current support status:
 
 =============================== === ===
 Model Field                     0.4 0.5
 =============================== === ===
-``AutoField``
-``BigIntegerField``                 x
-``BooleanField``                    x
-``CharField``                   x   x
-``CommaSeparatedIntegerField``  \*  \*
-``DateField``
-``DateTimeField``
-``DecimalField``
-``EmailField``                  \*  \*
-``FileField``                   x   x
-``FilePathField``
-``FloatField``
-``ImageField``                  x   x
-``IntegerField``                    x
-``IPAddressField``
-``GenericIPAddressField``
-``NullBooleanField``                x
-``PositiveIntegerField``            x
-``PositiveSmallIntegerField``       x
-``SlugField``                   \*  \*
-``SmallIntegerField``               x
-``TextField``                   x   x
-``TimeField``
-``URLField``                    \*  \*
-``ForeignKey``
-``OneToOneField``
-``ManyToManyField``
+``AutoField``                   |n| |n|
+``BigIntegerField``             |n| |i|
+``BooleanField``                |n| |y|
+``CharField``                   |y| |y|
+``CommaSeparatedIntegerField``  |n| |i|
+``DateField``                   |n| |u|
+``DateTimeField``               |n| |u|
+``DecimalField``                |n| |u|
+``EmailField``                  |i| |i|
+``FileField``                   |y| |y|
+``FilePathField``               |n| |u|
+``FloatField``                  |n| |u|
+``ImageField``                  |y| |y|
+``IntegerField``                |n| |y|
+``IPAddressField``              |n| |u|
+``GenericIPAddressField``       |n| |u|
+``NullBooleanField``            |n| |y|
+``PositiveIntegerField``        |n| |i|
+``PositiveSmallIntegerField``   |n| |i|
+``SlugField``                   |i| |i|
+``SmallIntegerField``           |n| |i|
+``TextField``                   |y| |y|
+``TimeField``                   |n| |u|
+``URLField``                    |i| |i|
+``ForeignKey``                  |n| |n|
+``OneToOneField``               |n| |n|
+``ManyToManyField``             |n| |n|
 =============================== === ===
 
-- x: Officially supported
-- \*: Implicitly supported (as it is a subclass of ``CharField``)
+.. |y| replace:: Yes
+.. |i| replace:: Yes\*
+.. |n| replace:: No
+.. |u| replace:: ?
+
+\* Implicitly supported (as subclass of a supported field)
