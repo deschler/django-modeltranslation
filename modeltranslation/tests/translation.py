@@ -33,8 +33,10 @@ translator.register(FileFieldsModel, FileFieldsModelTranslationOptions)
 
 
 class OtherFieldsModelTranslationOptions(TranslationOptions):
+#    fields = ('int', 'boolean', 'nullboolean', 'csi', 'float', 'decimal',
+#              'ip', 'genericip')
     fields = ('int', 'boolean', 'nullboolean', 'csi', 'float', 'decimal',
-              'ip', 'genericip')
+              'ip',)
 translator.register(OtherFieldsModel, OtherFieldsModelTranslationOptions)
 
 

@@ -22,7 +22,7 @@ SUPPORTED_FIELDS = (
     fields.FloatField,
     fields.DecimalField,
     fields.IPAddressField,
-    fields.GenericIPAddressField,
+    fields.GenericIPAddressField,  # Django 1.4+ only
     fields.files.FileField,
     fields.files.ImageField,
 )
