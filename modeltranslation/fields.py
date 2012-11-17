@@ -22,10 +22,13 @@ SUPPORTED_FIELDS = (
     fields.FloatField,
     fields.DecimalField,
     fields.IPAddressField,
-    fields.GenericIPAddressField,  # Django 1.4+ only
     fields.files.FileField,
     fields.files.ImageField,
 )
+try:
+    SUPPORTED_FIELDS += (fields.GenericIPAddressField,)  # Django 1.4+ only
+except AttributeError:
+    pass
 
 
 def create_translation_field(model, field_name, lang):
