@@ -7,6 +7,7 @@ NOTE: Perhaps ModeltranslationTestBase in tearDownClass should reload some modul
 
 """
 from __future__ import with_statement  # Python 2.5 compatibility
+from decimal import Decimal
 import os
 import shutil
 
@@ -468,6 +469,18 @@ class OtherFieldsTest(ModeltranslationTestBase):
         self.failUnless('csi' in field_names)
         self.failUnless('csi_de' in field_names)
         self.failUnless('csi_en' in field_names)
+        self.failUnless('ip' in field_names)
+        self.failUnless('ip_de' in field_names)
+        self.failUnless('ip_en' in field_names)
+        self.failUnless('genericip' in field_names)
+        self.failUnless('genericip_de' in field_names)
+        self.failUnless('genericip_en' in field_names)
+        self.failUnless('float' in field_names)
+        self.failUnless('float_de' in field_names)
+        self.failUnless('float_en' in field_names)
+        self.failUnless('decimal' in field_names)
+        self.failUnless('decimal_de' in field_names)
+        self.failUnless('decimal_en' in field_names)
         inst.delete()
 
     def test_translated_models_integer_instance(self):
@@ -560,6 +573,99 @@ class OtherFieldsTest(ModeltranslationTestBase):
         # Check if validation is preserved
         inst.csi = '1;2'
         self.assertRaises(ValidationError, inst.full_clean)
+
+    def test_translated_models_ipaddress_instance(self):
+        inst = OtherFieldsModel()
+        inst.ip = '192.0.1.42'
+        self.assertEqual('de', get_language())
+        self.assertEqual('192.0.1.42', inst.ip)
+        self.assertEqual('192.0.1.42', inst.ip_de)
+        self.assertEqual(None, inst.ip_en)
+
+        inst.ip = '192.0.23.1'
+        inst.save()
+        self.assertEqual('192.0.23.1', inst.ip)
+        self.assertEqual('192.0.23.1', inst.ip_de)
+        self.assertEqual(None, inst.ip_en)
+
+        trans_real.activate('en')
+        inst.ip = '192.0.1.42'
+        self.assertEqual('192.0.1.42', inst.ip)
+        self.assertEqual('192.0.23.1', inst.ip_de)
+        self.assertEqual('192.0.1.42', inst.ip_en)
+
+        # Check if validation is preserved
+        inst.ip = '1;2'
+        self.assertRaises(ValidationError, inst.full_clean)
+
+    def test_translated_models_genericipaddress_instance(self):
+        inst = OtherFieldsModel()
+        inst.genericip = '2a02:42fe::4'
+        self.assertEqual('de', get_language())
+        self.assertEqual('2a02:42fe::4', inst.genericip)
+        self.assertEqual('2a02:42fe::4', inst.genericip_de)
+        self.assertEqual(None, inst.genericip_en)
+
+        inst.genericip = '2a02:23fe::4'
+        inst.save()
+        self.assertEqual('2a02:23fe::4', inst.genericip)
+        self.assertEqual('2a02:23fe::4', inst.genericip_de)
+        self.assertEqual(None, inst.genericip_en)
+
+        trans_real.activate('en')
+        inst.genericip = '2a02:42fe::4'
+        self.assertEqual('2a02:42fe::4', inst.genericip)
+        self.assertEqual('2a02:23fe::4', inst.genericip_de)
+        self.assertEqual('2a02:42fe::4', inst.genericip_en)
+
+        # Check if validation is preserved
+        inst.genericip = '1;2'
+        self.assertRaises(ValidationError, inst.full_clean)
+
+    def test_translated_models_float_instance(self):
+        inst = OtherFieldsModel()
+        inst.float = 0.42
+        self.assertEqual('de', get_language())
+        self.assertEqual(0.42, inst.float)
+        self.assertEqual(0.42, inst.float_de)
+        self.assertEqual(None, inst.float_en)
+
+        inst.float = 0.23
+        inst.save()
+        self.assertEqual(0.23, inst.float)
+        self.assertEqual(0.23, inst.float_de)
+        self.assertEqual(None, inst.float_en)
+
+        trans_real.activate('en')
+        inst.float = 0.42
+        self.assertEqual(0.42, inst.float)
+        self.assertEqual(0.23, inst.float_de)
+        self.assertEqual(0.42, inst.float_en)
+
+    def test_translated_models_decimal_instance(self):
+        inst = OtherFieldsModel()
+        inst.decimal = Decimal('0.42')
+        self.assertEqual('de', get_language())
+        self.assertEqual(Decimal('0.42'), inst.decimal)
+        self.assertEqual(Decimal('0.42'), inst.decimal_de)
+        self.assertEqual(None, inst.decimal_en)
+
+        inst.decimal = inst.decimal - Decimal('0.19')
+        inst.save()
+        self.assertEqual(Decimal('0.23'), inst.decimal)
+        self.assertEqual(Decimal('0.23'), inst.decimal_de)
+        self.assertEqual(None, inst.decimal_en)
+
+        trans_real.activate('en')
+        self.assertRaises(TypeError, lambda x: inst.decimal + Decimal('0.19'))
+        self.assertEqual(None, inst.decimal)
+        self.assertEqual(Decimal('0.23'), inst.decimal_de)
+        self.assertEqual(None, inst.decimal_en)
+
+        inst.decimal = Decimal('0.42')
+        self.assertEqual(Decimal('0.42'), inst.decimal)
+        self.assertEqual(Decimal('0.23'), inst.decimal_de)
+        self.assertEqual(Decimal('0.42'), inst.decimal_en)
 
 
 class ModeltranslationTestRule1(ModeltranslationTestBase):

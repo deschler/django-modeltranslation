@@ -11,12 +11,18 @@ from modeltranslation.utils import (get_language,
 
 SUPPORTED_FIELDS = (
     fields.CharField,
+    # Above implies also CommaSeparatedIntegerField, EmailField, SlugField and URLField
+    # as they are subclasses of CharField.
     fields.TextField,
     fields.IntegerField,
-    # Above imply also BigIntegerField, SmallIntegerField, PositiveIntegerField and
-    # PositiveSmallIntegerField, as they are subclasses of IntegerField
+    # Above implies also BigIntegerField, SmallIntegerField, PositiveIntegerField and
+    # PositiveSmallIntegerField, as they are subclasses of IntegerField.
     fields.BooleanField,
     fields.NullBooleanField,
+    fields.FloatField,
+    fields.DecimalField,
+    fields.IPAddressField,
+    fields.GenericIPAddressField,
     fields.files.FileField,
     fields.files.ImageField,
 )
