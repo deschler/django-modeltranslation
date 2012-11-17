@@ -3,10 +3,9 @@
 Registering Models for Translation
 ==================================
 
-The ``modeltranslation`` app can translate ``CharField`` and ``TextField``
-based fields (as well as ``FileField`` and ``ImageField`` as of version 0.4)
-of any model class. For each model to translate a translation option class
-containing the fields to translate is registered with the modeltranslation app.
+Modeltranslation can translate model fields of any model class. For each model
+to translate a translation option class containing the fields to translate is
+registered with a special object called the ``translator``.
 
 Registering models and their fields for translation requires the following
 steps:
@@ -14,17 +13,17 @@ steps:
 1. Create a ``translation.py`` in your app directory.
 2. Create a translation option class for every model to translate.
 3. Register the model and the translation option class at the
-   ``modeltranslation.translator.translator``
+   ``modeltranslation.translator.translator``.
 
 The modeltranslation application reads the ``translation.py`` file in your
 app directory thereby triggering the registration of the translation
 options found in the file.
 
 A translation option is a class that declares which fields of a model to
-translate. The class must derive from ``modeltranslation.ModelTranslation``
-and it must provide a ``fields`` attribute storing the list of fieldnames. The
-option class must be registered with the
-``modeltranslation.translator.translator`` instance.
+translate. The class must derive from
+``modeltranslation.translator.TranslationOptions`` and it must provide a
+``fields`` attribute storing the list of fieldnames. The option class must be
+registered with the ``modeltranslation.translator.translator`` instance.
 
 To illustrate this let's have a look at a simple example using a ``News``
 model. The news in this example only contains a ``title`` and a ``text`` field.
@@ -102,7 +101,7 @@ expected.
 Changes Automatically Applied to the Model Class
 ------------------------------------------------
 
-After registering the ``News`` model for translation an SQL dump of the news
+After registering the ``News`` model for translation a SQL dump of the news
 app will look like this:
 
 .. code-block:: console
@@ -123,9 +122,9 @@ app will look like this:
     COMMIT;
 
 Note the ``title_de``, ``title_en``, ``text_de`` and ``text_en`` fields which
-are not declared in the original News model class but rather have been added by
-the modeltranslation app. These are called *translation fields*. There will be
-one for every language in your project's ``settings.py``.
+are not declared in the original ``News`` model class but rather have been
+added by the modeltranslation app. These are called *translation fields*. There
+will be one for every language in your project's ``settings.py``.
 
 The name of these additional fields is build using the original name of the
 translated field and appending one of the language identifiers found in the
@@ -142,19 +141,22 @@ the translated models.
 In case you are translating an existing project and your models have already
 been synced to the database you will need to alter the tables in your database
 and add these additional translation fields. Note that all added fields are
-declared ``null=True`` not matter if the original field is required. In other
-words - all translations are optional. To populate the default translation
-fields added by the modeltranslation application you can use the
-``update_translation_fields`` command below. See
-:ref:`commands-update_translation_fields` section for more infos on this.
+declared ``blank=True`` and ``null=True`` no matter if the original field is
+required or not. In other words - all translations are optional. To populate
+the default translation fields added by the modeltranslation application you
+can use the ``update_translation_fields`` command below. See
+:ref:`commands-update_translation_fields` for more infos on this.
 
+
+.. _supported_field_matrix:
 
 Supported Fields Matrix
 -----------------------
 
-While the main purpose of modeltranslation is to translate text-like fields, translating other
-fields can be useful in several situations. The table lists all model fields available in Django and
-gives an overview about their current support status:
+While the main purpose of modeltranslation is to translate text-like fields,
+translating other fields can be useful in several situations. The table lists
+all model fields available in Django and gives an overview about their current
+support status:
 
 =============================== === ===
 Model Field                     0.4 0.5

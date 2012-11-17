@@ -33,9 +33,9 @@ inline related classes in modeltranslation derive from, implements a special
 method which is ``def formfield_for_dbfield(self, db_field, **kwargs)``. This
 method does the following:
 
-1. Copies the widget of the original field to each of it's translation fields.
-2. Checks if the original field was required and if so makes
-   the default translation field required instead.
+1. Copies the widget of the original field to each of its translation fields.
+2. Checks if the original field was required and if so makes the default
+   translation field required instead.
 
 
 get_form/get_fieldsets/_declared_fieldsets
@@ -156,7 +156,7 @@ A translated inline must derive from one of the following classes:
 Just like ``TranslationAdmin`` these classes implement a special method
 ``formfield_for_dbfield`` which does all the patching.
 
-For our example we assume that there is new model called ``Image``. Its
+For our example we assume that there is a new model called ``Image``. The
 definition is left out for simplicity. Our ``News`` model inlines the new
 model:
 

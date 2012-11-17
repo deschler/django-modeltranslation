@@ -21,10 +21,11 @@ model class.
 Features
 ========
 
-- Unlimited number of target languages
 - Add translations without changing existing models
-- Django admin support
+- Fast, because translation fields are stored in the same table
 - Supports inherited models
+- Django admin support
+- Unlimited number of target languages
 
 
 Project Home

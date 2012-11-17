@@ -115,7 +115,9 @@ and ``en`` in your project, set the ``LANGUAGES`` variable like this (where
 Advanced Settings
 *****************
 
-Modeltranslation also has some advanced settings to customize its behaviour:
+Modeltranslation also has some advanced settings to customize its behaviour.
+
+.. _settings-modeltranslation_default_language:
 
 ``MODELTRANSLATION_DEFAULT_LANGUAGE``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -147,8 +149,8 @@ Modeltranslation uses an autoregister feature similiar to the one in Django's
 admin. The autoregistration process will look for a ``translation.py``
 file in the root directory of each application that is in ``INSTALLED_APPS``.
 
-A setting ``MODELTRANSLATION_TRANSLATION_FILES`` is provided to limit or extend
-the modules that are taken into account.
+A setting ``MODELTRANSLATION_TRANSLATION_FILES`` is provided to extend the
+modules that are taken into account.
 
 Syntax:
 
@@ -168,12 +170,13 @@ Example:
         'projects.translation',
     )
 
-.. note:: Modeltranslation up to version 0.3 used a single project wide
-          registration file which was defined through
-          ``MODELTRANSLATION_TRANSLATION_REGISTRY = '<PROJECT_MODULE>.translation'``.
-          For backwards compatibiliy the module defined through this setting is
-          automatically added to ``MODELTRANSLATION_TRANSLATION_FILES``. A
-          ``DeprecationWarning`` is issued in this case.
+.. note::
+    Modeltranslation up to version 0.3 used a single project wide registration
+    file which was defined through
+    ``MODELTRANSLATION_TRANSLATION_REGISTRY = '<PROJECT_MODULE>.translation'``.
+    For backwards compatibiliy the module defined through this setting is
+    automatically added to ``MODELTRANSLATION_TRANSLATION_FILES``. A
+    ``DeprecationWarning`` is issued in this case.
 
 
 ``MODELTRANSLATION_CUSTOM_FIELDS``
@@ -183,14 +186,10 @@ Default: ``()`` (empty tuple)
 
 .. versionadded:: 0.3
 
-``Modeltranslation`` officially supports ``CharField`` and ``TextField``.
-
-.. versionadded:: 0.4
-
-Support for ``FileField`` and ``ImageField``.
-
-In most cases subclasses of the supported fields will work fine, too. Other
-fields aren't supported and will throw an ``ImproperlyConfigured`` exception.
+Modeltranslation supports the fields listed in the
+:ref:`supported_field_matrix`. In most cases subclasses of the supported
+fields will work fine, too. Unsupported fields will throw an
+``ImproperlyConfigured`` exception.
 
 The list of supported fields can be extended by defining a tuple of field
 names in your ``settings.py``.
@@ -203,9 +202,29 @@ Example:
 
 .. warning::
     This just prevents modeltranslation from throwing an
-    ``ImproperlyConfigured`` exception. Any non text-like field will most
+    ``ImproperlyConfigured`` exception. Any unsupported field will most
     likely fail in one way or another. The feature is considered experimental
     and might be replaced by a more sophisticated mechanism in future versions.
+
+
+``MODELTRANSLATION_AUTO_POPULATE``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Default: ``False``
+
+.. versionadded:: 0.5
+
+This setting controls if the :ref:`multilingual_manager` should automatically
+populate language field values in its ``create`` method, so that these two
+statements can be considered equivalent:
+
+.. code-block:: python
+
+    News.objects.create(title='-- no translation yet --', _populate=True)
+
+.. code-block:: python
+
+    News.objects.create(title='-- no translation yet --')
 
 
 ``MODELTRANSLATION_DEBUG``

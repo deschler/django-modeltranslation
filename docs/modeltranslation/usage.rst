@@ -90,6 +90,8 @@ language.
 .. todo:: Add more examples.
 
 
+.. _multilingual_manager:
+
 Multilingual Manager
 --------------------
 
