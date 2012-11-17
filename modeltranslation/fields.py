@@ -11,8 +11,8 @@ from modeltranslation.utils import (get_language,
 
 SUPPORTED_FIELDS = (
     fields.CharField,
-    # Above implies also CommaSeparatedIntegerField, EmailField, SlugField and URLField
-    # as they are subclasses of CharField.
+    # Above implies also CommaSeparatedIntegerField, EmailField, FilePathField, SlugField
+    # and URLField as they are subclasses of CharField.
     fields.TextField,
     fields.IntegerField,
     # Above implies also BigIntegerField, SmallIntegerField, PositiveIntegerField and

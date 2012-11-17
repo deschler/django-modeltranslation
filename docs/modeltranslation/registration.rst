@@ -171,7 +171,7 @@ Model Field                     0.4 0.5
 ``DecimalField``                |n| |y|
 ``EmailField``                  |i| |i|
 ``FileField``                   |y| |y|
-``FilePathField``               |n| |u|
+``FilePathField``               |i| |i|
 ``FloatField``                  |n| |y|
 ``ImageField``                  |y| |y|
 ``IntegerField``                |n| |y|
