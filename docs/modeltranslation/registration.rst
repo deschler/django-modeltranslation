@@ -166,8 +166,8 @@ Model Field                     0.4 0.5
 ``BooleanField``                |n| |y|
 ``CharField``                   |y| |y|
 ``CommaSeparatedIntegerField``  |n| |y|
-``DateField``                   |n| |u|
-``DateTimeField``               |n| |u|
+``DateField``                   |n| |y|
+``DateTimeField``               |n| |y|
 ``DecimalField``                |n| |y|
 ``EmailField``                  |i| |i|
 ``FileField``                   |y| |y|
@@ -183,7 +183,7 @@ Model Field                     0.4 0.5
 ``SlugField``                   |i| |i|
 ``SmallIntegerField``           |n| |i|
 ``TextField``                   |y| |y|
-``TimeField``                   |n| |u|
+``TimeField``                   |n| |y|
 ``URLField``                    |i| |i|
 ``ForeignKey``                  |n| |n|
 ``OneToOneField``               |n| |n|

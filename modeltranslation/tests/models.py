@@ -44,6 +44,9 @@ class OtherFieldsModel(models.Model):
     float = models.FloatField(blank=True, null=True)
     decimal = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
     ip = models.IPAddressField(blank=True, null=True)
+    date = models.DateField(blank=True, null=True)
+    datetime = models.DateTimeField(blank=True, null=True)
+    time = models.TimeField(blank=True, null=True)
 #    genericip = models.GenericIPAddressField(blank=True, null=True)
 
 

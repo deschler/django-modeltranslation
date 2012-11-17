@@ -36,7 +36,7 @@ class OtherFieldsModelTranslationOptions(TranslationOptions):
 #    fields = ('int', 'boolean', 'nullboolean', 'csi', 'float', 'decimal',
 #              'ip', 'genericip')
     fields = ('int', 'boolean', 'nullboolean', 'csi', 'float', 'decimal',
-              'ip',)
+              'ip', 'date', 'datetime', 'time',)
 translator.register(OtherFieldsModel, OtherFieldsModelTranslationOptions)
 
 

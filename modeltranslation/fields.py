@@ -22,6 +22,9 @@ SUPPORTED_FIELDS = (
     fields.FloatField,
     fields.DecimalField,
     fields.IPAddressField,
+    fields.DateField,
+    fields.DateTimeField,
+    fields.TimeField,
     fields.files.FileField,
     fields.files.ImageField,
 )

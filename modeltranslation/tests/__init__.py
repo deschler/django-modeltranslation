@@ -7,6 +7,7 @@ NOTE: Perhaps ModeltranslationTestBase in tearDownClass should reload some modul
 
 """
 from __future__ import with_statement  # Python 2.5 compatibility
+import datetime
 from decimal import Decimal
 import os
 import shutil
@@ -666,6 +667,78 @@ class OtherFieldsTest(ModeltranslationTestBase):
         self.assertEqual(Decimal('0.42'), inst.decimal)
         self.assertEqual(Decimal('0.23'), inst.decimal_de)
         self.assertEqual(Decimal('0.42'), inst.decimal_en)
+
+    def test_translated_models_date_instance(self):
+        inst = OtherFieldsModel()
+        inst.date = datetime.date(2012, 12, 31)
+        self.assertEqual('de', get_language())
+        self.assertEqual(datetime.date(2012, 12, 31), inst.date)
+        self.assertEqual(datetime.date(2012, 12, 31), inst.date_de)
+        self.assertEqual(None, inst.date_en)
+
+        inst.date = datetime.date(1999, 1, 1)
+        inst.save()
+        self.assertEqual(datetime.date(1999, 1, 1), inst.date)
+        self.assertEqual(datetime.date(1999, 1, 1), inst.date_de)
+        self.assertEqual(None, inst.date_en)
+
+        qs = OtherFieldsModel.objects.filter(date='1999-1-1')
+        self.assertEqual(len(qs), 1)
+        self.assertEqual(qs[0].date, datetime.date(1999, 1, 1))
+
+        trans_real.activate('en')
+        inst.date = datetime.date(2012, 12, 31)
+        self.assertEqual(datetime.date(2012, 12, 31), inst.date)
+        self.assertEqual(datetime.date(1999, 1, 1), inst.date_de)
+        self.assertEqual(datetime.date(2012, 12, 31), inst.date_en)
+
+    def test_translated_models_datetime_instance(self):
+        inst = OtherFieldsModel()
+        inst.datetime = datetime.datetime(2012, 12, 31, 23, 42)
+        self.assertEqual('de', get_language())
+        self.assertEqual(datetime.datetime(2012, 12, 31, 23, 42), inst.datetime)
+        self.assertEqual(datetime.datetime(2012, 12, 31, 23, 42), inst.datetime_de)
+        self.assertEqual(None, inst.datetime_en)
+
+        inst.datetime = datetime.datetime(1999, 1, 1, 23, 42)
+        inst.save()
+        self.assertEqual(datetime.datetime(1999, 1, 1, 23, 42), inst.datetime)
+        self.assertEqual(datetime.datetime(1999, 1, 1, 23, 42), inst.datetime_de)
+        self.assertEqual(None, inst.datetime_en)
+
+        qs = OtherFieldsModel.objects.filter(datetime='1999-1-1 23:42')
+        self.assertEqual(len(qs), 1)
+        self.assertEqual(qs[0].datetime, datetime.datetime(1999, 1, 1, 23, 42))
+
+        trans_real.activate('en')
+        inst.datetime = datetime.datetime(2012, 12, 31, 23, 42)
+        self.assertEqual(datetime.datetime(2012, 12, 31, 23, 42), inst.datetime)
+        self.assertEqual(datetime.datetime(1999, 1, 1, 23, 42), inst.datetime_de)
+        self.assertEqual(datetime.datetime(2012, 12, 31, 23, 42), inst.datetime_en)
+
+    def test_translated_models_time_instance(self):
+        inst = OtherFieldsModel()
+        inst.time = datetime.time(23, 42, 0)
+        self.assertEqual('de', get_language())
+        self.assertEqual(datetime.time(23, 42, 0), inst.time)
+        self.assertEqual(datetime.time(23, 42, 0), inst.time_de)
+        self.assertEqual(None, inst.time_en)
+
+        inst.time = datetime.time(01, 02, 03)
+        inst.save()
+        self.assertEqual(datetime.time(01, 02, 03), inst.time)
+        self.assertEqual(datetime.time(01, 02, 03), inst.time_de)
+        self.assertEqual(None, inst.time_en)
+
+        qs = OtherFieldsModel.objects.filter(time='01:02:03')
+        self.assertEqual(len(qs), 1)
+        self.assertEqual(qs[0].time, datetime.time(01, 02, 03))
+
+        trans_real.activate('en')
+        inst.time = datetime.time(23, 42, 0)
+        self.assertEqual(datetime.time(23, 42, 0), inst.time)
+        self.assertEqual(datetime.time(01, 02, 03), inst.time_de)
+        self.assertEqual(datetime.time(23, 42, 0), inst.time_en)
 
 
 class ModeltranslationTestRule1(ModeltranslationTestBase):
