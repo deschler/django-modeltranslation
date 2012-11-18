@@ -113,6 +113,12 @@ class TranslationField(object):
         self.verbose_name = build_localized_verbose_name(
             translated_field.verbose_name, language)
 
+    def get_attname_column(self):
+        attname = self.get_attname()
+        column = build_localized_fieldname(
+            self.translated_field.db_column or self.translated_field.name, self.language) or attname
+        return attname, column
+
     def south_field_triple(self):
         """
         Returns a suitable description of this field for South.
