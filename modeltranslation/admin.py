@@ -151,7 +151,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         exclude = self.replace_orig_field(exclude) or None
         exclude = self._exclude_original_fields(exclude)
         kwargs.update({'exclude': exclude})
-        
+
         return kwargs
 
     def _do_get_fieldsets_pre_form_or_formset(self):
