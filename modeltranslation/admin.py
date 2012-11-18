@@ -132,27 +132,26 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
                     prepopulated_fields_new[k] = tuple([translation_fields[0]])
             self.prepopulated_fields = prepopulated_fields_new
 
-    def _do_get_form_or_formset(self, **kwargs):
+    def _do_get_form_or_formset(self, request, obj, **kwargs):
         """
         Code shared among get_form and get_formset.
         """
+        if self.exclude is None:
+            exclude = []
+        else:
+            exclude = list(self.exclude)
+        exclude.extend(self.get_readonly_fields(request, obj))
         if not self.exclude and hasattr(
                 self.form, '_meta') and self.form._meta.exclude:
             # Take the custom ModelForm's Meta.exclude into account only if the
             # ModelAdmin doesn't define its own.
-            kwargs.update({'exclude': getattr(
-                kwargs, 'exclude', tuple()) +
-                tuple(self.replace_orig_field(self.form._meta.exclude))})
-        exclude = kwargs.get('exclude', [])
-        self.exclude = self.replace_orig_field(self.exclude)
-        exclude_fields = (
-            self._exclude_original_fields(exclude))
-        if self.exclude:
-            exclude_fields = tuple(self.exclude) + tuple(exclude_fields)
-        if exclude_fields:
-            kwargs.update({'exclude': getattr(
-                kwargs, 'exclude', tuple()) + exclude_fields})
-
+            exclude.extend(self.form._meta.exclude)
+        # if exclude is an empty list we pass None to be consistant with the
+        # default on modelform_factory
+        exclude = self.replace_orig_field(exclude) or None
+        exclude = self._exclude_original_fields(exclude)
+        kwargs.update({'exclude': exclude})
+        
         return kwargs
 
     def _do_get_fieldsets_pre_form_or_formset(self):
@@ -213,7 +212,7 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
             self.list_display = display_new
 
     def get_form(self, request, obj=None, **kwargs):
-        kwargs = self._do_get_form_or_formset(**kwargs)
+        kwargs = self._do_get_form_or_formset(request, obj, **kwargs)
         return super(TranslationAdmin, self).get_form(request, obj, **kwargs)
 
     def get_fieldsets(self, request, obj=None):
@@ -226,7 +225,7 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
 
 class TranslationInlineModelAdmin(TranslationBaseModelAdmin, InlineModelAdmin):
     def get_formset(self, request, obj=None, **kwargs):
-        kwargs = self._do_get_form_or_formset(**kwargs)
+        kwargs = self._do_get_form_or_formset(request, obj, **kwargs)
         return super(TranslationInlineModelAdmin, self).get_formset(
             request, obj, **kwargs)
 
