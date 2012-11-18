@@ -1415,6 +1415,15 @@ class TranslationAdminTest(ModeltranslationTestBase):
         self.assertEqual(
             ma.get_form(request).base_fields.keys(), ['title_de', 'title_en'])
 
+        # Using `readonly_fields`.
+        class TestModelAdmin(TranslationAdmin):
+            fields = ['title', 'url']
+            readonly_fields = ['url']
+
+        ma = TestModelAdmin(TestModel, self.site)
+        self.assertEqual(
+            ma.get_form(request).base_fields.keys(), ['title_de', 'title_en'])
+
     def test_field_arguments_restricted_on_custom_form(self):
         # Using `fields`.
         class TestModelForm(forms.ModelForm):
