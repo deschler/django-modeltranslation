@@ -1,5 +1,8 @@
+  ADDED: A subclass of TranslationOptions inherits fields from its bases.
+         (thanks to Bruno Tavares and Jacek Tomaszewski,
+          resolves issue #110)
   ADDED: Support for fallback languages. Allows fine grained configuration
-         through project settings and translation options on model basis.
+         through project settings and TranslationOptions on model basis.
          (thanks to Jacek Tomaszewski,
           resolves issue #104)
   ADDED: Multilingual manager which is aware of the current language.
@@ -10,6 +13,11 @@ CHANGED: Constructor rewrites fields to be language aware.
          (thanks to Jacek Tomaszewski,
           resolves issues #33 and #58)
 
+  FIXED: Lacking support for readonly_fields in TranslationAdmin.
+         (thanks to sbrandtb,
+          resolves issue #111)
+  FIXED: Model's db_column option is not applied to the translation field.
+         (resolves issue #83)
   FIXED: Admin prevents saving a cleared field. The fix deactivates rule3 and
          implies the new language aware manager and constructor rewrite.
          (resolves issue #85)
