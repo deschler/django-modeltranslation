@@ -101,8 +101,20 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         ['title_de', 'title_en']
         >>> self.replace_orig_field(['title', 'url'])
         ['title_de', 'title_en', 'url']
+
+        Note that grouped fields are flattened. We do this because:
+
+            1. They are hard to handle in the jquery-ui tabs implementation
+            2. They don't scale well with more than a few languages
+            3. It's better than not handling them at all (okay that's weak)
+
+        >>> print self.trans_opts.fields
+        (('title', 'url'), 'email')
+        >>> get_translation_fields(self.trans_opts.fields[0])
+        ['title_de', 'title_en', 'url_de', 'url_en', 'email_de', 'email_en']
+        >>> self.replace_orig_field((('title', 'url'), 'email', 'text'))
+        ['title_de', 'title_en', 'url_de', 'url_en', 'email_de', 'email_en', 'text']
         """
-        # TODO: Handle nested lists to display multiple fields on same line.
         if option:
             option_new = list(option)
             for opt in option:
@@ -110,11 +122,14 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
                     index = option_new.index(opt)
                     translation_fields = get_translation_fields(opt)
                     option_new[index:index + 1] = translation_fields
+                elif isinstance(opt, (tuple, list)) and (
+                        [o for o in opt if o in self.trans_opts.fields]):
+                    index = option_new.index(opt)
+                    option_new[index:index + 1] = self.replace_orig_field(opt)
             option = option_new
         return option
 
     def _patch_fieldsets(self, fieldsets):
-        # TODO: Handle nested lists to display multiple fields on same line.
         if fieldsets:
             fieldsets_new = list(fieldsets)
             for (name, dct) in fieldsets:

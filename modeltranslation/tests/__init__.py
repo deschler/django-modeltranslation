@@ -1424,6 +1424,16 @@ class TranslationAdminTest(ModeltranslationTestBase):
         self.assertEqual(
             ma.get_form(request).base_fields.keys(), ['title_de', 'title_en'])
 
+        # Using grouped fields.
+        class TestModelAdmin(TranslationAdmin):
+            fields = (('title', 'url'), 'email',)
+
+        ma = TestModelAdmin(TestModel, self.site)
+        # Note: Current implementation flattens the nested fields
+        self.assertEqual(
+            ma.get_form(request).base_fields.keys(),
+            ['title_de', 'title_en', 'url_de', 'url_en', 'email_de', 'email_en'])
+
     def test_field_arguments_restricted_on_custom_form(self):
         # Using `fields`.
         class TestModelForm(forms.ModelForm):
