@@ -6,6 +6,32 @@ from django.utils.functional import lazy
 
 from modeltranslation import settings
 
+import json
+import re
+import urllib2
+import urllib
+
+
+def translate(text, ilang, olang):
+    """
+    Return translated string using google web translation
+    """
+    url = u"http://translate.google.com/translate_a/t?client=t&text={0}&hl=en&sl={1}&tl={2}&multires=1"
+    request = urllib2.Request(url.format(urllib.quote(text), ilang, olang),
+        headers={ 'User-Agent': 'Mozilla/5.0', 'Accept-Charset': 'utf-8' })
+    response = urllib2.urlopen(request).read()
+    fixedJSON = re.sub(r',{2,}', ',', response).replace(',]', ']')
+    data = json.loads(fixedJSON)
+    result = {}
+    result["definition"] = data[0][0]
+    for row in data[1]:
+        try:
+            result[row[0]] = row[1]
+        except:
+            pass
+    return u'%s' % result["definition"][0].replace(u'-', '')
+
+
 
 def get_language():
     """
