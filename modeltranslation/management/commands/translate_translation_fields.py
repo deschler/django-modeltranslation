@@ -35,6 +35,9 @@ class Command(BaseCommand):
                     instances = model.objects.exclude(
                         Q(**{def_from_lang_fieldname: None}) |
                         Q(**{def_from_lang_fieldname: ""})
+                    ).filter(
+                        Q(**{def_to_lang_fieldname: None}) |
+                        Q(**{def_to_lang_fieldname: ""})
                     )
                     for i in instances:
                         text = i.__dict__[def_from_lang_fieldname]
