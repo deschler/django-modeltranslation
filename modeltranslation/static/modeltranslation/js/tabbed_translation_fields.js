@@ -32,6 +32,8 @@ var google, django, gettext;
                 ':parents(.tabular)'), // exclude tabular inlines
               grouped_translations = {};
 
+            translation_fields = translation_fields.add('fieldset.collapse-closed .mt');
+
             translation_fields.each(function (i, el) {
                 var field_prefix = 'mt-field-',
                     name = '',
