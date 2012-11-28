@@ -39,8 +39,8 @@ AUTO_POPULATE = getattr(
 # FALLBACK_LANGUAGES should be in either format:
 # MODELTRANSLATION_FALLBACK_LANGUAGES = ('en', 'de')
 # MODELTRANSLATION_FALLBACK_LANGUAGES = {'default': ('en', 'de'), 'fr': ('de',)}
-# By default there is no fallback language
-FALLBACK_LANGUAGES = getattr(settings, 'MODELTRANSLATION_FALLBACK_LANGUAGES', ())
+# By default we fallback to the default language
+FALLBACK_LANGUAGES = getattr(settings, 'MODELTRANSLATION_FALLBACK_LANGUAGES', (DEFAULT_LANGUAGE,))
 if isinstance(FALLBACK_LANGUAGES, (tuple, list)):
     FALLBACK_LANGUAGES = {'default': FALLBACK_LANGUAGES}
 if 'default' not in FALLBACK_LANGUAGES:
