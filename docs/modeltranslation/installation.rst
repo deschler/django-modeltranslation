@@ -138,6 +138,43 @@ Example:
     MODELTRANSLATION_DEFAULT_LANGUAGE = 'en'
 
 
+``MODELTRANSLATION_FALLBACK_LANGUAGES``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. versionadded:: 0.5
+
+Default: ``(DEFAULT_LANGUAGE,)``
+
+By default modeltranslation will fallback to the computed value of the
+``DEFAULT_LANGUAGE``. This is either the first language found in the
+``LANGUAGES`` setting or the value defined through
+``MODELTRANSLATION_DEFAULT_LANGUAGE`` which acts as an override.
+
+This setting allows for a more fine grained tuning of the fallback behaviour
+by taking additional languages into account. The language order is defined as
+a tuple or list of language codes.
+
+Example:
+
+.. code-block:: python
+
+    MODELTRANSLATION_FALLBACK_LANGUAGES = ('en', 'de')
+
+Using a dict syntax it is also possible to define fallbacks by language.
+A ``default`` key is required in this case to define the default behaviour
+of unlisted languages.
+
+Example:
+
+.. code-block:: python
+
+    MODELTRANSLATION_FALLBACK_LANGUAGES = {'default': ('en', 'de'), 'fr': ('de',)}
+
+.. note::
+    Each language has to be in the ``LANGUAGES`` setting, otherwise an
+    ``ImproperlyConfigured`` exception is raised.
+
+
 ``MODELTRANSLATION_TRANSLATION_FILES``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -149,7 +186,7 @@ Modeltranslation uses an autoregister feature similiar to the one in Django's
 admin. The autoregistration process will look for a ``translation.py``
 file in the root directory of each application that is in ``INSTALLED_APPS``.
 
-A setting ``MODELTRANSLATION_TRANSLATION_FILES`` is provided to extend the
+The setting ``MODELTRANSLATION_TRANSLATION_FILES`` is provided to extend the
 modules that are taken into account.
 
 Syntax:
