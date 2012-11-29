@@ -32,6 +32,7 @@ var google, django, gettext;
                 ':parents(.tabular)'), // exclude tabular inlines
               grouped_translations = {};
 
+            // Handle fields inside collapsed groups as added by zinnia
             translation_fields = translation_fields.add('fieldset.collapse-closed .mt');
 
             translation_fields.each(function (i, el) {
