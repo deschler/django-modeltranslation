@@ -1,3 +1,10 @@
+v0.5a1
+======
+
+  ADDED: Increased the number of supported fields. Essentially all Django
+         model fields and subclasses of them should work, except related
+         fields (ForeignKey, ManyToManyField, OneToOneField) and AutoField
+         which are not supported.
   ADDED: A subclass of TranslationOptions inherits fields from its bases.
          (thanks to Bruno Tavares and Jacek Tomaszewski,
           resolves issue #110)
@@ -9,6 +16,7 @@
          (thanks to Jacek Tomaszewski,
           resolves issues #45, #78 and #84)
 
+CHANGED: Version code to use a PEP386 compliant version number.
 CHANGED: Constructor rewrites fields to be language aware.
          (thanks to Jacek Tomaszewski,
           resolves issues #33 and #58)
@@ -26,6 +34,7 @@ CHANGED: Constructor rewrites fields to be language aware.
 v0.4.1
 ======
 Date: 2012-11-13
+Packaged from revision d9bf9709e9647fb2af51fc559bbe356010bd51ca.
 
   FIXED: Pypi wants to install beta version. Happened because pypi treats
          0.4.0-beta2 as latest release. This also effectively resulted in a
