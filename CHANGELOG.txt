@@ -1,5 +1,6 @@
 v0.5a1
 ======
+Date: 2012-12-05
 
   ADDED: Increased the number of supported fields. Essentially all Django
          model fields and subclasses of them should work, except related
