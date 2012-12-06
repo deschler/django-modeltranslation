@@ -576,6 +576,11 @@ class OtherFieldsTest(ModeltranslationTestBase):
         self.assertEqual(False, inst.nullboolean_de)
         self.assertEqual(True, inst.nullboolean_en)
 
+        inst.nullboolean = None
+        self.assertEqual(None, inst.nullboolean)
+        self.assertEqual(False, inst.nullboolean_de)
+        self.assertEqual(None, inst.nullboolean_en)
+
     def test_translated_models_commaseparatedinteger_instance(self):
         inst = models.OtherFieldsModel()
         inst.csi = '4,8,15,16,23,42'
@@ -665,10 +670,15 @@ class OtherFieldsTest(ModeltranslationTestBase):
         self.assertEqual(0.23, inst.float_de)
         self.assertEqual(None, inst.float_en)
 
+        inst.float += 0.08
+        self.assertEqual(0.31, inst.float)
+        self.assertEqual(0.31, inst.float_de)
+        self.assertEqual(None, inst.float_en)
+
         trans_real.activate('en')
         inst.float = 0.42
         self.assertEqual(0.42, inst.float)
-        self.assertEqual(0.23, inst.float_de)
+        self.assertEqual(0.31, inst.float_de)
         self.assertEqual(0.42, inst.float_en)
 
     def test_translated_models_decimal_instance(self):
