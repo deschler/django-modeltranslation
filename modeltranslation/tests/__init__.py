@@ -950,73 +950,67 @@ class ModelValidationTest(ModeltranslationTestBase):
     """
     Tests if a translation model field validates correctly.
     """
-    def _test_model_validation(self, field_name, invalid_value, valid_value,
-                               invalid_value_de):
+    def assertRaisesValidation(self, func):
+        try:
+            func()
+        except ValidationError, e:
+            return e.message_dict
+        self.fail('ValidationError not raised.')
+
+    def _test_model_validation(self, field_name, invalid_value, valid_value):
         """
         Generic model field validation test.
         """
         field_name_de = '%s_de' % field_name
-        params = {'title_de': 'title de', 'title_en': 'title en',
-                  field_name: invalid_value}
+        field_name_en = '%s_en' % field_name
+        # Title need to be passed here - otherwise it would not validate
+        params = {'title_de': 'title de', 'title_en': 'title en', field_name: invalid_value}
 
-        has_error_key = False
-        # Create an object with an invalid url
-        #n = TestModel.objects.create(title='Title', url='foo')
         n = models.TestModel.objects.create(**params)
 
         # First check the original field
-        # Expect that the validation object contains an error for url
-        try:
-            n.full_clean()
-        except ValidationError, e:
-            if field_name in e.message_dict:
-                has_error_key = True
-        self.assertTrue(has_error_key)
+        # Expect that the validation object contains an error
+        errors = self.assertRaisesValidation(n.full_clean)
+        self.assertIn(field_name, errors)
 
-        # Check the translation field
+        # Set translation field to a valid value
         # Language is set to 'de' at this point
         self.failUnlessEqual(get_language(), 'de')
-        # Set translation field to a valid url
-        #n.url_de = 'http://code.google.com/p/django-modeltranslation/'
         setattr(n, field_name_de, valid_value)
-        has_error_key = False
-        # Expect that the validation object contains no error for url
-        try:
-            n.full_clean()
-        except ValidationError, e:
-            if field_name_de in e.message_dict:
-                has_error_key = True
-        self.assertFalse(has_error_key)
+        n.full_clean()
 
-        # Set translation field to an invalid url
-        #n.url_de = 'foo'
+        # All language fields are validated even though original field validation raise no error
+        setattr(n, field_name_en, invalid_value)
+        errors = self.assertRaisesValidation(n.full_clean)
+        self.assertNotIn(field_name, errors)
+        self.assertIn(field_name_en, errors)
+
+        # When language is changed to en, the original field also doesn't validate
+        with override('en'):
+            setattr(n, field_name_en, invalid_value)
+            errors = self.assertRaisesValidation(n.full_clean)
+            self.assertIn(field_name, errors)
+            self.assertIn(field_name_en, errors)
+
+        # Set translation field to an invalid value
+        setattr(n, field_name_en, valid_value)
         setattr(n, field_name_de, invalid_value)
-        has_error_key = False
         # Expect that the validation object contains an error for url_de
-        try:
-            n.full_clean()
-        except ValidationError, e:
-            #if 'url_de' in e.message_dict:
-            if field_name_de in e.message_dict:
-                has_error_key = True
-        self.assertTrue(has_error_key)
+        errors = self.assertRaisesValidation(n.full_clean)
+        self.assertIn(field_name, errors)
+        self.assertIn(field_name_de, errors)
 
-    def test_model_validation(self):
+    def test_model_validation_required(self):
         """
-        General test for CharField and TextField.
+        General test for CharField: if required/blank is handled properly.
         """
-        has_error_key = False
         # Create an object without title (which is required)
         n = models.TestModel.objects.create(text='Testtext')
 
         # First check the original field
         # Expect that the validation object contains an error for title
-        try:
-            n.full_clean()
-        except ValidationError, e:
-            if 'title' in e.message_dict:
-                has_error_key = True
-        self.assertTrue(has_error_key)
+        errors = self.assertRaisesValidation(n.full_clean)
+        self.assertIn('title', errors)
         n.save()
 
         # Check the translation field
@@ -1024,78 +1018,43 @@ class ModelValidationTest(ModeltranslationTestBase):
         self.failUnlessEqual(get_language(), 'de')
         # Set translation field to a valid title
         n.title_de = 'Title'
-        has_error_key = False
-        # Expect that the validation object contains no error for title
-        try:
-            n.full_clean()
-        except ValidationError, e:
-            if 'title_de' in e.message_dict:
-                has_error_key = True
-        self.assertFalse(has_error_key)
+        n.full_clean()
+
+        # Change language to en
+        # Now validation fails, because current language (en) title is empty
+        # So requirement validation depends on current language
+        with override('en'):
+            errors = self.assertRaisesValidation(n.full_clean)
+            self.assertIn('title', errors)
+
+            # However, with fallback language (most cases), it validates (because empty title
+            # falls back to title_de):
+            with override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=
+                                   (mt_settings.DEFAULT_LANGUAGE,)):
+                reload(mt_settings)
+                n.full_clean()
+            reload(mt_settings)
 
         # Set translation field to an empty title
         n.title_de = None
-        has_error_key = False
         # Even though the original field isn't optional, translation fields are
         # per definition always optional. So we expect that the validation
         # object contains no error for title_de.
-        try:
-            n.full_clean()
-        except ValidationError, e:
-            if 'title_de' in e.message_dict:
-                has_error_key = True
-        self.assertFalse(has_error_key)
+        # However, title still raises error, since it points to empty title_de
+        errors = self.assertRaisesValidation(n.full_clean)
+        self.assertNotIn('title_de', errors)
+        self.assertIn('title', errors)
 
     def test_model_validation_url_field(self):
-        #has_error_key = False
-        ## Create an object with an invalid url
-        #n = TestModel.objects.create(title='Title', url='foo')
-
-        ## First check the original field
-        ## Expect that the validation object contains an error for url
-        #try:
-            #n.full_clean()
-        #except ValidationError, e:
-            #if 'url' in e.message_dict:
-                #has_error_key = True
-        #self.assertTrue(has_error_key)
-
-        ## Check the translation field
-        ## Language is set to 'de' at this point
-        #self.failUnlessEqual(get_language(), 'de')
-        ## Set translation field to a valid url
-        #n.url_de = 'http://code.google.com/p/django-modeltranslation/'
-        #has_error_key = False
-        ## Expect that the validation object contains no error for url
-        #try:
-            #n.full_clean()
-        #except ValidationError, e:
-            #if 'url_de' in e.message_dict:
-                #has_error_key = True
-        #self.assertFalse(has_error_key)
-
-        ## Set translation field to an invalid url
-        #n.url_de = 'foo'
-        #has_error_key = False
-        ## Expect that the validation object contains an error for url_de
-        #try:
-            #n.full_clean()
-        #except ValidationError, e:
-            #if 'url_de' in e.message_dict:
-                #has_error_key = True
-        #self.assertTrue(has_error_key)
-
         self._test_model_validation(
             field_name='url',
             invalid_value='foo en',
-            valid_value='http://code.google.com/p/django-modeltranslation/',
-            invalid_value_de='foo de')
+            valid_value='http://code.google.com/p/django-modeltranslation/')
 
     def test_model_validation_email_field(self):
         self._test_model_validation(
             field_name='email', invalid_value='foo en',
-            valid_value='django-modeltranslation@googlecode.com',
-            invalid_value_de='foo de')
+            valid_value='django-modeltranslation@googlecode.com')
 
 
 class ModelInheritanceTest(ModeltranslationTestBase):

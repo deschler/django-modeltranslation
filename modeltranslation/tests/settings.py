@@ -23,7 +23,7 @@ MEDIA_ROOT = os.path.join(DIRNAME, 'media/')
 LANGUAGES = (('de', 'Deutsch'),
              ('en', 'English'))
 LANGUAGE_CODE = 'de'
-DEFAULT_LANGUAGE = 'de'
+MODELTRANSLATION_DEFAULT_LANGUAGE = 'de'
 
 USE_I18N = True
 
