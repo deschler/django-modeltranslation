@@ -47,6 +47,23 @@ except ImportError:
 request = None
 
 
+class reload_override_settings(override_settings):
+    """Context manager that not only override settings, but also reload modeltranslation conf."""
+    def __enter__(self):
+        super(reload_override_settings, self).__enter__()
+        reload(mt_settings)
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        super(reload_override_settings, self).__exit__(exc_type, exc_value, traceback)
+        reload(mt_settings)
+
+
+# In this test suite fallback language is turned off. This context manager temporarily turns it on.
+def default_fallback():
+    return reload_override_settings(
+        MODELTRANSLATION_FALLBACK_LANGUAGES=(mt_settings.DEFAULT_LANGUAGE,))
+
+
 class ModeltranslationTestBase(TestCase):
     urls = 'modeltranslation.tests.urls'
     cache = AppCache()
@@ -252,8 +269,7 @@ class ModeltranslationTest(ModeltranslationTestBase):
             self.failUnlessEqual(inst2.title_en, None)  # Language field access returns real value
 
         # However, by default FALLBACK_LANGUAGES is set to DEFAULT_LANGUAGE
-        with override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=(mt_settings.DEFAULT_LANGUAGE,)):
-            reload(mt_settings)
+        with default_fallback():
 
             # No change here...
             self.failUnlessEqual(inst2.title, title_de)
@@ -262,8 +278,6 @@ class ModeltranslationTest(ModeltranslationTestBase):
             with override('en'):
                 self.failUnlessEqual(inst2.title, title_de)
                 self.failUnlessEqual(inst2.title_en, None)  # Still real value
-
-        reload(mt_settings)
 
     def test_fallback_values_1(self):
         """
@@ -342,30 +356,24 @@ class FallbackTests(ModeltranslationTestBase):
         'de': ('en',)
     }
 
-    def tearDown(self):
-        trans_real.deactivate()
-        reload(mt_settings)  # Return to previous state
-
     def test_settings(self):
         # Initial
         self.assertEqual(mt_settings.FALLBACK_LANGUAGES, {'default': ()})
         # Tuple/list
-        with override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=('de',)):
-            reload(mt_settings)
+        with reload_override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=('de',)):
             self.assertEqual(mt_settings.FALLBACK_LANGUAGES, {'default': ('de',)})
         # Whole dict
-        with override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=self.test_fallback):
-            reload(mt_settings)
+        with reload_override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=self.test_fallback):
             self.assertEqual(mt_settings.FALLBACK_LANGUAGES, self.test_fallback)
         # Improper language raises error
         config = {'default': (), 'fr': ('en',)}
         with override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=config):
             self.assertRaises(ImproperlyConfigured, lambda: reload(mt_settings))
+        reload(mt_settings)
 
     def test_resolution_order(self):
         from modeltranslation.utils import resolution_order
-        with override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=self.test_fallback):
-            reload(mt_settings)
+        with reload_override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=self.test_fallback):
             self.assertEqual(('en', 'de'), resolution_order('en'))
             self.assertEqual(('de', 'en'), resolution_order('de'))
             # Overriding
@@ -392,8 +400,7 @@ class FallbackTests(ModeltranslationTestBase):
             self.assertEqual(('de',), resolution_order('de', config))
 
     def test_fallback_languages(self):
-        with override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=self.test_fallback):
-            reload(mt_settings)
+        with reload_override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=self.test_fallback):
             title_de = 'title de'
             title_en = 'title en'
             n = models.TestModel(title=title_de)
@@ -1029,11 +1036,8 @@ class ModelValidationTest(ModeltranslationTestBase):
 
             # However, with fallback language (most cases), it validates (because empty title
             # falls back to title_de):
-            with override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=
-                                   (mt_settings.DEFAULT_LANGUAGE,)):
-                reload(mt_settings)
+            with default_fallback():
                 n.full_clean()
-            reload(mt_settings)
 
         # Set translation field to an empty title
         n.title_de = None
