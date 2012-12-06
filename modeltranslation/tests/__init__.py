@@ -445,6 +445,14 @@ class FileFieldsTest(ModeltranslationTestBase):
         self.failUnless('image_de' in field_names)
         self.failUnless('image_en' in field_names)
 
+    def _file_factory(self, name, content):
+        try:
+            return ContentFile(content, name=name)
+        except TypeError:  # In Django 1.3 ContentFile had no name parameter
+            file = ContentFile(content)
+            file.name = name
+            return file
+
     def test_translated_models_instance(self):
         inst = models.FileFieldsModel(title="Testtitle")
 
@@ -452,13 +460,13 @@ class FileFieldsTest(ModeltranslationTestBase):
         inst.title = 'title_en'
         inst.file = 'a_en'
         inst.file.save('b_en', ContentFile('file in english'))
-        inst.image = ContentFile('image in english', name='i_en.jpg')  # Direct assign
+        inst.image = self._file_factory('i_en.jpg', 'image in english')  # Direct assign
 
         trans_real.activate("de")
         inst.title = 'title_de'
         inst.file = 'a_de'
         inst.file.save('b_de', ContentFile('file in german'))
-        inst.image = ContentFile('image in german', name='i_de.jpg')
+        inst.image = self._file_factory('i_de.jpg', 'image in german')
 
         inst.save()
 
