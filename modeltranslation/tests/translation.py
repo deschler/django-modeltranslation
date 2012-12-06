@@ -16,7 +16,7 @@ translator.register(TestModel, TestTranslationOptions)
 
 class FallbackModelTranslationOptions(TranslationOptions):
     fields = ('title', 'text', 'url', 'email',)
-    fallback_values = ""
+    fallback_values = "fallback"
 translator.register(FallbackModel, FallbackModelTranslationOptions)
 
 

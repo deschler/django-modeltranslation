@@ -128,6 +128,7 @@ class ModeltranslationTest(ModeltranslationTestBase):
     """Basic tests for the modeltranslation application."""
     def test_registration(self):
         langs = tuple(l[0] for l in django_settings.LANGUAGES)
+        self.failUnlessEqual(langs, tuple(mt_settings.AVAILABLE_LANGUAGES))
         self.failUnlessEqual(2, len(langs))
         self.failUnless('de' in langs)
         self.failUnless('en' in langs)
@@ -144,10 +145,8 @@ class ModeltranslationTest(ModeltranslationTestBase):
         self.assertRaises(translator.NotRegistered,
                           translator.translator.get_options_for_model, User)
 
-    def test_translated_models(self):
-        # First create an instance of the test model to play with
-        inst = models.TestModel.objects.create(title="Testtitle", text="Testtext")
-        field_names = dir(inst)
+    def test_fields(self):
+        field_names = dir(models.TestModel())
         self.failUnless('id' in field_names)
         self.failUnless('title' in field_names)
         self.failUnless('title_de' in field_names)
@@ -161,49 +160,110 @@ class ModeltranslationTest(ModeltranslationTestBase):
         self.failUnless('email' in field_names)
         self.failUnless('email_de' in field_names)
         self.failUnless('email_en' in field_names)
-        inst.delete()
 
     def test_verbose_name(self):
-        inst = models.TestModel.objects.create(title="Testtitle", text="Testtext")
-        self.assertEquals(unicode(
-            inst._meta.get_field('title_de').verbose_name), u'title [de]')
-        inst.delete()
+        verbose_name = models.TestModel._meta.get_field('title_de').verbose_name
+        self.assertEquals(unicode(verbose_name), u'title [de]')
 
     def test_set_translation(self):
+        """This test briefly shows main modeltranslation features."""
         self.failUnlessEqual(get_language(), 'de')
-        # First create an instance of the test model to play with
-        title1_de = "title de"
-        title1_en = "title en"
-        title2_de = "title2 de"
-        inst1 = models.TestModel(title_en=title1_en, text="Testtext")
-        inst1.title = title1_de
-        inst2 = models.TestModel(title=title2_de, text="Testtext")
-        inst1.save()
-        inst2.save()
+        title_de = "title de"
+        title_en = "title en"
 
-        self.failUnlessEqual(inst1.title, title1_de)
-        self.failUnlessEqual(inst1.title_en, title1_en)
-
-        self.failUnlessEqual(inst2.title, title2_de)
+        # The original field "title" passed in the constructor is
+        # populated for the current language field: "title_de".
+        inst2 = models.TestModel(title=title_de)
+        self.failUnlessEqual(inst2.title, title_de)
         self.failUnlessEqual(inst2.title_en, None)
+        self.failUnlessEqual(inst2.title_de, title_de)
 
-        del inst1
-        del inst2
+        # So creating object is language-aware
+        with override('en'):
+            inst2 = models.TestModel(title=title_en)
+            self.failUnlessEqual(inst2.title, title_en)
+            self.failUnlessEqual(inst2.title_en, title_en)
+            self.failUnlessEqual(inst2.title_de, None)
+
+        # Value from original field is presented in current language:
+        inst2 = models.TestModel(title_de=title_de, title_en=title_en)
+        self.failUnlessEqual(inst2.title, title_de)
+        with override('en'):
+            self.failUnlessEqual(inst2.title, title_en)
+
+        # Changes made via original field affect current language field:
+        inst2.title = 'foo'
+        self.failUnlessEqual(inst2.title, 'foo')
+        self.failUnlessEqual(inst2.title_en, title_en)
+        self.failUnlessEqual(inst2.title_de, 'foo')
+        with override('en'):
+            inst2.title = 'bar'
+            self.failUnlessEqual(inst2.title, 'bar')
+            self.failUnlessEqual(inst2.title_en, 'bar')
+            self.failUnlessEqual(inst2.title_de, 'foo')
+        self.failUnlessEqual(inst2.title, 'foo')
+
+        # When conflict, language field wins with original field
+        inst2 = models.TestModel(title='foo', title_de=title_de, title_en=title_en)
+        self.failUnlessEqual(inst2.title, title_de)
+        self.failUnlessEqual(inst2.title_en, title_en)
+        self.failUnlessEqual(inst2.title_de, title_de)
+
+        # Creating model and assigning only one language
+        inst1 = models.TestModel(title_en=title_en)
+        # Please note: '' and not None, because descriptor falls back to field default value
+        self.failUnlessEqual(inst1.title, '')
+        self.failUnlessEqual(inst1.title_en, title_en)
+        self.failUnlessEqual(inst1.title_de, None)
+        # Assign current language value - de
+        inst1.title = title_de
+        self.failUnlessEqual(inst1.title, title_de)
+        self.failUnlessEqual(inst1.title_en, title_en)
+        self.failUnlessEqual(inst1.title_de, title_de)
+        inst1.save()
 
         # Check that the translation fields are correctly saved and provide the
         # correct value when retrieving them again.
-        n = models.TestModel.objects.get(title=title1_de)
-        self.failUnlessEqual(n.title, title1_de)
-        self.failUnlessEqual(n.title_en, title1_en)
+        n = models.TestModel.objects.get(title=title_de)
+        self.failUnlessEqual(n.title, title_de)
+        self.failUnlessEqual(n.title_en, title_en)
+        self.failUnlessEqual(n.title_de, title_de)
 
-    def test_titleonly(self):
-        title1_de = "title de"
-        n = models.TestModel(title=title1_de)
-        # The original field "title" passed in the constructor is also
-        # populated for the current language field: "title_de".
-        self.failUnlessEqual(n.title, title1_de)
-        self.failUnlessEqual(n.title_de, title1_de)
-        self.failUnlessEqual(n.title_en, None)
+        # Queries are also language-aware:
+        self.failUnlessEqual(1, models.TestModel.objects.filter(title=title_de).count())
+        with override('en'):
+            self.failUnlessEqual(0, models.TestModel.objects.filter(title=title_de).count())
+
+    def test_fallback_language(self):
+        # Present what happens if current language field is empty
+        self.failUnlessEqual(get_language(), 'de')
+        title_de = "title de"
+
+        # Create model with value in de only...
+        inst2 = models.TestModel(title=title_de)
+        self.failUnlessEqual(inst2.title, title_de)
+        self.failUnlessEqual(inst2.title_en, None)
+        self.failUnlessEqual(inst2.title_de, title_de)
+
+        # In this test environment, fallback language is not set. So return value for en
+        # will be field's default: ''
+        with override('en'):
+            self.failUnlessEqual(inst2.title, '')
+            self.failUnlessEqual(inst2.title_en, None)  # Language field access returns real value
+
+        # However, by default FALLBACK_LANGUAGES is set to DEFAULT_LANGUAGE
+        with override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=(mt_settings.DEFAULT_LANGUAGE,)):
+            reload(mt_settings)
+
+            # No change here...
+            self.failUnlessEqual(inst2.title, title_de)
+
+            # ... but for empty en fall back to de
+            with override('en'):
+                self.failUnlessEqual(inst2.title, title_de)
+                self.failUnlessEqual(inst2.title_en, None)  # Still real value
+
+        reload(mt_settings)
 
     def test_fallback_values_1(self):
         """
@@ -211,14 +271,12 @@ class ModeltranslationTest(ModeltranslationTestBase):
         return this string.
         """
         title1_de = "title de"
-        n = models.FallbackModel()
-        n.title = title1_de
+        n = models.FallbackModel(title=title1_de)
         n.save()
-        del n
         n = models.FallbackModel.objects.get(title=title1_de)
         self.failUnlessEqual(n.title, title1_de)
         trans_real.activate("en")
-        self.failUnlessEqual(n.title, "")
+        self.failUnlessEqual(n.title, "fallback")
 
     def test_fallback_values_2(self):
         """
@@ -228,11 +286,8 @@ class ModeltranslationTest(ModeltranslationTestBase):
         """
         title1_de = "title de"
         text1_de = "text in german"
-        n = models.FallbackModel2()
-        n.title = title1_de
-        n.text = text1_de
+        n = models.FallbackModel2(title=title1_de, text=text1_de)
         n.save()
-        del n
         n = models.FallbackModel2.objects.get(title=title1_de)
         trans_real.activate("en")
         self.failUnlessEqual(n.title, '')  # Falling back to default field value
