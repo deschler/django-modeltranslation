@@ -11,6 +11,8 @@ class TestModel(models.Model):
     email = models.EmailField(blank=True, null=True)
 
 
+########## Fallback values testing
+
 class FallbackModel(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
     text = models.TextField(blank=True, null=True)
@@ -25,11 +27,15 @@ class FallbackModel2(models.Model):
     email = models.EmailField(blank=True, null=True)
 
 
+########## File fields testing
+
 class FileFieldsModel(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
     file = models.FileField(upload_to='test', null=True, blank=True)
     image = models.ImageField(upload_to='test', null=True, blank=True)
 
+
+########## Custom fields testing
 
 class OtherFieldsModel(models.Model):
     """
@@ -50,6 +56,8 @@ class OtherFieldsModel(models.Model):
 #    genericip = models.GenericIPAddressField(blank=True, null=True)
 
 
+########## Multitable inheritance testing
+
 class MultitableModelA(models.Model):
     titlea = models.CharField(ugettext_lazy('title a'), max_length=255)
 
@@ -66,6 +74,8 @@ class MultitableDTestModel(MultitableBModelA):
     titled = models.CharField(ugettext_lazy('title d'), max_length=255)
 
 
+########## Abstract inheritance testing
+
 class AbstractModelA(models.Model):
     titlea = models.CharField(ugettext_lazy('title a'), max_length=255)
 
@@ -77,9 +87,13 @@ class AbstractModelB(AbstractModelA):
     titleb = models.CharField(ugettext_lazy('title b'), max_length=255)
 
 
+########## Admin testing
+
 class DataModel(models.Model):
     data = models.TextField(blank=True, null=True)
 
+
+########## Manager testing
 
 class ManagerTestModel(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
