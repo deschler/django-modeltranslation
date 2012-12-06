@@ -73,21 +73,19 @@ class ModeltranslationTestBase(TestCase):
                 # 2. Reload MT because LANGUAGES likely changed.
                 reload(mt_settings)
                 reload(translator)
-                from modeltranslation import admin
                 reload(admin)
 
                 # 3. Reset test models (because autodiscover have already run, those models
                 #    have translation fields, but for languages previously defined. We want
                 #    to be sure that 'de' and 'en' are available)
                 del cls.cache.app_models['tests']
-                from modeltranslation.tests import models
                 reload(models)
                 cls.cache.load_app('modeltranslation.tests')
                 sys.modules.pop('modeltranslation.tests.translation', None)
 
                 # 4. Autodiscover
-                from modeltranslation import models
-                reload(models)
+                from modeltranslation import models as aut_models
+                reload(aut_models)
 
                 # 5. Syncdb (``migrate=False`` in case of south)
                 from django.db import connections, DEFAULT_DB_ALIAS
@@ -765,7 +763,7 @@ class ModeltranslationTestRule1(ModeltranslationTestBase):
         text_en = "This is an english sentence"
 
         n = models.TestModel.objects.create(title_de=title1_de, title_en=title1_en,
-                                     text_de=text_de, text_en=text_en)
+                                            text_de=text_de, text_en=text_en)
         n.save()
 
         # Language is set to 'de' at this point
@@ -785,7 +783,7 @@ class ModeltranslationTestRule1(ModeltranslationTestBase):
         self.failUnlessEqual(n.text, text_en)
 
         n = models.TestModel.objects.create(title_de=title1_de, title_en=title1_en,
-                                     text_de=text_de, text_en=text_en)
+                                            text_de=text_de, text_en=text_en)
         n.save()
         # Language is set to "en" at this point
         self.failUnlessEqual(n.title, title1_en)
@@ -1554,7 +1552,8 @@ class TestManager(ModeltranslationTestBase):
 
             # Still possible to use explicit language version
             self.assertEqual(1, models.ManagerTestModel.objects.filter(title_en='en').count())
-            self.assertEqual(2, models.ManagerTestModel.objects.filter(title_en__contains='en').count())
+            self.assertEqual(2, models.ManagerTestModel.objects.filter(
+                             title_en__contains='en').count())
 
             models.ManagerTestModel.objects.update(title='new')
             self.assertEqual(2, models.ManagerTestModel.objects.filter(title='new').count())
@@ -1573,12 +1572,16 @@ class TestManager(ModeltranslationTestBase):
         n.save()
 
         self.assertEqual('en', get_language())
-        self.assertEqual(0, models.ManagerTestModel.objects.filter(Q(title='de') | Q(pk=42)).count())
-        self.assertEqual(1, models.ManagerTestModel.objects.filter(Q(title='en') | Q(pk=42)).count())
+        self.assertEqual(0, models.ManagerTestModel.objects.filter(Q(title='de')
+                                                                   | Q(pk=42)).count())
+        self.assertEqual(1, models.ManagerTestModel.objects.filter(Q(title='en')
+                                                                   | Q(pk=42)).count())
 
         with override('de'):
-            self.assertEqual(1, models.ManagerTestModel.objects.filter(Q(title='de') | Q(pk=42)).count())
-            self.assertEqual(0, models.ManagerTestModel.objects.filter(Q(title='en') | Q(pk=42)).count())
+            self.assertEqual(1, models.ManagerTestModel.objects.filter(Q(title='de')
+                                                                       | Q(pk=42)).count())
+            self.assertEqual(0, models.ManagerTestModel.objects.filter(Q(title='en')
+                                                                       | Q(pk=42)).count())
 
     def test_f(self):
         """Test if F queries are rewritten."""
