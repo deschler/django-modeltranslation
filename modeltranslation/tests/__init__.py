@@ -415,8 +415,7 @@ class FallbackTests(ModeltranslationTestBase):
 
 
 class FileFieldsTest(ModeltranslationTestBase):
-    test_media_root = os.path.join(
-        os.path.dirname(os.path.realpath(__file__)), 'media')
+    test_media_root = TEST_SETTINGS['MEDIA_ROOT']
 
     def tearDown(self):
         # File tests create a temporary media directory structure. While the
@@ -427,10 +426,7 @@ class FileFieldsTest(ModeltranslationTestBase):
         trans_real.deactivate()
 
     def test_translated_models(self):
-        # First create an instance of the test model to play with
-        inst = models.FileFieldsModel.objects.create(
-            title="Testtitle", file=None)
-        field_names = dir(inst)
+        field_names = dir(models.FileFieldsModel())
         self.failUnless('id' in field_names)
         self.failUnless('title' in field_names)
         self.failUnless('title_de' in field_names)
@@ -438,49 +434,51 @@ class FileFieldsTest(ModeltranslationTestBase):
         self.failUnless('file' in field_names)
         self.failUnless('file_de' in field_names)
         self.failUnless('file_en' in field_names)
-        inst.delete()
+        self.failUnless('image' in field_names)
+        self.failUnless('image_de' in field_names)
+        self.failUnless('image_en' in field_names)
 
     def test_translated_models_instance(self):
-        #f_en = ContentFile("Just a really good file")
-        inst = models.FileFieldsModel(title="Testtitle", file=None)
+        inst = models.FileFieldsModel(title="Testtitle")
 
         trans_real.activate("en")
         inst.title = 'title_en'
-
         inst.file = 'a_en'
         inst.file.save('b_en', ContentFile('file in english'))
-
-        inst.image = 'i_en.jpg'
-        inst.image.save('i_en.jpg', ContentFile('image in english'))
+        inst.image = ContentFile('image in english', name='i_en.jpg')  # Direct assign
 
         trans_real.activate("de")
         inst.title = 'title_de'
-
         inst.file = 'a_de'
         inst.file.save('b_de', ContentFile('file in german'))
-
-        inst.image = 'i_de.jpg'
-        inst.image.save('i_de.jpg', ContentFile('image in germany'))
+        inst.image = ContentFile('image in german', name='i_de.jpg')
 
         inst.save()
 
         trans_real.activate("en")
-
         self.failUnlessEqual(inst.title, 'title_en')
         self.failUnless(inst.file.name.count('b_en') > 0)
+        self.failUnlessEqual(inst.file.read(), 'file in english')
         self.failUnless(inst.image.name.count('i_en') > 0)
+        self.failUnlessEqual(inst.image.read(), 'image in english')
+
+        # Check if file was actually saved on disc
+        self.failUnless(os.path.exists(os.path.join(self.test_media_root, inst.file.name)))
+        self.failUnless(inst.file.size > 0)
+        self.failUnless(os.path.exists(os.path.join(self.test_media_root, inst.image.name)))
+        self.failUnless(inst.image.size > 0)
 
         trans_real.activate("de")
         self.failUnlessEqual(inst.title, 'title_de')
         self.failUnless(inst.file.name.count('b_de') > 0)
+        self.failUnlessEqual(inst.file.read(), 'file in german')
         self.failUnless(inst.image.name.count('i_de') > 0)
+        self.failUnlessEqual(inst.image.read(), 'image in german')
 
         inst.file_en.delete()
         inst.image_en.delete()
         inst.file_de.delete()
         inst.image_de.delete()
-
-        inst.delete()
 
 
 class OtherFieldsTest(ModeltranslationTestBase):
