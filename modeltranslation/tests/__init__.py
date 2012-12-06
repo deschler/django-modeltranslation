@@ -26,8 +26,7 @@ from django.utils.translation import get_language, trans_real
 
 from modeltranslation import settings as mt_settings
 from modeltranslation import translator
-from modeltranslation.admin import (TranslationAdmin,
-                                    TranslationStackedInline)
+from modeltranslation import admin
 from modeltranslation.tests.models import (
     AbstractModelB, MultitableModelA, DataModel, FallbackModel, FallbackModel2,
     FileFieldsModel, OtherFieldsModel, TestModel, MultitableBModelA, MultitableModelC,
@@ -65,7 +64,7 @@ class ModeltranslationTestBase(TestCase):
         """
         super(ModeltranslationTestBase, cls).setUpClass()
         if not ModeltranslationTestBase.synced:
-            # In odred to perform only one syncdb
+            # In order to perform only one syncdb
             ModeltranslationTestBase.synced = True
             with override_settings(**TEST_SETTINGS):
                 import sys
@@ -95,7 +94,6 @@ class ModeltranslationTestBase(TestCase):
 
                 # 5. Reload some imported classes
                 cls.reload_globals('modeltranslation.tests.models')
-                cls.reload_globals('modeltranslation.admin')
 
                 # 6. Syncdb (``migrate=False`` in case of south)
                 from django.db import connections, DEFAULT_DB_ALIAS
@@ -1333,7 +1331,7 @@ class TranslationAdminTest(ModeltranslationTestBase):
         self.test_obj.delete()
 
     def test_default_fields(self):
-        class TestModelAdmin(TranslationAdmin):
+        class TestModelAdmin(admin.TranslationAdmin):
             pass
 
         ma = TestModelAdmin(TestModel, self.site)
@@ -1343,7 +1341,7 @@ class TranslationAdminTest(ModeltranslationTestBase):
              'email_de', 'email_en'])
 
     def test_default_fieldsets(self):
-        class TestModelAdmin(TranslationAdmin):
+        class TestModelAdmin(admin.TranslationAdmin):
             pass
 
         ma = TestModelAdmin(TestModel, self.site)
@@ -1358,7 +1356,7 @@ class TranslationAdminTest(ModeltranslationTestBase):
             [(None, {'fields': fields})])
 
     def test_field_arguments(self):
-        class TestModelAdmin(TranslationAdmin):
+        class TestModelAdmin(admin.TranslationAdmin):
             fields = ['title']
 
         ma = TestModelAdmin(TestModel, self.site)
@@ -1369,7 +1367,7 @@ class TranslationAdminTest(ModeltranslationTestBase):
 
     def test_field_arguments_restricted_on_form(self):
         # Using `fields`.
-        class TestModelAdmin(TranslationAdmin):
+        class TestModelAdmin(admin.TranslationAdmin):
             fields = ['title']
 
         ma = TestModelAdmin(TestModel, self.site)
@@ -1379,7 +1377,7 @@ class TranslationAdminTest(ModeltranslationTestBase):
             ma.get_form(request, self.test_obj).base_fields.keys(), fields)
 
         # Using `fieldsets`.
-        class TestModelAdmin(TranslationAdmin):
+        class TestModelAdmin(admin.TranslationAdmin):
             fieldsets = [(None, {'fields': ['title']})]
 
         ma = TestModelAdmin(TestModel, self.site)
@@ -1388,7 +1386,7 @@ class TranslationAdminTest(ModeltranslationTestBase):
             ma.get_form(request, self.test_obj).base_fields.keys(), fields)
 
         # Using `exclude`.
-        class TestModelAdmin(TranslationAdmin):
+        class TestModelAdmin(admin.TranslationAdmin):
             exclude = ['url', 'email']
 
         ma = TestModelAdmin(TestModel, self.site)
@@ -1397,7 +1395,7 @@ class TranslationAdminTest(ModeltranslationTestBase):
             ma.get_form(request).base_fields.keys(), fields)
 
         # You can also pass a tuple to `exclude`.
-        class TestModelAdmin(TranslationAdmin):
+        class TestModelAdmin(admin.TranslationAdmin):
             exclude = ('url', 'email')
 
         ma = TestModelAdmin(TestModel, self.site)
@@ -1407,7 +1405,7 @@ class TranslationAdminTest(ModeltranslationTestBase):
             ma.get_form(request, self.test_obj).base_fields.keys(), fields)
 
         # Using `fields` and `exclude`.
-        class TestModelAdmin(TranslationAdmin):
+        class TestModelAdmin(admin.TranslationAdmin):
             fields = ['title', 'url']
             exclude = ['url']
 
@@ -1416,7 +1414,7 @@ class TranslationAdminTest(ModeltranslationTestBase):
             ma.get_form(request).base_fields.keys(), ['title_de', 'title_en'])
 
         # Using `readonly_fields`.
-        class TestModelAdmin(TranslationAdmin):
+        class TestModelAdmin(admin.TranslationAdmin):
             fields = ['title', 'url']
             readonly_fields = ['url']
 
@@ -1426,7 +1424,7 @@ class TranslationAdminTest(ModeltranslationTestBase):
 
         # Using grouped fields.
         # Note: Current implementation flattens the nested fields
-        class TestModelAdmin(TranslationAdmin):
+        class TestModelAdmin(admin.TranslationAdmin):
             fields = (('title', 'url'), 'email',)
 
         ma = TestModelAdmin(TestModel, self.site)
@@ -1435,7 +1433,7 @@ class TranslationAdminTest(ModeltranslationTestBase):
             ['title_de', 'title_en', 'url_de', 'url_en', 'email_de', 'email_en'])
 
         # Using grouped fields in `fieldsets`.
-        class TestModelAdmin(TranslationAdmin):
+        class TestModelAdmin(admin.TranslationAdmin):
             fieldsets = [(None, {'fields': ('email', ('title', 'url'))})]
 
         ma = TestModelAdmin(TestModel, self.site)
@@ -1451,7 +1449,7 @@ class TranslationAdminTest(ModeltranslationTestBase):
                 model = TestModel
                 fields = ['url', 'email']
 
-        class TestModelAdmin(TranslationAdmin):
+        class TestModelAdmin(admin.TranslationAdmin):
             form = TestModelForm
 
         ma = TestModelAdmin(TestModel, self.site)
@@ -1467,7 +1465,7 @@ class TranslationAdminTest(ModeltranslationTestBase):
                 model = TestModel
                 exclude = ['url', 'email']
 
-        class TestModelAdmin(TranslationAdmin):
+        class TestModelAdmin(admin.TranslationAdmin):
             form = TestModelForm
 
         ma = TestModelAdmin(TestModel, self.site)
@@ -1479,7 +1477,7 @@ class TranslationAdminTest(ModeltranslationTestBase):
 
         # If both, the custom form an the ModelAdmin define an `exclude`
         # option, the ModelAdmin wins. This is Django behaviour.
-        class TestModelAdmin(TranslationAdmin):
+        class TestModelAdmin(admin.TranslationAdmin):
             form = TestModelForm
             exclude = ['url']
 
@@ -1497,7 +1495,7 @@ class TranslationAdminTest(ModeltranslationTestBase):
                 model = TestModel
                 fields = ['text', 'title']
 
-        class TestModelAdmin(TranslationAdmin):
+        class TestModelAdmin(admin.TranslationAdmin):
             form = TestModelForm
             fields = ['email']
 
@@ -1509,13 +1507,13 @@ class TranslationAdminTest(ModeltranslationTestBase):
             ma.get_form(request, self.test_obj).base_fields.keys(), fields)
 
     def test_inline_fieldsets(self):
-        class DataInline(TranslationStackedInline):
+        class DataInline(admin.TranslationStackedInline):
             model = DataModel
             fieldsets = [
                 ('Test', {'fields': ('data',)})
             ]
 
-        class TestModelAdmin(TranslationAdmin):
+        class TestModelAdmin(admin.TranslationAdmin):
             exclude = ('title', 'text',)
             inlines = [DataInline]
 
