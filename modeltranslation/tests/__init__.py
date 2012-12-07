@@ -960,6 +960,24 @@ class ModeltranslationTestRule3(ModeltranslationTestBase):
         self.assertEqual(n.title_de, 'foo')
         self.assertEqual(n.title_en, None)
 
+    @staticmethod
+    def _index(list, element):
+        for i, el in enumerate(list):
+            if el is element:
+                return i
+        raise ValueError
+
+    def test_rule3_internals(self):
+        # Rule 3 work because translation fields are added to model field list
+        # later than original field.
+        original = models.TestModel._meta.get_field('title')
+        translated_de = models.TestModel._meta.get_field('title_de')
+        translated_en = models.TestModel._meta.get_field('title_en')
+        fields = models.TestModel._meta.fields
+        # Here we cannot use simple list.index, because Field has overloaded __cmp__
+        self.assertTrue(self._index(fields, original) < self._index(fields, translated_de))
+        self.assertTrue(self._index(fields, original) < self._index(fields, translated_en))
+
 
 class ModelValidationTest(ModeltranslationTestBase):
     """
