@@ -1159,14 +1159,14 @@ class UpdateCommandTest(ModeltranslationTestBase):
         # fixtures loader doesn't use raw sql but rather creates objects,
         # so translation descriptor affects result and we cannot set the
         # 'original' field value.
-        models.TestModel.objects.create(title_de='')
-        models.TestModel.objects.create(title_de='already')
+        pk1 = models.TestModel.objects.create(title_de='').pk
+        pk2 = models.TestModel.objects.create(title_de='already').pk
         # Due to ``rewrite(False)`` here, original field will be affected.
         models.TestModel.objects.all().rewrite(False).update(title='initial')
 
         # Check raw data using ``values``
-        obj1 = models.TestModel.objects.filter(pk=1).values()[0]
-        obj2 = models.TestModel.objects.filter(pk=2).values()[0]
+        obj1 = models.TestModel.objects.filter(pk=pk1).values()[0]
+        obj2 = models.TestModel.objects.filter(pk=pk2).values()[0]
         self.assertEqual('', obj1['title_de'])
         self.assertEqual('initial', obj1['title'])
         self.assertEqual('already', obj2['title_de'])
@@ -1174,8 +1174,8 @@ class UpdateCommandTest(ModeltranslationTestBase):
 
         call_command('update_translation_fields', verbosity=0)
 
-        obj1 = models.TestModel.objects.get(pk=1)
-        obj2 = models.TestModel.objects.get(pk=2)
+        obj1 = models.TestModel.objects.get(pk=pk1)
+        obj2 = models.TestModel.objects.get(pk=pk2)
         self.assertEqual('initial', obj1.title_de)
         self.assertEqual('already', obj2.title_de)
 
