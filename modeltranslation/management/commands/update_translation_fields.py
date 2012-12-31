@@ -12,14 +12,22 @@ class Command(NoArgsCommand):
             'translated application using the value of the original field.')
 
     def handle(self, **options):
-        print "Using default language:", DEFAULT_LANGUAGE
+        verbosity = options['verbosity']
+        if verbosity > 0:
+            self.stdout.write("Using default language: %s\n" % DEFAULT_LANGUAGE)
         for model, trans_opts in translator._registry.items():
-            print "Updating data of model '%s'" % model
+            if model._meta.abstract:
+                continue
+            if verbosity > 0:
+                self.stdout.write("Updating data of model '%s'\n" % model)
             for fieldname in trans_opts.fields:
                 def_lang_fieldname = build_localized_fieldname(
                     fieldname, DEFAULT_LANGUAGE)
+
                 # We'll only update fields which do not have an existing value
-                model.objects.filter(
-                    Q(**{def_lang_fieldname: None}) |
-                    Q(**{def_lang_fieldname: ""})).update(
-                        **{def_lang_fieldname: F(fieldname)})
+                q = Q(**{def_lang_fieldname: None})
+                field = model._meta.get_field(fieldname)
+                if field.empty_strings_allowed:
+                    q |= Q(**{def_lang_fieldname: ""})
+
+                model.objects.filter(q).rewrite(False).update(**{def_lang_fieldname: F(fieldname)})
