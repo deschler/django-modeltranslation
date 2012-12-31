@@ -66,6 +66,8 @@ def get_fields_to_translatable_models(model):
 
 
 class MultilingualQuerySet(models.query.QuerySet):
+    _rewrite = True
+
     def __init__(self, *args, **kwargs):
         super(MultilingualQuerySet, self).__init__(*args, **kwargs)
         if self.model and (not self.query.order_by):
@@ -76,6 +78,15 @@ class MultilingualQuerySet(models.query.QuerySet):
                 for key in self.model._meta.ordering:
                     ordering.append(rewrite_lookup_key(self.model, key))
                 self.query.add_ordering(*ordering)
+
+    # This method was not present in django-linguo
+    def _clone(self, *args, **kwargs):
+        kwargs.setdefault('_rewrite', self._rewrite)
+        return super(MultilingualQuerySet, self)._clone(*args, **kwargs)
+
+    # This method was not present in django-linguo
+    def rewrite(self, mode=True):
+        return self._clone(_rewrite=mode)
 
     # This method was not present in django-linguo
     def _rewrite_q(self, q):
@@ -97,6 +108,8 @@ class MultilingualQuerySet(models.query.QuerySet):
         return q
 
     def _filter_or_exclude(self, negate, *args, **kwargs):
+        if not self._rewrite:
+            return super(MultilingualQuerySet, self)._filter_or_exclude(negate, *args, **kwargs)
         args = map(self._rewrite_q, args)
         for key, val in kwargs.items():
             new_key = rewrite_lookup_key(self.model, key)
@@ -105,12 +118,16 @@ class MultilingualQuerySet(models.query.QuerySet):
         return super(MultilingualQuerySet, self)._filter_or_exclude(negate, *args, **kwargs)
 
     def order_by(self, *field_names):
+        if not self._rewrite:
+            return super(MultilingualQuerySet, self).order_by(*field_names)
         new_args = []
         for key in field_names:
             new_args.append(rewrite_lookup_key(self.model, key))
         return super(MultilingualQuerySet, self).order_by(*new_args)
 
     def update(self, **kwargs):
+        if not self._rewrite:
+            return super(MultilingualQuerySet, self).update(**kwargs)
         for key, val in kwargs.items():
             new_key = rewrite_lookup_key(self.model, key)
             del kwargs[key]
