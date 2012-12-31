@@ -1376,6 +1376,9 @@ class TranslationAdminTest(ModeltranslationTestBase):
                 models.TestModel, self.site).get_fieldsets(request, self.test_obj)
         self.assertEqual(ma_fieldsets, fieldsets)
 
+        # Remove translation for DataModel
+        translator.translator.unregister(models.DataModel)
+
 
 class TestManager(ModeltranslationTestBase):
     def setUp(self):
