@@ -7,7 +7,7 @@ from django.db.models.signals import post_init
 
 from modeltranslation import settings as mt_settings
 from modeltranslation.fields import (NONE, create_translation_field, TranslationFieldDescriptor,
-                                     TranslatedRelationIdDescriptor,
+                                     TranslatedRelationIdDescriptor, original_field_factory,
                                      LanguageCacheSingleObjectDescriptor)
 from modeltranslation.manager import MultilingualManager, rewrite_lookup_key
 from modeltranslation.utils import build_localized_fieldname, parse_field
@@ -145,6 +145,10 @@ def add_translation_fields(model, opts):
             # django model fields and therefore adds them via add_to_class
             model.add_to_class(localized_field_name, translation_field)
             opts.add_translation_field(field_name, translation_field)
+        # Also patch original field
+        original = model._meta.get_field(field_name)
+        new = original_field_factory(original.__class__)
+        original.__class__ = new
 
     # Rebuild information about parents fields. If there are opts.local_fields, field cache would be
     # invalidated (by model._meta.add_field() function). Otherwise, we need to do it manually.
@@ -403,11 +407,16 @@ class Translator(object):
                 field = model._meta.get_field(field_name)
                 field_fallback_value = parse_field(model_fallback_values, field_name, NONE)
                 field_fallback_undefined = parse_field(model_fallback_undefined, field_name, NONE)
+                prev = getattr(model, field_name, None)
+                # Check previous descriptor
+                if prev and isinstance(prev, TranslationFieldDescriptor):
+                    prev = None
                 descriptor = TranslationFieldDescriptor(
                     field,
                     fallback_languages=model_fallback_languages,
                     fallback_value=field_fallback_value,
-                    fallback_undefined=field_fallback_undefined)
+                    fallback_undefined=field_fallback_undefined,
+                    descriptor=prev)
                 setattr(model, field_name, descriptor)
                 if isinstance(field, ForeignKey):
                     # We need to use a special descriptor so that

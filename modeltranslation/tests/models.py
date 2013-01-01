@@ -97,12 +97,14 @@ class OtherFieldsModel(models.Model):
 
 class FancyDescriptor(object):
     """
-    Stupid demo descriptor, that store int in database and return string of that length on get.
+    Stupid demo descriptor, that store int on model and return string of that length on get.
     """
     def __init__(self, field):
         self.field = field
 
     def __get__(self, instance, owner):
+        if instance is None:
+            return self
         length = instance.__dict__[self.field.name]
         if length is None:
             return ''

@@ -1883,6 +1883,39 @@ class UpdateCommandTest(ModeltranslationTestBase):
         self.assertEqual('initial', obj1.title_de)
         self.assertEqual('already', obj2.title_de)
 
+    def assertOriginal(self, pk):
+        obj = models.TestModel.objects.filter(pk=pk).raw_values()[0]
+        self.assertEqual('initial', obj['title'])
+
+    def test_original_field_preservation(self):
+        """
+        Test if operations on model does not mess with original field value -
+        that's it: original field value is preserved in database and can be used for
+        eg. update_translation_fields command.
+        """
+        pk = models.TestModel.objects.create().pk
+        models.TestModel.objects.all().rewrite(False).update(title='initial')
+
+        self.assertOriginal(pk)
+
+        obj = models.TestModel.objects.get(pk=pk)
+        obj.save()
+        self.assertOriginal(pk)
+
+        obj.title_de = 'a'
+        obj.title_en = 'b'
+        obj.save()
+        self.assertOriginal(pk)
+
+        obj.title = 'c'
+        obj.save()
+        self.assertOriginal(pk)
+
+        models.TestModel.objects.update(title='d')
+        self.assertOriginal(pk)
+
+        # TODO: admin test
+
 
 class TranslationAdminTest(ModeltranslationTestBase):
     def setUp(self):
@@ -2466,7 +2499,7 @@ class TestManager(ModeltranslationTestBase):
         self.assertEqual(list(manager.raw_values()), list(manager.rewrite(False).values()))
         i2.delete()
         self.assertEqual(list(manager.raw_values()), [
-            {'id': id1, 'title': 'en', 'title_en': 'en', 'title_de': 'de',
+            {'id': id1, 'title': '', 'title_en': 'en', 'title_de': 'de',
              'visits': 0, 'visits_en': 0, 'visits_de': 0,
              'description': None, 'description_en': None, 'description_de': None},
         ])

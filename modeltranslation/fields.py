@@ -69,6 +69,28 @@ def create_translation_field(model, field_name, lang, empty_value):
     return translation_class(translated_field=field, language=lang, empty_value=empty_value)
 
 
+def original_field_factory(baseclass):
+    if issubclass(baseclass, OriginalTranslationField):
+        return baseclass
+
+    class OriginalTranslationFieldSpecific(baseclass, OriginalTranslationField):
+        pass
+
+    # Reflect baseclass name of returned subclass
+    OriginalTranslationFieldSpecific.__name__ = 'OriginalTranslation%s' % baseclass.__name__
+
+    return OriginalTranslationFieldSpecific
+
+
+class OriginalTranslationField(fields.Field):
+    def pre_save(self, model_instance, add):
+        if self._prev_descriptor and self.name == self.attname:
+            return self._prev_descriptor.__get__(model_instance, None)
+        value = super(OriginalTranslationField, self).pre_save(model_instance, add)
+        # Get value stored at instantiation time
+        return model_instance.__dict__.get(self.attname, value)
+
+
 def field_factory(baseclass):
     class TranslationFieldSpecific(TranslationField, baseclass):
         pass
@@ -263,7 +285,7 @@ class TranslationField(object):
                                      self.translated_field.__class__.__name__)
         args, kwargs = introspector(self)
         # That's our definition!
-        return (field_class, args, kwargs)
+        return field_class, args, kwargs
 
 
 class TranslationFieldDescriptor(object):
@@ -271,7 +293,7 @@ class TranslationFieldDescriptor(object):
     A descriptor used for the original translated field.
     """
     def __init__(self, field, fallback_languages=None, fallback_value=NONE,
-                 fallback_undefined=NONE):
+                 fallback_undefined=NONE, descriptor=None):
         """
         Stores fallback options and the original field, so we know it's name
         and default.
@@ -280,12 +302,17 @@ class TranslationFieldDescriptor(object):
         self.fallback_languages = fallback_languages
         self.fallback_value = fallback_value
         self.fallback_undefined = fallback_undefined
+        self.field._prev_descriptor = descriptor
 
     def __set__(self, instance, value):
         """
         Updates the translation field for the current language.
         """
         if getattr(instance, '_mt_init', False):
+            # If initializing the instance, store original value
+            instance.__dict__[self.field.attname] = value
+            if self.field._prev_descriptor:
+                self.field._prev_descriptor.__set__(instance, value)
             # When assignment takes place in model instance constructor, don't set value.
             # This is essential for only/defer to work, but I think it's sensible anyway.
             return
@@ -345,6 +372,10 @@ class TranslatedRelationIdDescriptor(object):
         self.fallback_languages = fallback_languages
 
     def __set__(self, instance, value):
+        if getattr(instance, '_mt_init', False):
+            # If initializing the instance, store original value
+            attname = instance._meta.get_field(self.field_name).get_attname()
+            instance.__dict__[attname] = value
         lang = get_language()
         loc_field_name = build_localized_fieldname(self.field_name, lang)
         # Localized field name with '_id'
