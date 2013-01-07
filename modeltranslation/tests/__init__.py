@@ -18,6 +18,7 @@ from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError, ImproperlyConfigured
 from django.core.files.base import ContentFile
+from django.core.management import call_command
 from django.db.models import Q, F
 from django.db.models.loading import AppCache
 from django.test import TestCase
@@ -106,7 +107,6 @@ class ModeltranslationTestBase(TestCase):
 
                 # 5. Syncdb (``migrate=False`` in case of south)
                 from django.db import connections, DEFAULT_DB_ALIAS
-                from django.core.management import call_command
                 call_command('syncdb', verbosity=0, migrate=False, interactive=False,
                              database=connections[DEFAULT_DB_ALIAS].alias, load_initial_data=False)
 
@@ -1153,6 +1153,33 @@ class ModelInheritanceFieldAggregationTest(ModeltranslationTestBase):
         self.failUnlessEqual(5, len(clsb.fields))  # there are no repetitions
 
 
+class UpdateCommandTest(ModeltranslationTestBase):
+    def test_update_command(self):
+        # Here it would be convenient to use fixtures - unfortunately,
+        # fixtures loader doesn't use raw sql but rather creates objects,
+        # so translation descriptor affects result and we cannot set the
+        # 'original' field value.
+        pk1 = models.TestModel.objects.create(title_de='').pk
+        pk2 = models.TestModel.objects.create(title_de='already').pk
+        # Due to ``rewrite(False)`` here, original field will be affected.
+        models.TestModel.objects.all().rewrite(False).update(title='initial')
+
+        # Check raw data using ``values``
+        obj1 = models.TestModel.objects.filter(pk=pk1).values()[0]
+        obj2 = models.TestModel.objects.filter(pk=pk2).values()[0]
+        self.assertEqual('', obj1['title_de'])
+        self.assertEqual('initial', obj1['title'])
+        self.assertEqual('already', obj2['title_de'])
+        self.assertEqual('initial', obj2['title'])
+
+        call_command('update_translation_fields', verbosity=0)
+
+        obj1 = models.TestModel.objects.get(pk=pk1)
+        obj2 = models.TestModel.objects.get(pk=pk2)
+        self.assertEqual('initial', obj1.title_de)
+        self.assertEqual('already', obj2.title_de)
+
+
 class TranslationAdminTest(ModeltranslationTestBase):
     def setUp(self):
         trans_real.activate('de')
@@ -1375,6 +1402,9 @@ class TranslationAdminTest(ModeltranslationTestBase):
             ma_fieldsets = ma.inlines[0](
                 models.TestModel, self.site).get_fieldsets(request, self.test_obj)
         self.assertEqual(ma_fieldsets, fieldsets)
+
+        # Remove translation for DataModel
+        translator.translator.unregister(models.DataModel)
 
 
 class TestManager(ModeltranslationTestBase):
