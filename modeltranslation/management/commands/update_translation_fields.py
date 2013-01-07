@@ -12,7 +12,7 @@ class Command(NoArgsCommand):
             'translated application using the value of the original field.')
 
     def handle(self, **options):
-        verbosity = options['verbosity']
+        verbosity = int(options['verbosity'])
         if verbosity > 0:
             self.stdout.write("Using default language: %s\n" % DEFAULT_LANGUAGE)
         for model, trans_opts in translator._registry.items():
