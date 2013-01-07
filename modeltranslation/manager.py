@@ -6,6 +6,7 @@ https://github.com/zmathew/django-linguo
 """
 from django.db import models
 from django.db.models.fields.related import RelatedField
+from django.db.models.sql.where import Constraint
 from django.utils.tree import Node
 
 from modeltranslation.utils import build_localized_fieldname, get_language
@@ -158,5 +159,26 @@ class MultilingualQuerySet(models.query.QuerySet):
 class MultilingualManager(models.Manager):
     use_for_related_fields = True
 
+    def _rewrite_where(self, q):
+        "Rewrite field names inside WHERE tree."
+        if isinstance(q, tuple) and isinstance(q[0], Constraint):
+            c = q[0]
+            new_name = rewrite_lookup_key(self.model, c.field.name)
+            if c.field.name != new_name:
+                c.field = self.model._meta.get_field(new_name)
+                c.col = c.field.column
+        if isinstance(q, Node):
+            map(self._rewrite_where, q.children)
+
     def get_query_set(self):
-        return MultilingualQuerySet(self.model)
+        qs = super(MultilingualManager, self).get_query_set()
+        if qs.__class__ == models.query.QuerySet:
+            qs.__class__ = MultilingualQuerySet
+        else:
+            class NewClass(qs.__class__, MultilingualQuerySet):
+                pass
+            NewClass.__name__ = 'Multilingual%s' % qs.__class__.__name__
+            qs.__class__ = NewClass
+        self._rewrite_where(qs.query.where)
+        self._rewrite_where(qs.query.having)
+        return qs
