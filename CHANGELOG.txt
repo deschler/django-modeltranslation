@@ -1,3 +1,8 @@
+v0.5b1
+======
+Date: 2013-01-07
+Packaged from revision da928dd431fcf112e2e9c4c154c5b69e7dadc3b3.
+
   FIXED: Fixed update_translation_fields management command.
          (thanks to Jacek Tomaszewski,
           resolves issues #123 and #124)
