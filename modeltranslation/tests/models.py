@@ -111,3 +111,17 @@ class CustomManager(models.Manager):
 class CustomManagerTestModel(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
     objects = CustomManager()
+
+
+class CustomQuerySet(models.query.QuerySet):
+    pass
+
+
+class CustomManager2(models.Manager):
+    def get_query_set(self):
+        return CustomQuerySet(self.model, using=self._db)
+
+
+class CustomManager2TestModel(models.Model):
+    title = models.CharField(ugettext_lazy('title'), max_length=255)
+    objects = CustomManager2()

@@ -30,9 +30,4 @@ class Command(NoArgsCommand):
                 if field.empty_strings_allowed:
                     q |= Q(**{def_lang_fieldname: ""})
 
-                try:
-                    model.objects.filter(q).rewrite(False).update(
-                        **{def_lang_fieldname: F(fieldname)})
-                except AttributeError:
-                    # FIXME: Workaround for abstract models. See issue #123 for details.
-                    model.objects.filter(q).update(**{def_lang_fieldname: F(fieldname)})
+                model.objects.filter(q).rewrite(False).update(**{def_lang_fieldname: F(fieldname)})

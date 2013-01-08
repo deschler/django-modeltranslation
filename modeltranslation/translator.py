@@ -97,7 +97,7 @@ def add_manager(model):
     if current_manager.__class__ is Manager:
         current_manager.__class__ = MultilingualManager
     else:
-        class NewMultilingualManager(current_manager.__class__, MultilingualManager):
+        class NewMultilingualManager(MultilingualManager, current_manager.__class__):
             pass
         current_manager.__class__ = NewMultilingualManager
 

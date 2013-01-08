@@ -6,7 +6,7 @@ from modeltranslation.tests.models import (
     TestModel, FallbackModel, FallbackModel2,
     FileFieldsModel, OtherFieldsModel, AbstractModelA, AbstractModelB,
     MultitableModelA, MultitableBModelA, MultitableModelC,
-    ManagerTestModel, CustomManagerTestModel)
+    ManagerTestModel, CustomManagerTestModel, CustomManager2TestModel)
 
 
 class TestTranslationOptions(TranslationOptions):
@@ -84,7 +84,8 @@ translator.register(ManagerTestModel, ManagerTestModelTranslationOptions)
 
 class CustomManagerTestModelTranslationOptions(TranslationOptions):
     fields = ('title',)
-translator.register(CustomManagerTestModel, CustomManagerTestModelTranslationOptions)
+translator.register([CustomManagerTestModel, CustomManager2TestModel],
+                    CustomManagerTestModelTranslationOptions)
 
 
 ########## TranslationOptions field inheritance testing
