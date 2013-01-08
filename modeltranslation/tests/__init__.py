@@ -152,7 +152,7 @@ class ModeltranslationTest(ModeltranslationTestBase):
         self.failUnless(translator.translator)
 
         # Check that all models are registered for translation
-        self.failUnlessEqual(len(translator.translator._registry), 12)
+        self.failUnlessEqual(len(translator.translator._registry), 13)
 
         # Try to unregister a model that is not registered
         self.assertRaises(translator.NotRegistered,
@@ -1506,6 +1506,16 @@ class TestManager(ModeltranslationTestBase):
         self.assertEqual(2, models.CustomManagerTestModel.objects.count())
         with override('de'):
             self.assertEqual(1, models.CustomManagerTestModel.objects.count())
+
+    def test_custom_manager2(self):
+        """Test if user-defined queryset is still working"""
+        from modeltranslation.manager import MultilingualManager, MultilingualQuerySet
+        manager = models.CustomManager2TestModel.objects
+        self.assertTrue(isinstance(manager, models.CustomManager2))
+        self.assertTrue(isinstance(manager, MultilingualManager))
+        qs = manager.all()
+        self.assertTrue(isinstance(qs, models.CustomQuerySet))
+        self.assertTrue(isinstance(qs, MultilingualQuerySet))
 
     def test_creation(self):
         """Test if field are rewritten in create."""
