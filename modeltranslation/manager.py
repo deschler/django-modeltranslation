@@ -71,6 +71,9 @@ class MultilingualQuerySet(models.query.QuerySet):
 
     def __init__(self, *args, **kwargs):
         super(MultilingualQuerySet, self).__init__(*args, **kwargs)
+        self._post_init()
+
+    def _post_init(self):
         if self.model and (not self.query.order_by):
             if self.model._meta.ordering:
                 # If we have default ordering specified on the model, set it now so that
@@ -88,6 +91,30 @@ class MultilingualQuerySet(models.query.QuerySet):
     # This method was not present in django-linguo
     def rewrite(self, mode=True):
         return self._clone(_rewrite=mode)
+
+    def _rewrite_applied_operations(self):
+        """
+        Rewrite fields in already applied filters/ordering.
+        Useful when converting any QuerySet into MultilingualQuerySet.
+        """
+        self._rewrite_where(self.query.where)
+        self._rewrite_where(self.query.having)
+        self._rewrite_order()
+
+    def _rewrite_where(self, q):
+        "Rewrite field names inside WHERE tree."
+        if isinstance(q, tuple) and isinstance(q[0], Constraint):
+            c = q[0]
+            new_name = rewrite_lookup_key(self.model, c.field.name)
+            if c.field.name != new_name:
+                c.field = self.model._meta.get_field(new_name)
+                c.col = c.field.column
+        if isinstance(q, Node):
+            map(self._rewrite_where, q.children)
+
+    def _rewrite_order(self):
+        self.query.order_by = [rewrite_lookup_key(self.model, field_name)
+                               for field_name in self.query.order_by]
 
     # This method was not present in django-linguo
     def _rewrite_q(self, q):
@@ -159,17 +186,6 @@ class MultilingualQuerySet(models.query.QuerySet):
 class MultilingualManager(models.Manager):
     use_for_related_fields = True
 
-    def _rewrite_where(self, q):
-        "Rewrite field names inside WHERE tree."
-        if isinstance(q, tuple) and isinstance(q[0], Constraint):
-            c = q[0]
-            new_name = rewrite_lookup_key(self.model, c.field.name)
-            if c.field.name != new_name:
-                c.field = self.model._meta.get_field(new_name)
-                c.col = c.field.column
-        if isinstance(q, Node):
-            map(self._rewrite_where, q.children)
-
     def get_query_set(self):
         qs = super(MultilingualManager, self).get_query_set()
         if qs.__class__ == models.query.QuerySet:
@@ -179,6 +195,6 @@ class MultilingualManager(models.Manager):
                 pass
             NewClass.__name__ = 'Multilingual%s' % qs.__class__.__name__
             qs.__class__ = NewClass
-        self._rewrite_where(qs.query.where)
-        self._rewrite_where(qs.query.having)
+        qs._post_init()
+        qs._rewrite_applied_operations()
         return qs
