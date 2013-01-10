@@ -97,7 +97,75 @@ Multilingual Manager
 
 .. versionadded:: 0.5
 
-.. todo:: Write something smart.
+Every model registered for translation is patched so that its manager becomes a subclass
+of ``MultilingualManager`` (of course, if a custom manager was defined on the model, its
+functions will be retained). ``MultilingualManager`` simplifies language-aware queries,
+especially on third-party apps, by rewriting query field names.
+
+For example:
+
+.. code-block:: python
+
+    # Assuming the current language is "de",
+    # these queries returns the same objects
+    news1 = News.objects.filter(title__contains='enigma')
+    news2 = News.objects.filter(title_de__contains='enigma')
+
+    assert news1 == news2
+
+It works as follow: if the translation field name is used (``title``), it is changed into the
+current language field name (``title_de`` or ``title_en``, depending on the current active
+language).
+Any language-suffixed names are left untouched (so ``title_en`` wouldn't change,
+no matter what the current language is).
+
+Rewriting of field names works with operators (like ``__in``, ``__ge``) as well as with
+relationship spanning. Moreover, it is also handled on ``Q`` and ``F`` expressions.
+
+These manager methods perform rewriting:
+
+- ``filter()``, ``exclude()``, ``get()``
+- ``order_by()``
+- ``update()``
+- ``create()``, with optional auto-population_ feature
+
+In order not to introduce differences between ``X.objects.create(...)`` and ``X(...)``, model
+constructor is also patched and performs rewriting of field names prior to regular initialization.
+
+If one wants to turn rewriting of field names off, this can be easily achieved with
+``rewrite(mode)`` method. ``mode`` is a boolean specifying whether rewriting should be applied.
+It can be changed several times inside a query. So ``X.objects.rewrite(False)`` turns rewriting off.
+
+Auto-population
+***************
+
+In ``create()`` you can set special parameter ``_populate=True`` to populate all translation
+(language) fields with values from translated (original) ones. It can be very convenient when working
+with many languages. So:
+
+.. code-block:: python
+
+    x = News.objects.create(title='bar', _populate=True)
+
+is equivalent of:
+
+.. code-block:: python
+
+    x = News.objects.create(title_en='bar', title_de='bar') ## title_?? for every language
+
+
+Moreover, some fields can be explicitly assigned different values:
+
+.. code-block:: python
+
+    x = News.objects.create(title='-- no translation yet --', title_de='enigma', _populate=True)
+
+It will result in ``title_de == 'nic'`` and other ``title_?? == '-- no translation yet --'``.
+
+There is a more convenient way than passing _populate all the time:
+:ref:`settings_auto_populate` setting.
+If ``_populate`` parameter is missing, ``create()`` will look at the setting to determine if
+population should be used.
 
 
 The State of the Original Field
