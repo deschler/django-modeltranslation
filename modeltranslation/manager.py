@@ -146,17 +146,16 @@ class MultilingualQuerySet(models.query.QuerySet):
                         # Try to add value in every language
                         for new_key in translatable_fields[key]:
                             kwargs.setdefault(new_key, val)
-        else:
-            # If not use populate feature, then perform normal rewriting
-            for key, val in kwargs.items():
-                new_key = rewrite_lookup_key(self.model, key)
-                del kwargs[key]
-                kwargs.setdefault(new_key, val)
+        # If not use populate feature, then normal rewriting will occur at model's __init__
+        # That's why it is not performed here - no reason to rewrite twice.
         return super(MultilingualQuerySet, self).create(**kwargs)
 
 
 class MultilingualManager(models.Manager):
     use_for_related_fields = True
+
+    def rewrite(self, *args, **kwargs):
+        return self.get_query_set().rewrite(*args, **kwargs)
 
     def get_query_set(self):
         return MultilingualQuerySet(self.model)
