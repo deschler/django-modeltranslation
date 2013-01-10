@@ -248,6 +248,8 @@ Example:
     and might be replaced by a more sophisticated mechanism in future versions.
 
 
+.. _settings_auto_populate:
+
 ``MODELTRANSLATION_AUTO_POPULATE``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
