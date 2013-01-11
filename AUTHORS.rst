@@ -14,4 +14,7 @@ Contributors
 * Sébastien Fievet
 * Jacek Tomaszewski
 * Bruno Tavares
+* Zach Mathew (of django-linguo_, initial author of ``MultilingualManager``)
 * And many more ...
+
+.. _django-linguo: https://github.com/zmathew/django-linguo
