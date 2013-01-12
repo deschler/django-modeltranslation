@@ -1,5 +1,5 @@
 Authors
--------
+=======
 
 * Peter Eschler <peschler@gmail.com>
 * Dirk Eschler <eschler@gmail.com>

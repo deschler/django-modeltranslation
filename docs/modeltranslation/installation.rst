@@ -64,11 +64,11 @@ in detail in the following sections:
    in that case.
 
 
-Configure the Project's ``settings.py``
----------------------------------------
+Configuration
+=============
 
 Required Settings
-*****************
+-----------------
 
 The following variables have to be added to or edited in the project's
 ``settings.py``:
@@ -117,7 +117,7 @@ and ``en`` in your project, set the ``LANGUAGES`` variable like this (where
 
 
 Advanced Settings
-*****************
+-----------------
 
 Modeltranslation also has some advanced settings to customize its behaviour.
 
