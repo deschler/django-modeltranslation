@@ -154,6 +154,91 @@ If ``_populate`` parameter is missing, ``create()`` will look at the setting to 
 population should be used.
 
 
+.. _fallback:
+
+Falling back
+------------
+
+Modeltranslation provides mechanism to control behaviour of data access in case of empty
+translation values.
+
+Consider ``News`` example: a creator of some news hasn't specified it's german title and content,
+but only english ones. Then if a german visitor is viewing site, we would rather show him english
+title/content of the news than display empty strings. This is called *fallback*.
+
+There are several ways of controlling fallback, described below.
+
+Fallback languages
+******************
+
+.. versionadded:: 0.5
+
+:ref:`settings-modeltranslation_fallback_languages` setting allows to set order of *fallback
+languages*. By default it is only ``DEFAULT_LANGUAGE``.
+
+For example, setting ::
+
+    MODELTRANSLATION_FALLBACK_LANGUAGES = ('en', 'de', 'fr')
+
+means: if current active language field value is unset, try english value. If it is also unset,
+try german, and so on - until some language yield non-empty value of the field.
+
+There is also option to define fallback by language, using dict syntax::
+
+    MODELTRANSLATION_FALLBACK_LANGUAGES = {
+        'default': ('en', 'de', 'fr'),
+        'fr': ('de',),
+        'uk': ('ru',)
+    }
+
+The ``default`` key is required and its value denote languages which are always tried at the end.
+With such a setting:
+
+- for `uk` (Ukrainian) order of fallback languages is: ``('ru', 'en', 'de', 'fr')``
+- for `fr` order of fallback languages is: ``('de', 'en')`` - `fr` obviously is not fallback, since
+  it's active language; and `de` would be tried before `en`
+- for `en` and `de` fallback order is ``('de', 'fr')`` and ``('en', 'fr')``, respectively
+- for any other language order of fallback languages is just ``('en', 'de', 'fr')``
+
+What is more, fallback languages order can be overridden per model, using ``TranslationOptions``::
+
+    class NewsTranslationOptions(TranslationOptions):
+        fields = ('title', 'text',)
+        fallback_languages = {'default': ('fa', 'km')}  # use Persian and Khmer as fallback for News
+
+Dict syntax is only allowed there.
+
+Fallback values
+***************
+
+.. versionadded:: 0.4
+
+But what if current language and all fallback languages yield no field value? Then modeltranslation
+will use field's *fallback value*, if one was defined.
+
+Fallback values are defined in ``TranslationOptions``, for example::
+
+    class NewsTranslationOptions(TranslationOptions):
+        fields = ('title', 'text',)
+        fallback_values = _('-- sorry, no translation provided --')
+
+In this case, if title is missing in active language and any of fallback languages, news title
+will be ``'-- sorry, no translation provided --'`` (maybe translated, since gettext is used).
+Empty text will be handled in same way.
+
+Fallback values can be also customized per model field::
+
+    class NewsTranslationOptions(TranslationOptions):
+        fields = ('title', 'text',)
+        fallback_values = {
+            'title': _('-- sorry, this news was not translated --'),
+            'text': _('-- please contact our translator (translator@example.com) --')
+        }
+
+If current language and all fallback languages yield no field value, and no fallback values are
+defined, then modeltranslation will use field's default value.
+
+
 The State of the Original Field
 -------------------------------
 

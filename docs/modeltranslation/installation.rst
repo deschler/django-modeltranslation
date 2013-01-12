@@ -136,6 +136,8 @@ Example::
     MODELTRANSLATION_DEFAULT_LANGUAGE = 'en'
 
 
+.. _settings-modeltranslation_fallback_languages:
+
 ``MODELTRANSLATION_FALLBACK_LANGUAGES``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -143,7 +145,7 @@ Example::
 
 Default: ``(DEFAULT_LANGUAGE,)``
 
-By default modeltranslation will fallback to the computed value of the
+By default modeltranslation will :ref:`fallback <fallback>` to the computed value of the
 ``DEFAULT_LANGUAGE``. This is either the first language found in the
 ``LANGUAGES`` setting or the value defined through
 ``MODELTRANSLATION_DEFAULT_LANGUAGE`` which acts as an override.
