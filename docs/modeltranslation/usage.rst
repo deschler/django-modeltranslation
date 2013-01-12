@@ -163,7 +163,7 @@ Moreover, some fields can be explicitly assigned different values:
 It will result in ``title_de == 'nic'`` and other ``title_?? == '-- no translation yet --'``.
 
 There is a more convenient way than passing _populate all the time:
-:ref:`settings_auto_populate` setting.
+:ref:`settings-modeltranslation_auto_populate` setting.
 If ``_populate`` parameter is missing, ``create()`` will look at the setting to determine if
 population should be used.
 
