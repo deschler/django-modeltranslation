@@ -78,9 +78,7 @@ The following variables have to be added to or edited in the project's
 ^^^^^^^^^^^^^^^^^^
 
 Make sure that the ``modeltranslation`` app is listed in your
-``INSTALLED_APPS`` variable:
-
-.. code-block:: python
+``INSTALLED_APPS`` variable::
 
     INSTALLED_APPS = (
         ...
@@ -100,9 +98,7 @@ first language is treated as the *default language*.
 The modeltranslation application uses the list of languages to add localized
 fields to the models registered for translation. To use the languages ``de``
 and ``en`` in your project, set the ``LANGUAGES`` variable like this (where
-``de`` is the default language):
-
-.. code-block:: python
+``de`` is the default language)::
 
     gettext = lambda s: s
     LANGUAGES = (
@@ -135,9 +131,7 @@ you can define a language in ``MODELTRANSLATION_DEFAULT_LANGUAGE``. Note that
 the value has to be in ``settings.LANGUAGES``, otherwise an
 ``ImproperlyConfigured`` exception will be raised.
 
-Example:
-
-.. code-block:: python
+Example::
 
     MODELTRANSLATION_DEFAULT_LANGUAGE = 'en'
 
@@ -158,9 +152,7 @@ This setting allows for a more fine grained tuning of the fallback behaviour
 by taking additional languages into account. The language order is defined as
 a tuple or list of language codes.
 
-Example:
-
-.. code-block:: python
+Example::
 
     MODELTRANSLATION_FALLBACK_LANGUAGES = ('en', 'de')
 
@@ -168,9 +160,7 @@ Using a dict syntax it is also possible to define fallbacks by language.
 A ``default`` key is required in this case to define the default behaviour
 of unlisted languages.
 
-Example:
-
-.. code-block:: python
+Example::
 
     MODELTRANSLATION_FALLBACK_LANGUAGES = {'default': ('en', 'de'), 'fr': ('de',)}
 
@@ -193,18 +183,14 @@ file in the root directory of each application that is in ``INSTALLED_APPS``.
 The setting ``MODELTRANSLATION_TRANSLATION_FILES`` is provided to extend the
 modules that are taken into account.
 
-Syntax:
-
-.. code-block:: python
+Syntax::
 
     MODELTRANSLATION_TRANSLATION_FILES = (
         '<APP1_MODULE>.translation',
         '<APP2_MODULE>.translation',
     )
 
-Example:
-
-.. code-block:: python
+Example::
 
     MODELTRANSLATION_TRANSLATION_FILES = (
         'news.translation',
@@ -235,9 +221,7 @@ fields will work fine, too. Unsupported fields will throw an
 The list of supported fields can be extended by defining a tuple of field
 names in your ``settings.py``.
 
-Example:
-
-.. code-block:: python
+Example::
 
     MODELTRANSLATION_CUSTOM_FIELDS = ('MyField', 'MyOtherField',)
 
@@ -259,13 +243,9 @@ Default: ``False``
 
 This setting controls if the :ref:`multilingual_manager` should automatically
 populate language field values in its ``create`` method, so that these two
-statements can be considered equivalent:
-
-.. code-block:: python
+statements can be considered equivalent::
 
     News.objects.create(title='-- no translation yet --', _populate=True)
-
-.. code-block:: python
 
     News.objects.create(title='-- no translation yet --')
 

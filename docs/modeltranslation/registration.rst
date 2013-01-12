@@ -27,9 +27,7 @@ registered with the ``modeltranslation.translator.translator`` instance.
 
 To illustrate this let's have a look at a simple example using a ``News``
 model. The news in this example only contains a ``title`` and a ``text`` field.
-Instead of a news, this could be any Django model class:
-
-.. code-block:: python
+Instead of a news, this could be any Django model class::
 
     class News(models.Model):
         title = models.CharField(max_length=255)
@@ -37,9 +35,7 @@ Instead of a news, this could be any Django model class:
 
 In order to tell the modeltranslation app to translate the ``title`` and
 ``text`` field, create a ``translation.py`` file in your news app directory and
-add the following:
-
-.. code-block:: python
+add the following::
 
     from modeltranslation.translator import translator, TranslationOptions
     from news.models import News
@@ -65,9 +61,7 @@ explains how things are working under the hood.
 .. versionadded:: 0.5
 
 A subclass of any ``TranslationOptions`` will inherit fields from its bases
-(similar to the way Django models inherit fields, but with a different syntax).
-
-.. code-block:: python
+(similar to the way Django models inherit fields, but with a different syntax). ::
 
     from modeltranslation.translator import translator, TranslationOptions
     from news.models import News, NewsWithImage
@@ -83,9 +77,7 @@ A subclass of any ``TranslationOptions`` will inherit fields from its bases
 
 The above example adds the fields ``title`` and ``text`` from the
 ``NewsTranslationOptions`` class to ``NewsWithImageTranslationOptions``, or to
-say it in code:
-
-.. code-block:: python
+say it in code::
 
     assert NewsWithImageTranslationOptions.fields == ('title', 'text', 'image')
 

@@ -5,18 +5,14 @@ Accessing Translated and Translation Fields
 
 The modeltranslation app changes the behaviour of the translated fields. To
 explain this consider the news example from the :ref:`registration` chapter
-again. The original ``News`` model looked like this:
-
-.. code-block:: python
+again. The original ``News`` model looked like this::
 
     class News(models.Model):
         title = models.CharField(max_length=255)
         text = models.TextField()
 
 Now that it is registered with the modeltranslation app the model looks
-like this - note the additional fields automatically added by the app:
-
-.. code-block:: python
+like this - note the additional fields automatically added by the app::
 
     class News(models.Model):
         title = models.CharField(max_length=255)  # original/translated field
@@ -71,9 +67,7 @@ on the current language setting. "Language setting" is referring to the Django
 `set_language`_ view and the corresponding ``get_lang`` function.
 
 Assuming the current language is ``de`` in the news example from above, the
-translated ``title`` field will return the value from the ``title_de`` field:
-
-.. code-block:: python
+translated ``title`` field will return the value from the ``title_de`` field::
 
     # Assuming the current language is "de"
     n = News.objects.all()[0]
@@ -102,9 +96,7 @@ of ``MultilingualManager`` (of course, if a custom manager was defined on the mo
 functions will be retained). ``MultilingualManager`` simplifies language-aware queries,
 especially on third-party apps, by rewriting query field names.
 
-For example:
-
-.. code-block:: python
+For example::
 
     # Assuming the current language is "de",
     # these queries returns the same objects
@@ -141,22 +133,16 @@ Auto-population
 
 In ``create()`` you can set special parameter ``_populate=True`` to populate all translation
 (language) fields with values from translated (original) ones. It can be very convenient when working
-with many languages. So:
-
-.. code-block:: python
+with many languages. So::
 
     x = News.objects.create(title='bar', _populate=True)
 
-is equivalent of:
-
-.. code-block:: python
+is equivalent of::
 
     x = News.objects.create(title_en='bar', title_de='bar') ## title_?? for every language
 
 
-Moreover, some fields can be explicitly assigned different values:
-
-.. code-block:: python
+Moreover, some fields can be explicitly assigned different values::
 
     x = News.objects.create(title='-- no translation yet --', title_de='enigma', _populate=True)
 
