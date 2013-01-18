@@ -111,6 +111,12 @@ and ``en`` in your project, set the ``LANGUAGES`` variable like this (where
     rather required for Django to be able to (statically) translate the verbose
     names of the languages using the standard ``i18n`` solution.
 
+.. warning::
+    Modeltranslation does not enforce the ``LANGUAGES`` setting to be defined
+    in your project. When it isn't present, it defaults to Django's
+    `global LANGUAGES setting <https://github.com/django/django/blob/master/django/conf/global_settings.py>`_
+    instead, and that are quite a number of languages!
+
 
 Advanced Settings
 -----------------
