@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import logging
+
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import fields
 
@@ -32,6 +34,9 @@ try:
     SUPPORTED_FIELDS += (fields.GenericIPAddressField,)  # Django 1.4+ only
 except AttributeError:
     pass
+
+
+logger = logging.getLogger(__name__)
 
 
 def create_translation_field(model, field_name, lang):
@@ -153,9 +158,8 @@ class TranslationFieldDescriptor(object):
 
     def __get__(self, instance, owner):
         if not instance:
-            raise ValueError(
-                "Translation field '%s' can only be accessed via an instance "
-                "not via a class." % self.field.name)
+            logger.warning("Translation field '%s' can only be accessed via "
+                           "an instance not via a class." % self.field.name)
         langs = resolution_order(get_language(), self.fallback_languages)
         for lang in langs:
             loc_field_name = build_localized_fieldname(self.field.name, lang)
