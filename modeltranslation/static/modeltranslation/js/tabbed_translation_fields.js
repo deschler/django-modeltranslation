@@ -55,8 +55,7 @@ var google, django, gettext;
             return grouped_translations;
         }
 
-        function createTabs() {
-            var grouped_translations = getGroupedTranslationFields();
+        function createTabs(grouped_translations) {
             var tabs = [];
             $.each(grouped_translations, function (name, languages) {
                 var tabs_container = $('<div></div>'),
@@ -93,9 +92,8 @@ var google, django, gettext;
             return tabs;
         }
 
-        function createMainSwitch(tabs) {
-            var grouped_translations = getGroupedTranslationFields(),
-              unique_languages = [],
+        function createMainSwitch(grouped_translations, tabs) {
+            var unique_languages = [],
               select = $('<select>');
             $.each(grouped_translations, function (name, languages) {
                 $.each(languages, function (lang, el) {
@@ -116,7 +114,8 @@ var google, django, gettext;
         }
 
         if ($('body').hasClass('change-form')) {
-            createMainSwitch(createTabs());
+            var grouped_translations = getGroupedTranslationFields();
+            createMainSwitch(grouped_translations, createTabs(grouped_translations));
         }
     });
 }());
