@@ -152,10 +152,8 @@ class TranslationFieldDescriptor(object):
         setattr(instance, loc_field_name, value)
 
     def __get__(self, instance, owner):
-        if not instance:
-            raise ValueError(
-                "Translation field '%s' can only be accessed via an instance "
-                "not via a class." % self.field.name)
+        if instance is None:
+            return self
         langs = resolution_order(get_language(), self.fallback_languages)
         for lang in langs:
             loc_field_name = build_localized_fieldname(self.field.name, lang)

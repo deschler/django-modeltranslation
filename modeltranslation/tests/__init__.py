@@ -182,6 +182,15 @@ class ModeltranslationTest(ModeltranslationTestBase):
         verbose_name = models.TestModel._meta.get_field('title_de').verbose_name
         self.assertEquals(unicode(verbose_name), u'title [de]')
 
+    def test_descriptor_introspection(self):
+        # See Django #8248
+        try:
+            models.TestModel.title
+            models.TestModel.title.__doc__
+            self.assertTrue(True)
+        except:
+            self.fail('Descriptor accessed on class should return itself.')
+
     def test_set_translation(self):
         """This test briefly shows main modeltranslation features."""
         self.failUnlessEqual(get_language(), 'de')
