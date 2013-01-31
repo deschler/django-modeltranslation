@@ -30,7 +30,7 @@ Using Pip
 Using the Source
 ----------------
 
-Get a source tarball from `github`_ or `pypi`_, unpack, then install with:
+Get a source tarball from `pypi`_, unpack, then install with:
 
 .. code-block:: console
 
@@ -40,7 +40,6 @@ Get a source tarball from `github`_ or `pypi`_, unpack, then install with:
           unpack the tarball and copy/move the modeltranslation directory
           to a path listed in your ``PYTHONPATH`` environment variable.
 
-.. _github: https://github.com/deschler/django-modeltranslation/downloads
 .. _pypi: http://pypi.python.org/pypi/django-modeltranslation/
 
 
