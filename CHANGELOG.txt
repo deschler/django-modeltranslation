@@ -1,13 +1,26 @@
+  ADDED: Rewrite method to MultilingualManager and optimized create.
+
+  FIXED: The update_translation_fields management command does nothing.
+         (resolves issue #123)
+  FIXED: MultilingualQuerySet custom inheritance.
+
+CHANGED: Don't raise an exception if TranslationField is accessed via class
+         to allow descriptor introspection.
+         (resolves issue #131)
+
+
 v0.5b1
 ======
 Date: 2013-01-07
 Packaged from revision da928dd431fcf112e2e9c4c154c5b69e7dadc3b3.
 
+  ADDED: Possibility to turn off query rewriting in MultilingualManager.
+         (thanks to Jacek Tomaszewski)
+
   FIXED: Fixed update_translation_fields management command.
          (thanks to Jacek Tomaszewski,
           resolves issues #123 and #124)
-  ADDED: Possibility to turn off query rewriting in MultilingualManager.
-         (thanks to Jacek Tomaszewski)
+
 CHANGED: Major test refactoring.
          (thanks to Jacek Tomaszewski,
           resolves issues #100 and #119)
