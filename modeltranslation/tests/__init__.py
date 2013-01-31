@@ -1486,6 +1486,21 @@ class TestManager(ModeltranslationTestBase):
             self.assertEqual(n.visits_en, 11)
             self.assertEqual(n.visits_de, 22)
 
+    def test_order_by(self):
+        """Check that field names are rewritten in order by keys."""
+        manager = models.ManagerTestModel.objects
+        m1 = manager.create(title='a')
+        m2 = manager.create(title='b')
+        m3 = manager.create(title='c')
+        with override('de'):
+            # Make the order of the 'title' column different.
+            m2.title = 'd'
+            m2.save()
+        titles_asc = tuple(m.title for m in manager.order_by('title'))
+        titles_desc = tuple(m.title for m in manager.order_by('-title'))
+        self.assertEqual(titles_asc, ('a', 'b', 'c'))
+        self.assertEqual(titles_desc, ('c', 'b', 'a'))
+
     def test_custom_manager(self):
         """Test if user-defined manager is still working"""
         n = models.CustomManagerTestModel(title='')
