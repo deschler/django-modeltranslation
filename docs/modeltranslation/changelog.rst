@@ -1,0 +1,4 @@
+ChangeLog
+=========
+
+.. literalinclude:: ../../CHANGELOG.txt

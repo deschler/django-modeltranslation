@@ -22,6 +22,6 @@ Table of Contents
    :maxdepth: 1
 
    related_projects
-
+   changelog
 
 .. include:: authors.rst
