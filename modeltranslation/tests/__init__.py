@@ -1496,7 +1496,7 @@ class TestManager(ModeltranslationTestBase):
             self.assertEqual(n.visits_de, 22)
 
     def test_order_by(self):
-        """Check that field names are rewritten in order by keys."""
+        """Check that field names are rewritten in order_by keys."""
         manager = models.ManagerTestModel.objects
         manager.create(title='a')
         m = manager.create(title='b')
@@ -1509,6 +1509,23 @@ class TestManager(ModeltranslationTestBase):
         titles_desc = tuple(m.title for m in manager.order_by('-title'))
         self.assertEqual(titles_asc, ('a', 'b', 'c'))
         self.assertEqual(titles_desc, ('c', 'b', 'a'))
+
+    def test_order_by_meta(self):
+        """Check that meta ordering is rewritten."""
+        manager = models.ManagerTestModel.objects
+        manager.create(title='more_de', visits_en=1, visits_de=2)
+        manager.create(title='more_en', visits_en=2, visits_de=1)
+        manager.create(title='most', visits_en=3, visits_de=3)
+        manager.create(title='least', visits_en=0, visits_de=0)
+
+        # Ordering descending with visits_en
+        titles_for_en = tuple(m.title_en for m in manager.all())
+        with override('de'):
+            # Ordering descending with visits_de
+            titles_for_de = tuple(m.title_en for m in manager.all())
+
+        self.assertEqual(titles_for_en, ('most', 'more_en', 'more_de', 'least'))
+        self.assertEqual(titles_for_de, ('most', 'more_de', 'more_en', 'least'))
 
     def test_custom_manager(self):
         """Test if user-defined manager is still working"""

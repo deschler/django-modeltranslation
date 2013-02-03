@@ -99,6 +99,9 @@ class ManagerTestModel(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
     visits = models.IntegerField(ugettext_lazy('visits'), default=0)
 
+    class Meta:
+        ordering = ('-visits',)
+
 
 class CustomManager(models.Manager):
     def get_query_set(self):

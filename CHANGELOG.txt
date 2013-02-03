@@ -8,6 +8,10 @@ CHANGED: Don't raise an exception if TranslationField is accessed via class
          to allow descriptor introspection.
          (resolves issue #131)
 
+  FIXED: Rewriting of descending ('-' prefixed) ordering fields in
+         MultilingualManager.
+         (thanks to Wojtek Ruszczewski)
+
 
 v0.5b1
 ======
