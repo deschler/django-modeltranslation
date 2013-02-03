@@ -1489,13 +1489,13 @@ class TestManager(ModeltranslationTestBase):
     def test_order_by(self):
         """Check that field names are rewritten in order by keys."""
         manager = models.ManagerTestModel.objects
-        m1 = manager.create(title='a')
-        m2 = manager.create(title='b')
-        m3 = manager.create(title='c')
+        manager.create(title='a')
+        m = manager.create(title='b')
+        manager.create(title='c')
         with override('de'):
             # Make the order of the 'title' column different.
-            m2.title = 'd'
-            m2.save()
+            m.title = 'd'
+            m.save()
         titles_asc = tuple(m.title for m in manager.order_by('title'))
         titles_desc = tuple(m.title for m in manager.order_by('-title'))
         self.assertEqual(titles_asc, ('a', 'b', 'c'))
