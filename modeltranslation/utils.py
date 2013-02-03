@@ -53,8 +53,6 @@ def build_css_class(localized_fieldname, prefix=''):
     """
     bits = localized_fieldname.split('_')
     css_class = ''
-    if bits[0] == '':
-        return ''
     if len(bits) == 1:
         css_class = str(localized_fieldname)
     elif len(bits) == 2:

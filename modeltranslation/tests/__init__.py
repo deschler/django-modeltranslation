@@ -33,6 +33,7 @@ from modeltranslation.tests.translation import (FallbackModel2TranslationOptions
                                                 FieldInheritanceCTranslationOptions,
                                                 FieldInheritanceETranslationOptions)
 from modeltranslation.tests.test_settings import TEST_SETTINGS
+from modeltranslation.utils import build_css_class
 
 try:
     from django.test.utils import override_settings
@@ -1414,6 +1415,18 @@ class TranslationAdminTest(ModeltranslationTestBase):
 
         # Remove translation for DataModel
         translator.translator.unregister(models.DataModel)
+
+    def test_build_css_class(self):
+        fields = {
+            'foo_en': 'foo-en', 'foo_es_ar': 'foo-es_ar',
+            'foo_bar_de': 'foo_bar-de',
+            '_foo_en': '_foo-en', '_foo_es_ar': '_foo-es_ar',
+            '_foo_bar_de': '_foo_bar-de',
+            'foo__en': 'foo_-en', 'foo__es_ar': 'foo_-es_ar',
+            'foo_bar__de': 'foo_bar_-de',
+        }
+        for field, css in fields.items():
+            self.assertEqual(build_css_class(field), css)
 
 
 class TestManager(ModeltranslationTestBase):
