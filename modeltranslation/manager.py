@@ -146,11 +146,19 @@ class MultilingualQuerySet(models.query.QuerySet):
         return super(MultilingualQuerySet, self)._filter_or_exclude(negate, *args, **kwargs)
 
     def order_by(self, *field_names):
+        """
+        Change translatable field names in an ``order_by`` argument
+        to translation fields for the current language.
+        """
         if not self._rewrite:
             return super(MultilingualQuerySet, self).order_by(*field_names)
         new_args = []
         for key in field_names:
-            new_args.append(rewrite_lookup_key(self.model, key))
+            if key.startswith('-'):
+                key = '-' + rewrite_lookup_key(self.model, key[1:])
+            else:
+                key = rewrite_lookup_key(self.model, key)
+            new_args.append(key)
         return super(MultilingualQuerySet, self).order_by(*new_args)
 
     def update(self, **kwargs):
