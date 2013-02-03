@@ -6,7 +6,7 @@ Core Committers
 
 * Peter Eschler <peschler@gmail.com> (retired)
 * Dirk Eschler <eschler@gmail.com>
-* Jacek Tomaszewski
+* Jacek Tomaszewski <jacek.tomek@gmail.com>
 
 Contributors
 ------------
