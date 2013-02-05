@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from contextlib import contextmanager
+
 from django.conf import global_settings
 from django.utils.encoding import force_unicode
 from django.utils.translation import get_language as _get_language
@@ -97,3 +99,30 @@ def resolution_order(lang, override=None):
     fallback_def = override.get('default', settings.FALLBACK_LANGUAGES['default'])
     order = (lang,) + fallback_for_lang + fallback_def
     return tuple(unique(order))
+
+
+@contextmanager
+def auto_populate(mode='all'):
+    """
+    Overrides translation fields population mode (population mode decides which
+    unprovided translations will be filled during model construction / loading).
+
+    Example:
+
+        with auto_populate('all'):
+            s = Slugged.objects.create(title='foo')
+        s.title_en == 'foo' // True
+        s.title_de == 'foo' // True
+
+    This method may be used to ensure consistency loading untranslated fixtures,
+    with non-default language active:
+
+        with auto_populate('required'):
+            call_command('loaddata', 'fixture.json')
+    """
+    current_population_mode = settings.AUTO_POPULATE
+    settings.AUTO_POPULATE = mode
+    try:
+        yield
+    finally:
+        settings.AUTO_POPULATE = current_population_mode

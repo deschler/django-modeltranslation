@@ -2,7 +2,9 @@
 from django.conf import settings
 from django.db.models import Manager
 from django.db.models.base import ModelBase
+from django.db.models.signals import pre_save
 
+from modeltranslation import settings as mt_settings
 from modeltranslation.fields import (TranslationFieldDescriptor,
                                      create_translation_field)
 from modeltranslation.manager import MultilingualManager, rewrite_lookup_key
@@ -150,6 +152,61 @@ def delete_cache_fields(model):
         pass
 
 
+def populate_translation_fields(sender, instance, **kwargs):
+    """
+    When models are created or loaded from fixtures, replicates values
+    provided for translatable fields to some / all empty translation fields,
+    according to the current population mode. Callback for registered models
+    ``pre_save`` signal.
+
+    With ``mode`` set to:
+    -- ``all``: fills all translation fields, skipping just those for
+       which a translated value is also provided;
+    -- ``default``: fills only the default translation (unless it is
+       additionally provided);
+    -- ``required``: like ``default``, but only if the original field is
+       non-nullable;
+
+    At least the ``required`` mode should be used when loading untranslated
+    fixtures to keep the database consistent (note that Django management
+    commands are normally forced to run with hardcoded ``en-us`` language
+    active). The ``default`` mode is useful if you need to ensure fallback
+    values are available, and ``all`` if you need to have all translations
+    defined (for example to make lookups / filtering without resorting to
+    query fallbacks).
+    """
+    populate = mt_settings.AUTO_POPULATE
+    if not populate:
+        return
+    if populate is True:
+        # What was meant by ``True`` is now called ``all``.
+        populate = 'all'
+
+    opts = translator.get_options_for_model(sender)
+    for field, translation_fields in opts.localized_fieldnames.iteritems():
+        if populate == 'all':
+            # Set the value for every language.
+            for trans in translation_fields:
+                if getattr(instance, trans) is None:
+                    setattr(instance, trans, getattr(instance, field))
+        elif populate == 'default':
+            # Set the value just for the default language.
+            default = build_localized_fieldname(field,
+                                                mt_settings.DEFAULT_LANGUAGE)
+            if getattr(instance, default) is None:
+                setattr(instance, default, getattr(instance, field))
+        elif populate == 'required':
+            # Set the default language only if the field
+            # field was non-nullable.
+            default = build_localized_fieldname(field,
+                                                mt_settings.DEFAULT_LANGUAGE)
+            if (getattr(instance, default) is None and
+                    not sender._meta.get_field(field).null):
+                setattr(instance, default, getattr(instance, field))
+        else:
+            raise AttributeError("Unknown population mode '%s'." % populate)
+
+
 class Translator(object):
     """
     A Translator object encapsulates an instance of a translator. Models are
@@ -233,8 +290,9 @@ class Translator(object):
                     fallback_languages=model_fallback_languages)
                 setattr(model, field_name, descriptor)
 
-        #signals.pre_init.connect(translated_model_initializing, sender=model,
-                                 #weak=False)
+            # Populate translation fields before the model is saved.
+            pre_save.connect(populate_translation_fields, sender=model)
+
 
     def unregister(self, model_or_iterable):
         """
@@ -248,6 +306,7 @@ class Translator(object):
             if model not in self._registry:
                 raise NotRegistered('The model "%s" is not registered for '
                                     'translation' % model.__name__)
+            pre_save.disconnect(populate_translation_fields, sender=model)
             del self._registry[model]
 
     def get_options_for_model(self, model):
