@@ -195,6 +195,7 @@ class NameModel(models.Model):
 class ManagerTestModel(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
     visits = models.IntegerField(ugettext_lazy('visits'), default=0)
+    description = models.CharField(max_length=255, null=True)
 
     class Meta:
         ordering = ('-visits',)
