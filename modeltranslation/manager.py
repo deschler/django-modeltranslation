@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 The idea of MultilingualManager is taken from
 django-linguo by Zach Mathew
@@ -36,7 +37,6 @@ def rewrite_lookup_key(model, lookup_key):
         # For example, we want to rewrite "name__startswith" to "name_fr__startswith"
         if pieces[0] in translatable_fields:
             lookup_key = build_localized_fieldname(pieces[0], get_language())
-
             remaining_lookup = '__'.join(pieces[1:])
             if remaining_lookup:
                 lookup_key = '%s__%s' % (lookup_key, remaining_lookup)
@@ -66,7 +66,6 @@ def rewrite_order_lookup_key(model, lookup_key):
 def get_fields_to_translatable_models(model):
     from modeltranslation.translator import translator
     results = []
-
     for field_name in translator.get_options_for_model(model).localized_fieldnames.keys():
         field_object, modelclass, direct, m2m = model._meta.get_field_by_name(field_name)
         if direct and isinstance(field_object, RelatedField):
@@ -111,7 +110,9 @@ class MultilingualQuerySet(models.query.QuerySet):
         self._rewrite_order()
 
     def _rewrite_where(self, q):
-        "Rewrite field names inside WHERE tree."
+        """
+        Rewrite field names inside WHERE tree.
+        """
         if isinstance(q, tuple) and isinstance(q[0], Constraint):
             c = q[0]
             new_name = rewrite_lookup_key(self.model, c.field.name)
@@ -127,7 +128,7 @@ class MultilingualQuerySet(models.query.QuerySet):
 
     # This method was not present in django-linguo
     def _rewrite_q(self, q):
-        "Rewrite field names inside Q call."
+        """Rewrite field names inside Q call."""
         if isinstance(q, tuple) and len(q) == 2:
             return rewrite_lookup_key(self.model, q[0]), q[1]
         if isinstance(q, Node):
@@ -136,7 +137,9 @@ class MultilingualQuerySet(models.query.QuerySet):
 
     # This method was not present in django-linguo
     def _rewrite_f(self, q):
-        "Rewrite field names inside F call."
+        """
+        Rewrite field names inside F call.
+        """
         if isinstance(q, models.F):
             q.name = rewrite_lookup_key(self.model, q.name)
             return q

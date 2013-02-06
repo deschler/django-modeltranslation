@@ -24,8 +24,7 @@ def ask_for_confirmation(sql_sentences, model_full_name):
     for sentence in sql_sentences:
         print '   %s' % sentence
     while True:
-        prompt = ('\nAre you sure that you want to execute the previous SQL: '
-                  '(y/n) [n]: ')
+        prompt = '\nAre you sure that you want to execute the previous SQL: (y/n) [n]: '
         answer = raw_input(prompt).strip()
         if answer == '':
             return False
@@ -43,8 +42,7 @@ def print_missing_langs(missing_langs, field_name, model_name):
 
 
 class Command(BaseCommand):
-    help = ('Detect new translatable fields or new available languages and '
-            'sync database structure')
+    help = 'Detect new translatable fields or new available languages and sync database structure'
 
     def handle(self, *args, **options):
         """
@@ -61,25 +59,19 @@ class Command(BaseCommand):
                 # Options returns full-wide spectrum of localized fields but
                 # we only want to synchronize the local fields attached to the
                 # model.
-                local_field_names = [field.name for field
-                                     in model._meta.local_fields]
-                translatable_fields = [field for field
-                                       in options.localized_fieldnames
+                local_field_names = [field.name for field in model._meta.local_fields]
+                translatable_fields = [field for field in options.localized_fieldnames
                                        if field in local_field_names]
-                model_full_name = '%s.%s' % (model._meta.app_label,
-                                             model._meta.module_name)
+                model_full_name = '%s.%s' % (model._meta.app_label, model._meta.module_name)
                 db_table = model._meta.db_table
                 for field_name in translatable_fields:
                     missing_langs = list(
                         self.get_missing_languages(field_name, db_table))
                     if missing_langs:
                         found_missing_fields = True
-                        print_missing_langs(
-                            missing_langs, field_name, model_full_name)
-                        sql_sentences = self.get_sync_sql(
-                            field_name, missing_langs, model)
-                        execute_sql = ask_for_confirmation(
-                            sql_sentences, model_full_name)
+                        print_missing_langs(missing_langs, field_name, model_full_name)
+                        sql_sentences = self.get_sync_sql(field_name, missing_langs, model)
+                        execute_sql = ask_for_confirmation(sql_sentences, model_full_name)
                         if execute_sql:
                             print 'Executing SQL...',
                             for sentence in sql_sentences:
@@ -99,8 +91,7 @@ class Command(BaseCommand):
         """
         Gets table fields from schema.
         """
-        db_table_desc = self.introspection.get_table_description(
-            self.cursor, db_table)
+        db_table_desc = self.introspection.get_table_description(self.cursor, db_table)
         return [t[0] for t in db_table_desc]
 
     def get_missing_languages(self, field_name, db_table):
@@ -109,8 +100,7 @@ class Command(BaseCommand):
         """
         db_table_fields = self.get_table_fields(db_table)
         for lang_code, lang_name in settings.LANGUAGES:
-            if build_localized_fieldname(
-                    field_name, lang_code) not in db_table_fields:
+            if build_localized_fieldname(field_name, lang_code) not in db_table_fields:
                 yield lang_code
 
     def get_sync_sql(self, field_name, missing_langs, model):
@@ -125,15 +115,11 @@ class Command(BaseCommand):
             new_field = build_localized_fieldname(field_name, lang)
             f = model._meta.get_field(new_field)
             col_type = f.db_type(connection=connection)
-            field_sql = [style.SQL_FIELD(qn(f.column)),
-                         style.SQL_COLTYPE(col_type)]
+            field_sql = [style.SQL_FIELD(qn(f.column)), style.SQL_COLTYPE(col_type)]
             # column creation
-            sql_output.append(
-                "ALTER TABLE %s ADD COLUMN %s;" % (
-                    qn(db_table), ' '.join(field_sql)))
+            sql_output.append("ALTER TABLE %s ADD COLUMN %s;" % (qn(db_table), ' '.join(field_sql)))
             if not f.null and lang == settings.LANGUAGE_CODE:
                 sql_output.append(
                     ("ALTER TABLE %s MODIFY COLUMN %s %s %s;" % (
-                        qn(db_table), qn(f.column), col_type,
-                        style.SQL_KEYWORD('NOT NULL'))))
+                        qn(db_table), qn(f.column), col_type, style.SQL_KEYWORD('NOT NULL'))))
         return sql_output
