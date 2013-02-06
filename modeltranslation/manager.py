@@ -9,8 +9,8 @@ from django.db.models.fields.related import RelatedField
 from django.db.models.sql.where import Constraint
 from django.utils.tree import Node
 
-from modeltranslation.utils import build_localized_fieldname, get_language
 from modeltranslation import settings
+from modeltranslation.utils import build_localized_fieldname, get_language
 
 
 _registry = {}
@@ -64,8 +64,10 @@ def rewrite_order_lookup_key(model, lookup_key):
 
 
 def get_fields_to_translatable_models(model):
+    from modeltranslation.translator import translator
     results = []
-    for field_name in model._meta.get_all_field_names():
+
+    for field_name in translator.get_options_for_model(model).localized_fieldnames.keys():
         field_object, modelclass, direct, m2m = model._meta.get_field_by_name(field_name)
         if direct and isinstance(field_object, RelatedField):
             if get_translatable_fields_for_model(field_object.related.parent_model) is not None:
