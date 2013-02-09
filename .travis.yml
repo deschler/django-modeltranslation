@@ -4,12 +4,12 @@ python:
   - "2.6"
   - "2.7"
 env:
-  - DJANGO=Django==1.3.4 DB=sqlite
-  - DJANGO=Django==1.3.4 DB=postgres
-  - DJANGO=Django==1.3.4 DB=mysql
-  - DJANGO=Django==1.4.2 DB=sqlite
-  - DJANGO=Django==1.4.2 DB=postgres
-  - DJANGO=Django==1.4.2 DB=mysql
+  - DJANGO=Django==1.3.5 DB=sqlite
+  - DJANGO=Django==1.3.5 DB=postgres
+  - DJANGO=Django==1.3.5 DB=mysql
+  - DJANGO=Django==1.4.3 DB=sqlite
+  - DJANGO=Django==1.4.3 DB=postgres
+  - DJANGO=Django==1.4.3 DB=mysql
   - DJANGO=https://github.com/django/django/zipball/master DB=sqlite
   - DJANGO=https://github.com/django/django/zipball/master DB=postgres
   - DJANGO=https://github.com/django/django/zipball/master DB=mysql
