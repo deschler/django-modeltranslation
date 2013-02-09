@@ -22,7 +22,6 @@ from django.core.management import call_command
 from django.db.models import Q, F
 from django.db.models.loading import AppCache
 from django.test import TestCase
-from django.utils.datastructures import SortedDict
 from django.utils.translation import get_language, trans_real
 
 from modeltranslation import settings as mt_settings
