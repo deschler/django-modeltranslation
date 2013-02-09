@@ -28,6 +28,7 @@ from django.utils.translation import get_language, trans_real
 from modeltranslation import settings as mt_settings
 from modeltranslation import translator
 from modeltranslation import admin
+from modeltranslation.models import autodiscover
 from modeltranslation.tests import models
 from modeltranslation.tests.translation import (FallbackModel2TranslationOptions,
                                                 FieldInheritanceCTranslationOptions,
@@ -66,6 +67,7 @@ def default_fallback():
         MODELTRANSLATION_FALLBACK_LANGUAGES=(mt_settings.DEFAULT_LANGUAGE,))
 
 
+@override_settings(**TEST_SETTINGS)
 class ModeltranslationTestBase(TestCase):
     urls = 'modeltranslation.tests.urls'
     cache = AppCache()
@@ -139,7 +141,101 @@ class ModeltranslationTestBase(TestCase):
     def tearDown(self):
         trans_real.deactivate()
 
-ModeltranslationTestBase = override_settings(**TEST_SETTINGS)(ModeltranslationTestBase)
+
+class TestAutodiscover(ModeltranslationTestBase):
+    # The way the ``override_settings`` works on ``TestCase`` is wicked;
+    # it patches ``_pre_setup`` and ``_post_teardown`` methods.
+    # Because of this, if class B extends class A and both are ``override_settings``'ed,
+    # class B settings would be overwritten by class A settings (if some keys clash).
+    # To solve this, override some settings after parents ``_pre_setup`` is called.
+    def _pre_setup(self):
+        super(TestAutodiscover, self)._pre_setup()
+        # Add test_app to INSTALLED_APPS
+        from django.conf import settings
+        new_installed_apps = settings.INSTALLED_APPS + ('modeltranslation.tests.test_app',)
+        self.__override = override_settings(INSTALLED_APPS=new_installed_apps)
+        self.__override.enable()
+
+    def _post_teardown(self):
+        self.__override.disable()
+        super(TestAutodiscover, self)._post_teardown()
+
+    @classmethod
+    def setUpClass(cls):
+        """Save registry (and restore it after tests)."""
+        super(TestAutodiscover, cls).setUpClass()
+        from copy import copy
+        from modeltranslation.translator import translator
+        cls.registry_cpy = copy(translator._registry)
+
+    @classmethod
+    def tearDownClass(cls):
+        from modeltranslation.translator import translator
+        translator._registry = cls.registry_cpy
+        super(TestAutodiscover, cls).tearDownClass()
+
+    def tearDown(self):
+        self.clear_cache()
+        from test_app import models
+        reload(models)  # Rollback model classes
+
+        # Delete translation modules from import cache
+        import sys
+        sys.modules.pop('modeltranslation.tests.test_app.translation', None)
+        sys.modules.pop('modeltranslation.tests.project_translation', None)
+
+    def check_news(self):
+        from test_app.models import News
+        fields = dir(News())
+        self.assertIn('title', fields)
+        self.assertIn('title_en', fields)
+        self.assertIn('title_de', fields)
+        self.assertIn('visits', fields)
+        self.assertNotIn('visits_en', fields)
+        self.assertNotIn('visits_de', fields)
+
+    def check_other(self, present=True):
+        from test_app.models import Other
+        fields = dir(Other())
+        self.assertIn('name', fields)
+        if present:
+            self.assertIn('name_en', fields)
+            self.assertIn('name_de', fields)
+        else:
+            self.assertNotIn('name_en', fields)
+            self.assertNotIn('name_de', fields)
+
+    def test_simple(self):
+        """Check if translation is imported for installed apps."""
+        autodiscover()
+        self.check_news()
+        self.check_other(present=False)
+
+    @reload_override_settings(
+        MODELTRANSLATION_TRANSLATION_FILES=('modeltranslation.tests.project_translation',)
+    )
+    def test_global(self):
+        """Check if translation is imported for global translation file."""
+        autodiscover()
+        self.check_news()
+        self.check_other()
+
+    @reload_override_settings(
+        MODELTRANSLATION_TRANSLATION_FILES=('modeltranslation.tests.test_app.translation',)
+    )
+    def test_duplication(self):
+        """Check if there is no problem with duplicated filenames."""
+        autodiscover()
+        self.check_news()
+
+    @reload_override_settings(
+        MODELTRANSLATION_TRANSLATION_REGISTRY='modeltranslation.tests.project_translation'
+    )
+    def test_backward_compatibility(self):
+        """Check if old modeltranslation configuration (with REGISTRY) is handled properly."""
+        autodiscover()
+        self.check_news()
+        self.check_other()
 
 
 class ModeltranslationTest(ModeltranslationTestBase):
