@@ -67,7 +67,6 @@ def default_fallback():
         MODELTRANSLATION_FALLBACK_LANGUAGES=(mt_settings.DEFAULT_LANGUAGE,))
 
 
-@override_settings(**TEST_SETTINGS)
 class ModeltranslationTestBase(TestCase):
     urls = 'modeltranslation.tests.urls'
     cache = AppCache()
@@ -140,6 +139,8 @@ class ModeltranslationTestBase(TestCase):
 
     def tearDown(self):
         trans_real.deactivate()
+
+ModeltranslationTestBase = override_settings(**TEST_SETTINGS)(ModeltranslationTestBase)
 
 
 class TestAutodiscover(ModeltranslationTestBase):
