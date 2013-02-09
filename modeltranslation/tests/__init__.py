@@ -176,12 +176,12 @@ class TestAutodiscover(ModeltranslationTestBase):
         super(TestAutodiscover, cls).tearDownClass()
 
     def tearDown(self):
-        self.clear_cache()
-        from test_app import models
-        reload(models)  # Rollback model classes
-
-        # Delete translation modules from import cache
         import sys
+        # Rollback model classes
+        del self.cache.app_models['test_app']
+        from test_app import models
+        reload(models)
+        # Delete translation modules from import cache
         sys.modules.pop('modeltranslation.tests.test_app.translation', None)
         sys.modules.pop('modeltranslation.tests.project_translation', None)
 
