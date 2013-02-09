@@ -112,28 +112,6 @@ class ModeltranslationTestBase(TestCase):
                 call_command('syncdb', verbosity=0, migrate=False, interactive=False,
                              database=connections[DEFAULT_DB_ALIAS].alias, load_initial_data=False)
 
-    @classmethod
-    def clear_cache(cls):
-        """
-        It is necessary to clear cache - otherwise model reloading won't
-        recreate models, but just use old ones.
-        """
-        cls.cache.app_store = SortedDict()
-        cls.cache.app_models = SortedDict()
-        cls.cache.app_errors = {}
-        cls.cache.handled = {}
-        cls.cache.loaded = False
-
-    @classmethod
-    def reset_cache(cls):
-        """
-        Rebuild whole cache, import all models again
-        """
-        cls.clear_cache()
-        cls.cache._populate()
-        for m in cls.cache.get_apps():
-            reload(m)
-
     def setUp(self):
         trans_real.activate('de')
 
