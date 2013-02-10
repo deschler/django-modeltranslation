@@ -222,7 +222,6 @@ class Translator(object):
             # Add translation fields to the model.
             add_translation_fields(model, opts)
 
-
             # Delete all fields cache for related model (parent and children)
             for related_obj in model._meta.get_all_related_objects():
                 delete_cache_fields(related_obj.model)
@@ -262,8 +261,9 @@ class Translator(object):
         if isinstance(model_or_iterable, ModelBase):
             model_or_iterable = [model_or_iterable]
         for model in model_or_iterable:
-            # Check if the model is actually registered.
-            opts = self.get_options_for_model(model)
+            # Check if the model is actually registered (``get_options_for_model``
+            # throws an exception if it's not).
+            self.get_options_for_model(model)
             # Invalidate all submodels options and forget about
             # the model itself.
             for desc, desc_opts in self._registry.items():

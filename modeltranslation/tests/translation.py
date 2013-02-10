@@ -5,7 +5,7 @@ from modeltranslation.translator import translator, TranslationOptions
 from modeltranslation.tests.models import (
     TestModel, FallbackModel, FallbackModel2,
     FileFieldsModel, OtherFieldsModel, AbstractModelA, AbstractModelB,
-    Slugged, MetaData, Displayable, BasePage, Page, RichText, RichTextPage,
+    Slugged, MetaData, Displayable, Page, RichText, RichTextPage,
     MultitableModelA, MultitableBModelA, MultitableModelC,
     ManagerTestModel, CustomManagerTestModel, CustomManager2TestModel)
 
