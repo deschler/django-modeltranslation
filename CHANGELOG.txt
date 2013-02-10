@@ -1,5 +1,24 @@
+v0.5
+====
+Date: 2013-02-10
+
+  ADDED: Merged autodiscover tests from django-modeltranslation-wrapper.
   ADDED: Rewrite method to MultilingualManager and optimized create.
 
+  FIXED: grouped_translations are computed twice in tabbed translations.
+         (thanks to Wojtek Ruszczewski,
+          resolves issue #135)
+  FIXED: CSS classes in tabbed translation fields when fieldname has a leading
+         underscore.
+         (thanks to Wojtek Ruszczewski,
+          resolves issue #134)
+  FIXED: Rewriting of descending ('-' prefixed) ordering fields in
+         MultilingualManager.
+         (thanks to Wojtek Ruszczewski,
+          resolves issue #133)
+  FIXED: Download url in setup.py.
+         (thanks to Benoît Bryon,
+          resolves issue #130)
   FIXED: The update_translation_fields management command does nothing.
          (resolves issue #123)
   FIXED: MultilingualQuerySet custom inheritance.
@@ -7,10 +26,6 @@
 CHANGED: Don't raise an exception if TranslationField is accessed via class
          to allow descriptor introspection.
          (resolves issue #131)
-
-  FIXED: Rewriting of descending ('-' prefixed) ordering fields in
-         MultilingualManager.
-         (thanks to Wojtek Ruszczewski)
 
 
 v0.5b1
