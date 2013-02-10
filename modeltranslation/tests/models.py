@@ -87,6 +87,47 @@ class AbstractModelB(AbstractModelA):
     titleb = models.CharField(ugettext_lazy('title b'), max_length=255)
 
 
+########## Fields inheritance testing
+
+class Slugged(models.Model):
+    slug = models.CharField(max_length=255)
+
+    class Meta:
+        abstract = True
+
+
+class MetaData(models.Model):
+    keywords = models.CharField(max_length=255)
+
+    class Meta:
+        abstract = True
+
+
+class Displayable(Slugged, MetaData):
+    class Meta:
+        abstract = True
+
+
+class BasePage(Displayable):
+    class Meta:
+        abstract = True
+
+
+class Page(BasePage):
+    title = models.CharField(max_length=255)
+
+
+class RichText(models.Model):
+    content = models.CharField(max_length=255)
+
+    class Meta:
+        abstract = True
+
+
+class RichTextPage(Page, RichText):
+    pass
+
+
 ########## Admin testing
 
 class DataModel(models.Model):
