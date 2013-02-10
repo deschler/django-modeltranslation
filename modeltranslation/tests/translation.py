@@ -5,6 +5,7 @@ from modeltranslation.translator import translator, TranslationOptions
 from modeltranslation.tests.models import (
     TestModel, FallbackModel, FallbackModel2,
     FileFieldsModel, OtherFieldsModel, AbstractModelA, AbstractModelB,
+    Slugged, MetaData, Displayable, BasePage, Page, RichText, RichTextPage,
     MultitableModelA, MultitableBModelA, MultitableModelC,
     ManagerTestModel, CustomManagerTestModel, CustomManager2TestModel)
 
@@ -73,6 +74,33 @@ translator.register(AbstractModelA, AbstractModelATranslationOptions)
 class AbstractModelBTranslationOptions(TranslationOptions):
     fields = ('titleb',)
 translator.register(AbstractModelB, AbstractModelBTranslationOptions)
+
+
+########## Fields inheritance testing
+
+class SluggedTranslationOptions(TranslationOptions):
+    fields = ('slug',)
+
+
+class MetaDataTranslationOptions(TranslationOptions):
+    fields = ('keywords',)
+
+
+class RichTextTranslationOptions(TranslationOptions):
+    fields = ('content',)
+
+
+class PageTranslationOptions(TranslationOptions):
+    fields = ('title',)
+
+
+# BasePage left unregistered intentionally.
+translator.register(Slugged, SluggedTranslationOptions)
+translator.register(MetaData, MetaDataTranslationOptions)
+translator.register(RichText, RichTextTranslationOptions)
+translator.register(Displayable)
+translator.register(Page, PageTranslationOptions)
+translator.register(RichTextPage)
 
 
 ########## Manager testing
