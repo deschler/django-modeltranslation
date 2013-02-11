@@ -14,18 +14,12 @@ from modeltranslation import settings
 from modeltranslation.utils import build_localized_fieldname, get_language
 
 
-_registry = {}
-
-
 def get_translatable_fields_for_model(model):
-    from modeltranslation import translator
-    if model not in _registry:
-        try:
-            _registry[model] = dict(
-                translator.translator.get_options_for_model(model).localized_fieldnames)
-        except translator.NotRegistered:
-            _registry[model] = None
-    return _registry[model]
+    from modeltranslation.translator import NotRegistered, translator
+    try:
+        return translator.get_options_for_model(model).fields
+    except NotRegistered:
+        return None
 
 
 def rewrite_lookup_key(model, lookup_key):
@@ -66,7 +60,7 @@ def rewrite_order_lookup_key(model, lookup_key):
 def get_fields_to_translatable_models(model):
     from modeltranslation.translator import translator
     results = []
-    for field_name in translator.get_options_for_model(model).localized_fieldnames.keys():
+    for field_name in translator.get_options_for_model(model).fields.keys():
         field_object, modelclass, direct, m2m = model._meta.get_field_by_name(field_name)
         if direct and isinstance(field_object, RelatedField):
             if get_translatable_fields_for_model(field_object.related.parent_model) is not None:
@@ -188,8 +182,8 @@ class MultilingualQuerySet(models.query.QuerySet):
                 for key, val in kwargs.items():
                     if key in translatable_fields:
                         # Try to add value in every language
-                        for new_key in translatable_fields[key]:
-                            kwargs.setdefault(new_key, val)
+                        for translation_field in translatable_fields[key]:
+                            kwargs.setdefault(translation_field.name, val)
         # If not use populate feature, then normal rewriting will occur at model's __init__
         # That's why it is not performed here - no reason to rewrite twice.
         return super(MultilingualQuerySet, self).create(**kwargs)
