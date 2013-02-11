@@ -4,6 +4,6 @@ from modeltranslation.admin import TranslationAdmin
 
 
 class CategoryAdmin(TranslationAdmin):
-    fields = ('slug',)
+    pass
 
 site.register(Category, CategoryAdmin)
