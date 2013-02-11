@@ -2,7 +2,7 @@
 from copy import deepcopy
 
 from django.contrib import admin
-from django.contrib.admin.options import BaseModelAdmin, InlineModelAdmin
+from django.contrib.admin.options import BaseModelAdmin, flatten_fieldsets, InlineModelAdmin
 from django.contrib.contenttypes import generic
 
 # Ensure that models are registered for translation before TranslationAdmin
@@ -145,8 +145,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         else:
             exclude = list(self.exclude)
         exclude.extend(self.get_readonly_fields(request, obj))
-        if not self.exclude and hasattr(
-                self.form, '_meta') and self.form._meta.exclude:
+        if not self.exclude and hasattr(self.form, '_meta') and self.form._meta.exclude:
             # Take the custom ModelForm's Meta.exclude into account only if the
             # ModelAdmin doesn't define its own.
             exclude.extend(self.form._meta.exclude)
@@ -212,6 +211,50 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
             self.list_editable = editable_new
             self.list_display = display_new
 
+    def _group_fieldsets(self, fieldsets):
+        # By default fieldsets are not grouped. The function is activated by
+        # setting TranslationAdmin.group_fieldsets to True.
+        # TODO: Consider addition of a setting which allows to override the fallback to True
+        group_fieldsets = getattr(self, 'group_fieldsets', False)
+        # If the admin class already defines a fieldset, we leave it
+        # alone and assume the author has done whatever grouping for
+        # translated fields they desire.
+        if not self.declared_fieldsets and group_fieldsets is True:
+            # Create a fieldset to group each translated field's localized fields
+            untranslated_fields = [
+                f.name for f in self.opts.fields if (
+                    # Exclude the primary key field
+                    f is not self.opts.auto_field
+                    # Exclude non-editable fields
+                    and f.editable
+                    # Exclude the original field
+                    #and f.name not in self.trans_opts.fields
+                    # Exclude the translation fields
+                    # TODO: I already miss localized_fieldnames_rev here ;)
+                    and f not in [
+                        k for l in [list(j) for i in self.trans_opts.fields.items() for
+                                    j in i[1:]] for k in l]
+                    # Honour field arguments. We rely on the fact that the
+                    # passed fieldsets argument is already fully filtered
+                    # and takes options like exclude into account.
+                    and f.name in flatten_fieldsets(fieldsets)
+                )
+            ]
+            # TODO: Allow setting a label
+            fieldsets = [('', {'fields': untranslated_fields},)]
+
+            for orig_field, trans_fields in self.trans_opts.fields.items():
+                # Extract the original field's verbose_name for use as this
+                # fieldset's label - using ugettext_lazy in your model
+                # declaration can make that translatable.
+                label = self.model._meta.get_field(orig_field).verbose_name
+                fieldsets.append((label, {
+                    'fields': [f.name for f in trans_fields],
+                    'classes': ('mt-fieldset',)
+                }))
+
+        return fieldsets
+
     def get_form(self, request, obj=None, **kwargs):
         kwargs = self._do_get_form_or_formset(request, obj, **kwargs)
         return super(TranslationAdmin, self).get_form(request, obj, **kwargs)
@@ -219,9 +262,8 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
     def get_fieldsets(self, request, obj=None):
         if self.declared_fieldsets:
             return self._do_get_fieldsets_pre_form_or_formset()
-        form = self.get_form(request, obj)
-        return self._do_get_fieldsets_post_form_or_formset(
-            request, form, obj)
+        return self._group_fieldsets(
+            self._do_get_fieldsets_post_form_or_formset(request, self.get_form(request, obj), obj))
 
 
 class TranslationInlineModelAdmin(TranslationBaseModelAdmin, InlineModelAdmin):
