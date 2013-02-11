@@ -5,8 +5,7 @@ from django.db.models.base import ModelBase
 from django.db.models.signals import pre_save
 
 from modeltranslation import settings as mt_settings
-from modeltranslation.fields import (TranslationFieldDescriptor,
-                                     create_translation_field)
+from modeltranslation.fields import TranslationFieldDescriptor, create_translation_field
 from modeltranslation.manager import MultilingualManager, rewrite_lookup_key
 from modeltranslation.utils import build_localized_fieldname, unique
 
@@ -21,7 +20,7 @@ class NotRegistered(Exception):
 
 class FieldsAggregationMetaClass(type):
     """
-    Meta class to handle inheritance of fields between classes
+    Metaclass to handle inheritance of fields between classes.
     """
     def __new__(cls, name, bases, attrs):
         parents = [b for b in bases if isinstance(b, FieldsAggregationMetaClass)]
@@ -44,7 +43,6 @@ class TranslationOptions(object):
     It caches the content type of the translated model for faster lookup later
     on.
     """
-
     __metaclass__ = FieldsAggregationMetaClass
     fields = ()
 
@@ -74,9 +72,8 @@ def add_localized_fields(model):
             # Check if the model already has a field by that name
             if hasattr(model, localized_field_name):
                 raise ValueError(
-                    "Error adding translation field. Model '%s' already "
-                    "contains a field named '%s'." % (
-                        model._meta.object_name, localized_field_name))
+                    "Error adding translation field. Model '%s' already contains a field named"
+                    "'%s'." % (model._meta.object_name, localized_field_name))
             # This approach implements the translation fields as full valid
             # django model fields and therefore adds them via add_to_class
             model.add_to_class(localized_field_name, translation_field)
@@ -230,8 +227,8 @@ class Translator(object):
 
         for model in model_or_iterable:
             if model in self._registry:
-                raise AlreadyRegistered('The model %s is already registered '
-                                        'for translation' % model.__name__)
+                raise AlreadyRegistered(
+                    'The model %s is already registered for translation' % model.__name__)
 
             # If we got **options then dynamically construct a subclass of
             # translation_opts with those **options.
@@ -241,8 +238,7 @@ class Translator(object):
                 # which causes issues later on.
                 options['__module__'] = __name__
                 translation_opts = type(
-                    "%sTranslationOptions" % model.__name__,
-                    (translation_opts,), options)
+                    "%sTranslationOptions" % model.__name__, (translation_opts,), options)
 
             # Store the translation class associated to the model
             self._registry[model] = translation_opts
@@ -255,8 +251,7 @@ class Translator(object):
             # Create a reverse dict mapping the localized_fieldnames to the
             # original fieldname
             rev_dict = dict()
-            for orig_name, loc_names in \
-                    translation_opts.localized_fieldnames.items():
+            for orig_name, loc_names in translation_opts.localized_fieldnames.items():
                 for ln in loc_names:
                     rev_dict[ln] = orig_name
             translation_opts.localized_fieldnames_rev = rev_dict
@@ -272,16 +267,13 @@ class Translator(object):
             patch_constructor(model)
 
             # Substitute original field with descriptor
-            model_fallback_values = getattr(
-                translation_opts, 'fallback_values', None)
-            model_fallback_languages = getattr(
-                translation_opts, 'fallback_languages', None)
+            model_fallback_values = getattr(translation_opts, 'fallback_values', None)
+            model_fallback_languages = getattr(translation_opts, 'fallback_languages', None)
             for field_name in translation_opts.fields:
                 if model_fallback_values is None:
                     field_fallback_value = None
                 elif isinstance(model_fallback_values, dict):
-                    field_fallback_value = model_fallback_values.get(
-                        field_name, None)
+                    field_fallback_value = model_fallback_values.get(field_name, None)
                 else:
                     field_fallback_value = model_fallback_values
                 descriptor = TranslationFieldDescriptor(
@@ -304,8 +296,8 @@ class Translator(object):
             model_or_iterable = [model_or_iterable]
         for model in model_or_iterable:
             if model not in self._registry:
-                raise NotRegistered('The model "%s" is not registered for '
-                                    'translation' % model.__name__)
+                raise NotRegistered(
+                    'The model "%s" is not registered for translation' % model.__name__)
             pre_save.disconnect(populate_translation_fields, sender=model)
             del self._registry[model]
 
@@ -328,10 +320,8 @@ class Translator(object):
                 if parent in self._registry:
                     trans_opts = self._registry[parent]
                     fields.update(trans_opts.fields)
-                    localized_fieldnames.update(
-                        trans_opts.localized_fieldnames)
-                    localized_fieldnames_rev.update(
-                        trans_opts.localized_fieldnames_rev)
+                    localized_fieldnames.update(trans_opts.localized_fieldnames)
+                    localized_fieldnames_rev.update(trans_opts.localized_fieldnames_rev)
             if fields and localized_fieldnames and localized_fieldnames_rev:
                 options = {
                     '__module__': __name__,
@@ -340,12 +330,10 @@ class Translator(object):
                     'localized_fieldnames_rev': localized_fieldnames_rev
                 }
                 translation_opts = type(
-                    "%sTranslation" % model.__name__,
-                    (TranslationOptions,), options)
+                    "%sTranslation" % model.__name__, (TranslationOptions,), options)
                 # delete_cache_fields(model)
                 return translation_opts
-            raise NotRegistered('The model "%s" is not registered for '
-                                'translation' % model.__name__)
+            raise NotRegistered('The model "%s" is not registered for translation' % model.__name__)
 
 
 # This global object represents the singleton translator object

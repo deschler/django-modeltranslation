@@ -3,10 +3,8 @@ from django.core.exceptions import ImproperlyConfigured
 from django.db.models import fields
 
 from modeltranslation import settings as mt_settings
-from modeltranslation.utils import (get_language,
-                                    build_localized_fieldname,
-                                    build_localized_verbose_name,
-                                    resolution_order)
+from modeltranslation.utils import (
+    get_language, build_localized_fieldname, build_localized_verbose_name, resolution_order)
 
 
 SUPPORTED_FIELDS = (
@@ -49,8 +47,7 @@ def create_translation_field(model, field_name, lang):
     """
     field = model._meta.get_field(field_name)
     cls_name = field.__class__.__name__
-    if not (isinstance(field, SUPPORTED_FIELDS) or
-            cls_name in mt_settings.CUSTOM_FIELDS):
+    if not (isinstance(field, SUPPORTED_FIELDS) or cls_name in mt_settings.CUSTOM_FIELDS):
         raise ImproperlyConfigured(
             '%s is not supported by modeltranslation.' % cls_name)
     translation_class = field_factory(field.__class__)
@@ -104,14 +101,12 @@ class TranslationField(object):
         self.blank = True
 
         # Adjust the name of this field to reflect the language
-        self.attname = build_localized_fieldname(self.translated_field.name,
-                                                 self.language)
+        self.attname = build_localized_fieldname(self.translated_field.name, self.language)
         self.name = self.attname
 
         # Copy the verbose name and append a language suffix
         # (will show up e.g. in the admin).
-        self.verbose_name = build_localized_verbose_name(
-            translated_field.verbose_name, language)
+        self.verbose_name = build_localized_verbose_name(translated_field.verbose_name, language)
 
     def get_attname_column(self):
         attname = self.get_attname()

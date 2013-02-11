@@ -44,12 +44,9 @@ def autodiscover():
     if DEBUG:
         try:
             if sys.argv[1] in ('runserver', 'runserver_plus'):
-                translated_model_names = ', '.join(
-                    t.__name__ for t in translator._registry.keys())
-                print('modeltranslation: Registered %d models for translation '
-                      '(%s) [pid:%d].' % (
-                          len(translator._registry), translated_model_names,
-                          os.getpid()))
+                translated_model_names = ', '.join(t.__name__ for t in translator._registry.keys())
+                print('modeltranslation: Registered %d models for translation (%s) [pid:%d].' % (
+                    len(translator._registry), translated_model_names, os.getpid()))
         except IndexError:
             pass
 
