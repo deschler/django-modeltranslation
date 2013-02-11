@@ -1,6 +1,13 @@
+CHANGED: Major refactoring of translation field inheritance and
+         TranslationOptions.
+         (thanks to Wojtek Ruszczewski,
+          resolves issues #50 and #136)
+
+
 v0.5
 ====
 Date: 2013-02-10
+Packaged from revision bedd18ea9e338b133d06f2ed5e7ebfc2e21fd276
 
   ADDED: Merged autodiscover tests from django-modeltranslation-wrapper.
   ADDED: Rewrite method to MultilingualManager and optimized create.
