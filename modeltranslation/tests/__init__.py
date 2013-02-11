@@ -33,7 +33,7 @@ from modeltranslation.tests.translation import (FallbackModel2TranslationOptions
                                                 FieldInheritanceCTranslationOptions,
                                                 FieldInheritanceETranslationOptions)
 from modeltranslation.tests.test_settings import TEST_SETTINGS
-from modeltranslation.utils import build_css_class
+from modeltranslation.utils import build_css_class, build_localized_fieldname
 
 try:
     from django.test.utils import override_settings
@@ -227,15 +227,23 @@ class ModeltranslationTest(ModeltranslationTestBase):
         self.failUnless(translator.translator)
 
         # Check that all models are registered for translation
-        self.failUnlessEqual(len(translator.translator._registry), 13)
+        self.assertEqual(len(translator.translator.get_registered_models()), 19)
 
         # Try to unregister a model that is not registered
         self.assertRaises(translator.NotRegistered,
-                          translator.translator.unregister, User)
+                          translator.translator.unregister, models.BasePage)
 
         # Try to get options for a model that is not registered
         self.assertRaises(translator.NotRegistered,
                           translator.translator.get_options_for_model, User)
+
+        # Ensure that a base can't be registered after a subclass.
+        self.assertRaises(translator.DescendantRegistered,
+                          translator.translator.register, models.BasePage)
+
+        # Or unregistered before it.
+        self.assertRaises(translator.DescendantRegistered,
+                          translator.translator.unregister, models.Slugged)
 
     def test_fields(self):
         field_names = dir(models.TestModel())
@@ -400,11 +408,11 @@ class ModeltranslationTest(ModeltranslationTestBase):
     def _test_constructor(self, keywords):
         n = models.TestModel(**keywords)
         m = models.TestModel.objects.create(**keywords)
-        fields = translator.translator.get_options_for_model(models.TestModel).localized_fieldnames
-        for base_field, trans_fields in fields.iteritems():
+        opts = translator.translator.get_options_for_model(models.TestModel)
+        for base_field, trans_fields in opts.fields.iteritems():
             self._compare_instances(n, m, base_field)
             for lang_field in trans_fields:
-                self._compare_instances(n, m, lang_field)
+                self._compare_instances(n, m, lang_field.name)
 
     def test_constructor(self):
         """
@@ -1212,6 +1220,45 @@ class ModelInheritanceTest(ModeltranslationTestBase):
         self.failUnless('titleb_de' in field_names_d)
         self.failUnless('titleb_en' in field_names_d)
         self.failUnless('titled' in field_names_d)
+
+    def test_inheritance(self):
+        def assertLocalFields(model, local_fields):
+            # Proper fields are inherited.
+            opts = translator.translator.get_options_for_model(model)
+            self.assertEqual(set(opts.local_fields.keys()), set(local_fields))
+            # Local translation fields are created on the model.
+            model_local_fields = [f.name for f in model._meta.local_fields]
+            for field in local_fields:
+                for lang in mt_settings.AVAILABLE_LANGUAGES:
+                    translation_field = build_localized_fieldname(field, lang)
+                    self.assertTrue(translation_field in model_local_fields)
+
+        def assertFields(model, fields):
+            # The given fields are inherited.
+            opts = translator.translator.get_options_for_model(model)
+            self.assertEqual(set(opts.fields.keys()), set(fields))
+            # Inherited translation fields are available on the model.
+            model_fields = model._meta.get_all_field_names()
+            for field in fields:
+                for lang in mt_settings.AVAILABLE_LANGUAGES:
+                    translation_field = build_localized_fieldname(field, lang)
+                    self.assertTrue(translation_field in model_fields)
+
+        # Translation fields can be declared on abstract classes.
+        assertLocalFields(models.Slugged, ('slug',))
+        assertLocalFields(models.MetaData, ('keywords',))
+        assertLocalFields(models.RichText, ('content',))
+        # Local fields are inherited from abstract superclasses.
+        assertLocalFields(models.Displayable, ('slug', 'keywords',))
+        assertLocalFields(models.Page, ('slug', 'keywords', 'title',))
+        # But not from concrete superclasses.
+        assertLocalFields(models.RichTextPage, ('content',))
+
+        # Fields inherited from concrete models are also available.
+        assertFields(models.Slugged, ('slug',))
+        assertFields(models.Page, ('slug', 'keywords', 'title',))
+        assertFields(models.RichTextPage, ('slug', 'keywords', 'title',
+                                           'content',))
 
 
 class ModelInheritanceFieldAggregationTest(ModeltranslationTestBase):

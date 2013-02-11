@@ -10,12 +10,11 @@ You will need to execute this command in two cases:
 Credits: Heavily inspired by django-transmeta's sync_transmeta_db command.
 """
 from django.conf import settings
-from django.core.management.base import BaseCommand
+from django.core.management.base import NoArgsCommand
 from django.core.management.color import no_style
 from django.db import connection, transaction
-from django.db.models import get_models
 
-from modeltranslation.translator import translator, NotRegistered
+from modeltranslation.translator import translator
 from modeltranslation.utils import build_localized_fieldname
 
 
@@ -41,46 +40,38 @@ def print_missing_langs(missing_langs, field_name, model_name):
         field_name, model_name, ", ".join(missing_langs))
 
 
-class Command(BaseCommand):
-    help = 'Detect new translatable fields or new available languages and sync database structure'
+class Command(NoArgsCommand):
+    help = ('Detect new translatable fields or new available languages and'
+            ' sync database structure. Does not remove columns of removed'
+            ' languages or undeclared fields.')
 
-    def handle(self, *args, **options):
+    def handle_noargs(self, **options):
         """
         Command execution.
         """
         self.cursor = connection.cursor()
         self.introspection = connection.introspection
 
-        all_models = get_models()
         found_missing_fields = False
-        for model in all_models:
-            try:
-                options = translator.get_options_for_model(model)
-                # Options returns full-wide spectrum of localized fields but
-                # we only want to synchronize the local fields attached to the
-                # model.
-                local_field_names = [field.name for field in model._meta.local_fields]
-                translatable_fields = [field for field in options.localized_fieldnames
-                                       if field in local_field_names]
-                model_full_name = '%s.%s' % (model._meta.app_label, model._meta.module_name)
-                db_table = model._meta.db_table
-                for field_name in translatable_fields:
-                    missing_langs = list(
-                        self.get_missing_languages(field_name, db_table))
-                    if missing_langs:
-                        found_missing_fields = True
-                        print_missing_langs(missing_langs, field_name, model_full_name)
-                        sql_sentences = self.get_sync_sql(field_name, missing_langs, model)
-                        execute_sql = ask_for_confirmation(sql_sentences, model_full_name)
-                        if execute_sql:
-                            print 'Executing SQL...',
-                            for sentence in sql_sentences:
-                                self.cursor.execute(sentence)
-                            print 'Done'
-                        else:
-                            print 'SQL not executed'
-            except NotRegistered:
-                pass
+        models = translator.get_registered_models(abstract=False)
+        for model in models:
+            db_table = model._meta.db_table
+            model_full_name = '%s.%s' % (model._meta.app_label, model._meta.module_name)
+            opts = translator.get_options_for_model(model)
+            for field_name in opts.local_fields.iterkeys():
+                missing_langs = list(self.get_missing_languages(field_name, db_table))
+                if missing_langs:
+                    found_missing_fields = True
+                    print_missing_langs(missing_langs, field_name, model_full_name)
+                    sql_sentences = self.get_sync_sql(field_name, missing_langs, model)
+                    execute_sql = ask_for_confirmation(sql_sentences, model_full_name)
+                    if execute_sql:
+                        print 'Executing SQL...',
+                        for sentence in sql_sentences:
+                            self.cursor.execute(sentence)
+                        print 'Done'
+                    else:
+                        print 'SQL not executed'
 
         transaction.commit_unless_managed()
 
