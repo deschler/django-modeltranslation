@@ -62,15 +62,15 @@ class MultitableModelA(models.Model):
     titlea = models.CharField(ugettext_lazy('title a'), max_length=255)
 
 
-class MultitableBModelA(MultitableModelA):
+class MultitableModelB(MultitableModelA):
     titleb = models.CharField(ugettext_lazy('title b'), max_length=255)
 
 
-class MultitableModelC(MultitableBModelA):
+class MultitableModelC(MultitableModelB):
     titlec = models.CharField(ugettext_lazy('title c'), max_length=255)
 
 
-class MultitableDTestModel(MultitableBModelA):
+class MultitableModelD(MultitableModelB):
     titled = models.CharField(ugettext_lazy('title d'), max_length=255)
 
 

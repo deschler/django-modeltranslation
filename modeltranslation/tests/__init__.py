@@ -1193,7 +1193,7 @@ class ModelInheritanceTest(ModeltranslationTestBase):
         self.failUnless('titlea_de' in field_names_a)
         self.failUnless('titlea_en' in field_names_a)
 
-        field_names_b = models.MultitableBModelA._meta.get_all_field_names()
+        field_names_b = models.MultitableModelB._meta.get_all_field_names()
         self.failUnless('titlea' in field_names_b)
         self.failUnless('titlea_de' in field_names_b)
         self.failUnless('titlea_en' in field_names_b)
@@ -1212,7 +1212,7 @@ class ModelInheritanceTest(ModeltranslationTestBase):
         self.failUnless('titlec_de' in field_names_c)
         self.failUnless('titlec_en' in field_names_c)
 
-        field_names_d = models.MultitableDTestModel._meta.get_all_field_names()
+        field_names_d = models.MultitableModelD._meta.get_all_field_names()
         self.failUnless('titlea' in field_names_d)
         self.failUnless('titlea_de' in field_names_d)
         self.failUnless('titlea_en' in field_names_d)
