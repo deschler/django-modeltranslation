@@ -1549,6 +1549,21 @@ class TranslationAdminTest(ModeltranslationTestBase):
         for field, css in fields.items():
             self.assertEqual(build_css_class(field), css)
 
+    def test_multitable_inheritance(self):
+        class MultitableModelAAdmin(admin.TranslationAdmin):
+            pass
+
+        class MultitableModelBAdmin(admin.TranslationAdmin):
+            pass
+
+        maa = MultitableModelAAdmin(models.MultitableModelA, self.site)
+        mab = MultitableModelBAdmin(models.MultitableModelB, self.site)
+
+        self.assertEqual(maa.get_form(request).base_fields.keys(),
+                         ['titlea_de', 'titlea_en'])
+        self.assertEqual(mab.get_form(request).base_fields.keys(),
+                         ['titlea_de', 'titlea_en', 'titleb_de', 'titleb_en'])
+
 
 class TestManager(ModeltranslationTestBase):
     def setUp(self):
