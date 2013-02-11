@@ -285,7 +285,6 @@ class Translator(object):
             # Populate translation fields before the model is saved.
             pre_save.connect(populate_translation_fields, sender=model)
 
-
     def unregister(self, model_or_iterable):
         """
         Unregisters the given model(s).
