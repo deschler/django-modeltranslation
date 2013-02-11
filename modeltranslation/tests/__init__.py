@@ -1508,6 +1508,11 @@ class TestManager(ModeltranslationTestBase):
         # In this test case the default language is en, not de.
         trans_real.activate('en')
 
+    def tearDown(self):
+        # Settings may be loaded by translator, resulting in a different fallback.
+        trans_real.activate('de')
+        reload(mt_settings)
+
     def test_filter_update(self):
         """Test if filtering and updating is language-aware."""
         n = models.ManagerTestModel(title='')
@@ -1733,8 +1738,7 @@ class TestManager(ModeltranslationTestBase):
         self.assertEqual('foo', m.title_de)
 
         # ... or MODELTRANSLATION_AUTO_POPULATE setting
-        with override_settings(MODELTRANSLATION_AUTO_POPULATE=True):
-            reload(mt_settings)
+        with reload_override_settings(MODELTRANSLATION_AUTO_POPULATE=True):
             self.assertEqual(True, mt_settings.AUTO_POPULATE)
             n = models.ManagerTestModel.objects.create(title='foo')
             self.assertEqual('foo', n.title_en)
@@ -1746,10 +1750,6 @@ class TestManager(ModeltranslationTestBase):
             self.assertEqual('foo', n.title_en)
             self.assertEqual(None, n.title_de)
             self.assertEqual('foo', n.title)
-
-        # Restore previous state
-        reload(mt_settings)
-        self.assertEqual(False, mt_settings.AUTO_POPULATE)
 
     def test_get_or_create_population(self):
         """
