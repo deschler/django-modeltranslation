@@ -62,15 +62,15 @@ class MultitableModelA(models.Model):
     titlea = models.CharField(ugettext_lazy('title a'), max_length=255)
 
 
-class MultitableBModelA(MultitableModelA):
+class MultitableModelB(MultitableModelA):
     titleb = models.CharField(ugettext_lazy('title b'), max_length=255)
 
 
-class MultitableModelC(MultitableBModelA):
+class MultitableModelC(MultitableModelB):
     titlec = models.CharField(ugettext_lazy('title c'), max_length=255)
 
 
-class MultitableDTestModel(MultitableBModelA):
+class MultitableModelD(MultitableModelB):
     titled = models.CharField(ugettext_lazy('title d'), max_length=255)
 
 
@@ -85,6 +85,47 @@ class AbstractModelA(models.Model):
 
 class AbstractModelB(AbstractModelA):
     titleb = models.CharField(ugettext_lazy('title b'), max_length=255)
+
+
+########## Fields inheritance testing
+
+class Slugged(models.Model):
+    slug = models.CharField(max_length=255)
+
+    class Meta:
+        abstract = True
+
+
+class MetaData(models.Model):
+    keywords = models.CharField(max_length=255)
+
+    class Meta:
+        abstract = True
+
+
+class Displayable(Slugged, MetaData):
+    class Meta:
+        abstract = True
+
+
+class BasePage(Displayable):
+    class Meta:
+        abstract = True
+
+
+class Page(BasePage):
+    title = models.CharField(max_length=255)
+
+
+class RichText(models.Model):
+    content = models.CharField(max_length=255)
+
+    class Meta:
+        abstract = True
+
+
+class RichTextPage(Page, RichText):
+    pass
 
 
 ########## Admin testing

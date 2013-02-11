@@ -47,10 +47,12 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
 
         # For every localized field copy the widget from the original field
         # and add a css class to identify a modeltranslation widget.
-        if db_field.name in self.trans_opts.localized_fieldnames_rev:
-            orig_fieldname = self.trans_opts.localized_fieldnames_rev[db_field.name]
-            orig_formfield = self.formfield_for_dbfield(
-                self.model._meta.get_field(orig_fieldname), **kwargs)
+        try:
+            orig_field = db_field.translated_field
+        except AttributeError:
+            pass
+        else:
+            orig_formfield = self.formfield_for_dbfield(orig_field, **kwargs)
             field.widget = deepcopy(orig_formfield.widget)
             css_classes = field.widget.attrs.get('class', '').split(' ')
             css_classes.append('mt')
@@ -62,7 +64,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
                 # widget.
                 css_classes.append('mt-default')
                 if (orig_formfield.required or self._orig_was_required.get(
-                        '%s.%s' % (db_field.model._meta, orig_fieldname))):
+                        '%s.%s' % (orig_field.model._meta, orig_field.name))):
                     # In case the original form field was required, make the
                     # default translation field required instead.
                     orig_formfield.required = False
@@ -76,8 +78,8 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
             exclude = tuple()
         if exclude:
             exclude_new = tuple(exclude)
-            return exclude_new + tuple(self.trans_opts.fields)
-        return tuple(self.trans_opts.fields)
+            return exclude_new + tuple(self.trans_opts.fields.keys())
+        return tuple(self.trans_opts.fields.keys())
 
     def replace_orig_field(self, option):
         """
@@ -87,9 +89,9 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         Returns a new list with replaced fields. If `option` contains no
         registered fields, it is returned unmodified.
 
-        >>> print self.trans_opts.fields
-        ('title',)
-        >>> get_translation_fields(self.trans_opts.fields[0])
+        >>> print self.trans_opts.fields.keys()
+        ['title',]
+        >>> get_translation_fields(self.trans_opts.fields.keys()[0])
         ['title_de', 'title_en']
         >>> self.replace_orig_field(['title', 'url'])
         ['title_de', 'title_en', 'url']
@@ -100,10 +102,6 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
             2. They don't scale well with more than a few languages
             3. It's better than not handling them at all (okay that's weak)
 
-        >>> print self.trans_opts.fields
-        (('title', 'url'), 'email')
-        >>> get_translation_fields(self.trans_opts.fields[0])
-        ['title_de', 'title_en', 'url_de', 'url_en', 'email_de', 'email_en']
         >>> self.replace_orig_field((('title', 'url'), 'email', 'text'))
         ['title_de', 'title_en', 'url_de', 'url_en', 'email_de', 'email_en', 'text']
         """
@@ -187,9 +185,9 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         if exclude_languages:
             excl_languages = exclude_languages
         exclude = []
-        for orig_fieldname, translation_fields in self.trans_opts.localized_fieldnames.iteritems():
+        for orig_fieldname, translation_fields in self.trans_opts.fields.iteritems():
             for tfield in translation_fields:
-                language = tfield.split('_')[-1]
+                language = tfield.name.split('_')[-1]
                 if language in excl_languages and tfield not in exclude:
                     exclude.append(tfield)
         return tuple(exclude)
