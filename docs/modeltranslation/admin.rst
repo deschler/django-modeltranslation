@@ -281,11 +281,11 @@ this:
             }
 
 
-TranslationAdmin Options
-------------------------
+``TranslationAdmin`` Options
+----------------------------
 
-TranslationAdmin.group_fieldsets
-********************************
+``TranslationAdmin.group_fieldsets``
+************************************
 
 .. versionadded:: 0.6
 
