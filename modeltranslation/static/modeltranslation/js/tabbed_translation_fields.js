@@ -11,6 +11,22 @@ var google, django, gettext;
     };
 
     jQuery(function ($) {
+        function getGroupId(id, orig_fieldname) {
+            /** Returns a unique group identifier with respect to Django's
+              * data_set prefixes used for inlines. Essentially that's the
+              * field id without the language prefix. Examples:
+              *     id_float_de --> id_float
+              *     id_data_set-2-name_zh_tw --> id_data_set-2-name
+              */
+            var data_set_prefix = 'id_data_set',
+                id_bits = id.split('-'),
+                id_prefix = 'id_' + orig_fieldname;
+            if (id_bits.length === 3 && id_bits[0] === data_set_prefix) {
+                id_prefix = id_bits[0] + '-' + id_bits[1] + '-' + id_prefix;
+            }
+            return id_prefix;
+        }
+
         function getGroupedTranslationFields() {
             /** Returns a grouped set of all text based model translation fields.
              * The returned datastructure will look something like this:
@@ -29,44 +45,45 @@ var google, django, gettext;
              */
             var translation_fields = $('.mt').filter(
                 'input[type=text]:visible, textarea:visible').filter(
-                ':parents(.tabular)'), // exclude tabular inlines
-              grouped_translations = {};
+                    ':parents(.tabular)'),  // exclude tabular inlines
+                grouped_translations = {};
 
             // Handle fields inside collapsed groups as added by zinnia
             translation_fields = translation_fields.add('fieldset.collapse-closed .mt');
 
             translation_fields.each(function (i, el) {
                 var field_prefix = 'mt-field-',
-                    name = '',
+                    id = '',
+                    orig_fieldname = '',
                     lang = '';
                 $.each($(el).attr('class').split(' '), function(j, cls) {
                     if (cls.substring(0, field_prefix.length) === field_prefix) {
-                        var v = cls.substring(field_prefix.length,
-                                              cls.length).split('-');
-                        name = v[0];
+                        var v = cls.substring(field_prefix.length, cls.length).split('-');
+                        orig_fieldname = v[0];
+                        id = getGroupId($(el).attr('id'), orig_fieldname);
                         lang = v[1];
                     }
                 });
-                if (!grouped_translations[name]) {
-                    grouped_translations[name] = {};
+                if (!grouped_translations[id]) {
+                    grouped_translations[id] = {};
                 }
-                grouped_translations[name][lang] = el;
+                grouped_translations[id][lang] = el;
             });
             return grouped_translations;
         }
 
         function createTabs(grouped_translations) {
             var tabs = [];
-            $.each(grouped_translations, function (name, languages) {
+            $.each(grouped_translations, function (group_id, lang) {
                 var tabs_container = $('<div></div>'),
-                  tabs_list = $('<ul></ul>'),
-                  insertion_point;
+                    tabs_list = $('<ul></ul>'),
+                    insertion_point;
                 tabs_container.append(tabs_list);
-                $.each(languages, function (lang, el) {
+                $.each(lang, function (lang, el) {
                     var container = $(el).closest('.form-row'),
                       label = $('label', container),
                       field_label = container.find('label'),
-                      id = 'tab_' + [name, lang].join('_'),
+                      id = $(el).attr('id'),
                       panel, tab;
                     // Remove language and brackets from field label, they are
                     // displayed in the tab already.
@@ -94,16 +111,17 @@ var google, django, gettext;
 
         function createMainSwitch(grouped_translations, tabs) {
             var unique_languages = [],
-              select = $('<select>');
-            $.each(grouped_translations, function (name, languages) {
+                select = $('<select>');
+            $.each(grouped_translations, function (id, languages) {
                 $.each(languages, function (lang, el) {
                     if ($.inArray(lang, unique_languages) < 0) {
                         unique_languages.push(lang);
                     }
                 });
             });
+            console.log(unique_languages);
             $.each(unique_languages, function (i, language) {
-                select.append($('<option value="' + i + '">' + language.replace('_', '-') + '</option>'));
+                select.append($('<option value="' + unique_languages[i] + '">' + language.replace('_', '-') + '</option>'));
             });
             select.change(function (e) {
                 $.each(tabs, function (i, tab) {
