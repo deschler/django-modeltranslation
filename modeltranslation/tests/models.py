@@ -134,6 +134,12 @@ class DataModel(models.Model):
     data = models.TextField(blank=True, null=True)
 
 
+class GroupFieldsetsModel(models.Model):
+    title = models.CharField(max_length=255)
+    text = models.TextField(blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+
+
 ########## Manager testing
 
 class ManagerTestModel(models.Model):

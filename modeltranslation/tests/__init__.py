@@ -227,7 +227,7 @@ class ModeltranslationTest(ModeltranslationTestBase):
         self.failUnless(translator.translator)
 
         # Check that all models are registered for translation
-        self.assertEqual(len(translator.translator.get_registered_models()), 19)
+        self.assertEqual(len(translator.translator.get_registered_models()), 20)
 
         # Try to unregister a model that is not registered
         self.assertRaises(translator.NotRegistered,
@@ -1563,6 +1563,57 @@ class TranslationAdminTest(ModeltranslationTestBase):
                          ['titlea_de', 'titlea_en'])
         self.assertEqual(mab.get_form(request).base_fields.keys(),
                          ['titlea_de', 'titlea_en', 'titleb_de', 'titleb_en'])
+
+    def test_group_fieldsets(self):
+        # Declared fieldsets take precedence over group_fieldsets
+        class GroupFieldsetsModelAdmin(admin.TranslationAdmin):
+            fieldsets = [(None, {'fields': ['title']})]
+            group_fieldsets = True
+        ma = GroupFieldsetsModelAdmin(models.GroupFieldsetsModel, self.site)
+        fields = ['title_de', 'title_en']
+        self.assertEqual(ma.get_form(request).base_fields.keys(), fields)
+        self.assertEqual(ma.get_form(request, self.test_obj).base_fields.keys(), fields)
+
+        # Now set group_fieldsets only
+        class GroupFieldsetsModelAdmin(admin.TranslationAdmin):
+            group_fieldsets = True
+        ma = GroupFieldsetsModelAdmin(models.GroupFieldsetsModel, self.site)
+        # Only text and title are registered for translation. We expect to get
+        # three fieldsets. The first which gathers all untranslated field
+        # (email only) and one for each translation field (text and title).
+        fieldsets = [
+            ('', {'fields': ['email']}),
+            ('text', {'classes': ('mt-fieldset',), 'fields': ['text_de', 'text_en']}),
+            ('title', {'classes': ('mt-fieldset',), 'fields': ['title_de', 'title_en']})
+        ]
+        self.assertEqual(ma.get_fieldsets(request), fieldsets)
+        self.assertEqual(ma.get_fieldsets(request, self.test_obj), fieldsets)
+
+        # Verify that other options are still taken into account
+
+        # Exclude an untranslated field
+        class GroupFieldsetsModelAdmin(admin.TranslationAdmin):
+            group_fieldsets = True
+            exclude = ('email',)
+        ma = GroupFieldsetsModelAdmin(models.GroupFieldsetsModel, self.site)
+        fieldsets = [
+            ('text', {'classes': ('mt-fieldset',), 'fields': ['text_de', 'text_en']}),
+            ('title', {'classes': ('mt-fieldset',), 'fields': ['title_de', 'title_en']})
+        ]
+        self.assertEqual(ma.get_fieldsets(request), fieldsets)
+        self.assertEqual(ma.get_fieldsets(request, self.test_obj), fieldsets)
+
+        # Exclude a translation field
+        class GroupFieldsetsModelAdmin(admin.TranslationAdmin):
+            group_fieldsets = True
+            exclude = ('text',)
+        ma = GroupFieldsetsModelAdmin(models.GroupFieldsetsModel, self.site)
+        fieldsets = [
+            ('', {'fields': ['email']}),
+            ('title', {'classes': ('mt-fieldset',), 'fields': ['title_de', 'title_en']})
+        ]
+        self.assertEqual(ma.get_fieldsets(request), fieldsets)
+        self.assertEqual(ma.get_fieldsets(request, self.test_obj), fieldsets)
 
 
 class TestManager(ModeltranslationTestBase):
