@@ -280,3 +280,32 @@ this:
                 'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
             }
 
+
+TranslationAdmin Options
+------------------------
+
+TranslationAdmin.group_fieldsets
+********************************
+
+.. versionadded:: 0.6
+
+When this option is activated untranslated and translation fields are grouped
+into separate fieldsets. The first fieldset contains the untranslated fields,
+followed by a fieldset for each translation field. The translation field
+fieldsets use the original field's ``verbose_name`` as a label.
+
+Activating the option is a simple way to reduce the visual clutter one might
+experience when mixing these different types of fields.
+
+The ``group_fieldsets`` option expects a boolean. By default fields are not
+grouped into fieldsets (``group_fieldsets = False``).
+
+A few simple policies are applied:
+
+ * A ``fieldset`` option takes precedence over the ``group_fieldsets`` option.
+ * Other default ``ModelAdmin`` options like ``exclude`` are respected.
+
+.. code-block:: python
+
+    class NewsAdmin(TranslationAdmin):
+        group_fieldsets = True
