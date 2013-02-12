@@ -140,6 +140,12 @@ class GroupFieldsetsModel(models.Model):
     email = models.EmailField(blank=True, null=True)
 
 
+class NameModel(models.Model):
+    firstname = models.CharField(max_length=50)
+    lastname = models.CharField(max_length=50)
+    slug = models.SlugField(max_length=100)
+
+
 ########## Manager testing
 
 class ManagerTestModel(models.Model):

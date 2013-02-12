@@ -6,7 +6,7 @@ from modeltranslation.tests.models import (
     TestModel, FallbackModel, FallbackModel2, FileFieldsModel, OtherFieldsModel, AbstractModelA,
     AbstractModelB, Slugged, MetaData, Displayable, Page, RichText, RichTextPage,
     MultitableModelA, MultitableModelB, MultitableModelC, ManagerTestModel, CustomManagerTestModel,
-    CustomManager2TestModel, GroupFieldsetsModel)
+    CustomManager2TestModel, GroupFieldsetsModel, NameModel)
 
 
 class TestTranslationOptions(TranslationOptions):
@@ -142,3 +142,8 @@ class FieldInheritanceETranslationOptions(FieldInheritanceCTranslationOptions,
 class GroupFieldsetsTranslationOptions(TranslationOptions):
     fields = ('title', 'text',)
 translator.register(GroupFieldsetsModel, GroupFieldsetsTranslationOptions)
+
+
+class NameTranslationOptions(TranslationOptions):
+    fields = ('firstname', 'lastname',)
+translator.register(NameModel, NameTranslationOptions)

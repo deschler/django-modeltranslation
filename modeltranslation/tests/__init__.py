@@ -227,7 +227,7 @@ class ModeltranslationTest(ModeltranslationTestBase):
         self.failUnless(translator.translator)
 
         # Check that all models are registered for translation
-        self.assertEqual(len(translator.translator.get_registered_models()), 20)
+        self.assertEqual(len(translator.translator.get_registered_models()), 21)
 
         # Try to unregister a model that is not registered
         self.assertRaises(translator.NotRegistered,
@@ -1614,6 +1614,33 @@ class TranslationAdminTest(ModeltranslationTestBase):
         ]
         self.assertEqual(ma.get_fieldsets(request), fieldsets)
         self.assertEqual(ma.get_fieldsets(request, self.test_obj), fieldsets)
+
+    def test_prepopulated_fields(self):
+        trans_real.activate('de')
+        self.failUnlessEqual(get_language(), 'de')
+
+        class NameModelAdmin(admin.TranslationAdmin):
+            prepopulated_fields = {'slug': ('firstname',)}
+        ma = NameModelAdmin(models.NameModel, self.site)
+        self.assertEqual(ma.prepopulated_fields, {'slug': ('firstname_de',)})
+
+        class NameModelAdmin(admin.TranslationAdmin):
+            prepopulated_fields = {'slug': ('firstname', 'lastname',)}
+        ma = NameModelAdmin(models.NameModel, self.site)
+        self.assertEqual(ma.prepopulated_fields, {'slug': ('firstname_de', 'lastname_de',)})
+
+        trans_real.activate('en')
+        self.failUnlessEqual(get_language(), 'en')
+
+        class NameModelAdmin(admin.TranslationAdmin):
+            prepopulated_fields = {'slug': ('firstname',)}
+        ma = NameModelAdmin(models.NameModel, self.site)
+        self.assertEqual(ma.prepopulated_fields, {'slug': ('firstname_en',)})
+
+        class NameModelAdmin(admin.TranslationAdmin):
+            prepopulated_fields = {'slug': ('firstname', 'lastname',)}
+        ma = NameModelAdmin(models.NameModel, self.site)
+        self.assertEqual(ma.prepopulated_fields, {'slug': ('firstname_en', 'lastname_en',)})
 
 
 class TestManager(ModeltranslationTestBase):

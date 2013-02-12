@@ -11,7 +11,8 @@ from django.contrib.contenttypes import generic
 import modeltranslation.models  # NOQA
 from modeltranslation.settings import DEFAULT_LANGUAGE
 from modeltranslation.translator import translator
-from modeltranslation.utils import get_translation_fields, build_css_class
+from modeltranslation.utils import (
+    get_translation_fields, build_css_class, build_localized_fieldname, get_language)
 
 
 class TranslationBaseModelAdmin(BaseModelAdmin):
@@ -129,11 +130,15 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
 
     def _patch_prepopulated_fields(self):
         if self.prepopulated_fields:
+            # TODO: Perhaps allow to configure which language the slug should be based on?
+            lang = get_language()
             prepopulated_fields_new = dict(self.prepopulated_fields)
-            for (k, v) in self.prepopulated_fields.items():
-                if v[0] in self.trans_opts.fields:
-                    translation_fields = get_translation_fields(v[0])
-                    prepopulated_fields_new[k] = tuple([translation_fields[0]])
+            translation_fields = []
+            for k, v in self.prepopulated_fields.items():
+                for i in v:
+                    if i in self.trans_opts.fields.keys():
+                        translation_fields.append(build_localized_fieldname(i, lang))
+                prepopulated_fields_new[k] = tuple(translation_fields)
             self.prepopulated_fields = prepopulated_fields_new
 
     def _do_get_form_or_formset(self, request, obj, **kwargs):
