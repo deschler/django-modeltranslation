@@ -1,3 +1,9 @@
+  ADDED: New group_fieldsets option for TranslationAdmin. When activated
+         translation fields and untranslated fields are automatically
+         grouped into fieldsets.
+         (based on original implementation by Chris Adams,
+          resolves issues #38)
+
 CHANGED: Major refactoring of translation field inheritance and
          TranslationOptions.
          (thanks to Wojtek Ruszczewski,
