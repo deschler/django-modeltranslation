@@ -247,7 +247,7 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
                 # declaration can make that translatable.
                 label = self.model._meta.get_field(orig_field).verbose_name
                 fieldsets.append((label, {
-                    'fields': [f.name for f in trans_fields],
+                    'fields': [f.name for f in sorted(trans_fields, key=lambda x: x.name)],
                     'classes': ('mt-fieldset',)
                 }))
 
