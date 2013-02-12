@@ -220,6 +220,8 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
         # already defines a fieldset, we leave it alone and assume the author
         # has done whatever grouping for translated fields they desire.
         if not self.declared_fieldsets and self.group_fieldsets is True:
+            flattened_fieldsets = flatten_fieldsets(fieldsets)
+
             # Create a fieldset to group each translated field's localized fields
             untranslated_fields = [
                 f.name for f in self.opts.fields if (
@@ -235,21 +237,22 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
                     # Honour field arguments. We rely on the fact that the
                     # passed fieldsets argument is already fully filtered
                     # and takes options like exclude into account.
-                    and f.name in flatten_fieldsets(fieldsets)
+                    and f.name in flattened_fieldsets
                 )
             ]
             # TODO: Allow setting a label
-            fieldsets = [('', {'fields': untranslated_fields},)]
+            fieldsets = [('', {'fields': untranslated_fields},)] if untranslated_fields else []
 
             for orig_field, trans_fields in self.trans_opts.fields.items():
-                # Extract the original field's verbose_name for use as this
-                # fieldset's label - using ugettext_lazy in your model
-                # declaration can make that translatable.
-                label = self.model._meta.get_field(orig_field).verbose_name
-                fieldsets.append((label, {
-                    'fields': [f.name for f in sorted(trans_fields, key=lambda x: x.name)],
-                    'classes': ('mt-fieldset',)
-                }))
+                if any(f in [f.name for f in trans_fields] for f in flattened_fieldsets):
+                    # Extract the original field's verbose_name for use as this
+                    # fieldset's label - using ugettext_lazy in your model
+                    # declaration can make that translatable.
+                    label = self.model._meta.get_field(orig_field).verbose_name
+                    fieldsets.append((label, {
+                        'fields': [f.name for f in sorted(trans_fields, key=lambda x: x.name)],
+                        'classes': ('mt-fieldset',)
+                    }))
 
         return fieldsets
 
