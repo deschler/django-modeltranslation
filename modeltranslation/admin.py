@@ -193,6 +193,9 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
 
 
 class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
+    # TODO: Consider addition of a setting which allows to override the fallback to True
+    group_fieldsets = False
+
     def __init__(self, *args, **kwargs):
         super(TranslationAdmin, self).__init__(*args, **kwargs)
         self._patch_list_editable()
@@ -212,14 +215,11 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
             self.list_display = display_new
 
     def _group_fieldsets(self, fieldsets):
-        # By default fieldsets are not grouped. The function is activated by
-        # setting TranslationAdmin.group_fieldsets to True.
-        # TODO: Consider addition of a setting which allows to override the fallback to True
-        group_fieldsets = getattr(self, 'group_fieldsets', False)
-        # If the admin class already defines a fieldset, we leave it
-        # alone and assume the author has done whatever grouping for
-        # translated fields they desire.
-        if not self.declared_fieldsets and group_fieldsets is True:
+        # Fieldsets are not grouped by default. The function is activated by
+        # setting TranslationAdmin.group_fieldsets to True. If the admin class
+        # already defines a fieldset, we leave it alone and assume the author
+        # has done whatever grouping for translated fields they desire.
+        if not self.declared_fieldsets and self.group_fieldsets is True:
             # Create a fieldset to group each translated field's localized fields
             untranslated_fields = [
                 f.name for f in self.opts.fields if (
@@ -227,8 +227,6 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
                     f is not self.opts.auto_field
                     # Exclude non-editable fields
                     and f.editable
-                    # Exclude the original field
-                    #and f.name not in self.trans_opts.fields
                     # Exclude the translation fields
                     # TODO: I already miss localized_fieldnames_rev here ;)
                     and f not in [
