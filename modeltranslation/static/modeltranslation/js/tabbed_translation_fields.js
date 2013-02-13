@@ -11,37 +11,59 @@ var google, django, gettext;
     };
 
     jQuery(function ($) {
-        function getGroupId(id, orig_fieldname) {
-            /** Returns a unique group identifier with respect to Django's
-              * data_set prefixes used for inlines. Essentially that's the
-              * field id without the language prefix. Examples:
-              *     id_float_de --> id_float
-              *     id_data_set-2-name_zh_tw --> id_data_set-2-name
-              */
-            var data_set_prefix = 'id_data_set',
-                id_bits = id.split('-'),
+        function buildGroupId(id, orig_fieldname) {
+            /**
+             * Returns a unique group identifier with respect to Django's way
+             * of handling inline ids. Essentially that's the translation
+             * field id without the language prefix.
+             *
+             * Examples ('id parameter': 'return value'):
+             *
+             *     'id_name_de': 'id_name'
+             *     'id_name_zh_tw': 'id_name'
+             *     'id_name_set-2-name_de': 'id_name_set-2-name'
+             *     'id_name_set-2-name_zh_tw': 'id_name_set-2-name'
+             *     'id_news-data2-content_type-object_id-0-name_de': 'id_news-data2-content_type-object_id-0-name'
+             *     'id_news-data2-content_type-object_id-0-name_zh_cn': id_news-data2-content_type-object_id-0-name'
+             *
+             */
+            var id_bits = id.split('-'),
                 id_prefix = 'id_' + orig_fieldname;
-            if (id_bits.length === 3 && id_bits[0] === data_set_prefix) {
+            if (id_bits.length === 3) {  // Standard inlines
                 id_prefix = id_bits[0] + '-' + id_bits[1] + '-' + id_prefix;
+            } else if (id_bits.length === 6) {  // Generic inlines
+                id_prefix = id_bits[0] + '-' + id_bits[1] + '-' + id_bits[2] + '-' +
+                    id_bits[3] + '-' + id_bits[4] + '-' + orig_fieldname;
             }
             return id_prefix;
         }
 
         function getGroupedTranslationFields() {
-            /** Returns a grouped set of all text based model translation fields.
+            /**
+             * Returns a grouped set of all text based model translation fields.
              * The returned datastructure will look something like this:
+             *
              * {
-             *     'title': {
+             *     'id_name_de': {
              *         'en': HTMLInputElement,
              *         'de': HTMLInputElement,
              *         'zh_tw': HTMLInputElement
              *     },
-             *     'body': {
+             *     'id_name_set-2-name': {
+             *         'en': HTMLTextAreaElement,
+             *         'de': HTMLTextAreaElement,
+             *         'zh_tw': HTMLTextAreaElement
+             *     },
+             *     'id_news-data2-content_type-object_id-0-name': {
              *         'en': HTMLTextAreaElement,
              *         'de': HTMLTextAreaElement,
              *         'zh_tw': HTMLTextAreaElement
              *     }
              * }
+             *
+             * They key is a unique group identifier as returned by
+             * buildGroupId(id, orig_fieldname) to handle inlines properly.
+             *
              */
             var translation_fields = $('.mt').filter(
                 'input[type=text]:visible, textarea:visible').filter(
@@ -60,7 +82,7 @@ var google, django, gettext;
                     if (cls.substring(0, field_prefix.length) === field_prefix) {
                         var v = cls.substring(field_prefix.length, cls.length).split('-');
                         orig_fieldname = v[0];
-                        id = getGroupId($(el).attr('id'), orig_fieldname);
+                        id = buildGroupId($(el).attr('id'), orig_fieldname);
                         lang = v[1];
                     }
                 });
@@ -81,10 +103,12 @@ var google, django, gettext;
                 tabs_container.append(tabs_list);
                 $.each(lang, function (lang, el) {
                     var container = $(el).closest('.form-row'),
-                      label = $('label', container),
-                      field_label = container.find('label'),
-                      id = $(el).attr('id'),
-                      panel, tab;
+                        label = $('label', container),
+                        field_label = container.find('label'),
+                        id = $(el).attr('id'),
+                        tab_id = 'tab_' + id,
+                        panel,
+                        tab;
                     // Remove language and brackets from field label, they are
                     // displayed in the tab already.
                     if (field_label.html()) {
@@ -97,8 +121,8 @@ var google, django, gettext;
                         };
                     }
                     container.find('script').remove();
-                    panel = $('<div id="' + id + '"></div>').append(container);
-                    tab = $('<li' + (label.hasClass('required') ? ' class="required"' : '') + '><a href="#' + id + '">' + lang.replace('_', '-') + '</a></li>');
+                    panel = $('<div id="' + tab_id + '"></div>').append(container);
+                    tab = $('<li' + (label.hasClass('required') ? ' class="required"' : '') + '><a href="#' + tab_id + '">' + lang.replace('_', '-') + '</a></li>');
                     tabs_list.append(tab);
                     tabs_container.append(panel);
                 });
@@ -119,9 +143,8 @@ var google, django, gettext;
                     }
                 });
             });
-            console.log(unique_languages);
             $.each(unique_languages, function (i, language) {
-                select.append($('<option value="' + unique_languages[i] + '">' + language.replace('_', '-') + '</option>'));
+                select.append($('<option value="' + i + '">' + language.replace('_', '-') + '</option>'));
             });
             select.change(function (e) {
                 $.each(tabs, function (i, tab) {
