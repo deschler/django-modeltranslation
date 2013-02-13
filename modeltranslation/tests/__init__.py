@@ -1445,7 +1445,7 @@ class TranslationAdminTest(ModeltranslationTestBase):
         self.assertEqual(
             ma.get_form(request).base_fields.keys(), ['title_de', 'title_en'])
 
-        # Using `readonly_fields`.
+        # Using `fields` and `readonly_fields`.
         class TestModelAdmin(admin.TranslationAdmin):
             fields = ['title', 'url']
             readonly_fields = ['url']
@@ -1454,8 +1454,18 @@ class TranslationAdminTest(ModeltranslationTestBase):
         self.assertEqual(
             ma.get_form(request).base_fields.keys(), ['title_de', 'title_en'])
 
+        # Using `readonly_fields`.
+        # Note: readonly fields are not included in the form.
+        class TestModelAdmin(admin.TranslationAdmin):
+            readonly_fields = ['title']
+
+        ma = TestModelAdmin(models.TestModel, self.site)
+        self.assertEqual(
+            ma.get_form(request).base_fields.keys(),
+            ['text_de', 'text_en', 'url_de', 'url_en', 'email_de', 'email_en'])
+
         # Using grouped fields.
-        # Note: Current implementation flattens the nested fields
+        # Note: Current implementation flattens the nested fields.
         class TestModelAdmin(admin.TranslationAdmin):
             fields = (('title', 'url'), 'email',)
 
