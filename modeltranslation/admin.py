@@ -196,6 +196,12 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
                     exclude.append(tfield)
         return tuple(exclude)
 
+    def get_readonly_fields(self, request, obj=None):
+        """
+        Hook for specifying custom readonly fields.
+        """
+        return self.replace_orig_field(self.readonly_fields)
+
 
 class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
     # TODO: Consider addition of a setting which allows to override the fallback to True
