@@ -70,7 +70,7 @@ class FancyDescriptor(object):
         return 'a' * length
 
     def __set__(self, obj, value):
-        if isinstance(value, int):
+        if isinstance(value, (int, long)):
             obj.__dict__[self.field.name] = value
         elif isinstance(value, basestring):
             obj.__dict__[self.field.name] = len(value)
