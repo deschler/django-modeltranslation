@@ -4,6 +4,9 @@
          (based on original implementation by Chris Adams,
           resolves issues #38)
 
+  FIXED: Keys used in tabbed translation fields to group translations are not
+         unique for inlines.
+         (resolves issue #121)
   FIXED: The prepopulated_fields TranslationAdmin option only works on the
          first defined field to prepopulate from and made the option aware
          of the current language.
