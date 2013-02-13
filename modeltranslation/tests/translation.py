@@ -3,8 +3,8 @@ from django.utils.translation import ugettext_lazy
 
 from modeltranslation.translator import translator, TranslationOptions
 from modeltranslation.tests.models import (
-    TestModel, FallbackModel, FallbackModel2, FileFieldsModel, OtherFieldsModel, AbstractModelA,
-    AbstractModelB, Slugged, MetaData, Displayable, Page, RichText, RichTextPage,
+    TestModel, FallbackModel, FallbackModel2, FileFieldsModel, OtherFieldsModel, DescriptorModel,
+    AbstractModelA, AbstractModelB, Slugged, MetaData, Displayable, Page, RichText, RichTextPage,
     MultitableModelA, MultitableModelB, MultitableModelC, ManagerTestModel, CustomManagerTestModel,
     CustomManager2TestModel, GroupFieldsetsModel, NameModel)
 
@@ -43,6 +43,11 @@ class OtherFieldsModelTranslationOptions(TranslationOptions):
     fields = ('int', 'boolean', 'nullboolean', 'csi', 'float', 'decimal',
               'ip', 'date', 'datetime', 'time',)
 translator.register(OtherFieldsModel, OtherFieldsModelTranslationOptions)
+
+
+class DescriptorModelTranslationOptions(TranslationOptions):
+    fields = ('trans',)
+translator.register(DescriptorModel, DescriptorModelTranslationOptions)
 
 
 ########## Multitable inheritance testing

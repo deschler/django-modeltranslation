@@ -227,7 +227,7 @@ class ModeltranslationTest(ModeltranslationTestBase):
         self.failUnless(translator.translator)
 
         # Check that all models are registered for translation
-        self.assertEqual(len(translator.translator.get_registered_models()), 21)
+        self.assertEqual(len(translator.translator.get_registered_models()), 22)
 
         # Try to unregister a model that is not registered
         self.assertRaises(translator.NotRegistered,
@@ -884,6 +884,46 @@ class OtherFieldsTest(ModeltranslationTestBase):
         self.assertEqual(datetime.time(23, 42, 0), inst.time)
         self.assertEqual(datetime.time(01, 02, 03), inst.time_de)
         self.assertEqual(datetime.time(23, 42, 0), inst.time_en)
+
+    def test_descriptors(self):
+        # Descriptor store ints in database and returns string of 'a' of that length
+        inst = models.DescriptorModel()
+        # Demonstrate desired behaviour
+        inst.normal = 2
+        self.assertEqual('aa', inst.normal)
+        inst.normal = 'abc'
+        self.assertEqual('aaa', inst.normal)
+
+        # Descriptor on translated field works too
+        self.assertEqual('de', get_language())
+        inst.trans = 5
+        self.assertEqual('aaaaa', inst.trans)
+
+        inst.save()
+        db_values = models.DescriptorModel.objects.values('normal', 'trans_en', 'trans_de')[0]
+        self.assertEqual(3, db_values['normal'])
+        self.assertEqual(5, db_values['trans_de'])
+        self.assertEqual(0, db_values['trans_en'])
+
+        # Retrieval from db
+        inst = models.DescriptorModel.objects.all()[0]
+        self.assertEqual('aaa', inst.normal)
+        self.assertEqual('aaaaa', inst.trans)
+        self.assertEqual('aaaaa', inst.trans_de)
+        self.assertEqual('', inst.trans_en)
+
+        # Other language
+        trans_real.activate('en')
+        self.assertEqual('', inst.trans)
+        inst.trans = 'q'
+        self.assertEqual('a', inst.trans)
+        inst.trans_de = 4
+        self.assertEqual('aaaa', inst.trans_de)
+        inst.save()
+        db_values = models.DescriptorModel.objects.values('normal', 'trans_en', 'trans_de')[0]
+        self.assertEqual(3, db_values['normal'])
+        self.assertEqual(4, db_values['trans_de'])
+        self.assertEqual(1, db_values['trans_en'])
 
 
 class ModeltranslationTestRule1(ModeltranslationTestBase):
