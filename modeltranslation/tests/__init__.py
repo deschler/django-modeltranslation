@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-TODO: Merge autoregister tests from django-modeltranslation-wrapper.
-
 NOTE: Perhaps ModeltranslationTestBase in tearDownClass should reload some modules,
       so that tests for other apps are in the same environment.
 
@@ -47,6 +45,9 @@ except ImportError:
 # None of the following tests really depend on the content of the request,
 # so we'll just pass in None.
 request = None
+
+# How much models are registered for tests.
+TEST_MODELS = 22
 
 
 class reload_override_settings(override_settings):
@@ -227,7 +228,7 @@ class ModeltranslationTest(ModeltranslationTestBase):
         self.failUnless(translator.translator)
 
         # Check that all models are registered for translation
-        self.assertEqual(len(translator.translator.get_registered_models()), 22)
+        self.assertEqual(len(translator.translator.get_registered_models()), TEST_MODELS)
 
         # Try to unregister a model that is not registered
         self.assertRaises(translator.NotRegistered,
