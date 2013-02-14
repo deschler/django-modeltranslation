@@ -80,10 +80,10 @@ var google, django, gettext;
                     lang = '';
                 $.each($(el).attr('class').split(' '), function(j, cls) {
                     if (cls.substring(0, field_prefix.length) === field_prefix) {
-                        var v = cls.substring(field_prefix.length, cls.length).split('-');
-                        orig_fieldname = v[0];
-                        id = buildGroupId($(el).attr('id'), orig_fieldname);
-                        lang = v[1];
+                        var v = cls.substring(field_prefix.length, cls.length).split('-'),
+                            orig_fieldname = v[0];
+                            id = buildGroupId($(el).attr('id'), orig_fieldname);
+                            lang = v[1];
                     }
                 });
                 if (!grouped_translations[id]) {
@@ -92,6 +92,45 @@ var google, django, gettext;
                 grouped_translations[id][lang] = el;
             });
             return grouped_translations;
+        }
+
+        function handleAddAnotherInline() {
+            var $add_another_links = $('.mt').parents('.inline-group').not('.tabular').find('.add-row a');
+            $($add_another_links).click(function () {
+                // TODO: Refactor, this reproduces a lot of code
+                var translation_fields = $(this).parent().prev().prev().find('.mt');
+                var grouped_translations = {};
+                translation_fields.each(function (i, el) {
+                    var field_prefix = 'mt-field-',
+                        id = '',
+                        orig_fieldname = '',
+                        lang = '';
+                    $.each($(el).attr('class').split(' '), function(j, cls) {
+                        if (cls.substring(0, field_prefix.length) === field_prefix) {
+                            var v = cls.substring(field_prefix.length, cls.length).split('-'),
+                                orig_fieldname = v[0];
+                                id = buildGroupId($(el).attr('id'), orig_fieldname);
+                                lang = v[1];
+                        }
+                    });
+                    if (!grouped_translations[id]) {
+                        grouped_translations[id] = {};
+                    }
+                    grouped_translations[id][lang] = el;
+                });
+                var tabs = createTabs(grouped_translations);
+                // Update the main switch as it is not aware of the newly created tabs
+                var $select = $('#content h1 select');
+                $select.change(function (e) {
+                    $.each(tabs, function (i, tab) {
+                        tab.tabs('select', parseInt($select.val()));
+                    });
+                });
+                // Activate the language tab selected in the main switch
+                $.each(tabs, function (i, tab) {
+                    tab.tabs('select', parseInt($select.val()));
+                });
+            });
         }
 
         function createTabs(grouped_translations) {
@@ -157,6 +196,15 @@ var google, django, gettext;
         if ($('body').hasClass('change-form')) {
             var grouped_translations = getGroupedTranslationFields();
             createMainSwitch(grouped_translations, createTabs(grouped_translations));
+
+            // Note: The add another functionality in admin is injected through
+            // inline javascript, here we have to run after that (and after all
+            // other ready events just to be sure).
+            $(document).ready(function() {
+                $(window).load(function() {
+                    handleAddAnotherInline();
+                });
+            });
         }
     });
 }());
