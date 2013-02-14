@@ -1588,17 +1588,26 @@ class TranslationAdminTest(ModeltranslationTestBase):
         # Remove translation for DataModel
         translator.translator.unregister(models.DataModel)
 
+    @override_settings()
     def test_build_css_class(self):
-        fields = {
-            'foo_en': 'foo-en', 'foo_es_ar': 'foo-es_ar',
-            'foo_bar_de': 'foo_bar-de',
-            '_foo_en': '_foo-en', '_foo_es_ar': '_foo-es_ar',
-            '_foo_bar_de': '_foo_bar-de',
-            'foo__en': 'foo_-en', 'foo__es_ar': 'foo_-es_ar',
-            'foo_bar__de': 'foo_bar_-de',
-        }
-        for field, css in fields.items():
-            self.assertEqual(build_css_class(field), css)
+        with override_settings(LANGUAGES=(('de', 'German'), ('en', 'English'),
+                                          ('es-ar', 'Argentinian Spanish'),)):
+            reload(mt_settings)
+            fields = {
+                'foo_en': 'foo-en',
+                'foo_es_ar': 'foo-es_ar',
+                'foo_en_us': 'foo-en_us',
+                'foo_bar_de': 'foo_bar-de',
+                '_foo_en': '_foo-en',
+                '_foo_es_ar': '_foo-es_ar',
+                '_foo_bar_de': '_foo_bar-de',
+                'foo__en': 'foo_-en',
+                'foo__es_ar': 'foo_-es_ar',
+                'foo_bar__de': 'foo_bar_-de',
+            }
+            for field, css in fields.items():
+                self.assertEqual(build_css_class(field), css)
+        reload(mt_settings)
 
     def test_multitable_inheritance(self):
         class MultitableModelAAdmin(admin.TranslationAdmin):
