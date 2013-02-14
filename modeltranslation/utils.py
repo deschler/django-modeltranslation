@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.conf import global_settings
+from django.conf import global_settings, settings as django_settings
 from django.utils.encoding import force_unicode
 from django.utils.translation import get_language as _get_language
 from django.utils.functional import lazy
@@ -20,6 +20,14 @@ def get_language():
     return settings.DEFAULT_LANGUAGE
 
 
+def get_supported_languages():
+    supported_languages = ['en-us']
+    supported_languages.extend([l[0] for l in django_settings.LANGUAGES])
+    supported_languages.extend([l[0] for l in global_settings.LANGUAGES])
+    return set(supported_languages)
+supported_languages = get_supported_languages()
+
+
 def get_translation_fields(field):
     """
     Returns a list of localized fieldnames for a given field.
@@ -37,7 +45,7 @@ build_localized_verbose_name = lazy(_build_localized_verbose_name, unicode)
 
 
 def _join_css_class(bits, offset):
-    if '-'.join(bits[-offset:]) in [l[0] for l in global_settings.LANGUAGES]:
+    if '-'.join(bits[-offset:]) in supported_languages:
         return '%s-%s' % ('_'.join(bits[:len(bits) - offset]), '_'.join(bits[-offset:]))
     return ''
 
