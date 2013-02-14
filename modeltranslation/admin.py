@@ -8,11 +8,13 @@ from django.contrib.contenttypes import generic
 # Ensure that models are registered for translation before TranslationAdmin
 # runs. The import is supposed to resolve a race condition between model import
 # and translation registration in production (see issue #19).
+from django.utils.safestring import mark_safe
 import modeltranslation.models  # NOQA
 from modeltranslation.settings import DEFAULT_LANGUAGE
 from modeltranslation.translator import translator
 from modeltranslation.utils import (
-    get_translation_fields, build_css_class, build_localized_fieldname, get_language)
+    get_translation_fields, build_css_class, build_localized_fieldname, get_language,
+    build_localized_verbose_name)
 
 
 class TranslationBaseModelAdmin(BaseModelAdmin):
@@ -196,11 +198,52 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
                     exclude.append(tfield)
         return tuple(exclude)
 
+    def _make_readonly_func(self, readonly_field):
+        field = self.model._meta.get_field(readonly_field)
+
+        def func(self, obj):
+            # Wrap the markup rendered by AdminReadonlyField in a hidden span
+            # with custom modeltranslation specific css class to mimic a field.
+            return mark_safe(
+                '<span id="id_%s" class="mt mt-readonly mt-field-%s-%s">%s</span>' % (
+                    readonly_field, field.translated_field.name, field.language.replace('-', '_'),
+                    getattr(obj, readonly_field)))
+        # Forgive me, for i don't know what i'm doing...
+        func.__name__ = str(
+            unicode(build_localized_verbose_name(field.translated_field.name, field.language)))
+        #func.__name__ = readonly_field
+        return func
+
     def get_readonly_fields(self, request, obj=None):
         """
         Hook for specifying custom readonly fields.
         """
-        return self.replace_orig_field(self.readonly_fields)
+        readonly_fields = self.replace_orig_field(self.readonly_fields)
+        # Note: A field defined in ModelAdmin.readonly_fields isn't rendered as
+        # a form field in admin. Since we rely on the custom css classes we add
+        # to the form fields through patch_translation_field in tabbed translation
+        # fields, readonly fields won't be tabbed.
+        if readonly_fields:
+            # Add a dynamic callable per translation to the admin class. This
+            # is actually an undocumented feature in ModelAdmin and might
+            # bite us hard, but it seems to be the only way to modify the
+            # rendered output without monkeypatching the entire
+            # AdminReadonlyField class. But is what we try here any better?
+            readonly_fields_new = []
+            for readonly_field in readonly_fields:
+                readonly_func = self._make_readonly_func(readonly_field)
+                readonly_fields_new.append(readonly_func.__name__)
+                if not hasattr(TranslationBaseModelAdmin, readonly_func.__name__):
+                    setattr(TranslationBaseModelAdmin, readonly_func.__name__, readonly_func)
+                # Replace the original readonly_fields with the dynamic callables
+                readonly_fields = readonly_fields_new
+                # And add the original readonly_fields to exclude, so they doesn't
+                # end up in the form. FIXME: At least one admin test will fail now.
+                if self.exclude:
+                    self.exclude.append(readonly_field)
+                else:
+                    self.exclude = [readonly_field]
+        return readonly_fields
 
 
 class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):

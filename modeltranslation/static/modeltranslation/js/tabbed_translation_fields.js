@@ -66,8 +66,7 @@ var google, django, gettext;
              *
              */
             var translation_fields = $('.mt').filter(
-                'input[type=text]:visible, textarea:visible').filter(
-                    ':parents(.tabular)'),  // exclude tabular inlines
+                'input[type=text]:visible, textarea:visible, span')
                 grouped_translations = {};
 
             // Handle fields inside collapsed groups as added by zinnia
@@ -92,6 +91,26 @@ var google, django, gettext;
                 grouped_translations[id][lang] = el;
             });
             return grouped_translations;
+        }
+
+        function patchReadonlyTranslationFields() {
+            /**
+             * Patches readonly translation fields to look like "real" fields.
+             * Based on some black magic in TranslationAdminBase.get_readonly_fields,
+             * which creates a dynamic callable per readonly translation field and
+             * injects a hidden span with custom css classes into the markup we
+             * can work with.
+             *
+             * This currently doesn't work with inlines as it doesn't handle the
+             * dynamic unique set ids the admin uses for inlines.
+             */
+            $.each($(".mt-readonly"), function() {
+                var $span = $(this);
+                var field_class_bits = $span.attr('class').split(' ')[1].replace('mt-field-', '').split('-');
+                var field_class = 'field-' + field_class_bits[0] + '_' + field_class_bits[1];
+                $(this).parent().parent().parent().attr('class', 'form-row ' + field_class);
+                $(this).parent().replaceWith($(this));
+            });
         }
 
         function createTabs(grouped_translations) {
@@ -155,6 +174,7 @@ var google, django, gettext;
         }
 
         if ($('body').hasClass('change-form')) {
+            patchReadonlyTranslationFields();
             var grouped_translations = getGroupedTranslationFields();
             createMainSwitch(grouped_translations, createTabs(grouped_translations));
         }
