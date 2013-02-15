@@ -1588,7 +1588,6 @@ class TranslationAdminTest(ModeltranslationTestBase):
         # Remove translation for DataModel
         translator.translator.unregister(models.DataModel)
 
-    @override_settings()
     def test_build_css_class(self):
         with override_settings(LANGUAGES=(('de', 'German'), ('en', 'English'),
                                           ('es-ar', 'Argentinian Spanish'),)):
