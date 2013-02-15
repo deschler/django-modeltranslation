@@ -1589,9 +1589,8 @@ class TranslationAdminTest(ModeltranslationTestBase):
         translator.translator.unregister(models.DataModel)
 
     def test_build_css_class(self):
-        with override_settings(LANGUAGES=(('de', 'German'), ('en', 'English'),
-                                          ('es-ar', 'Argentinian Spanish'),)):
-            reload(mt_settings)
+        with reload_override_settings(LANGUAGES=(('de', 'German'), ('en', 'English'),
+                                                 ('es-ar', 'Argentinian Spanish'),)):
             fields = {
                 'foo_en': 'foo-en',
                 'foo_es_ar': 'foo-es_ar',
@@ -1606,7 +1605,6 @@ class TranslationAdminTest(ModeltranslationTestBase):
             }
             for field, css in fields.items():
                 self.assertEqual(build_css_class(field), css)
-        reload(mt_settings)
 
     def test_multitable_inheritance(self):
         class MultitableModelAAdmin(admin.TranslationAdmin):

@@ -36,7 +36,7 @@ build_localized_verbose_name = lazy(_build_localized_verbose_name, unicode)
 
 
 def _join_css_class(bits, offset):
-    if '-'.join(bits[-offset:]) in [l for l in settings.AVAILABLE_LANGUAGES + ['en-us']]:
+    if '-'.join(bits[-offset:]) in settings.AVAILABLE_LANGUAGES + ['en-us']:
         return '%s-%s' % ('_'.join(bits[:len(bits) - offset]), '_'.join(bits[-offset:]))
     return ''
 
