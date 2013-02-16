@@ -172,6 +172,92 @@ var google, django, gettext;
             return tabs;
         }
 
+        function createTabularTabs(groupedTranslations) {
+            var tabs = [],
+                columns = [],
+                firstGroupId = Object.keys(groupedTranslations)[0];
+
+            // Remember table column indexes which have translation fields, but omit the first
+            // one per group, because that's where we insert our tab container.
+            $.each(groupedTranslations, function (groupId, lang) {
+                var i = 0;
+                $.each(lang, function (lang, el) {
+                    var column = $(el).parent().prevAll().length;
+                    if (i > 0 && $.inArray(column, columns) === -1) {
+                        columns.push(column);
+                    }
+                    i += 1;
+                });
+            });
+
+            $.each(groupedTranslations, function (groupId, lang) {
+                //console.log(lang);
+                var tabsContainer = $('<td></td>'),
+                    tabsList = $('<ul></ul>'),
+                    insertionPoint,
+                    $originalTd,
+                    $table;
+                tabsContainer.append(tabsList);
+
+                $.each(lang, function (lang, el) {
+                    $table = $(el).parent().parent().parent().parent();
+                    if (!$originalTd) {
+                        $originalTd = $(el).parent().prev();
+                        //$originalTd.find('p').hide();
+                    }
+                    var container = $(el).parent(),
+                        label = $('label', container),
+                        fieldLabel = container.find('label'),
+                        tabId = 'tab_' + $(el).attr('id'),
+                        panel,
+                        tab;
+
+                    // Remove language and brackets from field label, they are
+                    // displayed in the tab already.
+                    /*
+                    if (fieldLabel.html()) {
+                        fieldLabel.html(fieldLabel.html().replace(/ \[.+\]/, ''));
+                    }
+                    */
+                    if (!insertionPoint) {
+                        insertionPoint = {
+                            'insert': container.prev().length ? 'after' : container.next().length ? 'prepend' : 'append',
+                            'el': container.prev().length ? container.prev() : container.parent()
+                        };
+                    }
+                    panel = $('<div id="' + tabId + '"></div>').append(container);
+
+                    // Turn the moved tds into divs
+                    /*
+                    var attrs = {};
+                    $.each($(container)[0].attributes, function(idx, attr) {
+                        attrs[attr.nodeName] = attr.nodeValue;
+                    });
+                    $(container).replaceWith(function () {
+                        return $('<div />', attrs).append($(this).contents());
+                    });
+                    */
+
+                    tab = $('<li' + (label.hasClass('required') ? ' class="required"' : '') + '><a href="#' + tabId + '">' + lang.replace('_', '-') + '</a></li>');
+                    tabsList.append(tab);
+                    tabsContainer.append(panel);
+                });
+                insertionPoint.el[insertionPoint.insert](tabsContainer);
+                tabsContainer.tabs();
+                tabs.push(tabsContainer);
+
+                $table.find('th').each(function (idx) {
+                    // The markup of tabular inlines is kinda weird. There is an additional
+                    // leading td.original per row, so we have one td more than ths.
+                    if($.inArray(idx + 1, columns) !== -1) {
+                        $(this).hide();
+                    }
+                });
+
+            });
+            return tabs;
+        }
+
         function createMainSwitch(groupedTranslations, tabs) {
             var uniqueLanguages = [],
                 select = $('<select>');
@@ -194,10 +280,17 @@ var google, django, gettext;
         }
 
         if ($('body').hasClass('change-form')) {
+            // Group normal fields and fields in (existing) stacked inlines
             var grouper = new TranslationFieldGrouper({
                 $fieldSelector: $('.mt').filter('input[type=text]:visible, textarea:visible').filter(':parents(.tabular)')
             });
             createMainSwitch(grouper.groupedTranslations, createTabs(grouper.groupedTranslations));
+
+            // Group fields in (existing) tabular inlines
+            var tabularGrouper = new TranslationFieldGrouper({
+                $fieldSelector: $('.tabular').find('.mt').filter('input[type=text]:visible, textarea:visible')
+            });
+            createTabularTabs(tabularGrouper.groupedTranslations);
 
             // Note: The add another functionality in admin is injected through inline javascript,
             // here we have to run after that (and after all other ready events just to be sure).
