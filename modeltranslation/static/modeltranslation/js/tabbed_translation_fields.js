@@ -38,18 +38,30 @@ var google, django, gettext;
                  *  'id_name_zh_tw': 'id_name'
                  *  'id_name_set-2-name_de': 'id_name_set-2-name'
                  *  'id_name_set-2-name_zh_tw': 'id_name_set-2-name'
+                 *  'id_name_set-2-0-name_de': 'id_name_set-2-0-name'
+                 *  'id_name_set-2-0-name_zh_tw': 'id_name_set-2-0-name'
                  *  'id_news-data2-content_type-object_id-0-name_de': 'id_news-data2-content_type-object_id-0-name'
                  *  'id_news-data2-content_type-object_id-0-name_zh_cn': id_news-data2-content_type-object_id-0-name'
+                 *  'id_news-data2-content_type-object_id-0-1-name_de': 'id_news-data2-content_type-object_id-0-1-name'
+                 *  'id_news-data2-content_type-object_id-0-1-name_zh_cn': id_news-data2-content_type-object_id-0-1-name'
                  */
                 var idBits = this.id.split('-'),
                     idPrefix = 'id_' + this.origFieldname;
                 if (idBits.length === 3) {
                     // Handle standard inlines
                     idPrefix = idBits[0] + '-' + idBits[1] + '-' + idPrefix;
+                } else if (idBits.length === 4) {
+                    // Handle standard inlines with model used by inline more than once
+                    //console.log(idBits);
+                    idPrefix = idBits[0] + '-' + idBits[1] + '-' + idBits[2] + '-' + idPrefix;
                 } else if (idBits.length === 6) {
                     // Handle generic inlines
                     idPrefix = idBits[0] + '-' + idBits[1] + '-' + idBits[2] + '-' +
                         idBits[3] + '-' + idBits[4] + '-' + this.origFieldname;
+                } else if (idBits.length === 7) {
+                    // Handle generic inlines with model used by inline more than once
+                    idPrefix = idBits[0] + '-' + idBits[1] + '-' + idBits[2] + '-' +
+                        idBits[3] + '-' + idBits[4] + '-' + idBits[5] + '-' + this.origFieldname;
                 }
                 return idPrefix;
             };
