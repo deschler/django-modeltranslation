@@ -46,7 +46,7 @@ var google, django, gettext;
                  *  'id_news-data2-content_type-object_id-0-1-name_zh_cn': id_news-data2-content_type-object_id-0-1-name'
                  */
                 // TODO: We should be able to simplify this, the modeltranslation specific
-                // field ids are already build to be easily splitable, so we could use them
+                // field classes are already build to be easily splitable, so we could use them
                 // to slice off the language code.
                 var idBits = this.id.split('-'),
                     idPrefix = 'id_' + this.origFieldname;
@@ -297,10 +297,6 @@ var google, django, gettext;
                     }
                     panel = $('<div id="' + tabId + '"></div>').append(container);
 
-                    // TODO: Fix visual glitch when there are translation fields and
-                    // non-translation fields in the same row. Non-translation fields align top
-                    // which makes them appear in line with the tabs navigation.
-                    /*
                     // Turn the moved tds into divs
                     var attrs = {};
                     $.each($(container)[0].attributes, function(idx, attr) {
@@ -309,7 +305,6 @@ var google, django, gettext;
                     $(container).replaceWith(function () {
                         return $('<div />', attrs).append($(this).contents());
                     });
-                    */
 
                     // TODO: Setting the required state based on the default field is to naive.
                     // The user might have tweaked his admin. We somehow have to keep track of the

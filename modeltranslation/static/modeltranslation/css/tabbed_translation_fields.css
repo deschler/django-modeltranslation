@@ -54,13 +54,29 @@
     font-size: 12px;
 }
 
-.ui-tabs .ui-tabs-nav li.ui-tabs-selected a{
+.ui-tabs .ui-tabs-nav li.ui-tabs-selected a {
     background: #7CA0C7 repeat-x;
     color: #fff;
     padding: 6px 10px 4px 10px;
     margin-top: 0;
 }
 
-.ui-tabs .ui-tabs-panel{
+.ui-tabs .ui-tabs-panel {
     padding: 0;
+}
+
+.inline-group .tabular .ui-tabs .ui-tabs-panel {
+    padding: 5px;
+}
+.inline-group .tabular .ui-tabs .ui-tabs-nav {
+    padding-left: 4px;
+    font-family: "Lucida Grande", "DejaVu Sans", "Bitstream Vera Sans", Verdana,Arial, sans-serif;
+}
+.inline-group .tabular tr td input,
+.inline-group .tabular tr td textarea {
+    margin-top: 3.4em;
+}
+.inline-group .tabular tr td.ui-tabs input,
+.inline-group .tabular tr td.ui-tabs textarea {
+    margin-top: 0;
 }
