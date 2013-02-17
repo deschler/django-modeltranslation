@@ -208,8 +208,7 @@ var google, django, gettext;
 
             this.getAllGroupedTranslations = function () {
                 var grouper = new TranslationFieldGrouper({
-                    $fields: this.$table.find('.mt').filter(
-                        'input[type=text]:visible, textarea:visible')
+                    $fields: this.$table.find('.mt').filter('input:visible, textarea:visible')
                 });
                 this.translationColumns = this.getTranslationColumns(grouper.groupedTranslations);
                 //this.requiredColumns = this.getRequiredColumns();
@@ -374,7 +373,7 @@ var google, django, gettext;
             // Group normal fields and fields in (existing) stacked inlines
             var grouper = new TranslationFieldGrouper({
                 $fields: $('.mt').filter(
-                    'input[type=text]:visible, textarea:visible').filter(':parents(.tabular)')
+                    'input:visible, textarea:visible').filter(':parents(.tabular)')
             });
             MainSwitch.init(grouper.groupedTranslations, createTabs(grouper.groupedTranslations));
 
