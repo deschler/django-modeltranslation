@@ -28,9 +28,9 @@ var google, django, gettext;
 
             this.buildGroupId = function () {
                 /**
-                 * Returns a unique group identifier with respect to Django's way
-                 * of handling inline ids. Essentially that's the translation
-                 * field id without the language prefix.
+                 * Returns a unique group identifier with respect to the admin's way
+                 * of handling inline field name attributes. Essentially that's the
+                 * translation field id without the language prefix.
                  *
                  * Examples ('id parameter': 'return value'):
                  *
@@ -45,6 +45,9 @@ var google, django, gettext;
                  *  'id_news-data2-content_type-object_id-0-1-name_de': 'id_news-data2-content_type-object_id-0-1-name'
                  *  'id_news-data2-content_type-object_id-0-1-name_zh_cn': id_news-data2-content_type-object_id-0-1-name'
                  */
+                // TODO: We should be able to simplify this, the modeltranslation specific
+                // field ids are already build to be easily splitable, so we could use them
+                // to slice off the language code.
                 var idBits = this.id.split('-'),
                     idPrefix = 'id_' + this.origFieldname;
                 if (idBits.length === 3) {
@@ -52,7 +55,6 @@ var google, django, gettext;
                     idPrefix = idBits[0] + '-' + idBits[1] + '-' + idPrefix;
                 } else if (idBits.length === 4) {
                     // Handle standard inlines with model used by inline more than once
-                    //console.log(idBits);
                     idPrefix = idBits[0] + '-' + idBits[1] + '-' + idBits[2] + '-' + idPrefix;
                 } else if (idBits.length === 6) {
                     // Handle generic inlines
@@ -71,12 +73,12 @@ var google, django, gettext;
         TranslationField.cssPrefix = 'mt-field-';
 
         var TranslationFieldGrouper = function (options) {
-            this.$fieldSelector = options.$fieldSelector;
+            this.$fields = options.$fields;
             this.groupedTranslations = {};
 
             this.init = function () {
                 // Handle fields inside collapsed groups as added by zinnia
-                this.$fieldSelector = this.$fieldSelector.add('fieldset.collapse-closed .mt');
+                this.$fields = this.$fields.add('fieldset.collapse-closed .mt');
 
                 this.groupedTranslations = this.getGroupedTranslations();
             };
@@ -108,7 +110,7 @@ var google, django, gettext;
                  * TranslationField.buildGroupId() to handle inlines properly.
                  */
                 var self = this;
-                this.$fieldSelector.each(function (idx, el) {
+                this.$fields.each(function (idx, el) {
                     $.each($(el).attr('class').split(' '), function(idx, cls) {
                         if (cls.substring(0, TranslationField.cssPrefix.length) === TranslationField.cssPrefix) {
                             var tfield = new TranslationField({el: el, cls: cls});
@@ -124,27 +126,6 @@ var google, django, gettext;
 
             this.init();
         };
-
-        function handleAddAnotherInline() {
-            $('.mt').parents('.inline-group').not('.tabular').find('.add-row a').click(function () {
-                var grouper = new TranslationFieldGrouper({
-                    $fieldSelector: $(this).parent().prev().prev().find('.mt')
-                });
-                var tabs = createTabs(grouper.groupedTranslations);
-
-                // Update the main switch as it is not aware of the newly created tabs
-                var $select = $('#content').find('h1 select');
-                $select.change(function () {
-                    $.each(tabs, function (i, tab) {
-                        tab.tabs('select', parseInt($select.val()));
-                    });
-                });
-                // Activate the language tab selected in the main switch
-                $.each(tabs, function (i, tab) {
-                    tab.tabs('select', parseInt($select.val()));
-                });
-            });
-        }
 
         function createTabs(groupedTranslations) {
             var tabs = [];
@@ -184,53 +165,130 @@ var google, django, gettext;
             return tabs;
         }
 
-        function createTabularTabs(groupedTranslations) {
-            var tabs = [],
-                columns = [],
-                firstGroupId = Object.keys(groupedTranslations)[0];
+        function handleAddAnotherInline() {
+            // TODO: Refactor
+            $('.mt').parents('.inline-group').not('.tabular').find('.add-row a').click(function () {
+                var grouper = new TranslationFieldGrouper({
+                    $fields: $(this).parent().prev().prev().find('.mt')
+                });
+                var tabs = createTabs(grouper.groupedTranslations);
 
-            // Remember table column indexes which have translation fields, but omit the first
-            // one per group, because that's where we insert our tab container.
-            $.each(groupedTranslations, function (groupId, lang) {
-                var i = 0;
-                $.each(lang, function (lang, el) {
-                    var column = $(el).parent().prevAll().length;
-                    if (i > 0 && $.inArray(column, columns) === -1) {
-                        columns.push(column);
-                    }
-                    i += 1;
+                // Update the main switch as it is not aware of the newly created tabs
+                var $select = updateMainSwitch(tabs);
+                // Activate the language tab selected in the main switch
+                $.each(tabs, function (idx, tab) {
+                    tab.tabs('select', parseInt($select.val()));
                 });
             });
+        }
+
+        var TabularInlineGroup = function (options) {
+            this.id = options.id;
+            this.$id = null;
+            this.$table = null;
+            this.translationColumns = [];
+            // TODO: Make use of this to flag required tabs
+            this.requiredColumns = [];
+
+            this.init = function () {
+                this.$id = $('#' + this.id);
+                this.$table = $(this.$id).find('table');
+            };
+
+            this.getAllGroupedTranslations = function () {
+                var grouper = new TranslationFieldGrouper({
+                    $fields: this.$table.find('.mt').filter('input[type=text]:visible, textarea:visible')
+                });
+                this.translationColumns = this.getTranslationColumns(grouper.groupedTranslations);
+                //this.requiredColumns = this.getRequiredColumns();
+                this.updateTable();
+                return grouper.groupedTranslations;
+            };
+
+            this.getGroupedTranslations = function ($fields) {
+                var grouper = new TranslationFieldGrouper({
+                    $fields: $fields
+                });
+                return grouper.groupedTranslations;
+            };
+
+            this.updateTable = function () {
+                var self = this;
+                // The markup of tabular inlines is kinda weird. There is an additional
+                // leading td.original per row, so we have one td more than ths.
+                this.$table.find('th').each(function (idx) {
+                    // Hide table heads from which translation fields have been moved out.
+                    if($.inArray(idx + 1, self.translationColumns) !== -1) {
+                        // FIXME: Why does this break when we use remove instead of hide?
+                        $(this).hide();
+                    }
+
+                    // Remove language and brackets from table header,
+                    // they are displayed in the tab already.
+                    if ($(this).html() && $.inArray(idx + 1, self.translationColumns) === -1) {
+                        $(this).html($(this).html().replace(/ \[.+\]/, ''));
+                    }
+                });
+            };
+
+            this.getTranslationColumns = function (groupedTranslations) {
+                var translationColumns = [];
+                // Get table column indexes which have translation fields, but omit the first
+                // one per group, because that's where we insert our tab container.
+                $.each(groupedTranslations, function (groupId, lang) {
+                    var i = 0;
+                    $.each(lang, function (lang, el) {
+                        var column = $(el).parent().prevAll().length;
+                        if (i > 0 && $.inArray(column, translationColumns) === -1) {
+                            translationColumns.push(column);
+                        }
+                        i += 1;
+                    });
+                });
+                return translationColumns;
+            };
+
+            this.getRequiredColumns = function () {
+                var requiredColumns = [];
+                // Get table column indexes which have required fields, but omit the first
+                // one per group, because that's where we insert our tab container.
+                this.$table.find('th.required').each(function () {
+                    requiredColumns.push($(this).index() + 1);
+                });
+                return requiredColumns;
+            };
+
+            this.init();
+        };
+
+        function handleTabularAddAnotherInline(tabularInlineGroup) {
+            tabularInlineGroup.$table.find('.add-row a').click(function () {
+                var tabs = createTabularTabs(tabularInlineGroup.getGroupedTranslations(
+                    $(this).parent().parent().prev().prev().find('.mt')));
+                // Update the main switch as it is not aware of the newly created tabs
+                var $select = updateMainSwitch(tabs);
+                // Activate the language tab selected in the main switch
+                $.each(tabs, function (i, tab) {
+                    tab.tabs('select', parseInt($select.val()));
+                });
+
+            });
+        }
+
+        function createTabularTabs(groupedTranslations) {
+            var tabs = [];
 
             $.each(groupedTranslations, function (groupId, lang) {
-                //console.log(lang);
                 var tabsContainer = $('<td></td>'),
                     tabsList = $('<ul></ul>'),
-                    insertionPoint,
-                    $originalTd,
-                    $table;
+                    insertionPoint;
                 tabsContainer.append(tabsList);
 
                 $.each(lang, function (lang, el) {
-                    $table = $(el).parent().parent().parent().parent();
-                    if (!$originalTd) {
-                        $originalTd = $(el).parent().prev();
-                        //$originalTd.find('p').hide();
-                    }
                     var container = $(el).parent(),
-                        label = $('label', container),
-                        fieldLabel = container.find('label'),
                         tabId = 'tab_' + $(el).attr('id'),
                         panel,
                         tab;
-
-                    // Remove language and brackets from field label, they are
-                    // displayed in the tab already.
-                    /*
-                    if (fieldLabel.html()) {
-                        fieldLabel.html(fieldLabel.html().replace(/ \[.+\]/, ''));
-                    }
-                    */
                     if (!insertionPoint) {
                         insertionPoint = {
                             'insert': container.prev().length ? 'after' : container.next().length ? 'prepend' : 'append',
@@ -239,8 +297,11 @@ var google, django, gettext;
                     }
                     panel = $('<div id="' + tabId + '"></div>').append(container);
 
-                    // Turn the moved tds into divs
+                    // TODO: Fix visual glitch when there are translation fields and
+                    // non-translation fields in the same row. Non-translation fields align top
+                    // which makes them appear in line with the tabs navigation.
                     /*
+                    // Turn the moved tds into divs
                     var attrs = {};
                     $.each($(container)[0].attributes, function(idx, attr) {
                         attrs[attr.nodeName] = attr.nodeValue;
@@ -250,27 +311,22 @@ var google, django, gettext;
                     });
                     */
 
-                    tab = $('<li' + (label.hasClass('required') ? ' class="required"' : '') + '><a href="#' + tabId + '">' + lang.replace('_', '-') + '</a></li>');
+                    // TODO: Setting the required state based on the default field is to naive.
+                    // The user might have tweaked his admin. We somehow have to keep track of the
+                    // column indexes _before_ the tds have been moved around.
+                    tab = $('<li' + ($(el).hasClass('mt-default') ? ' class="required"' : '') + '><a href="#' + tabId + '">' + lang.replace('_', '-') + '</a></li>');
                     tabsList.append(tab);
                     tabsContainer.append(panel);
                 });
                 insertionPoint.el[insertionPoint.insert](tabsContainer);
                 tabsContainer.tabs();
                 tabs.push(tabsContainer);
-
-                $table.find('th').each(function (idx) {
-                    // The markup of tabular inlines is kinda weird. There is an additional
-                    // leading td.original per row, so we have one td more than ths.
-                    if($.inArray(idx + 1, columns) !== -1) {
-                        $(this).hide();
-                    }
-                });
-
             });
             return tabs;
         }
 
         function createMainSwitch(groupedTranslations, tabs) {
+            // TODO: Factor out update functionality
             var uniqueLanguages = [],
                 select = $('<select>');
             $.each(groupedTranslations, function (id, languages) {
@@ -291,24 +347,42 @@ var google, django, gettext;
             $('#content').find('h1').append('&nbsp;').append(select);
         }
 
+        function updateMainSwitch(tabs) {
+            var $select = $('#content').find('h1 select');
+            $select.change(function () {
+                $.each(tabs, function (idx, tab) {
+                    tab.tabs('select', parseInt($select.val()));
+                });
+            });
+            return $select;
+        }
+
         if ($('body').hasClass('change-form')) {
             // Group normal fields and fields in (existing) stacked inlines
             var grouper = new TranslationFieldGrouper({
-                $fieldSelector: $('.mt').filter('input[type=text]:visible, textarea:visible').filter(':parents(.tabular)')
+                $fields: $('.mt').filter('input[type=text]:visible, textarea:visible').filter(':parents(.tabular)')
             });
             createMainSwitch(grouper.groupedTranslations, createTabs(grouper.groupedTranslations));
-
-            // Group fields in (existing) tabular inlines
-            var tabularGrouper = new TranslationFieldGrouper({
-                $fieldSelector: $('.tabular').find('.mt').filter('input[type=text]:visible, textarea:visible')
-            });
-            createTabularTabs(tabularGrouper.groupedTranslations);
 
             // Note: The add another functionality in admin is injected through inline javascript,
             // here we have to run after that (and after all other ready events just to be sure).
             $(document).ready(function() {
                 $(window).load(function() {
                     handleAddAnotherInline();
+                });
+            });
+
+            // Group fields in (existing) tabular inlines
+            $('div.inline-group > div.tabular').each(function () {
+                var tabularInlineGroup = new TabularInlineGroup({
+                    'id': $(this).parent().attr('id')
+                });
+                updateMainSwitch(createTabularTabs(tabularInlineGroup.getAllGroupedTranslations()));
+
+                $(document).ready(function() {
+                    $(window).load(function() {
+                        handleTabularAddAnotherInline(tabularInlineGroup);
+                    });
                 });
             });
         }
