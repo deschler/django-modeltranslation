@@ -19,7 +19,8 @@ var google, django, gettext;
             this.groupId = '';
 
             this.init = function () {
-                var clsBits = this.cls.substring(TranslationField.cssPrefix.length, this.cls.length).split('-');
+                var clsBits = this.cls.substring(
+                    TranslationField.cssPrefix.length, this.cls.length).split('-');
                 this.origFieldname = clsBits[0];
                 this.lang = clsBits[1];
                 this.id = $(this.el).attr('id');
@@ -34,16 +35,26 @@ var google, django, gettext;
                  *
                  * Examples ('id parameter': 'return value'):
                  *
-                 *  'id_name_de': 'id_name'
-                 *  'id_name_zh_tw': 'id_name'
-                 *  'id_name_set-2-name_de': 'id_name_set-2-name'
-                 *  'id_name_set-2-name_zh_tw': 'id_name_set-2-name'
-                 *  'id_name_set-2-0-name_de': 'id_name_set-2-0-name'
-                 *  'id_name_set-2-0-name_zh_tw': 'id_name_set-2-0-name'
-                 *  'id_news-data2-content_type-object_id-0-name_de': 'id_news-data2-content_type-object_id-0-name'
-                 *  'id_news-data2-content_type-object_id-0-name_zh_cn': id_news-data2-content_type-object_id-0-name'
-                 *  'id_news-data2-content_type-object_id-0-1-name_de': 'id_news-data2-content_type-object_id-0-1-name'
-                 *  'id_news-data2-content_type-object_id-0-1-name_zh_cn': id_news-data2-content_type-object_id-0-1-name'
+                 *  'id_name_de':
+                 *      'id_name'
+                 *  'id_name_zh_tw':
+                 *      'id_name'
+                 *  'id_name_set-2-name_de':
+                 *      'id_name_set-2-name'
+                 *  'id_name_set-2-name_zh_tw':
+                 *      'id_name_set-2-name'
+                 *  'id_name_set-2-0-name_de':
+                 *      'id_name_set-2-0-name'
+                 *  'id_name_set-2-0-name_zh_tw':
+                 *      'id_name_set-2-0-name'
+                 *  'id_news-data2-content_type-object_id-0-name_de':
+                 *      'id_news-data2-content_type-object_id-0-name'
+                 *  'id_news-data2-content_type-object_id-0-name_zh_cn':
+                 *      id_news-data2-content_type-object_id-0-name'
+                 *  'id_news-data2-content_type-object_id-0-1-name_de':
+                 *      'id_news-data2-content_type-object_id-0-1-name'
+                 *  'id_news-data2-content_type-object_id-0-1-name_zh_cn':
+                 *      id_news-data2-content_type-object_id-0-1-name'
                  */
                 // TODO: We should be able to simplify this, the modeltranslation specific
                 // field classes are already build to be easily splitable, so we could use them
@@ -109,10 +120,11 @@ var google, django, gettext;
                  * The keys are unique group identifiers as returned by
                  * TranslationField.buildGroupId() to handle inlines properly.
                  */
-                var self = this;
+                var self = this,
+                    cssPrefix = TranslationField.cssPrefix;
                 this.$fields.each(function (idx, el) {
                     $.each($(el).attr('class').split(' '), function(idx, cls) {
-                        if (cls.substring(0, TranslationField.cssPrefix.length) === TranslationField.cssPrefix) {
+                        if (cls.substring(0, cssPrefix.length) === cssPrefix) {
                             var tfield = new TranslationField({el: el, cls: cls});
                             if (!self.groupedTranslations[tfield.groupId]) {
                                 self.groupedTranslations[tfield.groupId] = {};
@@ -148,13 +160,15 @@ var google, django, gettext;
                     }
                     if (!insertionPoint) {
                         insertionPoint = {
-                            'insert': container.prev().length ? 'after' : container.next().length ? 'prepend' : 'append',
+                            'insert': container.prev().length ? 'after' :
+                                container.next().length ? 'prepend' : 'append',
                             'el': container.prev().length ? container.prev() : container.parent()
                         };
                     }
                     container.find('script').remove();
                     panel = $('<div id="' + tabId + '"></div>').append(container);
-                    tab = $('<li' + (label.hasClass('required') ? ' class="required"' : '') + '><a href="#' + tabId + '">' + lang.replace('_', '-') + '</a></li>');
+                    tab = $('<li' + (label.hasClass('required') ? ' class="required"' : '') +
+                            '><a href="#' + tabId + '">' + lang.replace('_', '-') + '</a></li>');
                     tabsList.append(tab);
                     tabsContainer.append(panel);
                 });
@@ -174,10 +188,10 @@ var google, django, gettext;
                 var tabs = createTabs(grouper.groupedTranslations);
 
                 // Update the main switch as it is not aware of the newly created tabs
-                var $select = updateMainSwitch(tabs);
+                MainSwitch.update(tabs);
                 // Activate the language tab selected in the main switch
                 $.each(tabs, function (idx, tab) {
-                    tab.tabs('select', parseInt($select.val()));
+                    tab.tabs('select', parseInt(MainSwitch.$select.val()));
                 });
             });
         }
@@ -197,7 +211,8 @@ var google, django, gettext;
 
             this.getAllGroupedTranslations = function () {
                 var grouper = new TranslationFieldGrouper({
-                    $fields: this.$table.find('.mt').filter('input[type=text]:visible, textarea:visible')
+                    $fields: this.$table.find('.mt').filter(
+                        'input[type=text]:visible, textarea:visible')
                 });
                 this.translationColumns = this.getTranslationColumns(grouper.groupedTranslations);
                 //this.requiredColumns = this.getRequiredColumns();
@@ -266,10 +281,10 @@ var google, django, gettext;
                 var tabs = createTabularTabs(tabularInlineGroup.getGroupedTranslations(
                     $(this).parent().parent().prev().prev().find('.mt')));
                 // Update the main switch as it is not aware of the newly created tabs
-                var $select = updateMainSwitch(tabs);
+                MainSwitch.update(tabs);
                 // Activate the language tab selected in the main switch
                 $.each(tabs, function (i, tab) {
-                    tab.tabs('select', parseInt($select.val()));
+                    tab.tabs('select', parseInt(MainSwitch.$select.val()));
                 });
 
             });
@@ -285,33 +300,35 @@ var google, django, gettext;
                 tabsContainer.append(tabsList);
 
                 $.each(lang, function (lang, el) {
-                    var container = $(el).parent(),
-                        tabId = 'tab_' + $(el).attr('id'),
-                        panel,
-                        tab;
+                    var $container = $(el).parent(),
+                        $panel,
+                        $tab,
+                        tabId = 'tab_' + $(el).attr('id');
                     if (!insertionPoint) {
                         insertionPoint = {
-                            'insert': container.prev().length ? 'after' : container.next().length ? 'prepend' : 'append',
-                            'el': container.prev().length ? container.prev() : container.parent()
+                            'insert': $container.prev().length ? 'after' :
+                                $container.next().length ? 'prepend' : 'append',
+                            'el': $container.prev().length ? $container.prev() : $container.parent()
                         };
                     }
-                    panel = $('<div id="' + tabId + '"></div>').append(container);
+                    $panel = $('<div id="' + tabId + '"></div>').append($container);
 
                     // Turn the moved tds into divs
                     var attrs = {};
-                    $.each($(container)[0].attributes, function(idx, attr) {
+                    $.each($container[0].attributes, function(idx, attr) {
                         attrs[attr.nodeName] = attr.nodeValue;
                     });
-                    $(container).replaceWith(function () {
+                    $container.replaceWith(function () {
                         return $('<div />', attrs).append($(this).contents());
                     });
 
-                    // TODO: Setting the required state based on the default field is to naive.
+                    // TODO: Setting the required state based on the default field is naive.
                     // The user might have tweaked his admin. We somehow have to keep track of the
                     // column indexes _before_ the tds have been moved around.
-                    tab = $('<li' + ($(el).hasClass('mt-default') ? ' class="required"' : '') + '><a href="#' + tabId + '">' + lang.replace('_', '-') + '</a></li>');
-                    tabsList.append(tab);
-                    tabsContainer.append(panel);
+                    $tab = $('<li' + ($(el).hasClass('mt-default') ? ' class="required"' : '') +
+                             '><a href="#' + tabId + '">' + lang.replace('_', '-') + '</a></li>');
+                    tabsList.append($tab);
+                    tabsContainer.append($panel);
                 });
                 insertionPoint.el[insertionPoint.insert](tabsContainer);
                 tabsContainer.tabs();
@@ -320,44 +337,48 @@ var google, django, gettext;
             return tabs;
         }
 
-        function createMainSwitch(groupedTranslations, tabs) {
-            // TODO: Factor out update functionality
-            var uniqueLanguages = [],
-                select = $('<select>');
-            $.each(groupedTranslations, function (id, languages) {
-                $.each(languages, function (lang) {
-                    if ($.inArray(lang, uniqueLanguages) < 0) {
-                        uniqueLanguages.push(lang);
-                    }
-                });
-            });
-            $.each(uniqueLanguages, function (idx, language) {
-                select.append($('<option value="' + idx + '">' + language.replace('_', '-') + '</option>'));
-            });
-            select.change(function () {
-                $.each(tabs, function (idx, tab) {
-                    tab.tabs('select', parseInt(select.val()));
-                });
-            });
-            $('#content').find('h1').append('&nbsp;').append(select);
-        }
+        var MainSwitch = {
+            languages: [],
+            $select: $('<select>'),
 
-        function updateMainSwitch(tabs) {
-            var $select = $('#content').find('h1 select');
-            $select.change(function () {
-                $.each(tabs, function (idx, tab) {
-                    tab.tabs('select', parseInt($select.val()));
+            init: function(groupedTranslations, tabs) {
+                var self = this;
+                $.each(groupedTranslations, function (id, languages) {
+                    $.each(languages, function (lang) {
+                        if ($.inArray(lang, self.languages) < 0) {
+                            self.languages.push(lang);
+                        }
+                    });
                 });
-            });
-            return $select;
-        }
+                $.each(this.languages, function (idx, language) {
+                    self.$select.append($('<option value="' + idx + '">' +
+                                        language.replace('_', '-') + '</option>'));
+                });
+                this.$select.change(function () {
+                    $.each(tabs, function (idx, tab) {
+                        tab.tabs('select', parseInt(self.$select.val()));
+                    });
+                });
+                $('#content').find('h1').append('&nbsp;').append(self.$select);
+            },
+
+            update: function(tabs) {
+                var self = this;
+                this.$select.change(function () {
+                    $.each(tabs, function (idx, tab) {
+                        tab.tabs('select', parseInt(self.$select.val()));
+                    });
+                });
+            }
+        };
 
         if ($('body').hasClass('change-form')) {
             // Group normal fields and fields in (existing) stacked inlines
             var grouper = new TranslationFieldGrouper({
-                $fields: $('.mt').filter('input[type=text]:visible, textarea:visible').filter(':parents(.tabular)')
+                $fields: $('.mt').filter(
+                    'input[type=text]:visible, textarea:visible').filter(':parents(.tabular)')
             });
-            createMainSwitch(grouper.groupedTranslations, createTabs(grouper.groupedTranslations));
+            MainSwitch.init(grouper.groupedTranslations, createTabs(grouper.groupedTranslations));
 
             // Note: The add another functionality in admin is injected through inline javascript,
             // here we have to run after that (and after all other ready events just to be sure).
@@ -372,7 +393,8 @@ var google, django, gettext;
                 var tabularInlineGroup = new TabularInlineGroup({
                     'id': $(this).parent().attr('id')
                 });
-                updateMainSwitch(createTabularTabs(tabularInlineGroup.getAllGroupedTranslations()));
+                MainSwitch.update(
+                    createTabularTabs(tabularInlineGroup.getAllGroupedTranslations()));
 
                 $(document).ready(function() {
                     $(window).load(function() {
