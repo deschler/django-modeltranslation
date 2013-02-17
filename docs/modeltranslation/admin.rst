@@ -302,7 +302,7 @@ grouped into fieldsets (``group_fieldsets = False``).
 
 A few simple policies are applied:
 
- * A ``fieldset`` option takes precedence over the ``group_fieldsets`` option.
+ * A ``fieldsets`` option takes precedence over the ``group_fieldsets`` option.
  * Other default ``ModelAdmin`` options like ``exclude`` are respected.
 
 .. code-block:: python
