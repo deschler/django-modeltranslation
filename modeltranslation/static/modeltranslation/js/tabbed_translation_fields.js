@@ -186,13 +186,10 @@ var google, django, gettext;
                     $fields: $(this).parent().prev().prev().find('.mt')
                 });
                 var tabs = createTabs(grouper.groupedTranslations);
-
                 // Update the main switch as it is not aware of the newly created tabs
                 MainSwitch.update(tabs);
                 // Activate the language tab selected in the main switch
-                $.each(tabs, function (idx, tab) {
-                    tab.tabs('select', parseInt(MainSwitch.$select.val()));
-                });
+                MainSwitch.activateTab(tabs);
             });
         }
 
@@ -278,15 +275,13 @@ var google, django, gettext;
 
         function handleTabularAddAnotherInline(tabularInlineGroup) {
             tabularInlineGroup.$table.find('.add-row a').click(function () {
-                var tabs = createTabularTabs(tabularInlineGroup.getGroupedTranslations(
-                    $(this).parent().parent().prev().prev().find('.mt')));
+                var tabs = createTabularTabs(
+                    tabularInlineGroup.getGroupedTranslations(
+                        $(this).parent().parent().prev().prev().find('.mt')));
                 // Update the main switch as it is not aware of the newly created tabs
                 MainSwitch.update(tabs);
                 // Activate the language tab selected in the main switch
-                $.each(tabs, function (i, tab) {
-                    tab.tabs('select', parseInt(MainSwitch.$select.val()));
-                });
-
+                MainSwitch.activateTab(tabs);
             });
         }
 
@@ -354,11 +349,7 @@ var google, django, gettext;
                     self.$select.append($('<option value="' + idx + '">' +
                                         language.replace('_', '-') + '</option>'));
                 });
-                this.$select.change(function () {
-                    $.each(tabs, function (idx, tab) {
-                        tab.tabs('select', parseInt(self.$select.val()));
-                    });
-                });
+                this.update(tabs);
                 $('#content').find('h1').append('&nbsp;').append(self.$select);
             },
 
@@ -368,6 +359,13 @@ var google, django, gettext;
                     $.each(tabs, function (idx, tab) {
                         tab.tabs('select', parseInt(self.$select.val()));
                     });
+                });
+            },
+
+            activateTab: function(tabs) {
+                var self = this;
+                $.each(tabs, function (idx, tab) {
+                    tab.tabs('select', parseInt(self.$select.val()));
                 });
             }
         };
