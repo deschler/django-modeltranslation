@@ -289,3 +289,12 @@ class CustomManager2(models.Manager):
 class CustomManager2TestModel(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
     objects = CustomManager2()
+
+
+########## Required fields testing
+
+class RequiredModel(models.Model):
+    non_req = models.CharField(max_length=10, blank=True)
+    req = models.CharField(max_length=10)
+    req_reg = models.CharField(max_length=10)
+    req_en_reg = models.CharField(max_length=10)

@@ -7,7 +7,8 @@ from modeltranslation.tests.models import (
     DescriptorModel, AbstractModelA, AbstractModelB, Slugged, MetaData, Displayable, Page,
     RichText, RichTextPage, MultitableModelA, MultitableModelB, MultitableModelC, ManagerTestModel,
     CustomManagerTestModel, CustomManager2TestModel, GroupFieldsetsModel, NameModel,
-    ThirdPartyRegisteredModel, ProxyTestModel, UniqueNullableModel, OneToOneFieldModel)
+    ThirdPartyRegisteredModel, ProxyTestModel, UniqueNullableModel, OneToOneFieldModel,
+    RequiredModel)
 
 
 class TestTranslationOptions(TranslationOptions):
@@ -186,3 +187,14 @@ translator.register(GroupFieldsetsModel, GroupFieldsetsTranslationOptions)
 class NameTranslationOptions(TranslationOptions):
     fields = ('firstname', 'lastname', 'slug2')
 translator.register(NameModel, NameTranslationOptions)
+
+
+########## Required fields testing
+
+class RequiredTranslationOptions(TranslationOptions):
+    fields = ('non_req', 'req', 'req_reg', 'req_en_reg')
+    required_languages = {
+        'en': ('req_reg', 'req_en_reg',),
+        'default': ('req_reg',),  # for all other languages
+    }
+translator.register(RequiredModel, RequiredTranslationOptions)

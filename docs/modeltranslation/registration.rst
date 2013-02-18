@@ -154,13 +154,47 @@ involves copying migration files, using ``SOUTH_MIGRATION_MODULES`` setting,
 and passing ``--delete-ghost-migrations`` flag, so we don't recommend it.
 Invoking ``sync_translation_fields`` is plain easier.
 
-Note that all added fields are
+Note that all added fields are by default
 declared ``blank=True`` and ``null=True`` no matter if the original field is
-required or not. In other words - all translations are optional. To populate
-the default translation fields added by the modeltranslation application
+required or not. In other words - all translations are optional, unless an explicit option
+is provided - see below.
+
+To populate the default translation fields added by the modeltranslation application
 with values from existing database fields, you
 can use the ``update_translation_fields`` command below. See
 :ref:`commands-update_translation_fields` for more info on this.
+
+
+.. _required_langs:
+
+Required fields
+---------------
+
+By default, all translation fields are optional (not required). It can be changed using special
+attribute on ``TranslationOptions``, though::
+
+    class NewsTranslationOptions(TranslationOptions):
+        fields = ('title', 'text',)
+        required_languages = ('en', 'de')
+
+It quite self-explanatory: for German and English, all translation fields are required. For other
+languages - optional.
+
+A more fine-grained control is available::
+
+    class NewsTranslationOptions(TranslationOptions):
+        fields = ('title', 'text',)
+        required_languages = {'de': ('title', 'text'), 'default': ('title',)}
+
+For German, all fields (both ``title`` and ``text``) are required; for all other languages - only
+``title`` is required. The ``'default'`` is optional.
+
+.. note::
+    Requirement is enforced by ``blank=False``. Please remember that it will trigger validation only
+    in modelforms and admin (as always in Django). Manual model validation can be performed via
+    ``full_clean()`` model method.
+
+    The required fields are still ``null=True``, though.
 
 
 ``TranslationOptions`` attributes reference
@@ -204,6 +238,13 @@ Classes inheriting from ``TranslationOptions`` can have following attributes def
 
         empty_values = ''
         empty_values = {'title': '', 'slug': None, 'desc': 'both'}
+
+.. attribute:: TranslationOptions.required_languages
+
+    Control which translation fields are required. See :ref:`required_langs`. ::
+
+        required_languages = ('en', 'de')
+        required_languages = {'de': ('title','text'), 'default': ('title',)}
 
 
 .. _supported_field_matrix:

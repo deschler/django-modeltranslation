@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.utils.six import with_metaclass
+from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Manager, ForeignKey, OneToOneField
 from django.db.models.base import ModelBase
 from django.db.models.signals import post_init
@@ -57,6 +58,7 @@ class TranslationOptions(with_metaclass(FieldsAggregationMetaClass, object)):
     with translated model. This model may be not translated itself.
     ``related_fields`` contains names of reverse lookup fields.
     """
+    required_languages = ()
 
     def __init__(self, model):
         """
@@ -68,6 +70,28 @@ class TranslationOptions(with_metaclass(FieldsAggregationMetaClass, object)):
         self.local_fields = dict((f, set()) for f in self.fields)
         self.fields = dict((f, set()) for f in self.fields)
         self.related_fields = []
+
+    def validate(self):
+        """
+        Perform options validation.
+        """
+        # TODO: at the moment only required_languages is validated.
+        # Maybe check other options as well?
+        if self.required_languages:
+            if isinstance(self.required_languages, (tuple, list)):
+                self._check_languages(self.required_languages)
+            else:
+                self._check_languages(self.required_languages.iterkeys(), extra=('default',))
+                for fieldnames in self.required_languages.itervalues():
+                    if any(f not in self.fields for f in fieldnames):
+                        raise ImproperlyConfigured(
+                            'Fieldname in required_languages which is not in fields option.')
+
+    def _check_languages(self, languages, extra=()):
+        correct = mt_settings.AVAILABLE_LANGUAGES + list(extra)
+        if any(l not in correct for l in languages):
+            raise ImproperlyConfigured(
+                'Language in required_languages which is not in AVAILABLE_LANGUAGES.')
 
     def update(self, other):
         """
@@ -341,6 +365,9 @@ class Translator(object):
 
             # Find inherited fields and create options instance for the model.
             opts = self._get_options_for_model(model, opts_class, **options)
+
+            # Now, when all fields are initialized and inherited, validate configuration.
+            opts.validate()
 
             # Mark the object explicitly as registered -- registry caches
             # options of all models, registered or not.

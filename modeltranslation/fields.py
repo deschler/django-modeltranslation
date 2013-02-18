@@ -98,6 +98,8 @@ class TranslationField(object):
     that needs to be specified when the field is created.
     """
     def __init__(self, translated_field, language, empty_value, *args, **kwargs):
+        from modeltranslation.translator import translator
+
         # Update the dict of this field with the content of the original one
         # This might be a bit radical?! Seems to work though...
         self.__dict__.update(translated_field.__dict__)
@@ -109,14 +111,34 @@ class TranslationField(object):
         if empty_value is NONE:
             self.empty_value = None if translated_field.null else ''
 
-        # Translation are always optional (for now - maybe add some parameters
-        # to the translation options for configuring this)
-
+        # Default behaviour is that all translations are optional
         if not isinstance(self, fields.BooleanField):
             # TODO: Do we really want to enforce null *at all*? Shouldn't this
             # better honour the null setting of the translated field?
             self.null = True
         self.blank = True
+
+        # Take required_languages translation option into account
+        trans_opts = translator.get_options_for_model(self.model)
+        if trans_opts.required_languages:
+            required_languages = trans_opts.required_languages
+            if isinstance(trans_opts.required_languages, (tuple, list)):
+                # All fields
+                if self.language in required_languages:
+                    # self.null = False
+                    self.blank = False
+            else:
+                # Certain fields only
+                # Try current language - if not present, try 'default' key
+                try:
+                    req_fields = required_languages[self.language]
+                except KeyError:
+                    req_fields = required_languages.get('default', ())
+                if self.name in req_fields:
+                    # TODO: We might have to handle the whole thing through the
+                    # FieldsAggregationMetaClass, as fields can be inherited.
+                    # self.null = False
+                    self.blank = False
 
         # Adjust the name of this field to reflect the language
         self.attname = build_localized_fieldname(self.translated_field.name, self.language)
