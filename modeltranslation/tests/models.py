@@ -56,6 +56,50 @@ class OtherFieldsModel(models.Model):
 #    genericip = models.GenericIPAddressField(blank=True, null=True)
 
 
+class FancyDescriptor(object):
+    """
+    Stupid demo descriptor, that store int in database and return string of that length on get.
+    """
+    def __init__(self, field):
+        self.field = field
+
+    def __get__(self, instance, owner):
+        length = instance.__dict__[self.field.name]
+        if length is None:
+            return ''
+        return 'a' * length
+
+    def __set__(self, obj, value):
+        if isinstance(value, (int, long)):
+            obj.__dict__[self.field.name] = value
+        elif isinstance(value, basestring):
+            obj.__dict__[self.field.name] = len(value)
+        else:
+            obj.__dict__[self.field.name] = 0
+
+
+class FancyField(models.PositiveIntegerField):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('default', '')
+        super(FancyField, self).__init__(*args, **kwargs)
+
+    def contribute_to_class(self, cls, name):
+        super(FancyField, self).contribute_to_class(cls, name)
+        setattr(cls, self.name, FancyDescriptor(self))
+
+    def pre_save(self, model_instance, add):
+        value = super(FancyField, self).pre_save(model_instance, add)
+        # In this part value should be retrieved using descriptor and be a string
+        assert isinstance(value, basestring)
+        # We put an int to database
+        return len(value)
+
+
+class DescriptorModel(models.Model):
+    normal = FancyField()
+    trans = FancyField()
+
+
 ########## Multitable inheritance testing
 
 class MultitableModelA(models.Model):
@@ -132,6 +176,18 @@ class RichTextPage(Page, RichText):
 
 class DataModel(models.Model):
     data = models.TextField(blank=True, null=True)
+
+
+class GroupFieldsetsModel(models.Model):
+    title = models.CharField(max_length=255)
+    text = models.TextField(blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+
+
+class NameModel(models.Model):
+    firstname = models.CharField(max_length=50)
+    lastname = models.CharField(max_length=50)
+    slug = models.SlugField(max_length=100)
 
 
 ########## Manager testing

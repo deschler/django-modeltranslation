@@ -3,11 +3,10 @@ from django.utils.translation import ugettext_lazy
 
 from modeltranslation.translator import translator, TranslationOptions
 from modeltranslation.tests.models import (
-    TestModel, FallbackModel, FallbackModel2,
-    FileFieldsModel, OtherFieldsModel, AbstractModelA, AbstractModelB,
-    Slugged, MetaData, Displayable, Page, RichText, RichTextPage,
-    MultitableModelA, MultitableModelB, MultitableModelC,
-    ManagerTestModel, CustomManagerTestModel, CustomManager2TestModel)
+    TestModel, FallbackModel, FallbackModel2, FileFieldsModel, OtherFieldsModel, DescriptorModel,
+    AbstractModelA, AbstractModelB, Slugged, MetaData, Displayable, Page, RichText, RichTextPage,
+    MultitableModelA, MultitableModelB, MultitableModelC, ManagerTestModel, CustomManagerTestModel,
+    CustomManager2TestModel, GroupFieldsetsModel, NameModel)
 
 
 class TestTranslationOptions(TranslationOptions):
@@ -25,8 +24,7 @@ translator.register(FallbackModel, FallbackModelTranslationOptions)
 
 class FallbackModel2TranslationOptions(TranslationOptions):
     fields = ('title', 'text', 'url', 'email',)
-    fallback_values = {'text': ugettext_lazy('Sorry, translation is not '
-                                             'available.')}
+    fallback_values = {'text': ugettext_lazy('Sorry, translation is not available.')}
 translator.register(FallbackModel2, FallbackModel2TranslationOptions)
 
 
@@ -45,6 +43,11 @@ class OtherFieldsModelTranslationOptions(TranslationOptions):
     fields = ('int', 'boolean', 'nullboolean', 'csi', 'float', 'decimal',
               'ip', 'date', 'datetime', 'time',)
 translator.register(OtherFieldsModel, OtherFieldsModelTranslationOptions)
+
+
+class DescriptorModelTranslationOptions(TranslationOptions):
+    fields = ('trans',)
+translator.register(DescriptorModel, DescriptorModelTranslationOptions)
 
 
 ########## Multitable inheritance testing
@@ -137,3 +140,15 @@ class FieldInheritanceDTranslationOptions(FieldInheritanceBTranslationOptions):
 class FieldInheritanceETranslationOptions(FieldInheritanceCTranslationOptions,
                                           FieldInheritanceDTranslationOptions):
     fields = ('titlee',)
+
+
+########## Admin testing
+
+class GroupFieldsetsTranslationOptions(TranslationOptions):
+    fields = ('title', 'text',)
+translator.register(GroupFieldsetsModel, GroupFieldsetsTranslationOptions)
+
+
+class NameTranslationOptions(TranslationOptions):
+    fields = ('firstname', 'lastname',)
+translator.register(NameModel, NameTranslationOptions)

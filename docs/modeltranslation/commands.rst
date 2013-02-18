@@ -28,6 +28,7 @@ field ``title_de``. It only does so if the default translation field is empty
 otherwise nothing is copied.
 
 .. note::
+
     Unless you configured modeltranslation to
     :ref:`override the default language <settings-modeltranslation_default_language>`
     the command will examine your ``settings.LANGUAGES`` variable and the first

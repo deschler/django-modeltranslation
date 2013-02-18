@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from contextlib import contextmanager
 
-from django.conf import global_settings
 from django.utils.encoding import force_unicode
 from django.utils.translation import get_language as _get_language
 from django.utils.functional import lazy
@@ -39,7 +38,7 @@ build_localized_verbose_name = lazy(_build_localized_verbose_name, unicode)
 
 
 def _join_css_class(bits, offset):
-    if '-'.join(bits[-offset:]) in [l[0] for l in global_settings.LANGUAGES]:
+    if '-'.join(bits[-offset:]) in settings.AVAILABLE_LANGUAGES + ['en-us']:
         return '%s-%s' % ('_'.join(bits[:len(bits) - offset]), '_'.join(bits[-offset:]))
     return ''
 

@@ -1,3 +1,26 @@
+  ADDED: Major refactoring of the tabbed translation fields javascript. Adds
+         support for tabular inlines and includes proper handling of stacked
+         inlines, which have never been officially supported, but were not
+         actively prevented from being tabbified.
+         (resolves issue #66)
+  ADDED: New group_fieldsets option for TranslationAdmin. When activated
+         translation fields and untranslated fields are automatically
+         grouped into fieldsets.
+         (based on original implementation by Chris Adams,
+          resolves issues #38)
+
+  FIXED: Wrong admin field css class for en-us language.
+         (resolves issue #141)
+  FIXED: Added missing hook for admin readonly_fields.
+         (resolves issue #140)
+  FIXED: Keys used in tabbed translation fields to group translations are not
+         unique for inlines.
+         (resolves issue #121)
+  FIXED: The prepopulated_fields TranslationAdmin option only works on the
+         first defined field to prepopulate from and made the option aware
+         of the current language.
+         (resolves issue #57)
+
 CHANGED: Major refactoring of translation field inheritance and
          TranslationOptions.
          (thanks to Wojtek Ruszczewski,
