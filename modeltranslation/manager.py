@@ -5,6 +5,7 @@ django-linguo by Zach Mathew
 
 https://github.com/zmathew/django-linguo
 """
+from __future__ import with_statement  # Python 2.5 compatibility
 from django.db import models
 from django.db.models.fields.related import RelatedField
 from django.db.models.sql.where import Constraint
