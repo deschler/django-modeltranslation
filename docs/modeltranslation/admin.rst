@@ -236,49 +236,20 @@ The proposed way to include it is through the inner ``Media`` class of a
     class NewsAdmin(TranslationAdmin):
         class Media:
             js = (
-                'modeltranslation/js/force_jquery.js',
-                'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/jquery-ui.min.js',
+                '//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js'
+                '//ajax.googleapis.com/ajax/libs/jqueryui/1.10.1/jquery-ui.min.js',                
                 'modeltranslation/js/tabbed_translation_fields.js',
             )
             css = {
                 'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
             }
 
-The ``force_jquery.js`` script is necessary when using Django's built-in
-``django.jQuery`` object. Otherwise the *normal* ``jQuery`` object won't be
-available to the included (non-namespaced) jquery-ui library.
+Django´s shipped version of jquery is no longer compatible with jquery ui 1.10, so we need to include a newer one here.
 
 Standard jquery-ui theming can be used to customize the look of tabs, the
 provided css file is supposed to work well with a default Django admin.
 
 .. note:: This is just an example and might have to be adopted to your setup.
-
-
-Using a Custom jQuery Library
------------------------------
-
-If you don't want to use the jquery library shipped with Django, you can also
-include a standard one. While this adds some redundancy it could be useful in
-situations where you need certain features from a newer version of jquery
-that is not yet included in Django or you rely on a non-namespaced version of
-jquery somewhere in your custom admin frontend code or included plugins.
-
-In this case you don't need the ``force_jquery.js`` static provided by
-modeltranslation but include the standard jquery library before jquery-ui like
-this:
-
-.. code-block:: python
-
-    class NewsAdmin(TranslationAdmin):
-        class Media:
-            js = (
-                'http://code.jquery.com/jquery-1.8.2.min.js',
-                'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/jquery-ui.min.js',
-                'modeltranslation/js/tabbed_translation_fields.js',
-            )
-            css = {
-                'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
-            }
 
 
 ``TranslationAdmin`` Options
