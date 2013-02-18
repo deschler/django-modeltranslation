@@ -2,7 +2,6 @@
 from django.conf import settings
 from django.db.models import Manager
 from django.db.models.base import ModelBase
-from django.db.models.signals import pre_save
 
 from modeltranslation import settings as mt_settings
 from modeltranslation.fields import TranslationFieldDescriptor, create_translation_field
@@ -135,6 +134,7 @@ def patch_constructor(model):
     old_init = model.__init__
 
     def new_init(self, *args, **kwargs):
+        populate_translation_fields(self.__class__, kwargs)
         for key, val in kwargs.items():
             new_key = rewrite_lookup_key(model, key)
             # Old key is intentionally left in case old_init wants to play with it
@@ -176,12 +176,14 @@ def delete_cache_fields(model):
         pass
 
 
-def populate_translation_fields(sender, instance, **kwargs):
+def populate_translation_fields(sender, kwargs):
     """
     When models are created or loaded from fixtures, replicates values
     provided for translatable fields to some / all empty translation fields,
-    according to the current population mode. Callback for registered models
-    ``pre_save`` signal.
+    according to the current population mode.
+
+    Population is performed only on keys (field names) present in kwargs.
+    Nothing is returned, but passed kwargs dictionary is altered.
 
     With ``mode`` set to:
     -- ``all``: fills all translation fields, skipping just those for
@@ -207,26 +209,21 @@ def populate_translation_fields(sender, instance, **kwargs):
         populate = 'all'
 
     opts = translator.get_options_for_model(sender)
-    for field, translation_fields in opts.fields.iteritems():
-        if populate == 'all':
-            # Set the value for every language.
-            for trans in translation_fields:
-                if getattr(instance, trans.name) is None:
-                    setattr(instance, trans.name, getattr(instance, field))
-        elif populate == 'default':
-            # Set the value just for the default language.
-            default = build_localized_fieldname(field, mt_settings.DEFAULT_LANGUAGE)
-            if getattr(instance, default) is None:
-                setattr(instance, default, getattr(instance, field))
-        elif populate == 'required':
-            # Set the default language only if the field
-            # field was non-nullable.
-            default = build_localized_fieldname(field, mt_settings.DEFAULT_LANGUAGE)
-            if (getattr(instance, default) is None and
-                    not sender._meta.get_field(field).null):
-                setattr(instance, default, getattr(instance, field))
-        else:
-            raise AttributeError("Unknown population mode '%s'." % populate)
+    for key, val in kwargs.items():
+        if key in opts.fields:
+            if populate == 'all':
+                # Set the value for every language.
+                for translation_field in opts.fields[key]:
+                    kwargs.setdefault(translation_field.name, val)
+            elif populate == 'default':
+                default = build_localized_fieldname(key, mt_settings.DEFAULT_LANGUAGE)
+                kwargs.setdefault(default, val)
+            elif populate == 'required':
+                default = build_localized_fieldname(key, mt_settings.DEFAULT_LANGUAGE)
+                if not sender._meta.get_field(key).null:
+                    kwargs.setdefault(default, val)
+            else:
+                raise AttributeError("Unknown population mode '%s'." % populate)
 
 
 class Translator(object):
@@ -303,9 +300,6 @@ class Translator(object):
                     fallback_languages=model_fallback_languages)
                 setattr(model, field_name, descriptor)
 
-            # Populate translation fields before the model is saved.
-            pre_save.connect(populate_translation_fields, sender=model)
-
     def unregister(self, model_or_iterable):
         """
         Unregisters the given model(s).
@@ -331,7 +325,6 @@ class Translator(object):
                         'You need to unregister descendant "%s" before'
                         ' unregistering its base "%s"' %
                         (desc.__name__, model.__name__))
-                pre_save.disconnect(populate_translation_fields, sender=model)
                 del self._registry[desc]
 
     def get_registered_models(self, abstract=True):
