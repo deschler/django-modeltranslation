@@ -356,7 +356,7 @@ var google, django, gettext;
                 var self = this;
                 this.$select.change(function () {
                     $.each(tabs, function (idx, tab) {
-                        tab.tabs('select', parseInt(self.$select.val()));
+                        tab.tabs('option', 'active', parseInt(self.$select.val()));
                     });
                 });
             },
@@ -364,7 +364,7 @@ var google, django, gettext;
             activateTab: function(tabs) {
                 var self = this;
                 $.each(tabs, function (idx, tab) {
-                    tab.tabs('select', parseInt(self.$select.val()));
+                    tab.tabs('option', 'active', parseInt(self.$select.val()));
                 });
             }
         };
