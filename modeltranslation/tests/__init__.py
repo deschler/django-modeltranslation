@@ -1882,15 +1882,14 @@ class TestManager(ModeltranslationTestBase):
         self.assertEqual('foo', n.title)
 
         # ... but remember that still original attribute points to current language
-        # TODO: This kind of behaviour seems hardly doable for fixtures.
-#        self.assertEqual('en', get_language())
-#        n = models.ManagerTestModel.objects.create(title='foo', title_en='bar', _populate=True)
-#        self.assertEqual('bar', n.title_en)
-#        # self.assertEqual('foo', n.title_de)
-#        self.assertEqual('bar', n.title)  # points to en
-#        with override('de'):
-#            self.assertEqual('foo', n.title)  # points to de
-#        self.assertEqual('en', get_language())
+        self.assertEqual('en', get_language())
+        n = models.ManagerTestModel.objects.create(title='foo', title_en='bar', _populate=True)
+        self.assertEqual('bar', n.title_en)
+        self.assertEqual('foo', n.title_de)
+        self.assertEqual('bar', n.title)  # points to en
+        with override('de'):
+            self.assertEqual('foo', n.title)  # points to de
+        self.assertEqual('en', get_language())
 
         # This feature (for backward-compatibility) require _populate keyword...
         n = models.ManagerTestModel.objects.create(title='foo')
