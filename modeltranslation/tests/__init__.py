@@ -1968,7 +1968,7 @@ class TestManager(ModeltranslationTestBase):
         non-nullable fields.
         """
         with auto_populate('required'):
-            call_command('loaddata', 'fixture.json', verbosity=0)
+            call_command('loaddata', 'fixture.json', verbosity=0, commit=False)
             m = models.TestModel.objects.get()
             self.assertEqual(m.title_en, 'foo')
             self.assertEqual(m.title_de, 'foo')
