@@ -244,7 +244,26 @@ The proposed way to include it is through the inner ``Media`` class of a
                 'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
             }
 
-Django´s shipped version of jquery is no longer compatible with jquery ui 1.10, so we need to include a newer one here.
+Django's shipped version of jquery is no longer compatible with jquery ui 1.10, so you need to include a newer one here.
+
+However, if you have to stick to either Django's built-in jquery, or rely on jquery ui 1.8 or below, include this in your ``Media`` class instead (but be aware, the form's tabindex on older jquery ui versions is broken):
+
+.. code-block:: python
+
+    class NewsAdmin(TranslationAdmin):
+        class Media:
+            js = (
+                'modeltranslation/js/force_jquery.js',
+                'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/jquery-ui.min.js',
+                'modeltranslation/js/tabbed_translation_fields.js',
+            )
+            css = {
+                'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
+            }
+
+The ``force_jquery.js`` script is necessary when using Django's built-in
+``django.jQuery`` object. Otherwise the *normal* ``jQuery`` object won't be
+available to the included (non-namespaced) jquery-ui library.
 
 Standard jquery-ui theming can be used to customize the look of tabs, the
 provided css file is supposed to work well with a default Django admin.
