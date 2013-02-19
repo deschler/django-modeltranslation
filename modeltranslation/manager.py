@@ -5,13 +5,15 @@ django-linguo by Zach Mathew
 
 https://github.com/zmathew/django-linguo
 """
+from __future__ import with_statement  # Python 2.5 compatibility
 from django.db import models
 from django.db.models.fields.related import RelatedField
 from django.db.models.sql.where import Constraint
 from django.utils.tree import Node
 
 from modeltranslation import settings
-from modeltranslation.utils import build_localized_fieldname, get_language
+from modeltranslation.utils import (build_localized_fieldname, get_language,
+                                    auto_populate)
 
 
 def get_translatable_fields_for_model(model):
@@ -69,13 +71,13 @@ def get_fields_to_translatable_models(model):
 
 
 class MultilingualQuerySet(models.query.QuerySet):
-    _rewrite = True
-
     def __init__(self, *args, **kwargs):
         super(MultilingualQuerySet, self).__init__(*args, **kwargs)
         self._post_init()
 
     def _post_init(self):
+        self._rewrite = True
+        self._populate = None
         if self.model and (not self.query.order_by):
             if self.model._meta.ordering:
                 # If we have default ordering specified on the model, set it now so that
@@ -88,11 +90,19 @@ class MultilingualQuerySet(models.query.QuerySet):
     # This method was not present in django-linguo
     def _clone(self, *args, **kwargs):
         kwargs.setdefault('_rewrite', self._rewrite)
+        kwargs.setdefault('_populate', self._populate)
         return super(MultilingualQuerySet, self)._clone(*args, **kwargs)
 
     # This method was not present in django-linguo
     def rewrite(self, mode=True):
         return self._clone(_rewrite=mode)
+
+    # This method was not present in django-linguo
+    def populate(self, mode='all'):
+        """
+        Overrides the translation fields population mode for this query set.
+        """
+        return self._clone(_populate=mode)
 
     def _rewrite_applied_operations(self):
         """
@@ -174,19 +184,28 @@ class MultilingualQuerySet(models.query.QuerySet):
     update.alters_data = True
 
     # This method was not present in django-linguo
+    @property
+    def _populate_mode(self):
+        # Populate can be set using a global setting or a manager method.
+        if self._populate is None:
+            return settings.AUTO_POPULATE
+        return self._populate
+
+    # This method was not present in django-linguo
     def create(self, **kwargs):
-        populate = kwargs.pop('_populate', settings.AUTO_POPULATE)
-        if populate:
-            translatable_fields = get_translatable_fields_for_model(self.model)
-            if translatable_fields is not None:
-                for key, val in kwargs.items():
-                    if key in translatable_fields:
-                        # Try to add value in every language
-                        for translation_field in translatable_fields[key]:
-                            kwargs.setdefault(translation_field.name, val)
-        # If not use populate feature, then normal rewriting will occur at model's __init__
-        # That's why it is not performed here - no reason to rewrite twice.
-        return super(MultilingualQuerySet, self).create(**kwargs)
+        """
+        Allows to override population mode with a ``populate`` method.
+        """
+        with auto_populate(self._populate_mode):
+            return super(MultilingualQuerySet, self).create(**kwargs)
+
+    # This method was not present in django-linguo
+    def get_or_create(self, **kwargs):
+        """
+        Allows to override population mode with a ``populate`` method.
+        """
+        with auto_populate(self._populate_mode):
+            return super(MultilingualQuerySet, self).get_or_create(**kwargs)
 
 
 class MultilingualManager(models.Manager):
@@ -194,6 +213,9 @@ class MultilingualManager(models.Manager):
 
     def rewrite(self, *args, **kwargs):
         return self.get_query_set().rewrite(*args, **kwargs)
+
+    def populate(self, *args, **kwargs):
+        return self.get_query_set().populate(*args, **kwargs)
 
     def get_query_set(self):
         qs = super(MultilingualManager, self).get_query_set()

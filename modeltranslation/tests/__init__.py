@@ -31,7 +31,8 @@ from modeltranslation.tests.translation import (FallbackModel2TranslationOptions
                                                 FieldInheritanceCTranslationOptions,
                                                 FieldInheritanceETranslationOptions)
 from modeltranslation.tests.test_settings import TEST_SETTINGS
-from modeltranslation.utils import build_css_class, build_localized_fieldname
+from modeltranslation.utils import (build_css_class, build_localized_fieldname,
+                                    auto_populate)
 
 try:
     from django.test.utils import override_settings
@@ -1705,6 +1706,11 @@ class TestManager(ModeltranslationTestBase):
         # In this test case the default language is en, not de.
         trans_real.activate('en')
 
+    def tearDown(self):
+        # Settings may be loaded by translator, resulting in a different fallback.
+        trans_real.activate('de')
+        reload(mt_settings)
+
     def test_filter_update(self):
         """Test if filtering and updating is language-aware."""
         n = models.ManagerTestModel(title='')
@@ -1864,20 +1870,20 @@ class TestManager(ModeltranslationTestBase):
 
     def test_creation_population(self):
         """Test if language fields are populated with default value on creation."""
-        n = models.ManagerTestModel.objects.create(title='foo', _populate=True)
+        n = models.ManagerTestModel.objects.populate(True).create(title='foo')
         self.assertEqual('foo', n.title_en)
         self.assertEqual('foo', n.title_de)
         self.assertEqual('foo', n.title)
 
         # You can specify some language...
-        n = models.ManagerTestModel.objects.create(title='foo', title_de='bar', _populate=True)
+        n = models.ManagerTestModel.objects.populate(True).create(title='foo', title_de='bar')
         self.assertEqual('foo', n.title_en)
         self.assertEqual('bar', n.title_de)
         self.assertEqual('foo', n.title)
 
         # ... but remember that still original attribute points to current language
         self.assertEqual('en', get_language())
-        n = models.ManagerTestModel.objects.create(title='foo', title_en='bar', _populate=True)
+        n = models.ManagerTestModel.objects.populate(True).create(title='foo', title_en='bar')
         self.assertEqual('bar', n.title_en)
         self.assertEqual('foo', n.title_de)
         self.assertEqual('bar', n.title)  # points to en
@@ -1885,27 +1891,78 @@ class TestManager(ModeltranslationTestBase):
             self.assertEqual('foo', n.title)  # points to de
         self.assertEqual('en', get_language())
 
-        # This feature (for backward-compatibility) require _populate keyword...
+        # This feature (for backward-compatibility) require populate method...
         n = models.ManagerTestModel.objects.create(title='foo')
         self.assertEqual('foo', n.title_en)
         self.assertEqual(None, n.title_de)
         self.assertEqual('foo', n.title)
 
         # ... or MODELTRANSLATION_AUTO_POPULATE setting
-        with override_settings(MODELTRANSLATION_AUTO_POPULATE=True):
-            reload(mt_settings)
+        with reload_override_settings(MODELTRANSLATION_AUTO_POPULATE=True):
             self.assertEqual(True, mt_settings.AUTO_POPULATE)
             n = models.ManagerTestModel.objects.create(title='foo')
             self.assertEqual('foo', n.title_en)
             self.assertEqual('foo', n.title_de)
             self.assertEqual('foo', n.title)
 
-            # _populate keyword has highest priority
-            n = models.ManagerTestModel.objects.create(title='foo', _populate=False)
+            # populate method has highest priority
+            n = models.ManagerTestModel.objects.populate(False).create(title='foo')
             self.assertEqual('foo', n.title_en)
             self.assertEqual(None, n.title_de)
             self.assertEqual('foo', n.title)
 
-        # Restore previous state
-        reload(mt_settings)
-        self.assertEqual(False, mt_settings.AUTO_POPULATE)
+        # Populate ``default`` fills just the default translation.
+        # TODO: Having more languages would make these tests more meaningful.
+        qs = models.ManagerTestModel.objects
+        m = qs.populate('default').create(title='foo', description='bar')
+        self.assertEqual('foo', m.title_de)
+        self.assertEqual('foo', m.title_en)
+        self.assertEqual('bar', m.description_de)
+        self.assertEqual('bar', m.description_en)
+        with override('de'):
+            m = qs.populate('default').create(title='foo', description='bar')
+            self.assertEqual('foo', m.title_de)
+            self.assertEqual(None, m.title_en)
+            self.assertEqual('bar', m.description_de)
+            self.assertEqual(None, m.description_en)
+
+        # Populate ``required`` fills just non-nullable default translations.
+        qs = models.ManagerTestModel.objects
+        m = qs.populate('required').create(title='foo', description='bar')
+        self.assertEqual('foo', m.title_de)
+        self.assertEqual('foo', m.title_en)
+        self.assertEqual(None, m.description_de)
+        self.assertEqual('bar', m.description_en)
+        with override('de'):
+            m = qs.populate('required').create(title='foo', description='bar')
+            self.assertEqual('foo', m.title_de)
+            self.assertEqual(None, m.title_en)
+            self.assertEqual('bar', m.description_de)
+            self.assertEqual(None, m.description_en)
+
+    def test_get_or_create_population(self):
+        """
+        Populate may be used with ``get_or_create``.
+        """
+        qs = models.ManagerTestModel.objects
+        m1, created1 = qs.populate(True).get_or_create(title='aaa')
+        m2, created2 = qs.populate(True).get_or_create(title='aaa')
+        self.assertTrue(created1)
+        self.assertFalse(created2)
+        self.assertEqual(m1, m2)
+        self.assertEqual('aaa', m1.title_en)
+        self.assertEqual('aaa', m1.title_de)
+
+    def test_fixture_population(self):
+        """
+        Test that a fixture with values only for the original fields
+        does not result in missing default translations for (original)
+        non-nullable fields.
+        """
+        with auto_populate('required'):
+            call_command('loaddata', 'fixture.json', verbosity=0, commit=False)
+            m = models.TestModel.objects.get()
+            self.assertEqual(m.title_en, 'foo')
+            self.assertEqual(m.title_de, 'foo')
+            self.assertEqual(m.text_en, 'bar')
+            self.assertEqual(m.text_de, None)

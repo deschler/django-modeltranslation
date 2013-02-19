@@ -131,11 +131,13 @@ It can be changed several times inside a query. So ``X.objects.rewrite(False)`` 
 Auto-population
 ***************
 
-In ``create()`` you can set special parameter ``_populate=True`` to populate all translation
-(language) fields with values from translated (original) ones. It can be very convenient when working
-with many languages. So::
+.. versionchanged:: 0.6
 
-    x = News.objects.create(title='bar', _populate=True)
+There is special manager method ``populate(mode)`` which can trigger ``create()`` or
+``get_or_create()`` to populate all translation (language) fields with values from translated
+(original) ones. It can be very convenient when working with many languages. So::
+
+    x = News.objects.populate(True).create(title='bar')
 
 is equivalent of::
 
@@ -144,14 +146,50 @@ is equivalent of::
 
 Moreover, some fields can be explicitly assigned different values::
 
-    x = News.objects.create(title='-- no translation yet --', title_de='enigma', _populate=True)
+    x = News.objects.populate(True).create(title='-- no translation yet --', title_de='enigma')
 
-It will result in ``title_de == 'nic'`` and other ``title_?? == '-- no translation yet --'``.
+It will result in ``title_de == 'enigma'`` and other ``title_?? == '-- no translation yet --'``.
 
-There is a more convenient way than passing _populate all the time:
+There is another way of altering the current population status, an ``auto_populate`` context manager::
+
+    from modeltranslation.utils import auto_populate
+
+    with auto_populate(True):
+        x = News.objects.create(title='bar')
+
+Auto-population tooks place also in model constructor, what is extremely useful when loading
+non-translated fixtures. Just remember to use the context manager::
+
+     with auto_populate():  # True can be ommited
+            call_command('loaddata', 'fixture.json')  # Some fixture loading
+
+            z = News(title='bar')
+            print z.title_en, z.title_de  # prints 'bar bar'
+
+There is a more convenient way than calling ``populate`` manager method or entering
+``auto_populate`` manager context all the time:
 :ref:`settings-modeltranslation_auto_populate` setting.
-If ``_populate`` parameter is missing, ``create()`` will look at the setting to determine if
-population should be used.
+It controls the default population behaviour.
+
+There are 4 different population modes:
+
+``False``
+    [set by default]
+
+    Auto-population turned off
+
+``True`` or ``'all'``
+    [default argument to population altering methods]
+
+    Auto-population turned on, copying translated field value to all other languages
+    (unless a translation field value is provided)
+
+``'default'``
+    Auto-population turned on, copying translated field value to default language field
+    (unless its value is provided)
+
+``'required'``
+    Acts like ``'default'``, but copy value only if the original field is non-nullable
 
 
 .. _fallback:

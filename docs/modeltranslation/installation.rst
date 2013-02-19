@@ -249,12 +249,17 @@ Default: ``False``
 .. versionadded:: 0.5
 
 This setting controls if the :ref:`multilingual_manager` should automatically
-populate language field values in its ``create`` method, so that these two
-statements can be considered equivalent::
+populate language field values in its ``create`` and ``get_or_create`` method, and in model
+constructors, so that these two blocks of statements can be considered equivalent::
 
-    News.objects.create(title='-- no translation yet --', _populate=True)
+    News.objects.populate(True).create(title='-- no translation yet --')
+    with auto_populate(True):
+        q = News(title='-- no translation yet --')
+
+    # same effect with MODELTRANSLATION_AUTO_POPULATE == True:
 
     News.objects.create(title='-- no translation yet --')
+    q = News(title='-- no translation yet --')
 
 
 ``MODELTRANSLATION_DEBUG``
