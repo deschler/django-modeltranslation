@@ -109,7 +109,7 @@ translator.register(RichTextPage)
 ########## Manager testing
 
 class ManagerTestModelTranslationOptions(TranslationOptions):
-    fields = ('title', 'visits')
+    fields = ('title', 'visits', 'description')
 translator.register(ManagerTestModel, ManagerTestModelTranslationOptions)
 
 

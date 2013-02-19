@@ -3,6 +3,7 @@ from django.conf import settings
 from django.db.models import Manager
 from django.db.models.base import ModelBase
 
+from modeltranslation import settings as mt_settings
 from modeltranslation.fields import TranslationFieldDescriptor, create_translation_field
 from modeltranslation.manager import MultilingualManager, rewrite_lookup_key
 from modeltranslation.utils import build_localized_fieldname
@@ -133,6 +134,7 @@ def patch_constructor(model):
     old_init = model.__init__
 
     def new_init(self, *args, **kwargs):
+        populate_translation_fields(self.__class__, kwargs)
         for key, val in kwargs.items():
             new_key = rewrite_lookup_key(model, key)
             # Old key is intentionally left in case old_init wants to play with it
@@ -172,6 +174,56 @@ def delete_cache_fields(model):
         del opts._name_map
     except AttributeError:
         pass
+
+
+def populate_translation_fields(sender, kwargs):
+    """
+    When models are created or loaded from fixtures, replicates values
+    provided for translatable fields to some / all empty translation fields,
+    according to the current population mode.
+
+    Population is performed only on keys (field names) present in kwargs.
+    Nothing is returned, but passed kwargs dictionary is altered.
+
+    With ``mode`` set to:
+    -- ``all``: fills all translation fields, skipping just those for
+       which a translated value is also provided;
+    -- ``default``: fills only the default translation (unless it is
+       additionally provided);
+    -- ``required``: like ``default``, but only if the original field is
+       non-nullable;
+
+    At least the ``required`` mode should be used when loading untranslated
+    fixtures to keep the database consistent (note that Django management
+    commands are normally forced to run with hardcoded ``en-us`` language
+    active). The ``default`` mode is useful if you need to ensure fallback
+    values are available, and ``all`` if you need to have all translations
+    defined (for example to make lookups / filtering without resorting to
+    query fallbacks).
+    """
+    populate = mt_settings.AUTO_POPULATE
+    if not populate:
+        return
+    if populate is True:
+        # What was meant by ``True`` is now called ``all``.
+        populate = 'all'
+
+    opts = translator.get_options_for_model(sender)
+    for key, val in kwargs.items():
+        if key in opts.fields:
+            if populate == 'all':
+                # Set the value for every language.
+                for translation_field in opts.fields[key]:
+                    kwargs.setdefault(translation_field.name, val)
+            elif populate == 'default':
+                default = build_localized_fieldname(key, mt_settings.DEFAULT_LANGUAGE)
+                kwargs.setdefault(default, val)
+            elif populate == 'required':
+                default = build_localized_fieldname(key, mt_settings.DEFAULT_LANGUAGE)
+                if not sender._meta.get_field(key).null:
+                    kwargs.setdefault(default, val)
+            else:
+                raise AttributeError("Unknown population mode '%s'." % populate)
 
 
 class Translator(object):
@@ -247,9 +299,6 @@ class Translator(object):
                     fallback_value=field_fallback_value,
                     fallback_languages=model_fallback_languages)
                 setattr(model, field_name, descriptor)
-
-        #signals.pre_init.connect(translated_model_initializing, sender=model,
-                                 #weak=False)
 
     def unregister(self, model_or_iterable):
         """
