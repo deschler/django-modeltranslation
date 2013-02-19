@@ -143,23 +143,6 @@ def patch_constructor(model):
     model.__init__ = new_init
 
 
-#def translated_model_initialized(field_names, instance, **kwargs):
-    #print "translated_model_initialized instance:", \
-          #instance, ", field:", field_names
-    #for field_name in field_names:
-        #initial_val = getattr(instance, field_name)
-        #print "  field: %s, initialval: %s" % (field_name, initial_val)
-        #setattr(instance.__class__, field_name,
-                #TranslationFieldDescriptor(field_name, initial_val))
-
-
-#def translated_model_initializing(sender, args, kwargs, **signal_kwargs):
-    #print "translated_model_initializing", sender, args, kwargs
-    #trans_opts = translator.get_options_for_model(sender)
-    #for field_name in trans_opts.local_fields:
-        #setattr(sender, field_name, TranslationFieldDescriptor(field_name))
-
-
 def delete_cache_fields(model):
     opts = model._meta
     try:
