@@ -5,6 +5,12 @@
 * http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/base/jquery.ui.core.css
 */
 
+/*
+backward compatibility:
+.ui-tabs-selected:      jquery ui <  1.10
+.ui-tabs-active classes jquery ui >= 1.10
+*/
+
 /* Layout helpers
 ----------------------------------*/
 .ui-helper-hidden { display: none; }
@@ -24,8 +30,8 @@
 .ui-tabs .ui-tabs-nav { margin: 0; padding: .2em .2em 0; }
 .ui-tabs .ui-tabs-nav li { list-style: none; float: left; position: relative; top: 1px; margin: 0 .2em 1px 0; border-bottom: 0 !important; padding: 0; white-space: nowrap; }
 .ui-tabs .ui-tabs-nav li a { float: left; padding: .5em 1em; text-decoration: none; }
-.ui-tabs .ui-tabs-nav li.ui-tabs-selected { margin-bottom: 0; padding-bottom: 1px; }
-.ui-tabs .ui-tabs-nav li.ui-tabs-selected a, .ui-tabs .ui-tabs-nav li.ui-state-disabled a, .ui-tabs .ui-tabs-nav li.ui-state-processing a { cursor: text; }
+.ui-tabs .ui-tabs-nav li.ui-tabs-active, .ui-tabs .ui-tabs-nav li.ui-tabs-selected { margin-bottom: 0; padding-bottom: 1px; }
+.ui-tabs .ui-tabs-nav li.ui-tabs-active a, .ui-tabs .ui-tabs-nav li.ui-tabs-selected a, .ui-tabs .ui-tabs-nav li.ui-state-disabled a, .ui-tabs .ui-tabs-nav li.ui-state-processing a { cursor: text; }
 .ui-tabs .ui-tabs-nav li a, .ui-tabs.ui-tabs-collapsible .ui-tabs-nav li.ui-tabs-selected a { cursor: pointer; } /* first selector in group seems obsolete, but required to overcome bug in Opera applying cursor: text overall if defined elsewhere... */
 .ui-tabs .ui-tabs-panel { display: block; border-width: 0; padding: 1em 1.4em; background: none; }
 .ui-tabs .ui-tabs-hide {
@@ -54,7 +60,7 @@
     font-size: 12px;
 }
 
-.ui-tabs .ui-tabs-nav li.ui-tabs-selected a {
+.ui-tabs .ui-tabs-nav li.ui-tabs-active a, .ui-tabs .ui-tabs-nav li.ui-tabs-selected a {
     background: #7CA0C7 repeat-x;
     color: #fff;
     padding: 6px 10px 4px 10px;

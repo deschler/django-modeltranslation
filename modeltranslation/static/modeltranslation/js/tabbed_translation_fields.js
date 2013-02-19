@@ -356,7 +356,11 @@ var google, django, gettext;
                 var self = this;
                 this.$select.change(function () {
                     $.each(tabs, function (idx, tab) {
-                        tab.tabs('select', parseInt(self.$select.val()));
+                        try { //jquery ui => 1.10 api changed, we keep backward compatibility
+                            tab.tabs('select', parseInt(self.$select.val(), 10));
+                        } catch(e) {
+                            tab.tabs('option', 'active', parseInt(self.$select.val(), 10));
+                        }
                     });
                 });
             },
@@ -364,7 +368,11 @@ var google, django, gettext;
             activateTab: function(tabs) {
                 var self = this;
                 $.each(tabs, function (idx, tab) {
-                    tab.tabs('select', parseInt(self.$select.val()));
+                    try { //jquery ui => 1.10 api changed, we keep backward compatibility
+                        tab.tabs('select', parseInt(self.$select.val(), 10));
+                    } catch(e) {
+                        tab.tabs('option', 'active', parseInt(self.$select.val(), 10));
+                    }
                 });
             }
         };
