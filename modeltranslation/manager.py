@@ -184,30 +184,27 @@ class MultilingualQuerySet(models.query.QuerySet):
     update.alters_data = True
 
     # This method was not present in django-linguo
-    def _populate_mode(self, **kwargs):
-        # Populate can be set using a global setting, a manager method,
-        # or given as an argument to ``create`` or ``get_or_create``.
-        populate = kwargs.pop('_populate', self._populate)
-        if populate is None:
-            populate = settings.AUTO_POPULATE
-        return kwargs, populate
+    @property
+    def _populate_mode(self):
+        # Populate can be set using a global setting or a manager method.
+        if self._populate is None:
+            return settings.AUTO_POPULATE
+        return self._populate
 
     # This method was not present in django-linguo
     def create(self, **kwargs):
         """
-        Allows to override population mode with a ``_populate`` keyword.
+        Allows to override population mode with a ``populate`` method.
         """
-        kwargs, mode = self._populate_mode(**kwargs)
-        with auto_populate(mode):
+        with auto_populate(self._populate_mode):
             return super(MultilingualQuerySet, self).create(**kwargs)
 
     # This method was not present in django-linguo
     def get_or_create(self, **kwargs):
         """
-        Allows to override population mode with a ``_populate`` keyword.
+        Allows to override population mode with a ``populate`` method.
         """
-        kwargs, mode = self._populate_mode(**kwargs)
-        with auto_populate(mode):
+        with auto_populate(self._populate_mode):
             return super(MultilingualQuerySet, self).get_or_create(**kwargs)
 
 
