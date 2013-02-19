@@ -9,6 +9,10 @@
          (based on original implementation by Chris Adams,
           resolves issues #38)
 
+  FIXED: Broken tab activation when using jquery-ui 1.10, keeping support for
+         older jquery-ui versions and the jquery version shipped by Django.
+         (thanks to Dominique Lederer,
+          resolves issue #146)
   FIXED: Wrong admin field css class for en-us language.
          (resolves issue #141)
   FIXED: Added missing hook for admin readonly_fields.
