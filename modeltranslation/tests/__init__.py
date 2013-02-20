@@ -16,6 +16,7 @@ from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError, ImproperlyConfigured
 from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 from django.core.management import call_command
 from django.db.models import Q, F
 from django.db.models.loading import AppCache
@@ -518,14 +519,14 @@ class FallbackTests(ModeltranslationTestBase):
 
 
 class FileFieldsTest(ModeltranslationTestBase):
-    test_media_root = TEST_SETTINGS['MEDIA_ROOT']
 
     def tearDown(self):
-        # File tests create a temporary media directory structure. While the
-        # files are automatically deleted by the storage, the directories will
-        # stay. So we clean up a bit...
-        if os.path.isdir(self.test_media_root):
-            shutil.rmtree(self.test_media_root)
+        if default_storage.exists('modeltranslation_tests'):
+            # With FileSystemStorage uploading files creates a new directory,
+            # that's not automatically removed upon their deletion.
+            tests_dir = default_storage.path('modeltranslation_tests')
+            if os.path.isdir(tests_dir):
+                shutil.rmtree(tests_dir)
         super(FileFieldsTest, self).tearDown()
 
     def test_translated_models(self):
@@ -573,10 +574,10 @@ class FileFieldsTest(ModeltranslationTestBase):
         self.failUnless(inst.image.name.count('i_en') > 0)
         self.failUnlessEqual(inst.image.read(), 'image in english')
 
-        # Check if file was actually saved on disc
-        self.failUnless(os.path.exists(os.path.join(self.test_media_root, inst.file.name)))
+        # Check if file was actually created in the global storage.
+        self.failUnless(default_storage.exists(inst.file))
         self.failUnless(inst.file.size > 0)
-        self.failUnless(os.path.exists(os.path.join(self.test_media_root, inst.image.name)))
+        self.failUnless(default_storage.exists(inst.image))
         self.failUnless(inst.image.size > 0)
 
         trans_real.activate("de")

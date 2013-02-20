@@ -2,11 +2,8 @@
 """
 Settings overrided for test time
 """
-import os
 from django.conf import settings
 
-
-DIRNAME = os.path.dirname(__file__)
 
 INSTALLED_APPS = tuple(settings.INSTALLED_APPS) + (
     'modeltranslation.tests',
@@ -16,9 +13,6 @@ INSTALLED_APPS = tuple(settings.INSTALLED_APPS) + (
     #INSTALLED_APPS += ('django.contrib.staticfiles',)
 
 #STATIC_URL = '/static/'
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(DIRNAME, 'media/')
 
 LANGUAGES = (('de', 'Deutsch'),
              ('en', 'English'))
