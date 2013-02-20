@@ -14,7 +14,8 @@ def autodiscover():
     from django.utils.importlib import import_module
     from django.utils.module_loading import module_has_submodule
     from modeltranslation.translator import translator
-    from modeltranslation.settings import TRANSLATION_FILES, DEBUG
+    from modeltranslation.settings import TRANSLATION_FILES
+    from modeltranslation.settings import _DEBUG as DEBUG
 
     for app in settings.INSTALLED_APPS:
         mod = import_module(app)
