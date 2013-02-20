@@ -543,6 +543,16 @@ class FallbackTests(ModeltranslationTestBase):
                 with override('en'):
                     self.assertEqual(m.title, '')  # '' is the default
 
+    def test_nullable(self):
+        with reload_override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=self.test_fallback):
+            m = models.FallbackModel(description_en='en', description_de='')
+            self.assertEqual(m.description_en, 'en')
+            self.assertEqual(m.description_de, '')
+            with override('en'):
+                self.assertEqual(m.description, 'en')
+            with override('de'):
+                self.assertEqual(m.description, '')
+
 
 class FileFieldsTest(ModeltranslationTestBase):
 

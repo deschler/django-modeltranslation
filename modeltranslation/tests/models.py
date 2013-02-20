@@ -18,6 +18,7 @@ class FallbackModel(models.Model):
     text = models.TextField(blank=True, null=True)
     url = models.URLField(blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
+    description = models.CharField(max_length=255, null=True)
 
 
 class FallbackModel2(models.Model):
