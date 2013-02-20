@@ -190,15 +190,17 @@ class TranslationFieldDescriptor(object):
     def __get__(self, instance, owner):
         if instance is None:
             return self
+        default = self.field.get_default()
         langs = resolution_order(get_language(), self.fallback_languages)
         for lang in langs:
             loc_field_name = build_localized_fieldname(self.field.name, lang)
             val = getattr(instance, loc_field_name, None)
-            # Here we check only for None and '', because e.g. 0 should not fall back.
-            if val is not None and val != '':
+            # If there is no value or it's the field's default fall back to the next language.
+            # Note: Unless you pass null=True to a CharField it's default is ''.
+            if val is not None and val != default:
                 return val
         if self.fallback_value is None or not mt_settings.ENABLE_FALLBACKS:
-            return self.field.get_default()
+            return default
         else:
             return self.fallback_value
 
