@@ -236,7 +236,7 @@ The proposed way to include it is through the inner ``Media`` class of a
     class NewsAdmin(TranslationAdmin):
         class Media:
             js = (
-                'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js'
+                'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
                 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.1/jquery-ui.min.js',
                 'modeltranslation/js/tabbed_translation_fields.js',
             )
