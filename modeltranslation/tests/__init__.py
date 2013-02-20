@@ -114,10 +114,11 @@ class ModeltranslationTestBase(TestCase):
                              database=connections[DEFAULT_DB_ALIAS].alias, load_initial_data=False)
 
     def setUp(self):
+        self._old_language = get_language()
         trans_real.activate('de')
 
     def tearDown(self):
-        trans_real.deactivate()
+        trans_real.activate(self._old_language)
 
 ModeltranslationTestBase = override_settings(**TEST_SETTINGS)(ModeltranslationTestBase)
 
@@ -131,13 +132,13 @@ class TestAutodiscover(ModeltranslationTestBase):
     def _pre_setup(self):
         super(TestAutodiscover, self)._pre_setup()
         # Add test_app to INSTALLED_APPS
-        from django.conf import settings
-        new_installed_apps = settings.INSTALLED_APPS + ('modeltranslation.tests.test_app',)
+        new_installed_apps = django_settings.INSTALLED_APPS + ('modeltranslation.tests.test_app',)
         self.__override = override_settings(INSTALLED_APPS=new_installed_apps)
         self.__override.enable()
 
     def _post_teardown(self):
         self.__override.disable()
+        reload(mt_settings)  # restore mt_settings.FALLBACK_LANGUAGES
         super(TestAutodiscover, self)._post_teardown()
 
     @classmethod
@@ -163,6 +164,7 @@ class TestAutodiscover(ModeltranslationTestBase):
         # Delete translation modules from import cache
         sys.modules.pop('modeltranslation.tests.test_app.translation', None)
         sys.modules.pop('modeltranslation.tests.project_translation', None)
+        super(TestAutodiscover, self).tearDown()
 
     def check_news(self):
         from test_app.models import News
@@ -524,7 +526,7 @@ class FileFieldsTest(ModeltranslationTestBase):
         # stay. So we clean up a bit...
         if os.path.isdir(self.test_media_root):
             shutil.rmtree(self.test_media_root)
-        trans_real.deactivate()
+        super(FileFieldsTest, self).tearDown()
 
     def test_translated_models(self):
         field_names = dir(models.FileFieldsModel())
@@ -1355,14 +1357,14 @@ class UpdateCommandTest(ModeltranslationTestBase):
 
 class TranslationAdminTest(ModeltranslationTestBase):
     def setUp(self):
-        trans_real.activate('de')
+        super(TranslationAdminTest, self).setUp()
         self.test_obj = models.TestModel.objects.create(
             title='Testtitle', text='Testtext')
         self.site = AdminSite()
 
     def tearDown(self):
-        trans_real.deactivate()
         self.test_obj.delete()
+        super(TranslationAdminTest, self).tearDown()
 
     def test_default_fields(self):
         class TestModelAdmin(admin.TranslationAdmin):
@@ -1704,12 +1706,8 @@ class TranslationAdminTest(ModeltranslationTestBase):
 class TestManager(ModeltranslationTestBase):
     def setUp(self):
         # In this test case the default language is en, not de.
+        super(TestManager, self).setUp()
         trans_real.activate('en')
-
-    def tearDown(self):
-        # Settings may be loaded by translator, resulting in a different fallback.
-        trans_real.activate('de')
-        reload(mt_settings)
 
     def test_filter_update(self):
         """Test if filtering and updating is language-aware."""
