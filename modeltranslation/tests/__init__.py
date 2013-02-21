@@ -17,6 +17,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError, ImproperlyConfigured
 from django.core.files.base import ContentFile
 from django.core.management import call_command
+from django.db import IntegrityError
 from django.db.models import Q, F
 from django.db.models.loading import AppCache
 from django.test import TestCase
@@ -48,7 +49,7 @@ except ImportError:
 request = None
 
 # How much models are registered for tests.
-TEST_MODELS = 22
+TEST_MODELS = 23
 
 
 class reload_override_settings(override_settings):
@@ -442,6 +443,17 @@ class ModeltranslationTest(ModeltranslationTestBase):
             email='q@q.qq', email_en='e@e.ee',
         )
         self._test_constructor(keywords)
+
+    def test_unique_nullable_field(self):
+        models.UniqueNullableModel.objects.create()
+        models.UniqueNullableModel.objects.create()
+        models.UniqueNullableModel.objects.create(title=None)
+        models.UniqueNullableModel.objects.create(title=None)
+
+        models.UniqueNullableModel.objects.create(title='')
+        self.assertRaises(IntegrityError, models.UniqueNullableModel.objects.create, title='')
+        models.UniqueNullableModel.objects.create(title='foo')
+        self.assertRaises(IntegrityError, models.UniqueNullableModel.objects.create, title='foo')
 
 
 class FallbackTests(ModeltranslationTestBase):

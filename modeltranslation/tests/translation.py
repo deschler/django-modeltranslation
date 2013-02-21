@@ -6,12 +6,17 @@ from modeltranslation.tests.models import (
     TestModel, FallbackModel, FallbackModel2, FileFieldsModel, OtherFieldsModel, DescriptorModel,
     AbstractModelA, AbstractModelB, Slugged, MetaData, Displayable, Page, RichText, RichTextPage,
     MultitableModelA, MultitableModelB, MultitableModelC, ManagerTestModel, CustomManagerTestModel,
-    CustomManager2TestModel, GroupFieldsetsModel, NameModel)
+    CustomManager2TestModel, GroupFieldsetsModel, NameModel, UniqueNullableModel)
 
 
 class TestTranslationOptions(TranslationOptions):
     fields = ('title', 'text', 'url', 'email',)
 translator.register(TestModel, TestTranslationOptions)
+
+
+class UniqueNullableTranslationOptions(TranslationOptions):
+    fields = ('title',)
+translator.register(UniqueNullableModel, UniqueNullableTranslationOptions)
 
 
 ########## Fallback values testing

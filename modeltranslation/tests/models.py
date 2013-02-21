@@ -11,6 +11,10 @@ class TestModel(models.Model):
     email = models.EmailField(blank=True, null=True)
 
 
+class UniqueNullableModel(models.Model):
+    title = models.CharField(null=True, unique=True, max_length=255)
+
+
 ########## Fallback values testing
 
 class FallbackModel(models.Model):
