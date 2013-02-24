@@ -21,6 +21,7 @@ Table of Contents
 .. toctree::
    :maxdepth: 1
 
+   contribute
    related_projects
    changelog
 
