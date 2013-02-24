@@ -32,7 +32,7 @@ from modeltranslation.tests.translation import (FallbackModel2TranslationOptions
                                                 FieldInheritanceETranslationOptions)
 from modeltranslation.tests.test_settings import TEST_SETTINGS
 from modeltranslation.utils import (build_css_class, build_localized_fieldname,
-                                    auto_populate)
+                                    auto_populate, fallbacks)
 
 try:
     from django.test.utils import override_settings
@@ -513,6 +513,22 @@ class FallbackTests(ModeltranslationTestBase):
 
             n.title_en = None
             self.assertEqual(n.title, '')  # if all fallbacks fail, return field.get_default()
+
+    def test_fallbacks_toggle(self):
+        with reload_override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=self.test_fallback):
+            m = models.TestModel(title='foo')
+            with fallbacks(True):
+                self.assertEqual(m.title_de, 'foo')
+                self.assertEqual(m.title_en, None)
+                self.assertEqual(m.title, 'foo')
+                with override('en'):
+                    self.assertEqual(m.title, 'foo')
+            with fallbacks(False):
+                self.assertEqual(m.title_de, 'foo')
+                self.assertEqual(m.title_en, None)
+                self.assertEqual(m.title, 'foo')
+                with override('en'):
+                    self.assertEqual(m.title, '')  # '' is the default
 
 
 class FileFieldsTest(ModeltranslationTestBase):
