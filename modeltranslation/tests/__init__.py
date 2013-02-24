@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-NOTE: Perhaps ModeltranslationTestBase in tearDownClass should reload some modules,
-      so that tests for other apps are in the same environment.
-
-"""
 from __future__ import with_statement  # Python 2.5 compatibility
 import datetime
 from decimal import Decimal
