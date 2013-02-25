@@ -156,7 +156,7 @@ class TranslationFieldDescriptor(object):
             # Here we check only for None and '', because e.g. 0 should not fall back.
             if val is not None and val != '':
                 return val
-        if self.fallback_value is None:
+        if self.fallback_value is None or not mt_settings.ENABLE_FALLBACKS:
             return self.field.get_default()
         else:
             return self.fallback_value
