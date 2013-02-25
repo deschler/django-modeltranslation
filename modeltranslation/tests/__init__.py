@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-NOTE: Perhaps ModeltranslationTestBase in tearDownClass should reload some modules,
-      so that tests for other apps are in the same environment.
-
-"""
 from __future__ import with_statement  # Python 2.5 compatibility
 import datetime
 from decimal import Decimal
@@ -16,6 +11,7 @@ from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError, ImproperlyConfigured
 from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 from django.core.management import call_command
 from django.db.models import Q, F
 from django.db.models.loading import AppCache
@@ -114,10 +110,11 @@ class ModeltranslationTestBase(TestCase):
                              database=connections[DEFAULT_DB_ALIAS].alias, load_initial_data=False)
 
     def setUp(self):
+        self._old_language = get_language()
         trans_real.activate('de')
 
     def tearDown(self):
-        trans_real.deactivate()
+        trans_real.activate(self._old_language)
 
 ModeltranslationTestBase = override_settings(**TEST_SETTINGS)(ModeltranslationTestBase)
 
@@ -131,13 +128,13 @@ class TestAutodiscover(ModeltranslationTestBase):
     def _pre_setup(self):
         super(TestAutodiscover, self)._pre_setup()
         # Add test_app to INSTALLED_APPS
-        from django.conf import settings
-        new_installed_apps = settings.INSTALLED_APPS + ('modeltranslation.tests.test_app',)
+        new_installed_apps = django_settings.INSTALLED_APPS + ('modeltranslation.tests.test_app',)
         self.__override = override_settings(INSTALLED_APPS=new_installed_apps)
         self.__override.enable()
 
     def _post_teardown(self):
         self.__override.disable()
+        reload(mt_settings)  # restore mt_settings.FALLBACK_LANGUAGES
         super(TestAutodiscover, self)._post_teardown()
 
     @classmethod
@@ -163,6 +160,7 @@ class TestAutodiscover(ModeltranslationTestBase):
         # Delete translation modules from import cache
         sys.modules.pop('modeltranslation.tests.test_app.translation', None)
         sys.modules.pop('modeltranslation.tests.project_translation', None)
+        super(TestAutodiscover, self).tearDown()
 
     def check_news(self):
         from test_app.models import News
@@ -516,15 +514,15 @@ class FallbackTests(ModeltranslationTestBase):
 
 
 class FileFieldsTest(ModeltranslationTestBase):
-    test_media_root = TEST_SETTINGS['MEDIA_ROOT']
 
     def tearDown(self):
-        # File tests create a temporary media directory structure. While the
-        # files are automatically deleted by the storage, the directories will
-        # stay. So we clean up a bit...
-        if os.path.isdir(self.test_media_root):
-            shutil.rmtree(self.test_media_root)
-        trans_real.deactivate()
+        if default_storage.exists('modeltranslation_tests'):
+            # With FileSystemStorage uploading files creates a new directory,
+            # that's not automatically removed upon their deletion.
+            tests_dir = default_storage.path('modeltranslation_tests')
+            if os.path.isdir(tests_dir):
+                shutil.rmtree(tests_dir)
+        super(FileFieldsTest, self).tearDown()
 
     def test_translated_models(self):
         field_names = dir(models.FileFieldsModel())
@@ -571,10 +569,10 @@ class FileFieldsTest(ModeltranslationTestBase):
         self.failUnless(inst.image.name.count('i_en') > 0)
         self.failUnlessEqual(inst.image.read(), 'image in english')
 
-        # Check if file was actually saved on disc
-        self.failUnless(os.path.exists(os.path.join(self.test_media_root, inst.file.name)))
+        # Check if file was actually created in the global storage.
+        self.failUnless(default_storage.exists(inst.file))
         self.failUnless(inst.file.size > 0)
-        self.failUnless(os.path.exists(os.path.join(self.test_media_root, inst.image.name)))
+        self.failUnless(default_storage.exists(inst.image))
         self.failUnless(inst.image.size > 0)
 
         trans_real.activate("de")
@@ -1355,14 +1353,14 @@ class UpdateCommandTest(ModeltranslationTestBase):
 
 class TranslationAdminTest(ModeltranslationTestBase):
     def setUp(self):
-        trans_real.activate('de')
+        super(TranslationAdminTest, self).setUp()
         self.test_obj = models.TestModel.objects.create(
             title='Testtitle', text='Testtext')
         self.site = AdminSite()
 
     def tearDown(self):
-        trans_real.deactivate()
         self.test_obj.delete()
+        super(TranslationAdminTest, self).tearDown()
 
     def test_default_fields(self):
         class TestModelAdmin(admin.TranslationAdmin):
@@ -1704,12 +1702,8 @@ class TranslationAdminTest(ModeltranslationTestBase):
 class TestManager(ModeltranslationTestBase):
     def setUp(self):
         # In this test case the default language is en, not de.
+        super(TestManager, self).setUp()
         trans_real.activate('en')
-
-    def tearDown(self):
-        # Settings may be loaded by translator, resulting in a different fallback.
-        trans_real.activate('de')
-        reload(mt_settings)
 
     def test_filter_update(self):
         """Test if filtering and updating is language-aware."""
