@@ -272,3 +272,13 @@ Default: ``settings.DEBUG``
 Used for modeltranslation related debug output. Currently setting it to
 ``False`` will just prevent Django's development server from printing the
 ``Registered xx models for translation`` message to stdout.
+
+
+``MODELTRANSLATION_ENABLE_FALLBACKS``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Default: ``True``
+
+.. versionadded:: 0.6
+
+Control if :ref:`fallback <fallback>` (both language and value) will occur.

@@ -246,6 +246,8 @@ What is more, fallback languages order can be overridden per model, using ``Tran
 
 Dict syntax is only allowed there.
 
+.. versionadded:: 0.6
+
 Even more, all fallbacks may be switched on or off for just some exceptional block of code using::
 
     with fallbacks(False):
