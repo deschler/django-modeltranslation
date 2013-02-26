@@ -241,10 +241,7 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
                     # Exclude non-editable fields
                     and f.editable
                     # Exclude the translation fields
-                    # TODO: I already miss localized_fieldnames_rev here ;)
-                    and f not in [
-                        k for l in [list(j) for i in self.trans_opts.fields.items() for
-                                    j in i[1:]] for k in l]
+                    and not hasattr(f, 'translated_field')
                     # Honour field arguments. We rely on the fact that the
                     # passed fieldsets argument is already fully filtered
                     # and takes options like exclude into account.
