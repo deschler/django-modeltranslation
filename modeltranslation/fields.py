@@ -108,6 +108,12 @@ class TranslationField(object):
         # (will show up e.g. in the admin).
         self.verbose_name = build_localized_verbose_name(translated_field.verbose_name, language)
 
+    def __hash__(self):
+        # TODO this hotfix should be reconsidered.
+        # The case is connected with duplicated self.creation_counter amoung translated fields
+        h = super(TranslationField, self).__hash__()
+        return h + hash(self.language)
+
     def get_attname_column(self):
         attname = self.get_attname()
         column = build_localized_fieldname(
