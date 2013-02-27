@@ -208,11 +208,11 @@ var google, django, gettext;
 
             this.getAllGroupedTranslations = function () {
                 var grouper = new TranslationFieldGrouper({
-                    $fields: this.$table.find('.mt').filter('input:visible, textarea:visible')
+                    $fields: this.$table.find('.mt').filter(
+                        'input:visible, textarea:visible, select:visible')
                 });
-                this.translationColumns = this.getTranslationColumns(grouper.groupedTranslations);
                 //this.requiredColumns = this.getRequiredColumns();
-                this.updateTable();
+                this.initTable();
                 return grouper.groupedTranslations;
             };
 
@@ -223,8 +223,15 @@ var google, django, gettext;
                 return grouper.groupedTranslations;
             };
 
-            this.updateTable = function () {
+            this.initTable = function () {
                 var self = this;
+                // The table header requires special treatment. In case an inline
+                // is declared with extra=0, the translation fields are not visible.
+                var thGrouper = new TranslationFieldGrouper({
+                    $fields: this.$table.find('.mt').filter('input, textarea, select')
+                });
+                this.translationColumns = this.getTranslationColumns(thGrouper.groupedTranslations);
+
                 // The markup of tabular inlines is kinda weird. There is an additional
                 // leading td.original per row, so we have one td more than ths.
                 this.$table.find('th').each(function (idx) {
@@ -381,7 +388,7 @@ var google, django, gettext;
             // Group normal fields and fields in (existing) stacked inlines
             var grouper = new TranslationFieldGrouper({
                 $fields: $('.mt').filter(
-                    'input:visible, textarea:visible').filter(':parents(.tabular)')
+                    'input:visible, textarea:visible, select:visible').filter(':parents(.tabular)')
             });
             MainSwitch.init(grouper.groupedTranslations, createTabs(grouper.groupedTranslations));
 
