@@ -108,11 +108,20 @@ class TranslationField(object):
         # (will show up e.g. in the admin).
         self.verbose_name = build_localized_verbose_name(translated_field.verbose_name, language)
 
+    # Django 1.5 changed definition of __hash__ for fields to be fine with hash requirements.
+    # It spoiled our machinery, since TranslationField has the same creation_counter as its
+    # original field and fields didn't get added to sets.
+    # So here we override __eq__ and __hash__ to fix the issue while retaining fine with
+    # http://docs.python.org/2.7/reference/datamodel.html#object.__hash__
+    def __eq__(self, other):
+        if isinstance(other, fields.Field):
+            return (self.creation_counter == other.creation_counter and
+                    self.language == getattr(other, 'language', None))
+        return super(TranslationField, self).__eq__(other)
+
     def __hash__(self):
-        # TODO this hotfix should be reconsidered.
-        # The case is connected with duplicated self.creation_counter amoung translated fields
         h = super(TranslationField, self).__hash__()
-        return h + hash(self.language)
+        return hash((h, self.language))
 
     def get_attname_column(self):
         attname = self.get_attname()
