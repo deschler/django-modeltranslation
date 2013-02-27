@@ -206,15 +206,6 @@ class TestAutodiscover(ModeltranslationTestBase):
         autodiscover()
         self.check_news()
 
-    @reload_override_settings(
-        MODELTRANSLATION_TRANSLATION_REGISTRY='modeltranslation.tests.project_translation'
-    )
-    def test_backward_compatibility(self):
-        """Check if old modeltranslation configuration (with REGISTRY) is handled properly."""
-        autodiscover()
-        self.check_news()
-        self.check_other()
-
 
 class ModeltranslationTest(ModeltranslationTestBase):
     """Basic tests for the modeltranslation application."""
