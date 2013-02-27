@@ -14,7 +14,11 @@ def autodiscover():
     from django.utils.importlib import import_module
     from django.utils.module_loading import module_has_submodule
     from modeltranslation.translator import translator
-    from modeltranslation.settings import TRANSLATION_FILES, DEBUG
+    from modeltranslation.settings import TRANSLATION_FILES
+    # TODO: perhaps there's a better way of using the DEBUG from settings
+    # nasty error pops up: The 'modeltranslation.settings' module masks the
+    # built-in 'DEBUG' settings
+    from modeltranslation.settings import _DEBUG as DEBUG
 
     for app in settings.INSTALLED_APPS:
         mod = import_module(app)
