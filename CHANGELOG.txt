@@ -1,3 +1,11 @@
+v0.6
+====
+Date: 2013-03-01
+
+  ADDED: A new ENABLE_FALLBACKS setting and a context manager for switching
+         fallbacks temporarily.
+         (thanks to Wojtek Ruszczewski,
+          resolves issue #152)
   ADDED: Major refactoring of the tabbed translation fields javascript. Adds
          support for tabular inlines and includes proper handling of stacked
          inlines, which have never been officially supported, but were not
@@ -9,6 +17,9 @@
          (based on original implementation by Chris Adams,
           resolves issues #38)
 
+  FIXED: Tests to run properly in the scope of a Django project.
+         (thanks to Wojtek Ruszczewski,
+          resolves issue #153)
   FIXED: Broken tab activation when using jquery-ui 1.10, keeping support for
          older jquery-ui versions and the jquery version shipped by Django.
          (thanks to Dominique Lederer,
@@ -25,6 +36,12 @@
          of the current language.
          (resolves issue #57)
 
+CHANGED: Removed deprecated MODELTRANSLATION_TRANSLATION_REGISTRY setting.
+CHANGED: Refactored auto population manager functionality. Switched to a
+         populate method in favour of the old _populate keyword and added a new
+         contextmanager to switch the population mode on demand.
+         (thanks to Wojtek Ruszczewski,
+          resolves issue #145)
 CHANGED: Major refactoring of translation field inheritance and
          TranslationOptions.
          (thanks to Wojtek Ruszczewski,
