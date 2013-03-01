@@ -206,15 +206,6 @@ class TestAutodiscover(ModeltranslationTestBase):
         autodiscover()
         self.check_news()
 
-    @reload_override_settings(
-        MODELTRANSLATION_TRANSLATION_REGISTRY='modeltranslation.tests.project_translation'
-    )
-    def test_backward_compatibility(self):
-        """Check if old modeltranslation configuration (with REGISTRY) is handled properly."""
-        autodiscover()
-        self.check_news()
-        self.check_other()
-
 
 class ModeltranslationTest(ModeltranslationTestBase):
     """Basic tests for the modeltranslation application."""
@@ -273,6 +264,30 @@ class ModeltranslationTest(ModeltranslationTestBase):
             self.assertTrue(True)
         except:
             self.fail('Descriptor accessed on class should return itself.')
+
+    def test_fields_hashes(self):
+        opts = models.TestModel._meta
+        orig = opts.get_field('title')
+        en = opts.get_field('title_en')
+        de = opts.get_field('title_de')
+        # Translation field retain creation_counters
+        self.assertEqual(orig.creation_counter, en.creation_counter)
+        self.assertEqual(orig.creation_counter, de.creation_counter)
+        # But they compare unequal
+        self.assertNotEqual(orig, en)
+        self.assertNotEqual(orig, de)
+        self.assertNotEqual(en, de)
+        # Their hashes too
+        self.assertNotEqual(hash(orig), hash(en))
+        self.assertNotEqual(hash(orig), hash(de))
+        self.assertNotEqual(hash(en), hash(de))
+        self.assertEqual(3, len(set([orig, en, de])))
+        # TranslationFields can compare equal if they have the same language
+        de.language = 'en'
+        self.assertNotEqual(orig, de)
+        self.assertEqual(en, de)
+        self.assertEqual(hash(en), hash(de))
+        self.assertEqual(2, len(set([orig, en, de])))
 
     def test_set_translation(self):
         """This test briefly shows main modeltranslation features."""
