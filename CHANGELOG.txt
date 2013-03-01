@@ -1,6 +1,7 @@
 v0.6
 ====
 Date: 2013-03-01
+Packaged from revision ea0e2db68900371146d39dcdf88b29091ee5222f
 
   ADDED: A new ENABLE_FALLBACKS setting and a context manager for switching
          fallbacks temporarily.
