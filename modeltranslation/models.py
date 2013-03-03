@@ -14,7 +14,7 @@ def autodiscover():
     from django.utils.importlib import import_module
     from django.utils.module_loading import module_has_submodule
     from modeltranslation.translator import translator
-    from modeltranslation.settings import TRANSLATION_FILES, DEBUG
+    from modeltranslation.settings import TRANSLATION_FILES
 
     for app in settings.INSTALLED_APPS:
         mod = import_module(app)
@@ -23,33 +23,14 @@ def autodiscover():
         before_import_registry = copy.copy(translator._registry)
         try:
             import_module(module)
-        except:
+        except ImportError:
             # Reset the model registry to the state before the last import as
             # this import will have to reoccur on the next request and this
             # could raise NotRegistered and AlreadyRegistered exceptions
             translator._registry = before_import_registry
 
-            # Decide whether to bubble up this error. If the app just
-            # doesn't have an translation module, we can ignore the error
-            # attempting to import it, otherwise we want it to bubble up.
-            if module_has_submodule(mod, 'translation'):
-                raise
-
     for module in TRANSLATION_FILES:
         import_module(module)
-
-    # In debug mode, print a list of registered models and pid to stdout.
-    # Note: Differing model order is fine, we don't rely on a particular
-    # order, as far as base classes are registered before subclasses.
-    if DEBUG:
-        try:
-            if sys.argv[1] in ('runserver', 'runserver_plus'):
-                models = translator.get_registered_models()
-                names = ', '.join(m.__name__ for m in models)
-                print('modeltranslation: Registered %d models for translation'
-                      ' (%s) [pid: %d].' % (len(models), names, os.getpid()))
-        except IndexError:
-            pass
 
 
 def handle_translation_registrations(*args, **kwargs):
