@@ -28,6 +28,10 @@ def autodiscover():
             # this import will have to reoccur on the next request and this
             # could raise NotRegistered and AlreadyRegistered exceptions
             translator._registry = before_import_registry
+            # Re-raise ImportError in case it was raised from the
+            # 'translation' module.
+            if module_has_submodule(mod, 'translation'):
+                raise
 
     for module in TRANSLATION_FILES:
         import_module(module)
