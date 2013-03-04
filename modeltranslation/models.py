@@ -7,8 +7,6 @@ def autodiscover():
     not present. This forces an import on them to register.
     Also import explicit modules.
     """
-    import os
-    import sys
     import copy
     from django.conf import settings
     from django.utils.importlib import import_module
