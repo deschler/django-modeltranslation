@@ -1991,3 +1991,30 @@ class TestManager(ModeltranslationTestBase):
             self.assertEqual(m.title_de, 'foo')
             self.assertEqual(m.text_en, 'bar')
             self.assertEqual(m.text_de, None)
+
+    def test_fixture_population_via_command(self):
+        """
+        Test that the loaddata command takes new option.
+        """
+        call_command('loaddata', 'fixture.json', verbosity=0, commit=False, populate='required')
+        m = models.TestModel.objects.get()
+        self.assertEqual(m.title_en, 'foo')
+        self.assertEqual(m.title_de, 'foo')
+        self.assertEqual(m.text_en, 'bar')
+        self.assertEqual(m.text_de, None)
+
+        call_command('loaddata', 'fixture.json', verbosity=0, commit=False, populate='all')
+        m = models.TestModel.objects.get()
+        self.assertEqual(m.title_en, 'foo')
+        self.assertEqual(m.title_de, 'foo')
+        self.assertEqual(m.text_en, 'bar')
+        self.assertEqual(m.text_de, 'bar')
+
+        # Test if option overrides current context
+        with auto_populate('all'):
+            call_command('loaddata', 'fixture.json', verbosity=0, commit=False, populate=False)
+            m = models.TestModel.objects.get()
+            self.assertEqual(m.title_en, 'foo')
+            self.assertEqual(m.title_de, None)
+            self.assertEqual(m.text_en, 'bar')
+            self.assertEqual(m.text_de, None)
