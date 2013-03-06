@@ -656,10 +656,12 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         inst.optional = None
 
         trans_real.activate("en")
-        inst.optional = test_inst2
+        # Test assigning relation by ID:
+        inst.optional_id = test_inst2.pk
         inst.save()
 
         trans_real.activate("de")
+        self.failUnlessEqual(inst.test_id, test_inst1.pk)
         self.failUnlessEqual(inst.test.title, 'title1_de')
         self.failUnlessEqual(inst.test_de_id, test_inst1.pk)
         self.failUnlessEqual(inst.test_de.title, 'title1_de')
@@ -668,10 +670,12 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         # Test fallbacks:
         trans_real.activate("en")
         with default_fallback():
+            self.failUnlessEqual(inst.test_id, test_inst1.pk)
             self.failUnlessEqual(inst.test.pk, test_inst1.pk)
             self.failUnlessEqual(inst.test.title, 'title1_en')
 
         # Test English:
+        self.failUnlessEqual(inst.optional_id, test_inst2.pk)
         self.failUnlessEqual(inst.optional.title, 'title2_en')
         self.failUnlessEqual(inst.optional_en_id, test_inst2.pk)
         self.failUnlessEqual(inst.optional_en.title, 'title2_en')

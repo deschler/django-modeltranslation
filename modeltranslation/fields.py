@@ -186,3 +186,31 @@ class TranslationFieldDescriptor(object):
             return self.field.get_default()
         else:
             return self.fallback_value
+
+
+class TranslatedRelationIdDescriptor(object):
+    """
+    A descriptor used for the original '_id' attribute of a translated
+    ForeignKey field.
+    """
+    def __init__(self, field_name, fallback_languages):
+        self.field_name = field_name  # The name of the original field (excluding '_id')
+        self.fallback_languages = fallback_languages
+
+    def __set__(self, instance, value):
+        lang = get_language()
+        loc_field_name = build_localized_fieldname(self.field_name, lang)
+        loc_attname = instance._meta.get_field(loc_field_name).get_attname()  # Localized field name with '_id'
+        setattr(instance, loc_attname, value)
+
+    def __get__(self, instance, owner):
+        if instance is None:
+            return self
+        langs = resolution_order(get_language(), self.fallback_languages)
+        for lang in langs:
+            loc_field_name = build_localized_fieldname(self.field_name, lang)
+            loc_attname = instance._meta.get_field(loc_field_name).get_attname()  # Localized field name with '_id'
+            val = getattr(instance, loc_attname, None)
+            if val is not None:
+                return val
+        return None

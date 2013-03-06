@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from django.conf import settings
-from django.db.models import Manager
+from django.db.models import Manager, ForeignKey
 from django.db.models.base import ModelBase
 
 from modeltranslation import settings as mt_settings
-from modeltranslation.fields import TranslationFieldDescriptor, create_translation_field
+from modeltranslation.fields import (TranslationFieldDescriptor,
+    TranslatedRelationIdDescriptor, create_translation_field,)
 from modeltranslation.manager import MultilingualManager, rewrite_lookup_key
 from modeltranslation.utils import build_localized_fieldname
 
@@ -277,11 +278,18 @@ class Translator(object):
                     field_fallback_value = model_fallback_values.get(field_name, None)
                 else:
                     field_fallback_value = model_fallback_values
+                field = model._meta.get_field(field_name)
                 descriptor = TranslationFieldDescriptor(
-                    model._meta.get_field(field_name),
+                    field,
                     fallback_value=field_fallback_value,
                     fallback_languages=model_fallback_languages)
                 setattr(model, field_name, descriptor)
+                if isinstance(field, ForeignKey):
+                    # We need to use a special descriptor so that
+                    # _id fields on translated ForeignKeys work
+                    # as expected.
+                    desc = TranslatedRelationIdDescriptor(field_name, model_fallback_languages)
+                    setattr(model, field.get_attname(), desc)
 
     def unregister(self, model_or_iterable):
         """
