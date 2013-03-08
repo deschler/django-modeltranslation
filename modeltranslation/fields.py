@@ -51,8 +51,6 @@ def create_translation_field(model, field_name, lang):
     if not (isinstance(field, SUPPORTED_FIELDS) or cls_name in mt_settings.CUSTOM_FIELDS):
         raise ImproperlyConfigured(
             '%s is not supported by modeltranslation.' % cls_name)
-    if isinstance(field, fields.related.ForeignKey) and field.rel.related_name != '+':
-        raise ImproperlyConfigured('Translated ForeignKey fields must use related_name="+"')
     translation_class = field_factory(field.__class__)
     return translation_class(translated_field=field, language=lang)
 
@@ -110,6 +108,13 @@ class TranslationField(object):
         # Copy the verbose name and append a language suffix
         # (will show up e.g. in the admin).
         self.verbose_name = build_localized_verbose_name(translated_field.verbose_name, language)
+
+        # ForeignKey support - rewrite related_name
+        if self.rel and self.related:
+            import copy
+            current = self.related.get_accessor_name()
+            self.rel = copy.copy(self.rel)  # Since fields cannot share the same rel object.
+            self.rel.related_name = build_localized_fieldname(current, self.language)
 
     # Django 1.5 changed definition of __hash__ for fields to be fine with hash requirements.
     # It spoiled our machinery, since TranslationField has the same creation_counter as its
