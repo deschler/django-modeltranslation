@@ -256,7 +256,7 @@ var google, django, gettext;
                 $.each(groupedTranslations, function (groupId, lang) {
                     var i = 0;
                     $.each(lang, function (lang, el) {
-                        var column = $(el).parent().prevAll().length;
+                        var column = $(el).closest('td').prevAll().length;
                         if (i > 0 && $.inArray(column, translationColumns) === -1) {
                             translationColumns.push(column);
                         }
@@ -301,7 +301,7 @@ var google, django, gettext;
                 tabsContainer.append(tabsList);
 
                 $.each(lang, function (lang, el) {
-                    var $container = $(el).parent(),
+                    var $container = $(el).closest('td'),
                         $panel,
                         $tab,
                         tabId = 'tab_' + $(el).attr('id');
