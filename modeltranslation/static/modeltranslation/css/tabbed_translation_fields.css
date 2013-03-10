@@ -85,3 +85,10 @@ backward compatibility:
 .inline-group .tabular tr td.delete {
     vertical-align: top;
 }
+
+.inline-group .tabular .datetime > input {
+    margin-right: 5px;
+}
+.inline-group .tabular .datetime br {
+    display: none;
+}
