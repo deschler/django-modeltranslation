@@ -114,7 +114,11 @@ class TranslationField(object):
             import copy
             current = self.related.get_accessor_name()
             self.rel = copy.copy(self.rel)  # Since fields cannot share the same rel object.
+            self.related = copy.copy(self.related)
+            self.related.field = self  # We need self.related.field to point to this instance
             self.rel.related_name = build_localized_fieldname(current, self.language)
+            if hasattr(self.rel.to._meta, '_related_objects_cache'):
+                del self.rel.to._meta._related_objects_cache
 
     # Django 1.5 changed definition of __hash__ for fields to be fine with hash requirements.
     # It spoiled our machinery, since TranslationField has the same creation_counter as its

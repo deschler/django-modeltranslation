@@ -38,7 +38,7 @@ class FileFieldsModel(models.Model):
 ########## Foreign Key fields testing
 
 class ForeignKeyModel(models.Model):
-    test = models.ForeignKey(TestModel, null=True, related_name="test_fk")
+    test = models.ForeignKey(TestModel, null=True, related_name="test_fks")
     optional = models.ForeignKey(TestModel, blank=True, null=True)
 
 

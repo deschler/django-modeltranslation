@@ -680,6 +680,76 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         self.failUnlessEqual(inst.optional_en_id, test_inst2.pk)
         self.failUnlessEqual(inst.optional_en.title, 'title2_en')
 
+    def test_reverse_relations(self):
+        test_inst = models.TestModel(title_en='title_en', title_de='title_de')
+        test_inst.save()
+
+        # Instantiate many 'ForeignKeyModel' instances:
+        fk_inst_both = models.ForeignKeyModel(test_de=test_inst, test_en=test_inst)
+        fk_inst_both.save()
+        fk_inst_de = models.ForeignKeyModel(test_de_id=test_inst.pk)
+        fk_inst_de.save()
+        fk_inst_en = models.ForeignKeyModel(test_en=test_inst)
+        fk_inst_en.save()
+
+        # Check that the reverse accessors are created on the model:
+        testmodel_fields = models.TestModel._meta.get_all_field_names()
+        self.assertIn('test_fks', testmodel_fields)
+        self.assertIn('test_fks_de', testmodel_fields)
+        self.assertIn('test_fks_en', testmodel_fields)
+        self.assertIn('foreignkeymodel_set', testmodel_fields)  # FIXME
+        self.assertIn('foreignkeymodel_set_de', testmodel_fields)
+        self.assertIn('foreignkeymodel_set_en', testmodel_fields)
+
+        # Check the german reverse accessor:
+        self.assertIn(fk_inst_both, test_inst.test_fks_de.all())
+        self.assertIn(fk_inst_de, test_inst.test_fks_de.all())
+        self.assertNotIn(fk_inst_en, test_inst.test_fks_de.all())
+
+        # Check the English reverse accessor:
+        self.assertIn(fk_inst_both, test_inst.test_fks_en.all())
+        self.assertIn(fk_inst_en, test_inst.test_fks_en.all())
+        self.assertNotIn(fk_inst_de, test_inst.test_fks_en.all())
+
+        # Check the default reverse accessor:
+        trans_real.activate("de")
+        self.assertIn(fk_inst_de,    test_inst.test_fks.all())
+        self.assertNotIn(fk_inst_en, test_inst.test_fks.all())
+        trans_real.activate("en")
+        self.assertIn(fk_inst_en,    test_inst.test_fks.all())
+        self.assertNotIn(fk_inst_de, test_inst.test_fks.all())
+
+        # Check filtering:
+        self.failUnlessEqual(models.TestModel.objects.filter(test_fks=fk_inst_de).count(), 1)
+        self.failUnlessEqual(models.TestModel.objects.filter(test_fks__id=fk_inst_de.pk).count(), 1)
+        self.failUnlessEqual(models.TestModel.objects.filter(test_fks=fk_inst_en).count(), 0)
+        self.failUnlessEqual(models.TestModel.objects.filter(test_fks_en=fk_inst_en).count(), 1)
+        trans_real.activate("en")
+        self.failUnlessEqual(models.TestModel.objects.filter(test_fks=fk_inst_en).count(), 1)  # FIXME
+        self.failUnlessEqual(models.TestModel.objects.filter(test_fks__id=fk_inst_en.pk).count(), 1)  # FIXME
+        self.failUnlessEqual(models.TestModel.objects.filter(test_fks=fk_inst_de).count(), 0)  # FIXME
+        # TODO: test filter() on a relation to a non-translated model  - FIXME
+
+        # Check assignment
+        trans_real.activate("de")
+        test_inst2 = models.TestModel(title_en='title_en', title_de='title_de')
+        test_inst2.save()
+        test_inst2.test_fks = [fk_inst_de, fk_inst_both]
+        test_inst2.test_fks_en = (fk_inst_en, fk_inst_both)
+
+        self.assertEqual(fk_inst_both.test.pk, test_inst2.pk)
+        self.assertEqual(fk_inst_both.test_id, test_inst2.pk)
+        self.assertEqual(fk_inst_both.test_de, test_inst2)
+        self.assertIn(fk_inst_both, test_inst2.test_fks_de.all())
+        self.assertIn(fk_inst_de, test_inst2.test_fks_de.all())
+        self.assertIn(fk_inst_de, test_inst2.test_fks.all())
+        self.assertNotIn(fk_inst_en, test_inst2.test_fks_de.all())
+        trans_real.activate("en")
+        self.assertIn(fk_inst_both, test_inst2.test_fks.all())
+        self.assertIn(fk_inst_en, test_inst2.test_fks.all())
+        self.assertNotIn(fk_inst_de, test_inst2.test_fks.all())
+        self.assertNotIn(fk_inst_de, test_inst2.test_fks_en.all())
+
 
 class OtherFieldsTest(ModeltranslationTestBase):
     def test_translated_models(self):
