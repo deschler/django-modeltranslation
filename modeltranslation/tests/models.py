@@ -34,6 +34,11 @@ class FileFieldsModel(models.Model):
     file = models.FileField(upload_to='modeltranslation_tests', null=True, blank=True)
     image = models.ImageField(upload_to='modeltranslation_tests', null=True, blank=True)
 
+########## Foreign Key fields testing
+
+class ForeignKeyModel(models.Model):
+    test = models.ForeignKey(TestModel, null=True, related_name="+")
+    optional = models.ForeignKey(TestModel, blank=True, null=True, related_name="+")
 
 ########## Custom fields testing
 

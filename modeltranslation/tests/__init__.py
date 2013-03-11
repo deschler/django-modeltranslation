@@ -43,8 +43,8 @@ except ImportError:
 # so we'll just pass in None.
 request = None
 
-# How much models are registered for tests.
-TEST_MODELS = 22
+# How many models are registered for tests.
+TEST_MODELS = 23
 
 
 class reload_override_settings(override_settings):
@@ -617,6 +617,68 @@ class FileFieldsTest(ModeltranslationTestBase):
         inst.image_en.delete()
         inst.file_de.delete()
         inst.image_de.delete()
+
+
+class ForeignKeyFieldsTest(ModeltranslationTestBase):
+
+    def test_translated_models(self):
+        field_names = dir(models.ForeignKeyModel())
+        self.failUnless('id' in field_names)
+        for f in ('test', 'test_de', 'test_en', 'optional', 'optional_en', 'optional_de'):
+            self.failUnless(f in field_names)
+            self.failUnless('%s_id' % f in field_names)
+
+    def test_db_column_names(self):
+        meta = models.ForeignKeyModel._meta
+
+        # Make sure the correct database columns always get used:
+        attname, col = meta.get_field('test').get_attname_column()
+        self.failUnlessEqual(attname, 'test_id')
+        self.failUnlessEqual(attname, col)
+
+        attname, col = meta.get_field('test_en').get_attname_column()
+        self.failUnlessEqual(attname, 'test_en_id')
+        self.failUnlessEqual(attname, col)
+
+        attname, col = meta.get_field('test_de').get_attname_column()
+        self.failUnlessEqual(attname, 'test_de_id')
+        self.failUnlessEqual(attname, col)
+
+    def test_translated_models_instance(self):
+        test_inst1 = models.TestModel(title_en='title1_en', title_de='title1_de')
+        test_inst1.save()
+        test_inst2 = models.TestModel(title_en='title2_en', title_de='title2_de')
+        test_inst2.save()
+        inst = models.ForeignKeyModel()
+
+        trans_real.activate("de")
+        inst.test = test_inst1
+        inst.optional = None
+
+        trans_real.activate("en")
+        # Test assigning relation by ID:
+        inst.optional_id = test_inst2.pk
+        inst.save()
+
+        trans_real.activate("de")
+        self.failUnlessEqual(inst.test_id, test_inst1.pk)
+        self.failUnlessEqual(inst.test.title, 'title1_de')
+        self.failUnlessEqual(inst.test_de_id, test_inst1.pk)
+        self.failUnlessEqual(inst.test_de.title, 'title1_de')
+        self.failUnlessEqual(inst.optional, None)
+
+        # Test fallbacks:
+        trans_real.activate("en")
+        with default_fallback():
+            self.failUnlessEqual(inst.test_id, test_inst1.pk)
+            self.failUnlessEqual(inst.test.pk, test_inst1.pk)
+            self.failUnlessEqual(inst.test.title, 'title1_en')
+
+        # Test English:
+        self.failUnlessEqual(inst.optional_id, test_inst2.pk)
+        self.failUnlessEqual(inst.optional.title, 'title2_en')
+        self.failUnlessEqual(inst.optional_en_id, test_inst2.pk)
+        self.failUnlessEqual(inst.optional_en.title, 'title2_en')
 
 
 class OtherFieldsTest(ModeltranslationTestBase):
