@@ -38,7 +38,7 @@ translator.register(FileFieldsModel, FileFieldsModelTranslationOptions)
 ########## Foreign Key fields testing
 
 class ForeignKeyModelTranslationOptions(TranslationOptions):
-    fields = ('test', 'optional',)
+    fields = ('title', 'test', 'optional', 'hidden', 'non',)
 translator.register(ForeignKeyModel, ForeignKeyModelTranslationOptions)
 
 

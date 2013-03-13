@@ -7,7 +7,7 @@ https://github.com/zmathew/django-linguo
 """
 from __future__ import with_statement  # Python 2.5 compatibility
 from django.db import models
-from django.db.models.fields.related import RelatedField
+from django.db.models.fields.related import RelatedField, RelatedObject
 from django.db.models.sql.where import Constraint
 from django.utils.tree import Node
 
@@ -19,37 +19,32 @@ from modeltranslation.utils import (build_localized_fieldname, get_language,
 def get_translatable_fields_for_model(model):
     from modeltranslation.translator import NotRegistered, translator
     try:
-        return translator.get_options_for_model(model).fields
+        return translator.get_options_for_model(model).get_field_names()
     except NotRegistered:
         return None
 
 
 def rewrite_lookup_key(model, lookup_key):
+    pieces = lookup_key.split('__', 1)
+    original_key = pieces[0]
+
     translatable_fields = get_translatable_fields_for_model(model)
     if translatable_fields is not None:
-        pieces = lookup_key.split('__')
         # If we are doing a lookup on a translatable field,
         # we want to rewrite it to the actual field name
         # For example, we want to rewrite "name__startswith" to "name_fr__startswith"
         if pieces[0] in translatable_fields:
-            lookup_key = build_localized_fieldname(pieces[0], get_language())
-            remaining_lookup = '__'.join(pieces[1:])
-            if remaining_lookup:
-                lookup_key = '%s__%s' % (lookup_key, remaining_lookup)
+            pieces[0] = build_localized_fieldname(pieces[0], get_language())
 
-    pieces = lookup_key.split('__')
     if len(pieces) > 1:
         # Check if we are doing a lookup to a related trans model
         fields_to_trans_models = get_fields_to_translatable_models(model)
         for field_to_trans, transmodel in fields_to_trans_models:
-            if pieces[0] == field_to_trans:
-                sub_lookup = '__'.join(pieces[1:])
-                if sub_lookup:
-                    sub_lookup = rewrite_lookup_key(transmodel, sub_lookup)
-                    lookup_key = '%s__%s' % (pieces[0], sub_lookup)
+            # Check ``original key``, as pieces[0] may have been already rewritten.
+            if original_key == field_to_trans:
+                pieces[1] = rewrite_lookup_key(transmodel, pieces[1])
                 break
-
-    return lookup_key
+    return '__'.join(pieces)
 
 
 def rewrite_order_lookup_key(model, lookup_key):
@@ -58,16 +53,25 @@ def rewrite_order_lookup_key(model, lookup_key):
     else:
         return rewrite_lookup_key(model, lookup_key)
 
+_F2TM_CACHE = {}
+
 
 def get_fields_to_translatable_models(model):
-    from modeltranslation.translator import translator
-    results = []
-    for field_name in translator.get_options_for_model(model).fields.keys():
-        field_object, modelclass, direct, m2m = model._meta.get_field_by_name(field_name)
-        if direct and isinstance(field_object, RelatedField):
-            if get_translatable_fields_for_model(field_object.related.parent_model) is not None:
-                results.append((field_name, field_object.related.parent_model))
-    return results
+    if model not in _F2TM_CACHE:
+        from modeltranslation.translator import translator
+        results = []
+        for field_name in translator.get_options_for_model(model).get_field_names():
+            field_object, modelclass, direct, m2m = model._meta.get_field_by_name(field_name)
+            # Direct relationship
+            if direct and isinstance(field_object, RelatedField):
+                if get_translatable_fields_for_model(field_object.related.parent_model) is not None:
+                    results.append((field_name, field_object.related.parent_model))
+            # Reverse relationship
+            if isinstance(field_object, RelatedObject):
+                if get_translatable_fields_for_model(field_object.model) is not None:
+                    results.append((field_name, field_object.model))
+        _F2TM_CACHE[model] = results
+    return _F2TM_CACHE[model]
 
 
 class MultilingualQuerySet(models.query.QuerySet):

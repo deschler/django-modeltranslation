@@ -110,12 +110,12 @@ class TranslationField(object):
         self.verbose_name = build_localized_verbose_name(translated_field.verbose_name, language)
 
         # ForeignKey support - rewrite related_name
-        if self.rel and self.related:
+        if self.rel and self.related and not self.rel.is_hidden():
             import copy
             current = self.related.get_accessor_name()
             self.rel = copy.copy(self.rel)  # Since fields cannot share the same rel object.
-            self.related = copy.copy(self.related)
-            self.related.field = self  # We need self.related.field to point to this instance
+            # self.related doesn't need to be copied, as it will be recreated in
+            # ``RelatedField.do_related_class``
             self.rel.related_name = build_localized_fieldname(current, self.language)
             if hasattr(self.rel.to._meta, '_related_objects_cache'):
                 del self.rel.to._meta._related_objects_cache
@@ -209,7 +209,8 @@ class TranslatedRelationIdDescriptor(object):
     def __set__(self, instance, value):
         lang = get_language()
         loc_field_name = build_localized_fieldname(self.field_name, lang)
-        loc_attname = instance._meta.get_field(loc_field_name).get_attname()  # Localized field name with '_id'
+        # Localized field name with '_id'
+        loc_attname = instance._meta.get_field(loc_field_name).get_attname()
         setattr(instance, loc_attname, value)
 
     def __get__(self, instance, owner):
@@ -218,7 +219,8 @@ class TranslatedRelationIdDescriptor(object):
         langs = resolution_order(get_language(), self.fallback_languages)
         for lang in langs:
             loc_field_name = build_localized_fieldname(self.field_name, lang)
-            loc_attname = instance._meta.get_field(loc_field_name).get_attname()  # Localized field name with '_id'
+            # Localized field name with '_id'
+            loc_attname = instance._meta.get_field(loc_field_name).get_attname()
             val = getattr(instance, loc_attname, None)
             if val is not None:
                 return val
