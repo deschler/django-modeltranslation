@@ -116,7 +116,7 @@ class TranslationField(object):
             self.rel = copy.copy(self.rel)  # Since fields cannot share the same rel object.
             # self.related doesn't need to be copied, as it will be recreated in
             # ``RelatedField.do_related_class``
-            
+
             if self.rel.related_name is None:
                 # For implicit related_name use different query field name
                 loc_related_query_name = build_localized_fieldname(
