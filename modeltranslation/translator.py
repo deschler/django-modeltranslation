@@ -303,18 +303,11 @@ class Translator(object):
                     desc = TranslatedRelationIdDescriptor(field_name, model_fallback_languages)
                     setattr(model, field.get_attname(), desc)
 
-                    # If related name is not set on field, force its value, so that lookup key
-                    # is `model_set` instead of `model`, to trigger rewriting into `model_set_lang`
-                    # form.
-                    related_name = field.related.get_accessor_name()
-                    if field.rel.related_name is None:
-                        field.rel.related_name = related_name
-
                     # Set related field names on other model
                     if not field.rel.is_hidden():
                         other_opts = self._get_options_for_model(field.rel.to)
                         other_opts.related = True
-                        other_opts.related_fields.append(related_name)
+                        other_opts.related_fields.append(field.related_query_name())
                         add_manager(field.rel.to)  # Add manager in case of non-registered model
 
     def unregister(self, model_or_iterable):

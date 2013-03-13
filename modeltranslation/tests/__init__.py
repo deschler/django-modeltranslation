@@ -727,15 +727,22 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         fk_option_en = models.ForeignKeyModel.objects.create(optional_en=test_inst)
 
         # Check that the reverse accessors are created on the model:
+        # Explicit related_name
         testmodel_fields = models.TestModel._meta.get_all_field_names()
-        self.assertIn('test_fks', testmodel_fields)
+        testmodel_methods = dir(models.TestModel)
+        self.assertIn('test_fks',    testmodel_fields)
         self.assertIn('test_fks_de', testmodel_fields)
         self.assertIn('test_fks_en', testmodel_fields)
-        # For non-specified related_names, break the default schema. Django would give the related
-        # field name ``foreignkeymodel``, but we give ``foreignkeymodel_set``, just like descriptor.
-        self.assertIn('foreignkeymodel_set', testmodel_fields)
-        self.assertIn('foreignkeymodel_set_de', testmodel_fields)
-        self.assertIn('foreignkeymodel_set_en', testmodel_fields)
+        self.assertIn('test_fks',    testmodel_methods)
+        self.assertIn('test_fks_de', testmodel_methods)
+        self.assertIn('test_fks_en', testmodel_methods)
+        # Implicit related_name: manager descriptor name != query field name
+        self.assertIn('foreignkeymodel',    testmodel_fields)
+        self.assertIn('foreignkeymodel_de', testmodel_fields)
+        self.assertIn('foreignkeymodel_en', testmodel_fields)
+        self.assertIn('foreignkeymodel_set',    testmodel_methods)
+        self.assertIn('foreignkeymodel_set_de', testmodel_methods)
+        self.assertIn('foreignkeymodel_set_en', testmodel_methods)
 
         # Check the German reverse accessor:
         self.assertIn(fk_inst_both, test_inst.test_fks_de.all())
@@ -755,6 +762,9 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         self.assertIn(fk_inst_en,    test_inst.test_fks.all())
         self.assertNotIn(fk_inst_de, test_inst.test_fks.all())
 
+        # Check implicit related_name reverse accessor:
+        self.assertIn(fk_option_en, test_inst.foreignkeymodel_set.all())
+
         # Check filtering in reverse way + lookup spanning:
         manager = models.TestModel.objects
         trans_real.activate("de")
@@ -763,9 +773,9 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         self.failUnlessEqual(manager.filter(test_fks__id=fk_inst_de.pk).count(), 1)
         self.failUnlessEqual(manager.filter(test_fks=fk_inst_en).count(), 0)
         self.failUnlessEqual(manager.filter(test_fks_en=fk_inst_en).count(), 1)
-        self.failUnlessEqual(manager.filter(foreignkeymodel_set=fk_option_de).count(), 1)
-        self.failUnlessEqual(manager.filter(foreignkeymodel_set=fk_option_en).count(), 0)
-        self.failUnlessEqual(manager.filter(foreignkeymodel_set_en=fk_option_en).count(), 1)
+        self.failUnlessEqual(manager.filter(foreignkeymodel=fk_option_de).count(), 1)
+        self.failUnlessEqual(manager.filter(foreignkeymodel=fk_option_en).count(), 0)
+        self.failUnlessEqual(manager.filter(foreignkeymodel_en=fk_option_en).count(), 1)
         self.failUnlessEqual(manager.filter(test_fks__title='f_title_de').distinct().count(), 1)
         self.failUnlessEqual(manager.filter(test_fks__title='f_title_en').distinct().count(), 0)
         self.failUnlessEqual(manager.filter(test_fks__title_en='f_title_en').distinct().count(), 1)
@@ -775,9 +785,9 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         self.failUnlessEqual(manager.filter(test_fks__id=fk_inst_en.pk).count(), 1)
         self.failUnlessEqual(manager.filter(test_fks=fk_inst_de).count(), 0)
         self.failUnlessEqual(manager.filter(test_fks_de=fk_inst_de).count(), 1)
-        self.failUnlessEqual(manager.filter(foreignkeymodel_set=fk_option_en).count(), 1)
-        self.failUnlessEqual(manager.filter(foreignkeymodel_set=fk_option_de).count(), 0)
-        self.failUnlessEqual(manager.filter(foreignkeymodel_set_de=fk_option_de).count(), 1)
+        self.failUnlessEqual(manager.filter(foreignkeymodel=fk_option_en).count(), 1)
+        self.failUnlessEqual(manager.filter(foreignkeymodel=fk_option_de).count(), 0)
+        self.failUnlessEqual(manager.filter(foreignkeymodel_de=fk_option_de).count(), 1)
         self.failUnlessEqual(manager.filter(test_fks__title='f_title_en').distinct().count(), 1)
         self.failUnlessEqual(manager.filter(test_fks__title='f_title_de').distinct().count(), 0)
         self.failUnlessEqual(manager.filter(test_fks__title_de='f_title_de').distinct().count(), 1)
