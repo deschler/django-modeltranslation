@@ -150,37 +150,37 @@ translating other fields can be useful in several situations. The table lists
 all model fields available in Django and gives an overview about their current
 support status:
 
-=============================== === ===
-Model Field                     0.4 0.5
-=============================== === ===
-``AutoField``                   |n| |n|
-``BigIntegerField``             |n| |i|
-``BooleanField``                |n| |y|
-``CharField``                   |y| |y|
-``CommaSeparatedIntegerField``  |n| |y|
-``DateField``                   |n| |y|
-``DateTimeField``               |n| |y|
-``DecimalField``                |n| |y|
-``EmailField``                  |i| |i|
-``FileField``                   |y| |y|
-``FilePathField``               |i| |i|
-``FloatField``                  |n| |y|
-``ImageField``                  |y| |y|
-``IntegerField``                |n| |y|
-``IPAddressField``              |n| |y|
-``GenericIPAddressField``       |n| |y|
-``NullBooleanField``            |n| |y|
-``PositiveIntegerField``        |n| |i|
-``PositiveSmallIntegerField``   |n| |i|
-``SlugField``                   |i| |i|
-``SmallIntegerField``           |n| |i|
-``TextField``                   |y| |y|
-``TimeField``                   |n| |y|
-``URLField``                    |i| |i|
-``ForeignKey``                  |n| |n|
-``OneToOneField``               |n| |n|
-``ManyToManyField``             |n| |n|
-=============================== === ===
+=============================== === === ===
+Model Field                     0.4 0.5 0.7
+=============================== === === ===
+``AutoField``                   |n| |n| |n|
+``BigIntegerField``             |n| |i| |i|
+``BooleanField``                |n| |y| |y|
+``CharField``                   |y| |y| |y|
+``CommaSeparatedIntegerField``  |n| |y| |y|
+``DateField``                   |n| |y| |y|
+``DateTimeField``               |n| |y| |y|
+``DecimalField``                |n| |y| |y|
+``EmailField``                  |i| |i| |i|
+``FileField``                   |y| |y| |y|
+``FilePathField``               |i| |i| |i|
+``FloatField``                  |n| |y| |y|
+``ImageField``                  |y| |y| |y|
+``IntegerField``                |n| |y| |y|
+``IPAddressField``              |n| |y| |y|
+``GenericIPAddressField``       |n| |y| |y|
+``NullBooleanField``            |n| |y| |y|
+``PositiveIntegerField``        |n| |i| |i|
+``PositiveSmallIntegerField``   |n| |i| |i|
+``SlugField``                   |i| |i| |i|
+``SmallIntegerField``           |n| |i| |i|
+``TextField``                   |y| |y| |y|
+``TimeField``                   |n| |y| |y|
+``URLField``                    |i| |i| |i|
+``ForeignKey``                  |n| |n| |y|
+``OneToOneField``               |n| |n| |n|
+``ManyToManyField``             |n| |n| |n|
+=============================== === === ===
 
 .. |y| replace:: Yes
 .. |i| replace:: Yes\*
