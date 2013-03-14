@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from django.conf import settings
-from django.db.models import Manager
+from django.db.models import Manager, ForeignKey
 from django.db.models.base import ModelBase
 
 from modeltranslation import settings as mt_settings
-from modeltranslation.fields import TranslationFieldDescriptor, create_translation_field
+from modeltranslation.fields import (TranslationFieldDescriptor, TranslatedRelationIdDescriptor,
+                                     create_translation_field)
 from modeltranslation.manager import MultilingualManager, rewrite_lookup_key
 from modeltranslation.utils import build_localized_fieldname
 
@@ -49,6 +50,10 @@ class TranslationOptions(object):
     in between in the inheritance chain), while ``fields`` also includes fields
     inherited from concrete supermodels (giving all translated fields available
     on a model).
+
+    ``related`` attribute inform whether this model is related part of some relation
+    with translated model. This model may be not translated itself.
+    ``related_fields`` contains names of reverse lookup fields.
     """
     __metaclass__ = FieldsAggregationMetaClass
 
@@ -58,8 +63,10 @@ class TranslationOptions(object):
         """
         self.model = model
         self.registered = False
+        self.related = False
         self.local_fields = dict((f, set()) for f in self.fields)
         self.fields = dict((f, set()) for f in self.fields)
+        self.related_fields = []
 
     def update(self, other):
         """
@@ -75,6 +82,12 @@ class TranslationOptions(object):
         """
         self.local_fields[field].add(translation_field)
         self.fields[field].add(translation_field)
+
+    def get_field_names(self):
+        """
+        Return name of all fields that can be used in filtering.
+        """
+        return self.fields.keys() + self.related_fields
 
     def __str__(self):
         local = tuple(self.local_fields.keys())
@@ -277,11 +290,25 @@ class Translator(object):
                     field_fallback_value = model_fallback_values.get(field_name, None)
                 else:
                     field_fallback_value = model_fallback_values
+                field = model._meta.get_field(field_name)
                 descriptor = TranslationFieldDescriptor(
-                    model._meta.get_field(field_name),
+                    field,
                     fallback_value=field_fallback_value,
                     fallback_languages=model_fallback_languages)
                 setattr(model, field_name, descriptor)
+                if isinstance(field, ForeignKey):
+                    # We need to use a special descriptor so that
+                    # _id fields on translated ForeignKeys work
+                    # as expected.
+                    desc = TranslatedRelationIdDescriptor(field_name, model_fallback_languages)
+                    setattr(model, field.get_attname(), desc)
+
+                    # Set related field names on other model
+                    if not field.rel.is_hidden():
+                        other_opts = self._get_options_for_model(field.rel.to)
+                        other_opts.related = True
+                        other_opts.related_fields.append(field.related_query_name())
+                        add_manager(field.rel.to)  # Add manager in case of non-registered model
 
     def unregister(self, model_or_iterable):
         """
@@ -349,7 +376,7 @@ class Translator(object):
         semantic of throwing exception for models not directly registered.
         """
         opts = self._get_options_for_model(model)
-        if not opts.registered:
+        if not opts.registered and not opts.related:
             raise NotRegistered('The model "%s" is not registered for '
                                 'translation' % model.__name__)
         return opts

@@ -3,10 +3,10 @@ from django.utils.translation import ugettext_lazy
 
 from modeltranslation.translator import translator, TranslationOptions
 from modeltranslation.tests.models import (
-    TestModel, FallbackModel, FallbackModel2, FileFieldsModel, OtherFieldsModel, DescriptorModel,
-    AbstractModelA, AbstractModelB, Slugged, MetaData, Displayable, Page, RichText, RichTextPage,
-    MultitableModelA, MultitableModelB, MultitableModelC, ManagerTestModel, CustomManagerTestModel,
-    CustomManager2TestModel, GroupFieldsetsModel, NameModel)
+    TestModel, FallbackModel, FallbackModel2, FileFieldsModel, ForeignKeyModel, OtherFieldsModel,
+    DescriptorModel, AbstractModelA, AbstractModelB, Slugged, MetaData, Displayable, Page,
+    RichText, RichTextPage, MultitableModelA, MultitableModelB, MultitableModelC, ManagerTestModel,
+    CustomManagerTestModel, CustomManager2TestModel, GroupFieldsetsModel, NameModel)
 
 
 class TestTranslationOptions(TranslationOptions):
@@ -33,6 +33,13 @@ translator.register(FallbackModel2, FallbackModel2TranslationOptions)
 class FileFieldsModelTranslationOptions(TranslationOptions):
     fields = ('title', 'file', 'image',)
 translator.register(FileFieldsModel, FileFieldsModelTranslationOptions)
+
+
+########## Foreign Key fields testing
+
+class ForeignKeyModelTranslationOptions(TranslationOptions):
+    fields = ('title', 'test', 'optional', 'hidden', 'non',)
+translator.register(ForeignKeyModel, ForeignKeyModelTranslationOptions)
 
 
 ########## Custom fields testing
