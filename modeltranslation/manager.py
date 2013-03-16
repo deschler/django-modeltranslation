@@ -58,9 +58,8 @@ _F2TM_CACHE = {}
 
 def get_fields_to_translatable_models(model):
     if model not in _F2TM_CACHE:
-        from modeltranslation.translator import translator
         results = []
-        for field_name in translator.get_options_for_model(model).get_field_names():
+        for field_name in model._meta.get_all_field_names():
             field_object, modelclass, direct, m2m = model._meta.get_field_by_name(field_name)
             # Direct relationship
             if direct and isinstance(field_object, RelatedField):
