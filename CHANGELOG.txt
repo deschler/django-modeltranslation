@@ -1,3 +1,11 @@
+v0.5.1
+======
+Date: 2013-03-17
+
+  FIXED: Joined query does not use translated fields.
+         (resolves issue #162)
+
+
 v0.5
 ====
 Date: 2013-02-10
