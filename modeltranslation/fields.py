@@ -182,7 +182,7 @@ class TranslationFieldDescriptor(object):
     A descriptor used for the original translated field.
     """
     def __init__(self, field, fallback_languages=None, fallback_value=NONE,
-                              fallback_undefined=NONE):
+                 fallback_undefined=NONE):
         """
         Stores fallback options and the original field, so we know it's name
         and default.
