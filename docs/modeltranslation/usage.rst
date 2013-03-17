@@ -283,6 +283,28 @@ Fallback values can be also customized per model field::
 If current language and all fallback languages yield no field value, and no fallback values are
 defined, then modeltranslation will use field's default value.
 
+Fallback undefined
+******************
+
+.. versionadded:: 0.7
+
+Another question is what do we consider "no value", on what value should we fall back to other
+translations? For text fields the empty string can usually be considered as the undefined value,
+but other fields may have different concepts of empty or missing value.
+
+Modeltranslation defaults to using the field's default value as the undefined value (the empty
+string for non-nullable ``CharFields``). This requires calling ``get_default`` for every field
+access, which in some cases may be expensive.
+
+If you'd like to fallback on a different value or your default is expensive to calculate, provide
+a custom undefined value (for a field or model)::
+
+    class NewsTranslationOptions(TranslationOptions):
+        fields = ('title', 'text',)
+        fallback_undefined = {
+            'title': 'no title',
+            'text': None
+        }
 
 The State of the Original Field
 -------------------------------

@@ -25,6 +25,7 @@ translator.register(FallbackModel, FallbackModelTranslationOptions)
 class FallbackModel2TranslationOptions(TranslationOptions):
     fields = ('title', 'text', 'url', 'email',)
     fallback_values = {'text': ugettext_lazy('Sorry, translation is not available.')}
+    fallback_undefined = {'title': 'no title'}
 translator.register(FallbackModel2, FallbackModel2TranslationOptions)
 
 

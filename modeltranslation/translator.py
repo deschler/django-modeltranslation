@@ -4,8 +4,8 @@ from django.db.models import Manager, ForeignKey
 from django.db.models.base import ModelBase
 
 from modeltranslation import settings as mt_settings
-from modeltranslation.fields import (TranslationFieldDescriptor, TranslatedRelationIdDescriptor,
-                                     create_translation_field)
+from modeltranslation.fields import (NONE, create_translation_field, TranslationFieldDescriptor,
+                                     TranslatedRelationIdDescriptor)
 from modeltranslation.manager import MultilingualManager, rewrite_lookup_key
 from modeltranslation.utils import build_localized_fieldname
 
@@ -281,20 +281,24 @@ class Translator(object):
             patch_constructor(model)
 
             # Substitute original field with descriptor
-            model_fallback_values = getattr(opts, 'fallback_values', None)
             model_fallback_languages = getattr(opts, 'fallback_languages', None)
+            model_fallback_values = getattr(opts, 'fallback_values', NONE)
+            model_fallback_undefined = getattr(opts, 'fallback_undefined', NONE)
             for field_name in opts.local_fields.iterkeys():
-                if model_fallback_values is None:
-                    field_fallback_value = None
-                elif isinstance(model_fallback_values, dict):
-                    field_fallback_value = model_fallback_values.get(field_name, None)
+                field = model._meta.get_field(field_name)
+                if isinstance(model_fallback_values, dict):
+                    field_fallback_value = model_fallback_values.get(field_name, NONE)
                 else:
                     field_fallback_value = model_fallback_values
-                field = model._meta.get_field(field_name)
+                if isinstance(model_fallback_undefined, dict):
+                    field_fallback_undefined = model_fallback_undefined.get(field_name, NONE)
+                else:
+                    field_fallback_undefined = model_fallback_undefined
                 descriptor = TranslationFieldDescriptor(
                     field,
+                    fallback_languages=model_fallback_languages,
                     fallback_value=field_fallback_value,
-                    fallback_languages=model_fallback_languages)
+                    fallback_undefined=field_fallback_undefined)
                 setattr(model, field_name, descriptor)
                 if isinstance(field, ForeignKey):
                     # We need to use a special descriptor so that

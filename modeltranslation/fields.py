@@ -33,6 +33,15 @@ except AttributeError:
     pass
 
 
+class NONE:
+    """
+    Used for fallback options when they are not provided (``None`` can be
+    given as a fallback or undefined value) or to mark that a nullable value
+    is not yet known and needs to be computed (e.g. field default).
+    """
+    pass
+
+
 def create_translation_field(model, field_name, lang):
     """
     Translation field factory. Returns a ``TranslationField`` based on a
@@ -172,37 +181,49 @@ class TranslationFieldDescriptor(object):
     """
     A descriptor used for the original translated field.
     """
-    def __init__(self, field, fallback_value=None, fallback_languages=None):
+    def __init__(self, field, fallback_languages=None, fallback_value=NONE,
+                              fallback_undefined=NONE):
         """
-        The ``name`` is the name of the field (which is not available in the
-        descriptor by default - this is Python behaviour).
+        Stores fallback options and the original field, so we know it's name
+        and default.
         """
         self.field = field
-        self.fallback_value = fallback_value
         self.fallback_languages = fallback_languages
+        self.fallback_value = fallback_value
+        self.fallback_undefined = fallback_undefined
 
     def __set__(self, instance, value):
-        lang = get_language()
-        loc_field_name = build_localized_fieldname(self.field.name, lang)
-        # also update the translation field of the current language
+        """
+        Updates the translation field for the current language.
+        """
+        loc_field_name = build_localized_fieldname(self.field.name, get_language())
         setattr(instance, loc_field_name, value)
 
     def __get__(self, instance, owner):
+        """
+        Returns value from the translation field for the current language, or
+        value for some another language according to fallback languages, or the
+        custom fallback value, or field's default value.
+        """
         if instance is None:
             return self
-        default = self.field.get_default()
+        default = NONE
+        undefined = self.fallback_undefined
+        if undefined is NONE:
+            default = self.field.get_default()
+            undefined = default
         langs = resolution_order(get_language(), self.fallback_languages)
         for lang in langs:
             loc_field_name = build_localized_fieldname(self.field.name, lang)
             val = getattr(instance, loc_field_name, None)
-            # If there is no value or it's the field's default fall back to the next language.
-            # Note: Unless you pass null=True to a CharField it's default is ''.
-            if val is not None and val != default:
+            if val is not None and val != undefined:
                 return val
-        if self.fallback_value is None or not mt_settings.ENABLE_FALLBACKS:
-            return default
-        else:
+        if mt_settings.ENABLE_FALLBACKS and self.fallback_value is not NONE:
             return self.fallback_value
+        else:
+            if default is NONE:
+                default = self.field.get_default()
+            return default
 
 
 class TranslatedRelationIdDescriptor(object):
