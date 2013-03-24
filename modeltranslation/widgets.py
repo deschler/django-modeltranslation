@@ -1,6 +1,7 @@
 from django.contrib.admin.widgets import AdminTextInputWidget, AdminTextareaWidget
 from django.forms.widgets import Widget, TextInput, Textarea, CheckboxInput
-from django.utils.html import format_html
+from django.utils.html import conditional_escape
+from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext
 
 
@@ -43,7 +44,11 @@ class ClearableInput(Widget):
             checkbox_label = self.clear_checkbox_label
             checkbox = CheckboxInput().render(
                 checkbox_name, value == self.empty_value, attrs={'id': checkbox_id})
-            return format_html(self.template, original, checkbox_id, checkbox_label, checkbox)
+            return mark_safe(self.template.format(
+                conditional_escape(original),
+                conditional_escape(checkbox_id),
+                conditional_escape(checkbox_label),
+                conditional_escape(checkbox)))
 
     def value_from_datadict(self, data, files, name):
         """
