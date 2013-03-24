@@ -4,6 +4,7 @@ from copy import deepcopy
 from django.contrib import admin
 from django.contrib.admin.options import BaseModelAdmin, flatten_fieldsets, InlineModelAdmin
 from django.contrib.contenttypes import generic
+from django.db import models
 
 # Ensure that models are registered for translation before TranslationAdmin
 # runs. The import is supposed to resolve a race condition between model import
@@ -13,12 +14,23 @@ from modeltranslation.settings import DEFAULT_LANGUAGE
 from modeltranslation.translator import translator
 from modeltranslation.utils import (
     get_translation_fields, build_css_class, build_localized_fieldname, get_language)
+from modeltranslation.widgets import (ClearableAdminTextInputWidget,
+                                      ClearableAdminTextareaWidget)
+
+
+FORMFIELD_FOR_DBFIELD_DEFAULTS = {
+    models.CharField: {'widget': ClearableAdminTextInputWidget},
+    models.TextField: {'widget': ClearableAdminTextareaWidget},
+}
 
 
 class TranslationBaseModelAdmin(BaseModelAdmin):
     _orig_was_required = {}
 
     def __init__(self, *args, **kwargs):
+        overrides = FORMFIELD_FOR_DBFIELD_DEFAULTS.copy()
+        overrides.update(self.formfield_overrides)
+        self.formfield_overrides = overrides
         super(TranslationBaseModelAdmin, self).__init__(*args, **kwargs)
         self.trans_opts = translator.get_options_for_model(self.model)
         self._patch_prepopulated_fields()

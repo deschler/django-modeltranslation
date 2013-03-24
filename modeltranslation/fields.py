@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django import forms
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import fields
 
@@ -72,6 +73,20 @@ def field_factory(baseclass):
     TranslationFieldSpecific.__name__ = 'Translation%s' % baseclass.__name__
 
     return TranslationFieldSpecific
+
+
+def create_nullable_formfield(form_class):
+    """
+    Creates a form class subclass that ensures that ``None`` is not cast to
+    anything (like the empty string with ``CharField`` and its derivatives).
+    """
+    class NullableField(form_class):
+        def to_python(self, value):
+            if value is None:
+                return value
+            return super(NullableField, self).to_python(value)
+    NullableField.__name__ = 'Nullable%s' % form_class.__name__
+    return NullableField
 
 
 class TranslationField(object):
@@ -159,6 +174,22 @@ class TranslationField(object):
         else:
             column = attname
         return attname, column
+
+    def formfield(self, *args, **kwargs):
+        """
+        If the original field is nullable and uses ``forms.CharField`` subclass
+        as its form input, we patch the form field, so it doesn't cast ``None``
+        to anything.
+
+        The ``forms.CharField`` somewhat surprising behaviour is documented as a
+        "won't fix": https://code.djangoproject.com/ticket/9590.
+        """
+        formfield = super(TranslationField, self).formfield(*args, **kwargs)
+        if (self.translated_field.null and
+                issubclass(formfield.__class__, forms.CharField)):
+            kwargs['form_class'] = create_nullable_formfield(formfield.__class__)
+            formfield = super(TranslationField, self).formfield(*args, **kwargs)
+        return formfield
 
     def south_field_triple(self):
         """
