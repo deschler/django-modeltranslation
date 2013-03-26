@@ -58,7 +58,7 @@ in detail in the following sections:
    ``TranslationOptions`` for every model you want to translate.
 
 4. Sync the database using ``manage.py syncdb`` (note that this only applies
-   if the models registered in the ``translations.py`` did not have been
+   if the models registered in the ``translation.py`` did not have been
    synced to the database before. If they did - read further down what to do
    in that case.
 
