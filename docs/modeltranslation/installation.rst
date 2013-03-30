@@ -268,9 +268,10 @@ constructors, so that these two blocks of statements can be considered equivalen
 ``MODELTRANSLATION_DEBUG``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Default: ``settings.DEBUG``
+Default: ``False``
 
 .. versionadded:: 0.4
+.. versionchanged:: 0.7
 
 Used for modeltranslation related debug output. Currently setting it to
 ``False`` will just prevent Django's development server from printing the
