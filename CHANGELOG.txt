@@ -4,6 +4,9 @@
   ADDED: An auto-population option to the loaddata command.
          (resolves issue #160)
 
+CHANGED: MODELTRANSLATION_DEBUG setting defaults to False instead of
+         settings.DEBUG.
+
 
 v0.6.1
 ======
