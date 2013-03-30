@@ -1,3 +1,18 @@
+  ADDED: Support for ForeignKey.
+         (thanks to Braden MacDonald and Jacek Tomaszewski,
+          resolves issue #161)
+  ADDED: An auto-population option to the loaddata command.
+         (resolves issue #160)
+
+
+v0.6.1
+======
+Date: 2013-03-17
+
+  FIXED: Joined query does not use translated fields.
+         (resolves issue #162)
+
+
 v0.6
 ====
 Date: 2013-03-01
