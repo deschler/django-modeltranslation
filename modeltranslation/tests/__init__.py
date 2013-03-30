@@ -288,6 +288,7 @@ class ModeltranslationTest(ModeltranslationTestBase):
         self.assertEqual(en, de)
         self.assertEqual(hash(en), hash(de))
         self.assertEqual(2, len(set([orig, en, de])))
+        de.language = 'de'
 
     def test_set_translation(self):
         """This test briefly shows main modeltranslation features."""
