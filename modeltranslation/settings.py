@@ -19,7 +19,7 @@ CUSTOM_FIELDS = getattr(settings, 'MODELTRANSLATION_CUSTOM_FIELDS', ())
 ENABLE_REGISTRATIONS = getattr(settings, 'MODELTRANSLATION_ENABLE_REGISTRATIONS', settings.USE_I18N)
 
 # Modeltranslation specific debug setting
-DEBUG = getattr(settings, 'MODELTRANSLATION_DEBUG', settings.DEBUG)
+DEBUG = getattr(settings, 'MODELTRANSLATION_DEBUG', False)
 
 AUTO_POPULATE = getattr(settings, 'MODELTRANSLATION_AUTO_POPULATE', False)
 
