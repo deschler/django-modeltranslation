@@ -182,6 +182,10 @@ class TranslationFieldDescriptor(object):
         self.fallback_languages = fallback_languages
 
     def __set__(self, instance, value):
+        if getattr(instance, '_mt_init', False):
+            # When assignment takes place in model instance constructor, don't set value.
+            # This is essential for only/defer to work, but I think it's sensible anyway.
+            return
         lang = get_language()
         loc_field_name = build_localized_fieldname(self.field.name, lang)
         # also update the translation field of the current language

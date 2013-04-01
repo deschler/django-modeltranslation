@@ -210,6 +210,26 @@ class MultilingualQuerySet(models.query.QuerySet):
         with auto_populate(self._populate_mode):
             return super(MultilingualQuerySet, self).get_or_create(**kwargs)
 
+    def _append_translated(self, fields):
+        "If translated field is encountered, add also all its translation fields."
+        fields = set(fields)
+        from modeltranslation.translator import translator
+        opts = translator.get_options_for_model(self.model)
+        for key, translated in opts.fields.iteritems():
+            if key in fields:
+                fields = fields.union(f.name for f in translated)
+        return fields
+
+    # This method was not present in django-linguo
+    def defer(self, *fields):
+        fields = self._append_translated(fields)
+        return super(MultilingualQuerySet, self).defer(*fields)
+
+    # This method was not present in django-linguo
+    def only(self, *fields):
+        fields = self._append_translated(fields)
+        return super(MultilingualQuerySet, self).only(*fields)
+
 
 class MultilingualManager(models.Manager):
     use_for_related_fields = True

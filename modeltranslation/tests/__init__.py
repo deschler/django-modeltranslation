@@ -2262,3 +2262,43 @@ class TestManager(ModeltranslationTestBase):
             self.assertEqual(m.title_de, None)
             self.assertEqual(m.text_en, 'bar')
             self.assertEqual(m.text_de, None)
+
+    def assertDeferred(self, use_defer, *fields):
+        manager = models.TestModel.objects.defer if use_defer else models.TestModel.objects.only
+        inst1 = manager(*fields)[0]
+        with override('de'):
+            inst2 = manager(*fields)[0]
+        self.assertEqual('title_en', inst1.title)
+        self.assertEqual('title_en', inst2.title)
+        with override('de'):
+            self.assertEqual('title_de', inst1.title)
+            self.assertEqual('title_de', inst2.title)
+
+    def test_deferred(self):
+        """
+        Check if ``only`` and ``defer`` are working.
+        """
+        models.TestModel.objects.create(title_de='title_de', title_en='title_en')
+        inst = models.TestModel.objects.only('title_en')[0]
+        self.assertNotEqual(inst.__class__, models.TestModel)
+        self.assertTrue(isinstance(inst, models.TestModel))
+        self.assertDeferred(False, 'title_en')
+
+        with auto_populate('all'):
+            self.assertDeferred(False, 'title')
+            self.assertDeferred(False, 'title_de')
+            self.assertDeferred(False, 'title_en')
+            self.assertDeferred(False, 'title_en', 'title_de')
+            self.assertDeferred(False, 'title', 'title_en')
+            self.assertDeferred(False, 'title', 'title_de')
+            # Check if fields are deferred properly with ``only``
+            self.assertDeferred(False, 'text')
+
+            # Defer
+            self.assertDeferred(True, 'title')
+            self.assertDeferred(True, 'title_de')
+            self.assertDeferred(True, 'title_en')
+            self.assertDeferred(True, 'title_en', 'title_de')
+            self.assertDeferred(True, 'title', 'title_en')
+            self.assertDeferred(True, 'title', 'title_de')
+            self.assertDeferred(True, 'text', 'email', 'url')

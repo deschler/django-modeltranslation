@@ -147,13 +147,42 @@ def patch_constructor(model):
     old_init = model.__init__
 
     def new_init(self, *args, **kwargs):
-        populate_translation_fields(self.__class__, kwargs)
-        for key, val in kwargs.items():
-            new_key = rewrite_lookup_key(model, key)
-            # Old key is intentionally left in case old_init wants to play with it
-            kwargs.setdefault(new_key, val)
+        self._mt_init = True
+        if not self._deferred:
+            populate_translation_fields(self.__class__, kwargs)
+            for key, val in kwargs.items():
+                new_key = rewrite_lookup_key(model, key)
+                # Old key is intentionally left in case old_init wants to play with it
+                kwargs.setdefault(new_key, val)
         old_init(self, *args, **kwargs)
+        del self._mt_init
     model.__init__ = new_init
+
+
+def patch_metaclass(model):
+    """
+    Monkey patches original model metaclass to exclude translated fields on deferred subclasses.
+    """
+    old_mcs = model.__metaclass__
+
+    class translation_deferred_mcs(old_mcs):
+        """
+        This metaclass is essential for deferred subclasses (obtained via only/defer) to work.
+
+        When deferred subclass is created, some translated fields descriptors could be overridden
+        by DeferredAttribute - which would cause translation retrieval to fail.
+        Prevent this from happening with deleting those attributes from class being created.
+        This metaclass would be called from django.db.models.query_utils.deferred_class_factory
+        """
+        def __new__(cls, name, bases, attrs):
+            if attrs.get('_deferred', False):
+                opts = translator.get_options_for_model(model)
+                for field_name in opts.fields.iterkeys():
+                    attrs.pop(field_name, None)
+            return super(translation_deferred_mcs, cls).__new__(cls, name, bases, attrs)
+    # Assign to __metaclass__ wouldn't work, since metaclass search algorithm check for __class__.
+    # http://docs.python.org/2/reference/datamodel.html#__metaclass__
+    model.__class__ = translation_deferred_mcs
 
 
 def delete_cache_fields(model):
@@ -279,6 +308,9 @@ class Translator(object):
 
             # Patch __init__ to rewrite fields
             patch_constructor(model)
+
+            # Patch __metaclass__ to allow deferring to work
+            patch_metaclass(model)
 
             # Substitute original field with descriptor
             model_fallback_values = getattr(opts, 'fallback_values', None)
