@@ -44,7 +44,7 @@ except ImportError:
 request = None
 
 # How many models are registered for tests.
-TEST_MODELS = 23
+TEST_MODELS = 24
 
 
 class reload_override_settings(override_settings):
@@ -1972,6 +1972,43 @@ class TranslationAdminTest(ModeltranslationTestBase):
             prepopulated_fields = {'slug': ('firstname', 'lastname',)}
         ma = NameModelAdmin(models.NameModel, self.site)
         self.assertEqual(ma.prepopulated_fields, {'slug': ('firstname_en', 'lastname_en',)})
+
+
+class ThirdPartyAppIntegrationTest(ModeltranslationTestBase):
+    """
+    This test case and a test case below have identical tests. The models they test have the same
+    definition - but in this case the model is not registered for translation and in the other
+    case it is.
+    """
+    registered = False
+
+    @classmethod
+    def setUpClass(cls):
+        # 'model' attribute cannot be assigned to class in its definition,
+        # because ``models`` module will be reloaded and hence class would use old model classes.
+        super(ThirdPartyAppIntegrationTest, cls).setUpClass()
+        cls.model = models.ThirdPartyModel
+
+    def test_form(self):
+        class CreationForm(forms.ModelForm):
+            class Meta:
+                model = self.model
+
+        creation_form = CreationForm({'name': 'abc'})
+        inst = creation_form.save()
+        self.assertEqual('de', get_language())
+        self.assertEqual('abc', inst.name)
+        # self.assertEqual('abc', inst.name_de)
+        self.assertEqual(1, self.model.objects.count())
+
+
+class ThirdPartyAppIntegrationRegisteredTest(ThirdPartyAppIntegrationTest):
+    registered = True
+
+    @classmethod
+    def setUpClass(cls):
+        super(ThirdPartyAppIntegrationRegisteredTest, cls).setUpClass()
+        cls.model = models.ThirdPartyRegisteredModel
 
 
 class TestManager(ModeltranslationTestBase):

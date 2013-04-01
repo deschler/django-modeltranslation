@@ -151,6 +151,18 @@ class TranslationField(object):
             column = attname
         return attname, column
 
+    def save_form_data(self, instance, data):
+        # Allow 3rd-party apps forms to be saved using only translated field name.
+        # When translated field (e.g. 'name') is specified and translation field (e.g. 'name_en')
+        # not, we assume that form was saved without knowledge of modeltranslation and we make
+        # things right:
+        # Translated field is saved first, settings respective translation field value. Then
+        # translation field is being saved without value - and we handle this here (only for
+        # active language).
+        if self.language == get_language() and getattr(instance, self.name) and not data:
+            return
+        super(TranslationField, self).save_form_data(instance, data)
+
     def south_field_triple(self):
         """
         Returns a suitable description of this field for South.

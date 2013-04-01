@@ -204,6 +204,16 @@ class NameModel(models.Model):
     slug = models.SlugField(max_length=100)
 
 
+########## Integration testing
+
+class ThirdPartyModel(models.Model):
+    name = models.CharField(max_length=20)
+
+
+class ThirdPartyRegisteredModel(models.Model):
+    name = models.CharField(max_length=20)
+
+
 ########## Manager testing
 
 class ManagerTestModel(models.Model):
