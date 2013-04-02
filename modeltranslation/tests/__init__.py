@@ -721,8 +721,6 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         fk_inst_en = models.ForeignKeyModel(title_en='f_title_en', title_de='f_title_de',
                                             test_en=test_inst)
         fk_inst_en.save()
-        models.ForeignKeyModel.objects.create(title_en='f_title_en', title_de='f_title_de',
-                                              test_en=test_inst)
 
         fk_option_de = models.ForeignKeyModel.objects.create(optional_de=test_inst)
         fk_option_en = models.ForeignKeyModel.objects.create(optional_en=test_inst)
@@ -1998,7 +1996,6 @@ class ThirdPartyAppIntegrationTest(ModeltranslationTestBase):
         inst = creation_form.save()
         self.assertEqual('de', get_language())
         self.assertEqual('abc', inst.name)
-        # self.assertEqual('abc', inst.name_de)
         self.assertEqual(1, self.model.objects.count())
 
 
