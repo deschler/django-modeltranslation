@@ -123,6 +123,7 @@ class TranslationField(object):
                     self.related_query_name(), self.language)
                 self.related_query_name = lambda: loc_related_query_name
             self.rel.related_name = build_localized_fieldname(current, self.language)
+            self.rel.field = self  # Django 1.6
             if hasattr(self.rel.to._meta, '_related_objects_cache'):
                 del self.rel.to._meta._related_objects_cache
 
