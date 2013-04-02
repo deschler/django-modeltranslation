@@ -5,6 +5,7 @@ import sys
 from django.conf import settings
 from django.core.management import call_command
 
+
 def runtests():
     if not settings.configured:
         # Choose database for settings
@@ -38,6 +39,9 @@ def runtests():
                 'modeltranslation',
             ),
             ROOT_URLCONF = None, # tests override urlconf, but it still needs to be defined
+            LANGUAGES = (
+                ('en', 'English'),
+            ),
         )
 
     failures = call_command(
