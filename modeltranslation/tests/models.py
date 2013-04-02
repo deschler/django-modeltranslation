@@ -58,7 +58,7 @@ class OtherFieldsModel(models.Model):
     """
     # That's rich! PositiveIntegerField is only validated in forms, not in models.
     int = models.PositiveIntegerField(default=42, validators=[validators.MinValueValidator(0)])
-    boolean = models.BooleanField()
+    boolean = models.BooleanField(default=False)
     nullboolean = models.NullBooleanField()
     csi = models.CommaSeparatedIntegerField(max_length=255)
     float = models.FloatField(blank=True, null=True)
