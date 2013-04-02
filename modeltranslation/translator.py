@@ -187,18 +187,13 @@ def patch_metaclass(model):
 
 def delete_cache_fields(model):
     opts = model._meta
-    try:
-        del opts._field_cache
-    except AttributeError:
-        pass
-    try:
-        del opts._field_name_cache
-    except AttributeError:
-        pass
-    try:
-        del opts._name_map
-    except AttributeError:
-        pass
+    cached_attrs = ('_field_cache', '_field_name_cache', '_name_map', 'fields', 'concrete_fields',
+                    'local_concrete_fields')
+    for attr in cached_attrs:
+        try:
+            delattr(opts, attr)
+        except AttributeError:
+            pass
 
 
 def populate_translation_fields(sender, kwargs):
