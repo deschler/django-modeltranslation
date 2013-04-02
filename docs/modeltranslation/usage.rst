@@ -171,6 +171,9 @@ There is a more convenient way than calling ``populate`` manager method or enter
 :ref:`settings-modeltranslation_auto_populate` setting.
 It controls the default population behaviour.
 
+Auto-population modes
+^^^^^^^^^^^^^^^^^^^^^
+
 There are 4 different population modes:
 
 ``False``

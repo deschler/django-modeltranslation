@@ -264,6 +264,8 @@ constructors, so that these two blocks of statements can be considered equivalen
     News.objects.create(title='-- no translation yet --')
     q = News(title='-- no translation yet --')
 
+Possible modes are listed :ref:`here <auto-population-modes>`.
+
 
 ``MODELTRANSLATION_DEBUG``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
