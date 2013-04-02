@@ -163,7 +163,7 @@ def patch_metaclass(model):
     """
     Monkey patches original model metaclass to exclude translated fields on deferred subclasses.
     """
-    old_mcs = model.__metaclass__
+    old_mcs = model.__class__
 
     class translation_deferred_mcs(old_mcs):
         """
