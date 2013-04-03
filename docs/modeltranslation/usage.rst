@@ -255,6 +255,8 @@ Dict syntax is only allowed there.
 
 Even more, all fallbacks may be switched on or off for just some exceptional block of code using::
 
+    from modeltranslation.utils import fallbacks
+
     with fallbacks(False):
         # Work with values for the active language only
 
