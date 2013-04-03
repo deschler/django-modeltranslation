@@ -7,7 +7,7 @@ from django.utils.translation import ugettext
 
 class ClearableInput(Widget):
     clear_checkbox_label = ugettext("None")
-    template = '{0} <span>{2}</span> {3}'
+    template = u'{0} <span>{2}</span> {3}'
     # TODO: Label would be proper, but admin applies some hardly undoable
     # styling to labels.
     # template = '{} <label for="{}">{}</label> {}'
