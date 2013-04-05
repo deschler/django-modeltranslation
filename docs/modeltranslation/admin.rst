@@ -236,25 +236,6 @@ The proposed way to include it is through the inner ``Media`` class of a
     class NewsAdmin(TranslationAdmin):
         class Media:
             js = (
-                'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
-                'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.1/jquery-ui.min.js',
-                'modeltranslation/js/tabbed_translation_fields.js',
-            )
-            css = {
-                'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
-            }
-
-Django's shipped version of jquery is no longer compatible with jquery-ui 1.10,
-so you need to include a newer one here.
-
-However, if you have to stick to either Django's built-in jquery, or rely on
-jquery-ui 1.8 or below, include this in your ``Media`` class instead:
-
-.. code-block:: python
-
-    class NewsAdmin(TranslationAdmin):
-        class Media:
-            js = (
                 'modeltranslation/js/force_jquery.js',
                 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/jquery-ui.min.js',
                 'modeltranslation/js/tabbed_translation_fields.js',
@@ -263,15 +244,51 @@ jquery-ui 1.8 or below, include this in your ``Media`` class instead:
                 'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
             }
 
-The ``force_jquery.js`` script is necessary when using Django's built-in
-``django.jQuery`` object. Otherwise the *normal* ``jQuery`` object won't be
-available to the included (non-namespaced) jquery-ui library.
+
+.. note::
+    Here we stick to the jquery library shipped with Django. The
+    ``force_jquery.js`` script is necessary when using Django's built-in
+    ``django.jQuery`` object. Otherwise the *normal* ``jQuery`` object won't
+    be available to the included (non-namespaced) jquery-ui library.
 
 Standard jquery-ui theming can be used to customize the look of tabs, the
 provided css file is supposed to work well with a default Django admin.
 
-.. note:: These are just examples that might have to be adopted to your setup of
-          serving static files.
+As an alternative, if want to use a more recent version of jquery, you can do so
+by including this in your ``Media`` class instead:
+
+.. code-block:: python
+
+    class NewsAdmin(TranslationAdmin):
+        class Media:
+            js = (
+                'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
+                'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js',
+                'modeltranslation/js/tabbed_translation_fields.js',
+            )
+            css = {
+                'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
+            }
+
+
+Tabbed Translation Fields Admin Classes
+***************************************
+
+.. versionadded:: 0.7
+
+To ease the inclusion of the required static files for tabbed translation
+fields, the following admin classes are provided:
+
+ * ``TabbedDjangoJqueryTranslationAdmin`` (aliased to ``TabbedTranslationAdmin``)
+ * ``TabbedExternalJqueryTranslationAdmin``
+
+Rather than subclassing `TranslationAdmin`, simply to subclass one of these
+classes like this:
+
+.. code-block:: python
+
+    class NewsAdmin(TabbedTranslationAdmin):
+        pass
 
 
 ``TranslationAdmin`` Options
