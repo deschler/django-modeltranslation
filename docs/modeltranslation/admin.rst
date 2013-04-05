@@ -282,7 +282,7 @@ fields, the following admin classes are provided:
  * ``TabbedDjangoJqueryTranslationAdmin`` (aliased to ``TabbedTranslationAdmin``)
  * ``TabbedExternalJqueryTranslationAdmin``
 
-Rather than subclassing ``TranslationAdmin``, simply to subclass one of these
+Rather than inheriting from ``TranslationAdmin``, simply subclass one of these
 classes like this:
 
 .. code-block:: python
