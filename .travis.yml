@@ -1,12 +1,9 @@
 language: python
 python:
-  - "2.5"
   - "2.6"
   - "2.7"
+  - "3.3"
 env:
-  - DJANGO=Django==1.3.7 DB=sqlite
-  - DJANGO=Django==1.3.7 DB=postgres
-  - DJANGO=Django==1.3.7 DB=mysql
   - DJANGO=Django==1.4.5 DB=sqlite
   - DJANGO=Django==1.4.5 DB=postgres
   - DJANGO=Django==1.4.5 DB=mysql
@@ -16,20 +13,6 @@ env:
   - DJANGO=https://github.com/django/django/zipball/master DB=sqlite
   - DJANGO=https://github.com/django/django/zipball/master DB=postgres
   - DJANGO=https://github.com/django/django/zipball/master DB=mysql
-matrix:
-  exclude:
-    - python: "2.5"
-      env: DJANGO=Django==1.5 DB=sqlite
-    - python: "2.5"
-      env: DJANGO=Django==1.5 DB=postgres
-    - python: "2.5"
-      env: DJANGO=Django==1.5 DB=mysql
-    - python: "2.5"
-      env: DJANGO=https://github.com/django/django/zipball/master DB=sqlite
-    - python: "2.5"
-      env: DJANGO=https://github.com/django/django/zipball/master DB=postgres
-    - python: "2.5"
-      env: DJANGO=https://github.com/django/django/zipball/master DB=mysql
 before_script:
   - flake8 --max-line-length=100 modeltranslation
   - mysql -e 'create database modeltranslation;'
