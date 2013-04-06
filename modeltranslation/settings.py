@@ -33,7 +33,7 @@ if isinstance(FALLBACK_LANGUAGES, (tuple, list)):
 if 'default' not in FALLBACK_LANGUAGES:
     raise ImproperlyConfigured(
         'MODELTRANSLATION_FALLBACK_LANGUAGES does not contain "default" key.')
-for key, value in FALLBACK_LANGUAGES.iteritems():
+for key, value in FALLBACK_LANGUAGES.items():
     if key != 'default' and key not in AVAILABLE_LANGUAGES:
         raise ImproperlyConfigured(
             'MODELTRANSLATION_FALLBACK_LANGUAGES: "%s" not in LANGUAGES setting.' % key)

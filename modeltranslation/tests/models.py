@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
+import sys
+if sys.version > '3':
+    long = int
+
 from django.core import validators
 from django.db import models
+from django.utils import six
 from django.utils.translation import ugettext_lazy
 
 
@@ -86,7 +91,7 @@ class FancyDescriptor(object):
     def __set__(self, obj, value):
         if isinstance(value, (int, long)):
             obj.__dict__[self.field.name] = value
-        elif isinstance(value, basestring):
+        elif isinstance(value, six.string_types):
             obj.__dict__[self.field.name] = len(value)
         else:
             obj.__dict__[self.field.name] = 0
@@ -104,7 +109,7 @@ class FancyField(models.PositiveIntegerField):
     def pre_save(self, model_instance, add):
         value = super(FancyField, self).pre_save(model_instance, add)
         # In this part value should be retrieved using descriptor and be a string
-        assert isinstance(value, basestring)
+        assert isinstance(value, six.string_types)
         # We put an int to database
         return len(value)
 

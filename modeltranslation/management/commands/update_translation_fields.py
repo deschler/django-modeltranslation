@@ -20,7 +20,7 @@ class Command(NoArgsCommand):
             if verbosity > 0:
                 self.stdout.write("Updating data of model '%s'\n" % model)
             opts = translator.get_options_for_model(model)
-            for field_name in opts.fields.iterkeys():
+            for field_name in opts.fields.keys():
                 def_lang_fieldname = build_localized_fieldname(field_name, DEFAULT_LANGUAGE)
 
                 # We'll only update fields which do not have an existing value
