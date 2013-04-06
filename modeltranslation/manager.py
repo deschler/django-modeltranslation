@@ -215,7 +215,7 @@ class MultilingualQuerySet(models.query.QuerySet):
         fields = set(fields)
         from modeltranslation.translator import translator
         opts = translator.get_options_for_model(self.model)
-        for key, translated in opts.fields.iteritems():
+        for key, translated in opts.fields.items():
             if key in fields:
                 fields = fields.union(f.name for f in translated)
         return fields

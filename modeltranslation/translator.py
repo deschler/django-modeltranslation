@@ -34,8 +34,9 @@ class FieldsAggregationMetaClass(type):
         attrs['fields'] = tuple(attrs['fields'])
         return super(FieldsAggregationMetaClass, cls).__new__(cls, name, bases, attrs)
 
+TranslationOptionsClass = FieldsAggregationMetaClass('TranslationOptions', (object,), {})
 
-class TranslationOptions(object):
+class TranslationOptions(TranslationOptionsClass):
     """
     Translatable fields are declared by registering a model using
     ``TranslationOptions`` class with appropriate ``fields`` attribute.
@@ -55,7 +56,6 @@ class TranslationOptions(object):
     with translated model. This model may be not translated itself.
     ``related_fields`` contains names of reverse lookup fields.
     """
-    __metaclass__ = FieldsAggregationMetaClass
 
     def __init__(self, model):
         """
@@ -87,7 +87,7 @@ class TranslationOptions(object):
         """
         Return name of all fields that can be used in filtering.
         """
-        return self.fields.keys() + self.related_fields
+        return list(self.fields.keys()) + self.related_fields
 
     def __str__(self):
         local = tuple(self.local_fields.keys())
@@ -102,7 +102,7 @@ def add_translation_fields(model, opts):
 
     Adds newly created translation fields to the given translation options.
     """
-    for field_name in opts.local_fields.iterkeys():
+    for field_name in opts.local_fields.keys():
         for l in settings.LANGUAGES:
             # Create a dynamic translation field
             translation_field = create_translation_field(
@@ -150,7 +150,7 @@ def patch_constructor(model):
         self._mt_init = True
         if not self._deferred:
             populate_translation_fields(self.__class__, kwargs)
-            for key, val in kwargs.items():
+            for key, val in list(kwargs.items()):
                 new_key = rewrite_lookup_key(model, key)
                 # Old key is intentionally left in case old_init wants to play with it
                 kwargs.setdefault(new_key, val)
@@ -177,7 +177,7 @@ def patch_metaclass(model):
         def __new__(cls, name, bases, attrs):
             if attrs.get('_deferred', False):
                 opts = translator.get_options_for_model(model)
-                for field_name in opts.fields.iterkeys():
+                for field_name in opts.fields.keys():
                     attrs.pop(field_name, None)
             return super(translation_deferred_mcs, cls).__new__(cls, name, bases, attrs)
     # Assign to __metaclass__ wouldn't work, since metaclass search algorithm check for __class__.
@@ -229,7 +229,7 @@ def populate_translation_fields(sender, kwargs):
         populate = 'all'
 
     opts = translator.get_options_for_model(sender)
-    for key, val in kwargs.items():
+    for key, val in list(kwargs.items()):
         if key in opts.fields:
             if populate == 'all':
                 # Set the value for every language.
@@ -310,7 +310,7 @@ class Translator(object):
             # Substitute original field with descriptor
             model_fallback_values = getattr(opts, 'fallback_values', None)
             model_fallback_languages = getattr(opts, 'fallback_languages', None)
-            for field_name in opts.local_fields.iterkeys():
+            for field_name in opts.local_fields.keys():
                 if model_fallback_values is None:
                     field_fallback_value = None
                 elif isinstance(model_fallback_values, dict):
@@ -352,7 +352,7 @@ class Translator(object):
             self.get_options_for_model(model)
             # Invalidate all submodels options and forget about
             # the model itself.
-            for desc, desc_opts in self._registry.items():
+            for desc, desc_opts in list(self._registry.items()):
                 if not issubclass(desc, model):
                     continue
                 if model != desc and desc_opts.registered:
