@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.conf import settings
+from django.utils.six import with_metaclass
 from django.db.models import Manager, ForeignKey
 from django.db.models.base import ModelBase
 
@@ -33,10 +34,9 @@ class FieldsAggregationMetaClass(type):
                 attrs['fields'].update(base.fields)
         attrs['fields'] = tuple(attrs['fields'])
         return super(FieldsAggregationMetaClass, cls).__new__(cls, name, bases, attrs)
-TranslationOptionsClass = FieldsAggregationMetaClass('TranslationOptions', (object,), {})
 
 
-class TranslationOptions(TranslationOptionsClass):
+class TranslationOptions(with_metaclass(FieldsAggregationMetaClass, object)):
     """
     Translatable fields are declared by registering a model using
     ``TranslationOptions`` class with appropriate ``fields`` attribute.
