@@ -33,8 +33,8 @@ class FieldsAggregationMetaClass(type):
                 attrs['fields'].update(base.fields)
         attrs['fields'] = tuple(attrs['fields'])
         return super(FieldsAggregationMetaClass, cls).__new__(cls, name, bases, attrs)
-
 TranslationOptionsClass = FieldsAggregationMetaClass('TranslationOptions', (object,), {})
+
 
 class TranslationOptions(TranslationOptionsClass):
     """
