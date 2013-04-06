@@ -36,11 +36,7 @@ class FieldsAggregationMetaClass(type):
         return super(FieldsAggregationMetaClass, cls).__new__(cls, name, bases, attrs)
 
 
-<<<<<<< HEAD
 class TranslationOptions(with_metaclass(FieldsAggregationMetaClass, object)):
-=======
-class TranslationOptions(with_metaclass(FieldsAggregationMetaClass, object))):
->>>>>>> deschler/python3
     """
     Translatable fields are declared by registering a model using
     ``TranslationOptions`` class with appropriate ``fields`` attribute.

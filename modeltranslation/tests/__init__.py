@@ -1903,13 +1903,8 @@ class TranslationAdminTest(ModeltranslationTestBase):
         ma = GroupFieldsetsModelAdmin(models.GroupFieldsetsModel, self.site)
         fields = ['title_de', 'title_en']
         self.assertEqual(tuple(ma.get_form(request).base_fields.keys()), tuple(fields))
-<<<<<<< HEAD
-        self.assertEqual(tuple(ma.get_form(request, self.test_obj).base_fields.keys()),
-                         tuple(fields))
-=======
         self.assertEqual(
             tuple(ma.get_form(request, self.test_obj).base_fields.keys()), tuple(fields))
->>>>>>> deschler/python3
 
         # Now set group_fieldsets only
         class GroupFieldsetsModelAdmin(admin.TranslationAdmin):
