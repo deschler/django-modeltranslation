@@ -1,5 +1,5 @@
 from modeltranslation.translator import translator, TranslationOptions
-from test_app.models import Other
+from .test_app.models import Other
 
 
 class OtherTranslationOptions(TranslationOptions):
