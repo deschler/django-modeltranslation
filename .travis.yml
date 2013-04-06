@@ -1,43 +1,50 @@
 language: python
 python:
-  - "2.5"
   - "2.6"
   - "2.7"
+  - "3.2"
+  - "3.3"
 env:
-  - DJANGO=Django==1.3.7 DB=sqlite
-  - DJANGO=Django==1.3.7 DB=postgres
-  - DJANGO=Django==1.3.7 DB=mysql
   - DJANGO=Django==1.4.5 DB=sqlite
   - DJANGO=Django==1.4.5 DB=postgres
   - DJANGO=Django==1.4.5 DB=mysql
-  - DJANGO=Django==1.5 DB=sqlite
-  - DJANGO=Django==1.5 DB=postgres
-  - DJANGO=Django==1.5 DB=mysql
+  - DJANGO=Django==1.5.1 DB=sqlite
+  - DJANGO=Django==1.5.1 DB=postgres
+  - DJANGO=Django==1.5.1 DB=mysql
   - DJANGO=https://github.com/django/django/zipball/master DB=sqlite
   - DJANGO=https://github.com/django/django/zipball/master DB=postgres
   - DJANGO=https://github.com/django/django/zipball/master DB=mysql
 matrix:
   exclude:
-    - python: "2.5"
-      env: DJANGO=Django==1.5 DB=sqlite
-    - python: "2.5"
-      env: DJANGO=Django==1.5 DB=postgres
-    - python: "2.5"
-      env: DJANGO=Django==1.5 DB=mysql
-    - python: "2.5"
-      env: DJANGO=https://github.com/django/django/zipball/master DB=sqlite
-    - python: "2.5"
-      env: DJANGO=https://github.com/django/django/zipball/master DB=postgres
-    - python: "2.5"
+    - python: "3.2"
+      env: DJANGO=Django==1.4.5 DB=sqlite
+    - python: "3.2"
+      env: DJANGO=Django==1.4.5 DB=postgres
+    - python: "3.2"
+      env: DJANGO=Django==1.4.5 DB=mysql
+    - python: "3.3"
+      env: DJANGO=Django==1.4.5 DB=sqlite
+    - python: "3.3"
+      env: DJANGO=Django==1.4.5 DB=postgres
+    - python: "3.3"
+      env: DJANGO=Django==1.4.5 DB=mysql
+
+    - python: "3.2"
+      env: DJANGO=Django==1.5.1 DB=mysql
+    - python: "3.3"
+      env: DJANGO=Django==1.5.1 DB=mysql
+    - python: "3.2"
+      env: DJANGO=https://github.com/django/django/zipball/master DB=mysql
+    - python: "3.3"
       env: DJANGO=https://github.com/django/django/zipball/master DB=mysql
 before_script:
   - flake8 --max-line-length=100 modeltranslation
   - mysql -e 'create database modeltranslation;'
   - psql -c 'create database modeltranslation;' -U postgres
 install:
-  - pip install -q mysql-python --use-mirrors
-  - pip install -q psycopg2 --use-mirrors
-  - pip install -q Pillow==1.7.8 --use-mirrors
+  - if [[ $DB == mysql ]]; then pip install -q mysql-python --use-mirrors; fi
+  - if [[ $DB == postgres ]]; then pip install -q psycopg2 --use-mirrors; fi
+  - pip install -q Pillow --use-mirrors
   - pip install -q flake8 --use-mirrors
   - pip install -q $DJANGO
   - pip install -e . --use-mirrors
