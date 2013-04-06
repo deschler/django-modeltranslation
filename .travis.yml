@@ -33,7 +33,7 @@ before_script:
   - mysql -e 'create database modeltranslation;'
   - psql -c 'create database modeltranslation;' -U postgres
 install:
-  - pip install -q mysql-python --use-mirrors
+  - if [[ $TRAVIS_PYTHON_VERSION == '3.2' || $TRAVIS_PYTHON_VERSION == '3.3' ]]; then pip install -q pymysql3 --use-mirrors; else pip install -q mysql-python --use-mirrors; fi
   - pip install -q psycopg2 --use-mirrors
   - pip install -q Pillow==1.7.8 --use-mirrors
   - pip install -q flake8 --use-mirrors
