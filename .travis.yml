@@ -42,8 +42,8 @@ before_script:
   - mysql -e 'create database modeltranslation;'
   - psql -c 'create database modeltranslation;' -U postgres
 install:
-  - pip install -q mysql-python --use-mirrors
-  - pip install -q psycopg2 --use-mirrors
+  - if [ $DB = mysql ]; then pip install -q mysql-python --use-mirrors; fi
+  - if [ $DB = postgres ]; then pip install -q psycopg2 --use-mirrors; fi
   - pip install -q Pillow==1.7.8 --use-mirrors
   - pip install -q flake8 --use-mirrors
   - pip install -q $DJANGO
