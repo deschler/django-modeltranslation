@@ -5,34 +5,34 @@ python:
   - "3.2"
   - "3.3"
 env:
-  - DJANGO=Django==1.4.5 DB=sqlite
-  - DJANGO=Django==1.4.5 DB=postgres
-  - DJANGO=Django==1.4.5 DB=mysql
-  - DJANGO=Django==1.5.1 DB=sqlite
-  - DJANGO=Django==1.5.1 DB=postgres
-  - DJANGO=Django==1.5.1 DB=mysql
+  - DJANGO=1.4 DB=sqlite
+  - DJANGO=1.4 DB=postgres
+  - DJANGO=1.4 DB=mysql
+  - DJANGO=1.5 DB=sqlite
+  - DJANGO=1.5 DB=postgres
+  - DJANGO=1.5 DB=mysql
   - DJANGO=https://github.com/django/django/zipball/master DB=sqlite
   - DJANGO=https://github.com/django/django/zipball/master DB=postgres
   - DJANGO=https://github.com/django/django/zipball/master DB=mysql
 matrix:
   exclude:
     - python: "3.2"
-      env: DJANGO=Django==1.4.5 DB=sqlite
+      env: DJANGO=1.4 DB=sqlite
     - python: "3.2"
-      env: DJANGO=Django==1.4.5 DB=postgres
+      env: DJANGO=1.4 DB=postgres
     - python: "3.2"
-      env: DJANGO=Django==1.4.5 DB=mysql
+      env: DJANGO=1.4 DB=mysql
     - python: "3.3"
-      env: DJANGO=Django==1.4.5 DB=sqlite
+      env: DJANGO=1.4 DB=sqlite
     - python: "3.3"
-      env: DJANGO=Django==1.4.5 DB=postgres
+      env: DJANGO=1.4 DB=postgres
     - python: "3.3"
-      env: DJANGO=Django==1.4.5 DB=mysql
+      env: DJANGO=1.4 DB=mysql
 
     - python: "3.2"
-      env: DJANGO=Django==1.5.1 DB=mysql
+      env: DJANGO=1.5 DB=mysql
     - python: "3.3"
-      env: DJANGO=Django==1.5.1 DB=mysql
+      env: DJANGO=1.5 DB=mysql
     - python: "3.2"
       env: DJANGO=https://github.com/django/django/zipball/master DB=mysql
     - python: "3.3"
@@ -46,7 +46,9 @@ install:
   - if [[ $DB == postgres ]]; then pip install -q psycopg2 --use-mirrors; fi
   - pip install -q Pillow --use-mirrors
   - pip install -q flake8 --use-mirrors
-  - pip install -q $DJANGO
+  - IDJANGO=$(./travis.py $DJANGO)
+  - pip install -q $IDJANGO
   - pip install -e . --use-mirrors
 script:
+  - django-admin.py --version
   - ./runtests.py
