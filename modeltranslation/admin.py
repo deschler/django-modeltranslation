@@ -90,7 +90,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         Returns a new list with replaced fields. If `option` contains no
         registered fields, it is returned unmodified.
 
-        >>> print self.trans_opts.fields.keys()
+        >>> print(self.trans_opts.fields.keys())
         ['title',]
         >>> get_translation_fields(self.trans_opts.fields.keys()[0])
         ['title_de', 'title_en']
