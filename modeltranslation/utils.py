@@ -34,7 +34,7 @@ def build_localized_fieldname(field_name, lang):
 
 
 def _build_localized_verbose_name(verbose_name, lang):
-    return u'%s [%s]' % (force_text(verbose_name), lang)
+    return force_text('%s [%s]') % (force_text(verbose_name), lang)
 build_localized_verbose_name = lazy(_build_localized_verbose_name, six.text_type)
 
 
