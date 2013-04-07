@@ -19,16 +19,16 @@ from modeltranslation.utils import build_localized_fieldname
 
 
 def ask_for_confirmation(sql_sentences, model_full_name):
-    print '\nSQL to synchronize "%s" schema:' % model_full_name
+    print('\nSQL to synchronize "%s" schema:' % model_full_name)
     for sentence in sql_sentences:
-        print '   %s' % sentence
+        print('   %s' % sentence)
     while True:
         prompt = '\nAre you sure that you want to execute the previous SQL: (y/n) [n]: '
         answer = raw_input(prompt).strip()
         if answer == '':
             return False
         elif answer not in ('y', 'n', 'yes', 'no'):
-            print 'Please answer yes or no'
+            print('Please answer yes or no')
         elif answer == 'y' or answer == 'yes':
             return True
         else:
@@ -36,8 +36,8 @@ def ask_for_confirmation(sql_sentences, model_full_name):
 
 
 def print_missing_langs(missing_langs, field_name, model_name):
-    print 'Missing languages in "%s" field from "%s" model: %s' % (
-        field_name, model_name, ", ".join(missing_langs))
+    print('Missing languages in "%s" field from "%s" model: %s' % (
+        field_name, model_name, ", ".join(missing_langs)))
 
 
 class Command(NoArgsCommand):
@@ -66,17 +66,17 @@ class Command(NoArgsCommand):
                     sql_sentences = self.get_sync_sql(field_name, missing_langs, model)
                     execute_sql = ask_for_confirmation(sql_sentences, model_full_name)
                     if execute_sql:
-                        print 'Executing SQL...',
+                        print('Executing SQL...')
                         for sentence in sql_sentences:
                             self.cursor.execute(sentence)
-                        print 'Done'
+                        print('Done')
                     else:
-                        print 'SQL not executed'
+                        print('SQL not executed')
 
         transaction.commit_unless_managed()
 
         if not found_missing_fields:
-            print 'No new translatable fields detected'
+            print('No new translatable fields detected')
 
     def get_table_fields(self, db_table):
         """
