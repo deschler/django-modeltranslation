@@ -22,12 +22,20 @@ matrix:
       env: DJANGO=Django==1.4.5 DB=postgres
     - python: "3.2"
       env: DJANGO=Django==1.4.5 DB=mysql
+    - python: "3.2"
+      env: DJANGO=Django==1.5.1 DB=mysql
+    - python: "3.2"
+      env: DJANGO=https://github.com/django/django/zipball/master DB=mysql
     - python: "3.3"
       env: DJANGO=Django==1.4.5 DB=sqlite
     - python: "3.3"
       env: DJANGO=Django==1.4.5 DB=postgres
     - python: "3.3"
       env: DJANGO=Django==1.4.5 DB=mysql
+    - python: "3.3"
+      env: DJANGO=Django==1.5.1 DB=mysql
+    - python: "3.3"
+      env: DJANGO=https://github.com/django/django/zipball/master DB=mysql
 before_script:
   #- flake8 --max-line-length=100 modeltranslation
   - mysql -e 'create database modeltranslation;'
