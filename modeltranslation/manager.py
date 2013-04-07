@@ -127,7 +127,8 @@ class MultilingualQuerySet(models.query.QuerySet):
                 c.field = self.model._meta.get_field(new_name)
                 c.col = c.field.column
         if isinstance(q, Node):
-            map(self._rewrite_where, q.children)
+            for child in q.children:
+                self._rewrite_where(child)
 
     def _rewrite_order(self):
         self.query.order_by = [rewrite_order_lookup_key(self.model, field_name)

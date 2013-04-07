@@ -256,7 +256,7 @@ class ModeltranslationTest(ModeltranslationTestBase):
 
     def test_verbose_name(self):
         verbose_name = models.TestModel._meta.get_field('title_de').verbose_name
-        self.assertEquals(six.text_type(verbose_name), 'title [de]')
+        self.assertEqual(six.text_type(verbose_name), 'title [de]')
 
     def test_descriptor_introspection(self):
         # See Django #8248
