@@ -13,6 +13,7 @@ from django.conf import settings
 from django.core.management.base import NoArgsCommand
 from django.core.management.color import no_style
 from django.db import connection, transaction
+from django.utils.six import moves
 
 from modeltranslation.translator import translator
 from modeltranslation.utils import build_localized_fieldname
@@ -24,7 +25,7 @@ def ask_for_confirmation(sql_sentences, model_full_name):
         print('   %s' % sentence)
     while True:
         prompt = '\nAre you sure that you want to execute the previous SQL: (y/n) [n]: '
-        answer = raw_input(prompt).strip()
+        answer = moves.input(prompt).strip()
         if answer == '':
             return False
         elif answer not in ('y', 'n', 'yes', 'no'):
