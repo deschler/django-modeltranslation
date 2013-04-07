@@ -139,7 +139,7 @@ class MultilingualQuerySet(models.query.QuerySet):
         if isinstance(q, tuple) and len(q) == 2:
             return rewrite_lookup_key(self.model, q[0]), q[1]
         if isinstance(q, Node):
-            q.children = map(self._rewrite_q, q.children)
+            q.children = list(map(self._rewrite_q, q.children))
         return q
 
     # This method was not present in django-linguo
@@ -151,7 +151,7 @@ class MultilingualQuerySet(models.query.QuerySet):
             q.name = rewrite_lookup_key(self.model, q.name)
             return q
         if isinstance(q, Node):
-            q.children = map(self._rewrite_f, q.children)
+            q.children = list(map(self._rewrite_f, q.children))
         return q
 
     def _filter_or_exclude(self, negate, *args, **kwargs):
