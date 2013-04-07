@@ -12,7 +12,7 @@ import modeltranslation.models  # NOQA
 from modeltranslation.settings import DEFAULT_LANGUAGE
 from modeltranslation.translator import translator
 from modeltranslation.utils import (
-    get_translation_fields, build_css_class, build_localized_fieldname, get_language)
+    get_translation_fields, build_css_class, build_localized_fieldname, get_language, unique)
 
 
 class TranslationBaseModelAdmin(BaseModelAdmin):
@@ -251,6 +251,7 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
             # TODO: Allow setting a label
             fieldsets = [('', {'fields': untranslated_fields},)] if untranslated_fields else []
 
+            temp_fieldsets = {}
             for orig_field, trans_fields in self.trans_opts.fields.items():
                 trans_fieldnames = [f.name for f in sorted(trans_fields, key=lambda x: x.name)]
                 if any(f in trans_fieldnames for f in flattened_fieldsets):
@@ -258,10 +259,16 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
                     # fieldset's label - using ugettext_lazy in your model
                     # declaration can make that translatable.
                     label = self.model._meta.get_field(orig_field).verbose_name
-                    fieldsets.append((label, {
+                    temp_fieldsets[orig_field] = (label, {
                         'fields': trans_fieldnames,
                         'classes': ('mt-fieldset',)
-                    }))
+                    })
+
+            fields_order = unique(f.translated_field.name for f in self.opts.fields if
+                                  hasattr(f, 'translated_field') and f.name in flattened_fieldsets)
+            for field_name in fields_order:
+                fieldsets.append(temp_fieldsets.pop(field_name))
+            assert not temp_fieldsets  # cleaned
 
         return fieldsets
 
