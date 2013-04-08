@@ -137,12 +137,20 @@ class MultitableModelD(MultitableModelB):
 class AbstractModelA(models.Model):
     titlea = models.CharField(ugettext_lazy('title a'), max_length=255)
 
+    def __init__(self, *args, **kwargs):
+        super(AbstractModelA, self).__init__(*args, **kwargs)
+        self.titlea = 'title_a'
+
     class Meta:
         abstract = True
 
 
 class AbstractModelB(AbstractModelA):
     titleb = models.CharField(ugettext_lazy('title b'), max_length=255)
+
+    def __init__(self, *args, **kwargs):
+        super(AbstractModelB, self).__init__(*args, **kwargs)
+        self.titleb = 'title_b'
 
 
 ########## Fields inheritance testing

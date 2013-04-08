@@ -2,6 +2,8 @@
 from django.conf import settings
 from django.db.models import Manager, ForeignKey
 from django.db.models.base import ModelBase
+from django.db.models.signals import post_init
+from django.dispatch import receiver
 
 from modeltranslation import settings as mt_settings
 from modeltranslation.fields import (TranslationFieldDescriptor, TranslatedRelationIdDescriptor,
@@ -155,8 +157,13 @@ def patch_constructor(model):
                 # Old key is intentionally left in case old_init wants to play with it
                 kwargs.setdefault(new_key, val)
         old_init(self, *args, **kwargs)
-        del self._mt_init
     model.__init__ = new_init
+
+
+@receiver(post_init)
+def delete_mt_init(sender, instance, **kwargs):
+    if hasattr(instance, '_mt_init'):
+        del instance._mt_init
 
 
 def patch_metaclass(model):

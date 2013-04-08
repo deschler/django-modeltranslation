@@ -1496,6 +1496,12 @@ class ModelInheritanceTest(ModeltranslationTestBase):
     """Tests for inheritance support in modeltranslation."""
     def test_abstract_inheritance(self):
         field_names_b = models.AbstractModelB._meta.get_all_field_names()
+        self.assertTrue('titlea' in field_names_b)
+        self.assertTrue('titlea_de' in field_names_b)
+        self.assertTrue('titlea_en' in field_names_b)
+        self.assertTrue('titleb' in field_names_b)
+        self.assertTrue('titleb_de' in field_names_b)
+        self.assertTrue('titleb_en' in field_names_b)
         self.assertFalse('titled' in field_names_b)
         self.assertFalse('titled_de' in field_names_b)
         self.assertFalse('titled_en' in field_names_b)
@@ -2336,3 +2342,9 @@ class TestManager(ModeltranslationTestBase):
             self.assertDeferred(True, 'title', 'title_en')
             self.assertDeferred(True, 'title', 'title_de')
             self.assertDeferred(True, 'text', 'email', 'url')
+
+    def test_constructor_inheritance(self):
+        inst = models.AbstractModelB()
+        # Check if fields assigned in constructor hasn't been ignored.
+        self.assertEqual(inst.titlea, 'title_a')
+        self.assertEqual(inst.titleb, 'title_b')
