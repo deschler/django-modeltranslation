@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import with_statement  # Python 2.5 compatibility
 import datetime
 from decimal import Decimal
 import os
@@ -59,6 +58,7 @@ def default_fallback():
         MODELTRANSLATION_FALLBACK_LANGUAGES=(mt_settings.DEFAULT_LANGUAGE,))
 
 
+@override_settings(**TEST_SETTINGS)
 class ModeltranslationTestBase(TestCase):
     urls = 'modeltranslation.tests.urls'
     cache = AppCache()
@@ -110,8 +110,6 @@ class ModeltranslationTestBase(TestCase):
 
     def tearDown(self):
         trans_real.activate(self._old_language)
-
-ModeltranslationTestBase = override_settings(**TEST_SETTINGS)(ModeltranslationTestBase)
 
 
 class TestAutodiscover(ModeltranslationTestBase):
