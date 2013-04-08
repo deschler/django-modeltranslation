@@ -20,9 +20,8 @@ from django.test.utils import override_settings
 from django.utils import six
 from django.utils.translation import get_language, override, trans_real
 
-from modeltranslation import settings as mt_settings
-from modeltranslation import translator
-from modeltranslation import admin
+from modeltranslation import admin, settings as mt_settings, translator
+from modeltranslation.forms import TranslationModelForm
 from modeltranslation.models import autodiscover
 from modeltranslation.tests import models
 from modeltranslation.tests.translation import (FallbackModel2TranslationOptions,
@@ -2342,3 +2341,16 @@ class TestManager(ModeltranslationTestBase):
         # Check if fields assigned in constructor hasn't been ignored.
         self.assertEqual(inst.titlea, 'title_a')
         self.assertEqual(inst.titleb, 'title_b')
+
+
+class TranslationModelFormTest(ModeltranslationTestBase):
+    def test_fields(self):
+        class TestModelForm(TranslationModelForm):
+            class Meta:
+                model = models.TestModel
+
+        form = TestModelForm()
+        self.assertEqual(list(form.base_fields),
+                         ['title', 'title_de', 'title_en', 'text', 'text_de', 'text_en',
+                          'url', 'url_de', 'url_en', 'email', 'email_de', 'email_en'])
+        self.assertEqual(list(form.fields), ['title', 'text', 'url', 'email'])
