@@ -17,8 +17,9 @@ from django.core.management import call_command
 from django.db.models import Q, F
 from django.db.models.loading import AppCache
 from django.test import TestCase
+from django.test.utils import override_settings
 from django.utils import six
-from django.utils.translation import get_language, trans_real
+from django.utils.translation import get_language, override, trans_real
 
 from modeltranslation import settings as mt_settings
 from modeltranslation import translator
@@ -32,14 +33,6 @@ from modeltranslation.tests.test_settings import TEST_SETTINGS
 from modeltranslation.utils import (build_css_class, build_localized_fieldname,
                                     auto_populate, fallbacks)
 
-try:
-    from django.test.utils import override_settings
-except ImportError:
-    from modeltranslation.tests.utils import override_settings
-try:
-    from django.utils.translation import override
-except ImportError:
-    from modeltranslation.tests.utils import override  # NOQA
 
 # None of the following tests really depend on the content of the request,
 # so we'll just pass in None.
