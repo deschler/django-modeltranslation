@@ -1,11 +1,24 @@
+  ADDED: Support for Python 3.2 and 3.3.
+         (thanks to Karol Fuksiewicz,
+          resolves issue #174)
+  ADDED: Convenient admin classes which already contain proper Media definitions.
+         (resolves issue #171)
+  ADDED: Only/defer methods to MultilingualManager.
+         (resolves issue #166)
   ADDED: Support for ForeignKey.
          (thanks to Braden MacDonald and Jacek Tomaszewski,
           resolves issue #161)
   ADDED: An auto-population option to the loaddata command.
          (resolves issue #160)
 
+  FIXED: Compatibility with Django 1.6 development version.
+         (resolves issue #169)
+  FIXED: Handling of 3rd party apps' ModelForms.
+         (resolves issue #167)
+
 CHANGED: MODELTRANSLATION_DEBUG setting defaults to False instead of
          settings.DEBUG.
+CHANGED: Drop support for Python 2.5 and Django 1.3.
 
 
 v0.6.1
