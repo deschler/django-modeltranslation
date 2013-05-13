@@ -9,7 +9,11 @@ Requirements
 +------------------+------------+-----------+
 | Modeltranslation | Python     | Django    |
 +==================+============+===========+
-| >=0.5            | 2.6 - 2.7  |       1.5 |
+| >=0.7            | 3.2 - 3.3  |       1.5 |
+|                  +------------+-----------+
+|                  | 2.6 - 2.7  | 1.4 - 1.5 |
++------------------+------------+-----------+
+| ==0.5, ==0.6     | 2.6 - 2.7  |       1.5 |
 |                  +------------+-----------+
 |                  | 2.5 - 2.7  | 1.3 - 1.4 |
 +------------------+------------+-----------+
@@ -58,7 +62,7 @@ in detail in the following sections:
    ``TranslationOptions`` for every model you want to translate.
 
 4. Sync the database using ``manage.py syncdb`` (note that this only applies
-   if the models registered in the ``translations.py`` did not have been
+   if the models registered in the ``translation.py`` did not have been
    synced to the database before. If they did - read further down what to do
    in that case.
 
@@ -264,13 +268,16 @@ constructors, so that these two blocks of statements can be considered equivalen
     News.objects.create(title='-- no translation yet --')
     q = News(title='-- no translation yet --')
 
+Possible modes are listed :ref:`here <auto-population-modes>`.
+
 
 ``MODELTRANSLATION_DEBUG``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Default: ``settings.DEBUG``
+Default: ``False``
 
 .. versionadded:: 0.4
+.. versionchanged:: 0.7
 
 Used for modeltranslation related debug output. Currently setting it to
 ``False`` will just prevent Django's development server from printing the

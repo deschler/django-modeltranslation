@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
+import sys
+if sys.version > '3':
+    long = int
+
 from django.core import validators
 from django.db import models
+from django.utils import six
 from django.utils.translation import ugettext_lazy
 
 
@@ -59,7 +64,7 @@ class OtherFieldsModel(models.Model):
     """
     # That's rich! PositiveIntegerField is only validated in forms, not in models.
     int = models.PositiveIntegerField(default=42, validators=[validators.MinValueValidator(0)])
-    boolean = models.BooleanField()
+    boolean = models.BooleanField(default=False)
     nullboolean = models.NullBooleanField()
     csi = models.CommaSeparatedIntegerField(max_length=255)
     float = models.FloatField(blank=True, null=True)
@@ -87,7 +92,7 @@ class FancyDescriptor(object):
     def __set__(self, obj, value):
         if isinstance(value, (int, long)):
             obj.__dict__[self.field.name] = value
-        elif isinstance(value, basestring):
+        elif isinstance(value, six.string_types):
             obj.__dict__[self.field.name] = len(value)
         else:
             obj.__dict__[self.field.name] = 0
@@ -105,7 +110,7 @@ class FancyField(models.PositiveIntegerField):
     def pre_save(self, model_instance, add):
         value = super(FancyField, self).pre_save(model_instance, add)
         # In this part value should be retrieved using descriptor and be a string
-        assert isinstance(value, basestring)
+        assert isinstance(value, six.string_types)
         # We put an int to database
         return len(value)
 
@@ -138,12 +143,20 @@ class MultitableModelD(MultitableModelB):
 class AbstractModelA(models.Model):
     titlea = models.CharField(ugettext_lazy('title a'), max_length=255)
 
+    def __init__(self, *args, **kwargs):
+        super(AbstractModelA, self).__init__(*args, **kwargs)
+        self.titlea = 'title_a'
+
     class Meta:
         abstract = True
 
 
 class AbstractModelB(AbstractModelA):
     titleb = models.CharField(ugettext_lazy('title b'), max_length=255)
+
+    def __init__(self, *args, **kwargs):
+        super(AbstractModelB, self).__init__(*args, **kwargs)
+        self.titleb = 'title_b'
 
 
 ########## Fields inheritance testing
@@ -203,6 +216,16 @@ class NameModel(models.Model):
     firstname = models.CharField(max_length=50)
     lastname = models.CharField(max_length=50)
     slug = models.SlugField(max_length=100)
+
+
+########## Integration testing
+
+class ThirdPartyModel(models.Model):
+    name = models.CharField(max_length=20)
+
+
+class ThirdPartyRegisteredModel(models.Model):
+    name = models.CharField(max_length=20)
 
 
 ########## Manager testing

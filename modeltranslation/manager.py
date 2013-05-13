@@ -5,7 +5,6 @@ django-linguo by Zach Mathew
 
 https://github.com/zmathew/django-linguo
 """
-from __future__ import with_statement  # Python 2.5 compatibility
 from django.db import models
 from django.db.models.fields.related import RelatedField, RelatedObject
 from django.db.models.sql.where import Constraint
@@ -127,7 +126,8 @@ class MultilingualQuerySet(models.query.QuerySet):
                 c.field = self.model._meta.get_field(new_name)
                 c.col = c.field.column
         if isinstance(q, Node):
-            map(self._rewrite_where, q.children)
+            for child in q.children:
+                self._rewrite_where(child)
 
     def _rewrite_order(self):
         self.query.order_by = [rewrite_order_lookup_key(self.model, field_name)
@@ -139,7 +139,7 @@ class MultilingualQuerySet(models.query.QuerySet):
         if isinstance(q, tuple) and len(q) == 2:
             return rewrite_lookup_key(self.model, q[0]), q[1]
         if isinstance(q, Node):
-            q.children = map(self._rewrite_q, q.children)
+            q.children = list(map(self._rewrite_q, q.children))
         return q
 
     # This method was not present in django-linguo
@@ -151,7 +151,7 @@ class MultilingualQuerySet(models.query.QuerySet):
             q.name = rewrite_lookup_key(self.model, q.name)
             return q
         if isinstance(q, Node):
-            q.children = map(self._rewrite_f, q.children)
+            q.children = list(map(self._rewrite_f, q.children))
         return q
 
     def _filter_or_exclude(self, negate, *args, **kwargs):
@@ -209,6 +209,26 @@ class MultilingualQuerySet(models.query.QuerySet):
         """
         with auto_populate(self._populate_mode):
             return super(MultilingualQuerySet, self).get_or_create(**kwargs)
+
+    def _append_translated(self, fields):
+        "If translated field is encountered, add also all its translation fields."
+        fields = set(fields)
+        from modeltranslation.translator import translator
+        opts = translator.get_options_for_model(self.model)
+        for key, translated in opts.fields.items():
+            if key in fields:
+                fields = fields.union(f.name for f in translated)
+        return fields
+
+    # This method was not present in django-linguo
+    def defer(self, *fields):
+        fields = self._append_translated(fields)
+        return super(MultilingualQuerySet, self).defer(*fields)
+
+    # This method was not present in django-linguo
+    def only(self, *fields):
+        fields = self._append_translated(fields)
+        return super(MultilingualQuerySet, self).only(*fields)
 
 
 class MultilingualManager(models.Manager):

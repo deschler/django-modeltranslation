@@ -22,6 +22,7 @@ Contributors
 * Wojtek Ruszczewski
 * Chris Adams
 * Dominique Lederer
+* Braden MacDonald
 * And many more ... (if you miss your name here, please let us know!)
 
 .. _django-linguo: https://github.com/zmathew/django-linguo

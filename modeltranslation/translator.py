@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 from django.conf import settings
+from django.utils.six import with_metaclass
 from django.db.models import Manager, ForeignKey
 from django.db.models.base import ModelBase
+from django.db.models.signals import post_init
+from django.dispatch import receiver
 
 from modeltranslation import settings as mt_settings
 from modeltranslation.fields import (NONE, create_translation_field, TranslationFieldDescriptor,
@@ -35,7 +38,7 @@ class FieldsAggregationMetaClass(type):
         return super(FieldsAggregationMetaClass, cls).__new__(cls, name, bases, attrs)
 
 
-class TranslationOptions(object):
+class TranslationOptions(with_metaclass(FieldsAggregationMetaClass, object)):
     """
     Translatable fields are declared by registering a model using
     ``TranslationOptions`` class with appropriate ``fields`` attribute.
@@ -55,7 +58,6 @@ class TranslationOptions(object):
     with translated model. This model may be not translated itself.
     ``related_fields`` contains names of reverse lookup fields.
     """
-    __metaclass__ = FieldsAggregationMetaClass
 
     def __init__(self, model):
         """
@@ -87,7 +89,7 @@ class TranslationOptions(object):
         """
         Return name of all fields that can be used in filtering.
         """
-        return self.fields.keys() + self.related_fields
+        return list(self.fields.keys()) + self.related_fields
 
     def __str__(self):
         local = tuple(self.local_fields.keys())
@@ -102,7 +104,7 @@ def add_translation_fields(model, opts):
 
     Adds newly created translation fields to the given translation options.
     """
-    for field_name in opts.local_fields.iterkeys():
+    for field_name in opts.local_fields.keys():
         for l in settings.LANGUAGES:
             # Create a dynamic translation field
             translation_field = create_translation_field(
@@ -147,29 +149,58 @@ def patch_constructor(model):
     old_init = model.__init__
 
     def new_init(self, *args, **kwargs):
-        populate_translation_fields(self.__class__, kwargs)
-        for key, val in kwargs.items():
-            new_key = rewrite_lookup_key(model, key)
-            # Old key is intentionally left in case old_init wants to play with it
-            kwargs.setdefault(new_key, val)
+        self._mt_init = True
+        if not self._deferred:
+            populate_translation_fields(self.__class__, kwargs)
+            for key, val in list(kwargs.items()):
+                new_key = rewrite_lookup_key(model, key)
+                # Old key is intentionally left in case old_init wants to play with it
+                kwargs.setdefault(new_key, val)
         old_init(self, *args, **kwargs)
     model.__init__ = new_init
 
 
+@receiver(post_init)
+def delete_mt_init(sender, instance, **kwargs):
+    if hasattr(instance, '_mt_init'):
+        del instance._mt_init
+
+
+def patch_metaclass(model):
+    """
+    Monkey patches original model metaclass to exclude translated fields on deferred subclasses.
+    """
+    old_mcs = model.__class__
+
+    class translation_deferred_mcs(old_mcs):
+        """
+        This metaclass is essential for deferred subclasses (obtained via only/defer) to work.
+
+        When deferred subclass is created, some translated fields descriptors could be overridden
+        by DeferredAttribute - which would cause translation retrieval to fail.
+        Prevent this from happening with deleting those attributes from class being created.
+        This metaclass would be called from django.db.models.query_utils.deferred_class_factory
+        """
+        def __new__(cls, name, bases, attrs):
+            if attrs.get('_deferred', False):
+                opts = translator.get_options_for_model(model)
+                for field_name in opts.fields.keys():
+                    attrs.pop(field_name, None)
+            return super(translation_deferred_mcs, cls).__new__(cls, name, bases, attrs)
+    # Assign to __metaclass__ wouldn't work, since metaclass search algorithm check for __class__.
+    # http://docs.python.org/2/reference/datamodel.html#__metaclass__
+    model.__class__ = translation_deferred_mcs
+
+
 def delete_cache_fields(model):
     opts = model._meta
-    try:
-        del opts._field_cache
-    except AttributeError:
-        pass
-    try:
-        del opts._field_name_cache
-    except AttributeError:
-        pass
-    try:
-        del opts._name_map
-    except AttributeError:
-        pass
+    cached_attrs = ('_field_cache', '_field_name_cache', '_name_map', 'fields', 'concrete_fields',
+                    'local_concrete_fields')
+    for attr in cached_attrs:
+        try:
+            delattr(opts, attr)
+        except AttributeError:
+            pass
 
 
 def populate_translation_fields(sender, kwargs):
@@ -205,7 +236,7 @@ def populate_translation_fields(sender, kwargs):
         populate = 'all'
 
     opts = translator.get_options_for_model(sender)
-    for key, val in kwargs.items():
+    for key, val in list(kwargs.items()):
         if key in opts.fields:
             if populate == 'all':
                 # Set the value for every language.
@@ -280,11 +311,14 @@ class Translator(object):
             # Patch __init__ to rewrite fields
             patch_constructor(model)
 
+            # Patch __metaclass__ to allow deferring to work
+            patch_metaclass(model)
+
             # Substitute original field with descriptor
             model_fallback_languages = getattr(opts, 'fallback_languages', None)
             model_fallback_values = getattr(opts, 'fallback_values', NONE)
             model_fallback_undefined = getattr(opts, 'fallback_undefined', NONE)
-            for field_name in opts.local_fields.iterkeys():
+            for field_name in opts.local_fields.keys():
                 field = model._meta.get_field(field_name)
                 if isinstance(model_fallback_values, dict):
                     field_fallback_value = model_fallback_values.get(field_name, NONE)
@@ -329,7 +363,7 @@ class Translator(object):
             self.get_options_for_model(model)
             # Invalidate all submodels options and forget about
             # the model itself.
-            for desc, desc_opts in self._registry.items():
+            for desc, desc_opts in list(self._registry.items()):
                 if not issubclass(desc, model):
                     continue
                 if model != desc and desc_opts.registered:

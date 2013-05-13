@@ -13,9 +13,8 @@ import modeltranslation.models  # NOQA
 from modeltranslation.settings import DEFAULT_LANGUAGE
 from modeltranslation.translator import translator
 from modeltranslation.utils import (
-    get_translation_fields, build_css_class, build_localized_fieldname, get_language)
-from modeltranslation.widgets import (ClearableAdminTextInputWidget,
-                                      ClearableAdminTextareaWidget)
+    get_translation_fields, build_css_class, build_localized_fieldname, get_language, unique)
+from modeltranslation.widgets import ClearableAdminTextInputWidget, ClearableAdminTextareaWidget
 
 
 FORMFIELD_FOR_DBFIELD_DEFAULTS = {
@@ -102,7 +101,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         Returns a new list with replaced fields. If `option` contains no
         registered fields, it is returned unmodified.
 
-        >>> print self.trans_opts.fields.keys()
+        >>> print(self.trans_opts.fields.keys())
         ['title',]
         >>> get_translation_fields(self.trans_opts.fields.keys()[0])
         ['title_de', 'title_en']
@@ -263,6 +262,7 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
             # TODO: Allow setting a label
             fieldsets = [('', {'fields': untranslated_fields},)] if untranslated_fields else []
 
+            temp_fieldsets = {}
             for orig_field, trans_fields in self.trans_opts.fields.items():
                 trans_fieldnames = [f.name for f in sorted(trans_fields, key=lambda x: x.name)]
                 if any(f in trans_fieldnames for f in flattened_fieldsets):
@@ -270,10 +270,16 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
                     # fieldset's label - using ugettext_lazy in your model
                     # declaration can make that translatable.
                     label = self.model._meta.get_field(orig_field).verbose_name
-                    fieldsets.append((label, {
+                    temp_fieldsets[orig_field] = (label, {
                         'fields': trans_fieldnames,
                         'classes': ('mt-fieldset',)
-                    }))
+                    })
+
+            fields_order = unique(f.translated_field.name for f in self.opts.fields if
+                                  hasattr(f, 'translated_field') and f.name in flattened_fieldsets)
+            for field_name in fields_order:
+                fieldsets.append(temp_fieldsets.pop(field_name))
+            assert not temp_fieldsets  # cleaned
 
         return fieldsets
 
@@ -317,3 +323,28 @@ class TranslationGenericTabularInline(TranslationInlineModelAdmin, generic.Gener
 
 class TranslationGenericStackedInline(TranslationInlineModelAdmin, generic.GenericStackedInline):
     pass
+
+
+class TabbedDjangoJqueryTranslationAdmin(TranslationAdmin):
+    class Media:
+        js = (
+            'modeltranslation/js/force_jquery.js',
+            'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/jquery-ui.min.js',
+            'modeltranslation/js/tabbed_translation_fields.js',
+        )
+        css = {
+            'all': ('modeltranslation/css/tabbed_translation_fields.css',),
+        }
+TabbedTranslationAdmin = TabbedDjangoJqueryTranslationAdmin
+
+
+class TabbedExternalJqueryTranslationAdmin(TranslationAdmin):
+    class Media:
+        js = (
+            'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
+            'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js',
+            'modeltranslation/js/tabbed_translation_fields.js',
+        )
+        css = {
+            'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
+        }

@@ -48,3 +48,31 @@ The ``sync_translation_fields`` Command
     $ ./manage.py sync_translation_fields
 
 .. todo:: Explain
+
+
+The ``loaddata`` Command
+------------------------
+
+.. versionadded:: 0.7
+
+It is just extension to original ``loaddata`` command which adds an optional ``populate`` keyword.
+If specified, then normal loading command will be run under selected auto-population modes.
+
+By default no auto-population is performed.
+
+.. code-block:: console
+
+    $ ./manage.py loaddata --populate=all fixtures.json
+
+Allowed modes are listed :ref:`here <auto-population-modes>`. To choose ``False``
+(turn off auto-population) specify ``'0'`` or ``'false'``:
+
+.. code-block:: console
+
+    $ ./manage.py loaddata --populate=false fixtures.json
+    $ ./manage.py loaddata --populate=0 fixtures.json
+
+.. note::
+
+    If ``populate`` is not specified, then current auto-population mode is used. *Current* means
+    the one set by :ref:`settings <settings-modeltranslation_auto_populate>`.

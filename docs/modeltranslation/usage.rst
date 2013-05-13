@@ -171,6 +171,11 @@ There is a more convenient way than calling ``populate`` manager method or enter
 :ref:`settings-modeltranslation_auto_populate` setting.
 It controls the default population behaviour.
 
+.. _auto-population-modes:
+
+Auto-population modes
+^^^^^^^^^^^^^^^^^^^^^
+
 There are 4 different population modes:
 
 ``False``
@@ -249,6 +254,8 @@ Dict syntax is only allowed there.
 .. versionadded:: 0.6
 
 Even more, all fallbacks may be switched on or off for just some exceptional block of code using::
+
+    from modeltranslation.utils import fallbacks
 
     with fallbacks(False):
         # Work with values for the active language only
