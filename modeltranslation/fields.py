@@ -6,6 +6,7 @@ from django.db.models import fields
 from modeltranslation import settings as mt_settings
 from modeltranslation.utils import (
     get_language, build_localized_fieldname, build_localized_verbose_name, resolution_order)
+from modeltranslation.widgets import ClearableWidgetWrapper
 
 
 SUPPORTED_FIELDS = (
@@ -73,20 +74,6 @@ def field_factory(baseclass):
     TranslationFieldSpecific.__name__ = 'Translation%s' % baseclass.__name__
 
     return TranslationFieldSpecific
-
-
-def create_nullable_formfield(form_class):
-    """
-    Creates a form class subclass that ensures that ``None`` is not cast to
-    anything (like the empty string with ``CharField`` and its derivatives).
-    """
-    class NullableField(form_class):
-        def to_python(self, value):
-            if value is None:
-                return value
-            return super(NullableField, self).to_python(value)
-    NullableField.__name__ = 'Nullable%s' % form_class.__name__
-    return NullableField
 
 
 class TranslationField(object):
@@ -184,12 +171,21 @@ class TranslationField(object):
 
         The ``forms.CharField`` somewhat surprising behaviour is documented as a
         "won't fix": https://code.djangoproject.com/ticket/9590.
+
+        Textual widgets (subclassing ``TextInput`` or ``Textarea``) used for
+        nullable fields are enriched with a clear checkbox, allowing ``None``
+        values to be preserved rather than saved as empty strings.
         """
         formfield = super(TranslationField, self).formfield(*args, **kwargs)
-        if (self.translated_field.null and
-                issubclass(formfield.__class__, forms.CharField)):
-            kwargs['form_class'] = create_nullable_formfield(formfield.__class__)
-            formfield = super(TranslationField, self).formfield(*args, **kwargs)
+        if self.translated_field.null:
+            if isinstance(formfield, forms.CharField):
+                from modeltranslation.forms import NullableField
+                form_class = formfield.__class__
+                kwargs['form_class'] = type(
+                    'Nullable%s' % form_class.__name__, (NullableField, form_class), {})
+                formfield = super(TranslationField, self).formfield(*args, **kwargs)
+            if isinstance(formfield.widget, (forms.TextInput, forms.Textarea)):
+                formfield.widget = ClearableWidgetWrapper(formfield.widget)
         return formfield
 
     def save_form_data(self, instance, data):
@@ -238,7 +234,7 @@ class TranslationFieldDescriptor(object):
 
     def __set__(self, instance, value):
         """
-        Updates translation field for the current language.
+        Updates the translation field for the current language.
         """
         if getattr(instance, '_mt_init', False):
             # When assignment takes place in model instance constructor, don't set value.
