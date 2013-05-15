@@ -4,7 +4,6 @@ from copy import deepcopy
 from django.contrib import admin
 from django.contrib.admin.options import BaseModelAdmin, flatten_fieldsets, InlineModelAdmin
 from django.contrib.contenttypes import generic
-from django.db import models
 from django import forms
 
 # Ensure that models are registered for translation before TranslationAdmin

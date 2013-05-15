@@ -1,17 +1,33 @@
-import copy
-
-from django.forms.widgets import Widget, CheckboxInput
+from django.forms.widgets import Media, Widget, CheckboxInput
 from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext
 
 
 class ClearableWidgetWrapper(Widget):
+    """
+    Wraps another widget adding a clear checkbox, making it possible to
+    reset the field to some empty value even if the original input doesn't
+    have means to.
+
+    Useful for ``TextInput`` and ``Textarea`` based widgets used in combination
+    with nullable text fields.
+
+    Use it in ``Field.formfield`` or ``ModelAdmin.formfield_for_dbfield``:
+
+        field.widget = ClearableWidgetWrapper(field.widget)
+
+    ``None`` is assumed to be a proper choice for the empty value, but you may
+    pass another one to the constructor.
+    """
     clear_checkbox_label = ugettext("None")
     template = u'<span class="clearable-input">{0} <span>{2}</span> {3}</span>'
     # TODO: Label would be proper, but admin applies some hardly undoable
     #       styling to labels.
     # template = '<span class="clearable-input">{} <label for="{}">{}</label> {}</span>'
+
+    class Media:
+        js = ('modeltranslation/js/clearable_inputs.js',)
 
     def __init__(self, widget, empty_value=None):
         """
@@ -29,9 +45,17 @@ class ClearableWidgetWrapper(Widget):
         """
         return getattr(self.widget, name)
 
+    @property
+    def media(self):
+        """
+        Combines media of both components and adds a small script that unchecks
+        the clear box, when a value in any wrapped input is modified.
+        """
+        return self.widget.media + self.checkbox.media + Media(self.Media)
+
     def render(self, name, value, attrs=None):
         """
-        Appends a checkbox for clearing the value (that is setting the field
+        Appends a checkbox for clearing the value (that is, setting the field
         with the ``empty_value``).
         """
         wrapped = self.widget.render(name, value, attrs)
@@ -48,8 +72,8 @@ class ClearableWidgetWrapper(Widget):
 
     def value_from_datadict(self, data, files, name):
         """
-        If the clear checkbox is checked returns the empty value, completely
-        ignoring the original input.
+        If the clear checkbox is checked returns the configured empty value,
+        completely ignoring the original input.
         """
         clear = self.checkbox.value_from_datadict(data, files, self.clear_checkbox_name(name))
         if clear:
