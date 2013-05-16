@@ -2354,3 +2354,20 @@ class TranslationModelFormTest(ModeltranslationTestBase):
                          ['title', 'title_de', 'title_en', 'text', 'text_de', 'text_en',
                           'url', 'url_de', 'url_en', 'email', 'email_de', 'email_en'])
         self.assertEqual(list(form.fields), ['title', 'text', 'url', 'email'])
+
+    def test_updating_with_empty_value(self):
+        """
+        Can we update the current language translation with an empty value, when
+        the original field is excluded from the form?
+        """
+        class Form(forms.ModelForm):
+            class Meta:
+                model = models.TestModel
+                exclude = ('text',)
+
+        instance = models.TestModel.objects.create(text_de='something')
+        form = Form({'text_de': '', 'title': 'a', 'email_de': '', 'email_en': ''},
+                    instance=instance)
+        instance = form.save()
+        self.assertEqual('de', get_language())
+        self.assertEqual('', instance.text_de)
