@@ -38,7 +38,7 @@ matrix:
     - python: "3.3"
       env: DJANGO=https://github.com/django/django/zipball/master DB=mysql
 before_script:
-  - flake8 --max-line-length=100 modeltranslation
+  - PYFLAKES_NODOCTEST=1 flake8 --max-line-length=100 modeltranslation
   - mysql -e 'create database modeltranslation;'
   - psql -c 'create database modeltranslation;' -U postgres
 install:
