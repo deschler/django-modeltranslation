@@ -51,9 +51,8 @@ class Command(NoArgsCommand):
             ' languages or undeclared fields.')
 
     option_list = NoArgsCommand.option_list + (
-        make_option('--noinput',
-            action='store_false', dest='interactive', default=True,
-            help="Do NOT prompt the user for input of any kind."),
+        make_option('--noinput', action='store_false', dest='interactive', default=True,
+                    help='Do NOT prompt the user for input of any kind.'),
     )
 
     def handle_noargs(self, **options):
@@ -76,7 +75,8 @@ class Command(NoArgsCommand):
                     found_missing_fields = True
                     print_missing_langs(missing_langs, field_name, model_full_name)
                     sql_sentences = self.get_sync_sql(field_name, missing_langs, model)
-                    execute_sql = ask_for_confirmation(sql_sentences, model_full_name, self.interactive)
+                    execute_sql = ask_for_confirmation(
+                        sql_sentences, model_full_name, self.interactive)
                     if execute_sql:
                         print('Executing SQL...')
                         for sentence in sql_sentences:
