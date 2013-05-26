@@ -7,12 +7,19 @@ from modeltranslation.tests.models import (
     DescriptorModel, AbstractModelA, AbstractModelB, Slugged, MetaData, Displayable, Page,
     RichText, RichTextPage, MultitableModelA, MultitableModelB, MultitableModelC, ManagerTestModel,
     CustomManagerTestModel, CustomManager2TestModel, GroupFieldsetsModel, NameModel,
-    ThirdPartyRegisteredModel)
+    ThirdPartyRegisteredModel, ProxyTestModel)
 
 
 class TestTranslationOptions(TranslationOptions):
     fields = ('title', 'text', 'url', 'email',)
 translator.register(TestModel, TestTranslationOptions)
+
+
+########## Proxy model testing
+
+class ProxyTestTranslationOptions(TranslationOptions):
+    fields = ('title', 'text', 'url', 'email',)
+translator.register(ProxyTestModel, ProxyTestTranslationOptions)
 
 
 ########## Fallback values testing

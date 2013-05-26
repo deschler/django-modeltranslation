@@ -16,6 +16,16 @@ class TestModel(models.Model):
     email = models.EmailField(blank=True, null=True)
 
 
+########## Proxy model testing
+
+class ProxyTestModel(TestModel):
+    class Meta:
+        proxy = True
+
+    def get_title(self):
+        return self.title
+
+
 ########## Fallback values testing
 
 class FallbackModel(models.Model):

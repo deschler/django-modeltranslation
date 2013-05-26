@@ -37,7 +37,7 @@ from modeltranslation.utils import (build_css_class, build_localized_fieldname,
 request = None
 
 # How many models are registered for tests.
-TEST_MODELS = 24
+TEST_MODELS = 25
 
 
 class reload_override_settings(override_settings):
@@ -1970,6 +1970,16 @@ class TranslationAdminTest(ModeltranslationTestBase):
         ma = NameModelAdmin(models.NameModel, self.site)
         self.assertEqual(ma.prepopulated_fields, {'slug': ('firstname_en', 'lastname_en',)})
 
+    def test_proxymodel_field_argument(self):
+        class ProxyTestModelAdmin(admin.TranslationAdmin):
+            fields = ['title']
+
+        ma = ProxyTestModelAdmin(models.ProxyTestModel, self.site)
+        fields = ['title_de', 'title_en']
+        self.assertEqual(tuple(ma.get_form(request).base_fields.keys()), tuple(fields))
+        self.assertEqual(
+            tuple(ma.get_form(request, self.test_obj).base_fields.keys()), tuple(fields))
+
 
 class ThirdPartyAppIntegrationTest(ModeltranslationTestBase):
     """
@@ -2354,3 +2364,12 @@ class TranslationModelFormTest(ModeltranslationTestBase):
                          ['title', 'title_de', 'title_en', 'text', 'text_de', 'text_en',
                           'url', 'url_de', 'url_en', 'email', 'email_de', 'email_en'])
         self.assertEqual(list(form.fields), ['title', 'text', 'url', 'email'])
+
+
+class ProxyModelTest(ModeltranslationTestBase):
+    def test_equality(self):
+        n = models.TestModel.objects.create(title='Title')
+        m = models.ProxyTestModel.objects.get(title='Title')
+        self.assertEqual(n.title, m.title)
+        self.assertEqual(n.title_de, m.title_de)
+        self.assertEqual(n.title_en, m.title_en)
