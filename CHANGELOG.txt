@@ -1,7 +1,11 @@
+  ADDED: A noinput option to the sync_translation_fields management command.
+         (thanks to cuchac,
+          resolves issues #179 and #184)
   ADDED: Support for Python 3.2 and 3.3.
          (thanks to Karol Fuksiewicz,
           resolves issue #174)
-  ADDED: Convenient admin classes which already contain proper Media definitions.
+  ADDED: Convenient admin classes which already contain proper Media
+         definitions.
          (resolves issue #171)
   ADDED: Only/defer methods to MultilingualManager.
          (resolves issue #166)
