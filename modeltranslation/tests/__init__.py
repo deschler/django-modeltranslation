@@ -450,16 +450,168 @@ class ModeltranslationTest(ModeltranslationTestBase):
         )
         self._test_constructor(keywords)
 
-    def test_unique_nullable_field(self):
-        models.UniqueNullableModel.objects.create()
-        models.UniqueNullableModel.objects.create()
-        models.UniqueNullableModel.objects.create(title=None)
-        models.UniqueNullableModel.objects.create(title=None)
 
-        models.UniqueNullableModel.objects.create(title='')
-        self.assertRaises(IntegrityError, models.UniqueNullableModel.objects.create, title='')
-        models.UniqueNullableModel.objects.create(title='foo')
-        self.assertRaises(IntegrityError, models.UniqueNullableModel.objects.create, title='foo')
+class UniqueTestMixin(object):
+    """
+    Test mixin to track down issue #187.
+
+    Intention is to compare Django's default behaviour with unique fields
+    against modeltranslation's one to assure both behave equally.
+    """
+    def test_constructor(self):
+        """
+        Tests constructor behaviour with unique fields.
+        """
+        n = self.model()
+        n.uniq_title = None
+        self.assertRaises(IntegrityError, n.save)
+
+        n = self.model()
+        n.uniq_title = ''
+        n.save()
+        n.delete()
+
+        n = self.model()
+        n.uniqnull_title = None
+        n.save()
+        n.delete()
+
+        n = self.model()
+        n.uniqnull_title = ''
+        n.save()
+        n.delete()
+
+    def test_create(self):
+        """
+        Tests create behaviour with unique fields.
+        """
+        self.model.objects.create()
+        self.assertRaises(IntegrityError, self.model.objects.create)
+
+    def test_field(self):
+        """
+        Tests general behaviour with unique fields.
+        """
+        self.assertRaises(
+            IntegrityError, self.model.objects.create, uniq_title=None)
+        self.model.objects.create(uniqnull_title='')
+
+    def test_nullable_field(self):
+        """
+        Tests behaviour with unique nullable fields.
+        """
+        self.model.objects.create(uniqnull_title=None)
+        self.assertRaises(
+            IntegrityError, self.model.objects.create, uniqnull_title='')
+
+
+class DjangoUniqueTest(ModeltranslationTestBase, UniqueTestMixin):
+    model = models.UntranslatedUniqueModel
+
+
+class ModeltranslationUniqueTest(ModeltranslationTestBase, UniqueTestMixin):
+    model = models.UniqueModel
+
+
+# class UniqueTest(ModeltranslationTestBase):
+#     """
+#     Test to track down issue #187. Compares Django's default behaviour with
+#     unique fields against modeltranslation's one.
+#
+#     Essentially this runs the same tests, first with an unregistered model,
+#     then with a registered one.
+#     """
+#     def test_untranslated_constructor(self):
+#         """
+#         Demonstrates Django's default constructor behaviour with unique fields.
+#         """
+#         n = models.UntranslatedUniqueModel()
+#         n.uniq_title = None
+#         self.assertRaises(IntegrityError, n.save)
+#
+#         n = models.UntranslatedUniqueModel()
+#         n.uniq_title = ''
+#         n.save()
+#         n.delete()
+#
+#         n = models.UntranslatedUniqueModel()
+#         n.uniqnull_title = None
+#         n.save()
+#         n.delete()
+#
+#         n = models.UntranslatedUniqueModel()
+#         n.uniqnull_title = ''
+#         n.save()
+#         n.delete()
+#
+#     def test_untranslated_create(self):
+#         """
+#         Demonstrates Django's default create behaviour with unique fields.
+#         """
+#         models.UntranslatedUniqueModel.objects.create()
+#         self.assertRaises(IntegrityError, models.UntranslatedUniqueModel.objects.create)
+#
+#     def test_untranslated_field(self):
+#         """
+#         Demonstrates Django's default behaviour with unique fields.
+#         """
+#         self.assertRaises(
+#             IntegrityError, models.UntranslatedUniqueModel.objects.create, uniq_title=None)
+#         models.UntranslatedUniqueModel.objects.create(uniqnull_title='')
+#
+#     def test_untranslated_nullable_field(self):
+#         """
+#         Demonstrates Django's default behaviour with unique nullable fields.
+#         """
+#         models.UntranslatedUniqueModel.objects.create(uniqnull_title=None)
+#         self.assertRaises(
+#             IntegrityError, models.UntranslatedUniqueModel.objects.create, uniqnull_title='')
+#
+#     def test_constructor(self):
+#         """
+#         Tests modeltranslation constructor behaviour with unique fields.
+#         """
+#         n = models.UniqueModel()
+#         n.uniq_title = None
+#         self.assertRaises(IntegrityError, n.save)
+#
+#         n = models.UniqueModel()
+#         n.uniq_title = ''
+#         n.save()
+#         n.delete()
+#
+#         n = models.UniqueModel()
+#         n.uniqnull_title = None
+#         n.save()
+#         n.delete()
+#
+#         n = models.UniqueModel()
+#         n.uniqnull_title = ''
+#         n.save()
+#         n.delete()
+#
+#     def test_create(self):
+#         """
+#         Tests modeltranslation create behaviour with unique fields.
+#         """
+#         models.UniqueModel.objects.create()
+#         self.assertRaises(IntegrityError, models.UniqueModel.objects.create)
+#
+#     def test_field(self):
+#         """
+#         Tests modeltranslation behaviour with unique fields.
+#         """
+#         self.assertRaises(
+#             IntegrityError, models.UniqueModel.objects.create, uniq_title=None)
+#         models.UniqueModel.objects.create(uniqnull_title='')
+#
+#     def test_nullable_field(self):
+#         """
+#         Tests modeltranslation behaviour with unique nullable fields.
+#         """
+#         models.UniqueModel.objects.create(uniqnull_title=None)
+#         self.assertRaises(
+#             IntegrityError, models.UniqueModel.objects.create, uniqnull_title='')
 
 
 class FallbackTests(ModeltranslationTestBase):

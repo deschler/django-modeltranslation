@@ -16,8 +16,14 @@ class TestModel(models.Model):
     email = models.EmailField(blank=True, null=True)
 
 
-class UniqueNullableModel(models.Model):
-    title = models.CharField(null=True, unique=True, max_length=255)
+class UniqueModel(models.Model):
+    uniq_title = models.CharField(unique=True, max_length=255)
+    uniqnull_title = models.CharField(unique=True, null=True, max_length=255)
+
+
+class UntranslatedUniqueModel(models.Model):
+    uniq_title = models.CharField(unique=True, max_length=255)
+    uniqnull_title = models.CharField(unique=True, null=True, max_length=255)
 
 
 ########## Proxy model testing
