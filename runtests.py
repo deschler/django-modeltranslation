@@ -34,14 +34,25 @@ def runtests():
 
         # Configure test environment
         settings.configure(
-            DATABASES = DATABASES,
-            INSTALLED_APPS = (
+            DATABASES=DATABASES,
+            INSTALLED_APPS=(
+                'django.contrib.auth',
+                'django.contrib.contenttypes',
+                'django.contrib.messages',
+                'django.contrib.sessions',
                 'modeltranslation',
             ),
-            ROOT_URLCONF = None, # tests override urlconf, but it still needs to be defined
-            LANGUAGES = (
+            ROOT_URLCONF=None,  # tests override urlconf, but it still needs to be defined
+            LANGUAGES=(
                 ('en', 'English'),
             ),
+            TEMPLATE_CONTEXT_PROCESSORS=(
+                'django.contrib.messages.context_processors.messages',
+            ),
+            MIDDLEWARE_CLASSES=(
+                'django.contrib.auth.middleware.AuthenticationMiddleware',
+                'django.contrib.messages.middleware.MessageMiddleware',
+            )
         )
 
     failures = call_command(

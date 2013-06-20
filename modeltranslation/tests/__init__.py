@@ -7,16 +7,18 @@ import imp
 
 from django import forms
 from django.conf import settings as django_settings
+from django.contrib import admin as django_admin
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError, ImproperlyConfigured
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.core.management import call_command
+from django.core.urlresolvers import reverse
 from django.db import IntegrityError
 from django.db.models import Q, F
 from django.db.models.loading import AppCache
-from django.test import TestCase
+from django.test import TestCase, Client
 from django.test.utils import override_settings
 from django.utils import six
 from django.utils.translation import get_language, override, trans_real
@@ -1788,10 +1790,12 @@ class UpdateCommandTest(ModeltranslationTestBase):
 
 class TranslationAdminTest(ModeltranslationTestBase):
     def setUp(self):
+        #from modeltranslation.tests.admin import site
         super(TranslationAdminTest, self).setUp()
         self.test_obj = models.TestModel.objects.create(
             title='Testtitle', text='Testtext')
         self.site = AdminSite()
+        #self.site = site
 
     def tearDown(self):
         self.test_obj.delete()
@@ -2143,6 +2147,31 @@ class TranslationAdminTest(ModeltranslationTestBase):
         self.assertEqual(tuple(ma.get_form(request).base_fields.keys()), tuple(fields))
         self.assertEqual(
             tuple(ma.get_form(request, self.test_obj).base_fields.keys()), tuple(fields))
+
+
+class TranslationAdminClientTest(ModeltranslationTestBase):
+    def setUp(self):
+        super(TranslationAdminClientTest, self).setUp()
+        username = 'testuser'
+        password = 's3cret'
+        self.site = AdminSite()
+        self.client = Client()
+        self.user = User.objects.create_superuser(username, '', password)
+        self.client.login(username=username, password=password)
+
+    def tearDown(self):
+        self.client.logout()
+        self.user.delete()
+        super(TranslationAdminClientTest, self).tearDown()
+
+    def test_uniquemodel_change_form(self):
+        class UniqueModelAdmin(admin.TranslationAdmin):
+            pass
+        django_admin.site.register(models.UniqueModel, UniqueModelAdmin)
+
+        url = reverse('admin:tests_uniquemodel_add')
+        response = self.client.get(url)
+        print response
 
 
 class ThirdPartyAppIntegrationTest(ModeltranslationTestBase):

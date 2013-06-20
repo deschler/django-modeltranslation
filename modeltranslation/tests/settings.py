@@ -6,13 +6,22 @@ from django.conf import settings
 
 
 INSTALLED_APPS = tuple(settings.INSTALLED_APPS) + (
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.messages',
+    'django.contrib.sessions',
     'modeltranslation.tests',
 )
-# IMO this is unimportant
-#if django.VERSION[0] >= 1 and django.VERSION[1] >= 3:
-    #INSTALLED_APPS += ('django.contrib.staticfiles',)
 
-#STATIC_URL = '/static/'
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.contrib.messages.context_processors.messages',
+)
+
+MIDDLEWARE_CLASSES = (
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+)
 
 LANGUAGES = (('de', 'Deutsch'),
              ('en', 'English'))
