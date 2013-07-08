@@ -129,17 +129,32 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         return fieldsets
 
     def _patch_prepopulated_fields(self):
-        if self.prepopulated_fields:
-            # TODO: Perhaps allow to configure which language the slug should be based on?
-            lang = get_language()
-            prepopulated_fields_new = dict(self.prepopulated_fields)
-            translation_fields = []
-            for k, v in self.prepopulated_fields.items():
-                for i in v:
-                    if i in self.trans_opts.fields.keys():
-                        translation_fields.append(build_localized_fieldname(i, lang))
-                prepopulated_fields_new[k] = tuple(translation_fields)
-            self.prepopulated_fields = prepopulated_fields_new
+        prepopulated_fields = {}
+        for dest, sources in self.prepopulated_fields.items():
+            if dest in self.trans_opts.fields:
+                for lang in settings.LANGUAGES:
+                    key = "%s_%s" % (dest,lang[0])
+                    values = []
+                    for source in sources:
+                        if source in self.trans_opts.fields:
+                            values.append("%s_%s" % (source,lang[0]))
+                        else:
+                            values.append(source)
+                    prepopulated_fields[key] = values
+            else:
+                key = dest
+                values = []
+                if hasattr(settings,"MODELTRANSLATION_DEFAULT_LANGUAGE"):
+                    lang = settings.MODELTRANSLATION_DEFAULT_LANGUAGE
+                else:
+                    lang = settings.LANGUAGES[0][0]
+                for source in sources:
+                    if source in self.trans_opts.fields:
+                        values.append("%s_%s" % (source,lang))
+                    else:
+                        values.append(source)
+                prepopulated_fields[key] = values
+        self.prepopulated_fields = prepopulated_fields
 
     def _do_get_form_or_formset(self, request, obj, **kwargs):
         """
