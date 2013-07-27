@@ -1,0 +1,51 @@
+{% extends base_template %}
+
+{% block extrahead %}
+{{ block.super }}
+<script type="text/javascript">
+	if (!jQuery) {
+	    jQuery = django.jQuery;
+	}
+
+	function changeLanguage(value) {
+		value = value.replace("-", "_");
+
+		{% for lang in languages %}
+		$('div[class*="form-row"]').filter(function() {
+			var lang = "{{ lang.1 }}". replace("-", "_");
+	        return $(this).attr('class').match("field-.*._"+lang);
+	    }).hide();
+		{% endfor %}
+
+	    $('fieldset:not(.collapsed) > div[class*="form-row"]').filter(function() {
+	        return $(this).attr('class').match("field-.*._"+value);
+	    }).show();
+	}
+
+	(function($) {
+		$(document).ready(function () {
+			
+			$("#language_box").change(function () {
+				changeLanguage($(this).val());
+			});
+
+			$("#language_box").trigger('change');
+
+			$("fieldset").bind("show.fieldset", function (e, data){
+				$("#language_box").trigger('change');
+			});
+			$("fieldset").bind("hide.fieldset", function (e, data){
+				$(this).find('h2').siblings().hide();
+			});
+		});
+	})(django.jQuery);
+</script>
+{% endblock %}
+
+{% block sidebar %}
+<select id="language_box" style="width: 100%">
+	{% for lang in languages %}
+	<option value="{{ lang.1 }}" {% if selected_language == lang.1 %}selected="selected"{% endif %}>{{ lang.0 }}</option>
+	{% endfor %}
+</select>
+{% endblock %}

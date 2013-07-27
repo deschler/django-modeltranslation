@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from copy import deepcopy
-
+from django.conf import settings
+from django.utils.translation import ugettext_lazy as _
 from django.contrib import admin
 from django.contrib.admin.options import BaseModelAdmin, flatten_fieldsets, InlineModelAdmin
 from django.contrib.contenttypes import generic
@@ -13,6 +14,9 @@ from modeltranslation.settings import DEFAULT_LANGUAGE
 from modeltranslation.translator import translator
 from modeltranslation.utils import (
     get_translation_fields, build_css_class, build_localized_fieldname, get_language, unique)
+
+from django.template import TemplateDoesNotExist
+from django.template.loader import find_template
 
 
 class TranslationBaseModelAdmin(BaseModelAdmin):
@@ -129,17 +133,35 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         return fieldsets
 
     def _patch_prepopulated_fields(self):
-        if self.prepopulated_fields:
-            # TODO: Perhaps allow to configure which language the slug should be based on?
-            lang = get_language()
-            prepopulated_fields_new = dict(self.prepopulated_fields)
-            translation_fields = []
-            for k, v in self.prepopulated_fields.items():
-                for i in v:
-                    if i in self.trans_opts.fields.keys():
-                        translation_fields.append(build_localized_fieldname(i, lang))
-                prepopulated_fields_new[k] = tuple(translation_fields)
-            self.prepopulated_fields = prepopulated_fields_new
+        prepopulated_fields = {}
+        for dest, sources in self.prepopulated_fields.items():
+            if dest in self.trans_opts.fields:
+                for lang in settings.LANGUAGES:
+                    lang = lang[0].replace('-', '_')
+                    key = "%s_%s" % (dest,lang)
+                    values = []
+                    for source in sources:
+                        if source in self.trans_opts.fields:
+                            values.append("%s_%s" % (source,lang))
+                        else:
+                            values.append(source)
+                    prepopulated_fields[key] = values
+            else:
+                key = dest
+                values = []
+                if hasattr(settings,"MODELTRANSLATION_DEFAULT_LANGUAGE"):
+                    lang = settings.MODELTRANSLATION_DEFAULT_LANGUAGE
+                else:
+                    lang = settings.LANGUAGES[0][0]
+                for source in sources:
+                    if source in self.trans_opts.fields:
+                        lang = lang.replace('-', '_')
+                        values.append("%s_%s" % (source,lang))
+                    else:
+                        values.append(source)
+                prepopulated_fields[key] = values
+        self.prepopulated_fields = prepopulated_fields
+
 
     def _do_get_form_or_formset(self, request, obj, **kwargs):
         """
@@ -202,10 +224,23 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         """
         return self.replace_orig_field(self.readonly_fields)
 
+class TranslationModelAdminMixin(object):
 
-class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
+    def all_translations(self, obj):
+        return ''
+    all_translations.allow_tags = True
+    all_translations.short_description = _('all translations')
+
+    def get_language_tabs(self, request):
+        langs = []
+        for key, name in settings.LANGUAGES:
+            langs.append((name, key))
+        return langs
+
+class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin, TranslationModelAdminMixin):
     # TODO: Consider addition of a setting which allows to override the fallback to True
     group_fieldsets = False
+    change_form_template = "admin/modeltranslation/change_form.html"
 
     def __init__(self, *args, **kwargs):
         super(TranslationAdmin, self).__init__(*args, **kwargs)
@@ -281,6 +316,29 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
             return self._do_get_fieldsets_pre_form_or_formset()
         return self._group_fieldsets(
             self._do_get_fieldsets_post_form_or_formset(request, self.get_form(request, obj), obj))
+
+    def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
+        context['selected_language'] = get_language()
+        context['languages'] = self.get_language_tabs(request)
+        context['base_template'] = self.get_change_form_base_template()
+        return super(TranslationAdmin, self).render_change_form(request, context, add, change, form_url, obj)
+
+    def get_change_form_base_template(self):
+        opts = self.model._meta
+        app_label = opts.app_label
+        search_templates = [
+            "admin/%s/%s/change_form.html" % (app_label, opts.object_name.lower()),
+            "admin/%s/change_form.html" % app_label,
+            "admin/change_form.html"
+        ]
+        for template in search_templates:
+            try:
+                find_template(template)
+                return template
+            except TemplateDoesNotExist:
+                pass
+        else: # pragma: no cover
+            pass
 
 
 class TranslationInlineModelAdmin(TranslationBaseModelAdmin, InlineModelAdmin):

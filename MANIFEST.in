@@ -1,3 +1,4 @@
 include *.txt *.rst
 recursive-include docs *.rst conf.py Makefile make.bat
 recursive-include modeltranslation/static *
+recursive-include modeltranslation/templates *
