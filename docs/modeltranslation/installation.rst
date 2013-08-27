@@ -180,6 +180,30 @@ Example::
     ``ImproperlyConfigured`` exception is raised.
 
 
+.. _settings-modeltranslation_prepopulate_language:
+
+``MODELTRANSLATION_PREPOPULATE_LANGUAGE``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. versionadded:: devel (TODO)
+
+Default: ``current active language``
+
+By default modeltranslation will use the current request language for prepopulating
+admin fields specified in the ``prepopulated_fields`` admin property. This is often 
+used to automatically fill slug fields.
+
+This setting allows you to pin this functionality to a specific language.
+
+Example::
+
+    MODELTRANSLATION_PREPOPULATE_LANGUAGE = 'en'
+
+.. note::
+    The language has to be in the ``LANGUAGES`` setting, otherwise an
+    ``ImproperlyConfigured`` exception is raised.
+
+
 ``MODELTRANSLATION_TRANSLATION_FILES``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

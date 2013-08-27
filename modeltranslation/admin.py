@@ -9,7 +9,7 @@ from django.contrib.contenttypes import generic
 # runs. The import is supposed to resolve a race condition between model import
 # and translation registration in production (see issue #19).
 import modeltranslation.models  # NOQA
-from modeltranslation.settings import DEFAULT_LANGUAGE
+from modeltranslation.settings import DEFAULT_LANGUAGE, PREPOPULATE_LANGUAGE
 from modeltranslation.translator import translator
 from modeltranslation.utils import (
     get_translation_fields, build_css_class, build_localized_fieldname, get_language, unique)
@@ -130,8 +130,8 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
 
     def _patch_prepopulated_fields(self):
         if self.prepopulated_fields:
-            # TODO: Perhaps allow to configure which language the slug should be based on?
-            lang = get_language()
+            # Default to the active language, unless explicitly configured
+            lang = PREPOPULATE_LANGUAGE or get_language()
             prepopulated_fields_new = dict(self.prepopulated_fields)
             translation_fields = []
             for k, v in self.prepopulated_fields.items():
