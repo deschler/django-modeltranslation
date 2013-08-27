@@ -14,11 +14,9 @@ elif not DEFAULT_LANGUAGE:
 
 # Fixed base language for prepopulated fields (slugs)
 # (If not set, the current request language will be used)
-PREPOPULATE_LANGUAGE = getattr(settings,
-    'MODELTRANSLATION_PREPOPULATE_LANGUAGE', None)
+PREPOPULATE_LANGUAGE = getattr(settings, 'MODELTRANSLATION_PREPOPULATE_LANGUAGE', None)
 if PREPOPULATE_LANGUAGE and PREPOPULATE_LANGUAGE not in AVAILABLE_LANGUAGES:
-    raise ImproperlyConfigured('MODELTRANSLATION_PREPOPULATE_LANGUAGE '
-        'not in LANGUAGES setting.')
+    raise ImproperlyConfigured('MODELTRANSLATION_PREPOPULATE_LANGUAGE not in LANGUAGES setting.')
 
 # Load allowed CUSTOM_FIELDS from django settings
 CUSTOM_FIELDS = getattr(settings, 'MODELTRANSLATION_CUSTOM_FIELDS', ())
