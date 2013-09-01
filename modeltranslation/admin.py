@@ -4,6 +4,7 @@ from copy import deepcopy
 from django.contrib import admin
 from django.contrib.admin.options import BaseModelAdmin, flatten_fieldsets, InlineModelAdmin
 from django.contrib.contenttypes import generic
+from django import forms
 
 # Ensure that models are registered for translation before TranslationAdmin
 # runs. The import is supposed to resolve a race condition between model import
@@ -13,6 +14,7 @@ from modeltranslation.settings import DEFAULT_LANGUAGE, PREPOPULATE_LANGUAGE
 from modeltranslation.translator import translator
 from modeltranslation.utils import (
     get_translation_fields, build_css_class, build_localized_fieldname, get_language, unique)
+from modeltranslation.widgets import ClearableWidgetWrapper
 
 
 class TranslationBaseModelAdmin(BaseModelAdmin):
@@ -55,6 +57,8 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         else:
             orig_formfield = self.formfield_for_dbfield(orig_field, **kwargs)
             field.widget = deepcopy(orig_formfield.widget)
+            if orig_field.null and isinstance(field.widget, (forms.TextInput, forms.Textarea)):
+                field.widget = ClearableWidgetWrapper(field.widget)
             css_classes = field.widget.attrs.get('class', '').split(' ')
             css_classes.append('mt')
             # Add localized fieldname css class
@@ -90,6 +94,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         Returns a new list with replaced fields. If `option` contains no
         registered fields, it is returned unmodified.
 
+        >>> self = TranslationAdmin()  # PyFlakes
         >>> print(self.trans_opts.fields.keys())
         ['title',]
         >>> get_translation_fields(self.trans_opts.fields.keys()[0])

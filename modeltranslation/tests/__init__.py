@@ -548,6 +548,45 @@ class FallbackTests(ModeltranslationTestBase):
                 with override('en'):
                     self.assertEqual(m.title, '')  # '' is the default
 
+    def test_fallback_undefined(self):
+        """
+        Checks if a sensible value is considered undefined and triggers
+        fallbacks. Tests if the value can be overridden as documented.
+        """
+        with reload_override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=self.test_fallback):
+            # Non-nullable CharField falls back on empty strings.
+            m = models.FallbackModel(title_en='value', title_de='')
+            with override('en'):
+                self.assertEqual(m.title, 'value')
+            with override('de'):
+                self.assertEqual(m.title, 'value')
+
+            # Nullable CharField does not fall back on empty strings.
+            m = models.FallbackModel(description_en='value', description_de='')
+            with override('en'):
+                self.assertEqual(m.description, 'value')
+            with override('de'):
+                self.assertEqual(m.description, '')
+
+            # Nullable CharField does fall back on None.
+            m = models.FallbackModel(description_en='value', description_de=None)
+            with override('en'):
+                self.assertEqual(m.description, 'value')
+            with override('de'):
+                self.assertEqual(m.description, 'value')
+
+            # The undefined value may be overridden.
+            m = models.FallbackModel2(title_en='value', title_de='')
+            with override('en'):
+                self.assertEqual(m.title, 'value')
+            with override('de'):
+                self.assertEqual(m.title, '')
+            m = models.FallbackModel2(title_en='value', title_de='no title')
+            with override('en'):
+                self.assertEqual(m.title, 'value')
+            with override('de'):
+                self.assertEqual(m.title, 'value')
+
 
 class FileFieldsTest(ModeltranslationTestBase):
 
