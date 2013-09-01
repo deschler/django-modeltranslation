@@ -30,7 +30,7 @@ translator.register(ProxyTestModel, ProxyTestTranslationOptions)
 ########## Fallback values testing
 
 class FallbackModelTranslationOptions(TranslationOptions):
-    fields = ('title', 'text', 'url', 'email',)
+    fields = ('title', 'text', 'url', 'email', 'description')
     fallback_values = "fallback"
 translator.register(FallbackModel, FallbackModelTranslationOptions)
 
@@ -38,6 +38,7 @@ translator.register(FallbackModel, FallbackModelTranslationOptions)
 class FallbackModel2TranslationOptions(TranslationOptions):
     fields = ('title', 'text', 'url', 'email',)
     fallback_values = {'text': ugettext_lazy('Sorry, translation is not available.')}
+    fallback_undefined = {'title': 'no title'}
 translator.register(FallbackModel2, FallbackModel2TranslationOptions)
 
 
