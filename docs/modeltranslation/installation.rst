@@ -56,12 +56,14 @@ in detail in the following sections:
 1. Add the ``modeltranslation`` app to the ``INSTALLED_APPS`` variable of your
    project's ``settings.py``.
 
-2. Configure your ``LANGUAGES`` in ``settings.py``.
+#. Set ``USE_I18N = True`` in ``settings.py``.
 
-3. Create a ``translation.py`` in your app directory and register
+#. Configure your ``LANGUAGES`` in ``settings.py``.
+
+#. Create a ``translation.py`` in your app directory and register
    ``TranslationOptions`` for every model you want to translate.
 
-4. Sync the database using ``manage.py syncdb`` (note that this only applies
+#. Sync the database using ``manage.py syncdb`` (note that this only applies
    if the models registered in the ``translation.py`` did not have been
    synced to the database before. If they did - read further down what to do
    in that case.
@@ -185,12 +187,12 @@ Example::
 ``MODELTRANSLATION_PREPOPULATE_LANGUAGE``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. versionadded:: devel (TODO)
+.. versionadded:: 0.7
 
 Default: ``current active language``
 
 By default modeltranslation will use the current request language for prepopulating
-admin fields specified in the ``prepopulated_fields`` admin property. This is often 
+admin fields specified in the ``prepopulated_fields`` admin property. This is often
 used to automatically fill slug fields.
 
 This setting allows you to pin this functionality to a specific language.
