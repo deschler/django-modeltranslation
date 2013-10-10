@@ -2201,6 +2201,12 @@ class TestManager(ModeltranslationTestBase):
         with override('de'):
             self.assertEqual(1, models.CustomManagerTestModel.objects.count())
 
+    def test_non_objects_manager(self):
+        """Test if managers other than ``objects`` are patched too"""
+        from modeltranslation.manager import MultilingualManager
+        manager = models.CustomManagerTestModel.another_mgr_name
+        self.assertTrue(isinstance(manager, MultilingualManager))
+
     def test_custom_manager2(self):
         """Test if user-defined queryset is still working"""
         from modeltranslation.manager import MultilingualManager, MultilingualQuerySet

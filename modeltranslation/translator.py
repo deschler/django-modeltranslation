@@ -125,21 +125,20 @@ def add_translation_fields(model, opts):
 def add_manager(model):
     """
     Monkey patches the original model to use MultilingualManager instead of
-    default manager (``objects``).
+    default managers (not only ``objects``, but also every manager defined and inherited).
 
-    If model has a custom manager, then merge it with MultilingualManager.
+    Custom managers are merged with MultilingualManager.
     """
-    if not hasattr(model, 'objects'):
-        return
-    current_manager = model.objects
-    if isinstance(current_manager, MultilingualManager):
-        return
-    if current_manager.__class__ is Manager:
-        current_manager.__class__ = MultilingualManager
-    else:
-        class NewMultilingualManager(MultilingualManager, current_manager.__class__):
-            pass
-        current_manager.__class__ = NewMultilingualManager
+    for _, attname, cls in model._meta.concrete_managers:
+        current_manager = getattr(model, attname)
+        if isinstance(current_manager, MultilingualManager):
+            continue
+        if current_manager.__class__ is Manager:
+            current_manager.__class__ = MultilingualManager
+        else:
+            class NewMultilingualManager(MultilingualManager, current_manager.__class__):
+                pass
+            current_manager.__class__ = NewMultilingualManager
 
 
 def patch_constructor(model):

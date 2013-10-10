@@ -265,6 +265,8 @@ class CustomManagerTestModel(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
     objects = CustomManager()
 
+    another_mgr_name = CustomManager()
+
 
 class CustomQuerySet(models.query.QuerySet):
     pass
