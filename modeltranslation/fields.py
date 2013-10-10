@@ -177,7 +177,7 @@ class TranslationField(object):
         values to be preserved rather than saved as empty strings.
         """
         formfield = super(TranslationField, self).formfield(*args, **kwargs)
-        if self.translated_field.null:
+        if self.null:
             if isinstance(formfield, forms.CharField):
                 from modeltranslation.forms import NullableField
                 form_class = formfield.__class__

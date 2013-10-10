@@ -57,7 +57,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         else:
             orig_formfield = self.formfield_for_dbfield(orig_field, **kwargs)
             field.widget = deepcopy(orig_formfield.widget)
-            if orig_field.null and isinstance(field.widget, (forms.TextInput, forms.Textarea)):
+            if db_field.null and isinstance(field.widget, (forms.TextInput, forms.Textarea)):
                 field.widget = ClearableWidgetWrapper(field.widget)
             css_classes = field.widget.attrs.get('class', '').split(' ')
             css_classes.append('mt')
