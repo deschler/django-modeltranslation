@@ -203,11 +203,17 @@ Falling back
 ------------
 
 Modeltranslation provides mechanism to control behaviour of data access in case of empty
-translation values.
+translation values. This mechanism affects field access.
 
 Consider ``News`` example: a creator of some news hasn't specified it's german title and content,
 but only english ones. Then if a german visitor is viewing site, we would rather show him english
-title/content of the news than display empty strings. This is called *fallback*.
+title/content of the news than display empty strings. This is called *fallback*. ::
+
+    News.title_en = 'English title'
+    News.title_de = ''
+    print News.title
+    # If current active language is german, it should display title_de field value ('').
+    # But if fallback is enabled, it would display 'English title' instead.
 
 There are several ways of controlling fallback, described below.
 
