@@ -178,5 +178,5 @@ translator.register(GroupFieldsetsModel, GroupFieldsetsTranslationOptions)
 
 
 class NameTranslationOptions(TranslationOptions):
-    fields = ('firstname', 'lastname',)
+    fields = ('firstname', 'lastname', 'slug2')
 translator.register(NameModel, NameTranslationOptions)

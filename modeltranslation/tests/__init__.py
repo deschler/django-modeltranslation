@@ -1998,16 +1998,38 @@ class TranslationAdminTest(ModeltranslationTestBase):
         trans_real.activate('de')
         self.assertEqual(get_language(), 'de')
 
+        # Non-translated slug based on translated field (using active language)
         class NameModelAdmin(admin.TranslationAdmin):
             prepopulated_fields = {'slug': ('firstname',)}
         ma = NameModelAdmin(models.NameModel, self.site)
         self.assertEqual(ma.prepopulated_fields, {'slug': ('firstname_de',)})
 
+        # Checking multi-field
         class NameModelAdmin(admin.TranslationAdmin):
             prepopulated_fields = {'slug': ('firstname', 'lastname',)}
         ma = NameModelAdmin(models.NameModel, self.site)
         self.assertEqual(ma.prepopulated_fields, {'slug': ('firstname_de', 'lastname_de',)})
 
+        # Non-translated slug based on non-translated field (no change)
+        class NameModelAdmin(admin.TranslationAdmin):
+            prepopulated_fields = {'slug': ('age',)}
+        ma = NameModelAdmin(models.NameModel, self.site)
+        self.assertEqual(ma.prepopulated_fields, {'slug': ('age',)})
+
+        # Translated slug based on non-translated field (all populated on the same value)
+        class NameModelAdmin(admin.TranslationAdmin):
+            prepopulated_fields = {'slug2': ('age',)}
+        ma = NameModelAdmin(models.NameModel, self.site)
+        self.assertEqual(ma.prepopulated_fields, {'slug2_en': ('age',), 'slug2_de': ('age',)})
+
+        # Translated slug based on translated field (corresponding)
+        class NameModelAdmin(admin.TranslationAdmin):
+            prepopulated_fields = {'slug2': ('firstname',)}
+        ma = NameModelAdmin(models.NameModel, self.site)
+        self.assertEqual(ma.prepopulated_fields, {'slug2_en': ('firstname_en',),
+                                                  'slug2_de': ('firstname_de',)})
+
+        # Check that current active language is used
         trans_real.activate('en')
         self.assertEqual(get_language(), 'en')
 
@@ -2016,10 +2038,12 @@ class TranslationAdminTest(ModeltranslationTestBase):
         ma = NameModelAdmin(models.NameModel, self.site)
         self.assertEqual(ma.prepopulated_fields, {'slug': ('firstname_en',)})
 
-        class NameModelAdmin(admin.TranslationAdmin):
-            prepopulated_fields = {'slug': ('firstname', 'lastname',)}
-        ma = NameModelAdmin(models.NameModel, self.site)
-        self.assertEqual(ma.prepopulated_fields, {'slug': ('firstname_en', 'lastname_en',)})
+        # Prepopulation language can be overriden by MODELTRANSLATION_PREPOPULATE_LANGUAGE
+        with reload_override_settings(MODELTRANSLATION_PREPOPULATE_LANGUAGE='de'):
+            class NameModelAdmin(admin.TranslationAdmin):
+                prepopulated_fields = {'slug': ('firstname',)}
+            ma = NameModelAdmin(models.NameModel, self.site)
+            self.assertEqual(ma.prepopulated_fields, {'slug': ('firstname_de',)})
 
     def test_proxymodel_field_argument(self):
         class ProxyTestModelAdmin(admin.TranslationAdmin):

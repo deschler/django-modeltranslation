@@ -229,7 +229,9 @@ class GroupFieldsetsModel(models.Model):
 class NameModel(models.Model):
     firstname = models.CharField(max_length=50)
     lastname = models.CharField(max_length=50)
+    age = models.CharField(max_length=50)
     slug = models.SlugField(max_length=100)
+    slug2 = models.SlugField(max_length=100)
 
 
 ########## Integration testing
