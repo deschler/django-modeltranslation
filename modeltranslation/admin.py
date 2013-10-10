@@ -10,7 +10,7 @@ from django import forms
 # runs. The import is supposed to resolve a race condition between model import
 # and translation registration in production (see issue #19).
 import modeltranslation.models  # NOQA
-from modeltranslation.settings import DEFAULT_LANGUAGE, PREPOPULATE_LANGUAGE
+from modeltranslation.settings import DEFAULT_LANGUAGE, PREPOPULATE_LANGUAGE, AVAILABLE_LANGUAGES
 from modeltranslation.translator import translator
 from modeltranslation.utils import (
     get_translation_fields, build_css_class, build_localized_fieldname, get_language, unique)
@@ -134,17 +134,24 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         return fieldsets
 
     def _patch_prepopulated_fields(self):
-        if self.prepopulated_fields:
-            # Default to the active language, unless explicitly configured
-            lang = PREPOPULATE_LANGUAGE or get_language()
-            prepopulated_fields_new = dict(self.prepopulated_fields)
-            translation_fields = []
-            for k, v in self.prepopulated_fields.items():
-                for i in v:
-                    if i in self.trans_opts.fields.keys():
-                        translation_fields.append(build_localized_fieldname(i, lang))
-                prepopulated_fields_new[k] = tuple(translation_fields)
-            self.prepopulated_fields = prepopulated_fields_new
+        def localize(sources, lang):
+            "Append lang suffix (if applicable) to field list"
+            def append_lang(source):
+                if source in self.trans_opts.fields:
+                    return build_localized_fieldname(source, lang)
+                return source
+            return tuple(map(append_lang, sources))
+
+        prepopulated_fields = {}
+        for dest, sources in self.prepopulated_fields.items():
+            if dest in self.trans_opts.fields:
+                for lang in AVAILABLE_LANGUAGES:
+                    key = build_localized_fieldname(dest, lang)
+                    prepopulated_fields[key] = localize(sources, lang)
+            else:
+                lang = PREPOPULATE_LANGUAGE or get_language()
+                prepopulated_fields[dest] = localize(sources, lang)
+        self.prepopulated_fields = prepopulated_fields
 
     def _do_get_form_or_formset(self, request, obj, **kwargs):
         """
