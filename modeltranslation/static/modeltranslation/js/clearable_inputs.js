@@ -6,7 +6,10 @@ var jQuery, $, django;
         $('.clearable-input').each(function () {
             var clear = $(this).children().last();
             $(this).find('input, select, textarea').not(clear).change(function () {
-                clear.prop('checked', false);
+                if (typeof clear.prop == "undefined") // older jQuery
+                    clear.removeAttr('checked');
+                else
+                    clear.prop('checked', false);
             });
         });
     });
