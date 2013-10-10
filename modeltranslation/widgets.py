@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from django.forms.widgets import Media, Widget, CheckboxInput
 from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext
+from django.utils.translation import ugettext_lazy as _
 
 
 class ClearableWidgetWrapper(Widget):
@@ -22,7 +22,7 @@ class ClearableWidgetWrapper(Widget):
     ``None`` is assumed to be a proper choice for the empty value, but you may
     pass another one to the constructor.
     """
-    clear_checkbox_label = ugettext("None")
+    clear_checkbox_label = _("None")
     template = '<span class="clearable-input">{0} <span>{2}</span> {3}</span>'
     # TODO: Label would be proper, but admin applies some hardly undoable
     #       styling to labels.
