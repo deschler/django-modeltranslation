@@ -91,10 +91,13 @@ Multilingual Manager
 
 .. versionadded:: 0.5
 
-Every model registered for translation is patched so that its manager becomes a subclass
+Every model registered for translation is patched so that all its managers become subclasses
 of ``MultilingualManager`` (of course, if a custom manager was defined on the model, its
 functions will be retained). ``MultilingualManager`` simplifies language-aware queries,
 especially on third-party apps, by rewriting query field names.
+
+Every model's manager is patched, not only ``objects`` (even managers inherited from abstract base
+classes).
 
 For example::
 
