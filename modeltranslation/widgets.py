@@ -37,7 +37,7 @@ class ClearableWidgetWrapper(Widget):
         Allows overriding the empty value.
         """
         self.widget = widget
-        self.checkbox = CheckboxInput()
+        self.checkbox = CheckboxInput(attrs={'tabindex': '-1'})
         self.empty_value = empty_value
 
     def __getattr__(self, name):
