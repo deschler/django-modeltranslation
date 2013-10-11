@@ -196,9 +196,14 @@ class TranslationField(object):
         # Translated field is saved first, settings respective translation field value. Then
         # translation field is being saved without value - and we handle this here (only for
         # active language).
+        # Questionable fields are stored in special variable, which is later handled by clean_fields
+        # method on the model.
         if self.language == get_language() and getattr(instance, self.name) and not data:
-            return
-        super(TranslationField, self).save_form_data(instance, data)
+            if not hasattr(instance, '_mt_form_pending_cleanr'):
+                instance._mt_form_pending_clear = {}
+            instance._mt_form_pending_clear[self.name] = data
+        else:
+            super(TranslationField, self).save_form_data(instance, data)
 
     def south_field_triple(self):
         """

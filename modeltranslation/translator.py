@@ -165,6 +165,28 @@ def delete_mt_init(sender, instance, **kwargs):
         del instance._mt_init
 
 
+def patch_clean_fields(model):
+    """
+    Patch clean_fields method to handle different form types submission.
+    """
+    old_clean_fields = model.clean_fields
+
+    def new_clean_fields(self, exclude=None):
+        if hasattr(self, '_mt_form_pending_clear'):
+            # Some form translation fields has been marked as clearing value.
+            # Check if corresponding translated field was also saved (not excluded):
+            # - if yes, it seems like form for MT-unaware app. Ignore clearing (left value from
+            #   translated field unchanged), as if field was omitted from form
+            # - if no, then proceed as normally: clear the field
+            for field_name, value in self._mt_form_pending_clear.items():
+                orig_field_name = self._meta.get_field(field_name).translated_field.name
+                if orig_field_name in exclude:
+                    setattr(self, field_name, value)
+            delattr(self, '_mt_form_pending_clear')
+        old_clean_fields(self, exclude)
+    model.clean_fields = new_clean_fields
+
+
 def patch_metaclass(model):
     """
     Monkey patches original model metaclass to exclude translated fields on deferred subclasses.
@@ -309,6 +331,9 @@ class Translator(object):
 
             # Patch __init__ to rewrite fields
             patch_constructor(model)
+
+            # Patch clean_fields to verify form field clearing
+            patch_clean_fields(model)
 
             # Patch __metaclass__ to allow deferring to work
             patch_metaclass(model)
