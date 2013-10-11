@@ -21,3 +21,9 @@ class NullableField(object):
         if value is None:
             return value
         return super(NullableField, self).to_python(value)
+
+    # Django 1.6
+    def _has_changed(self, initial, data):
+        if (initial is None and data is not None) or (initial is not None and data is None):
+            return True
+        return super(NullableField, self)._has_changed(initial, data)
