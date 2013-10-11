@@ -16,7 +16,7 @@ from django.core.management import call_command
 from django.db import IntegrityError
 from django.db.models import Q, F
 from django.db.models.loading import AppCache
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 from django.test.utils import override_settings
 from django.utils import six
 from django.utils.translation import get_language, override, trans_real
@@ -59,7 +59,7 @@ def default_fallback():
 
 
 @override_settings(**TEST_SETTINGS)
-class ModeltranslationTestBase(TestCase):
+class ModeltranslationTransactionTestBase(TransactionTestCase):
     urls = 'modeltranslation.tests.urls'
     cache = AppCache()
     synced = False
@@ -71,7 +71,7 @@ class ModeltranslationTestBase(TestCase):
         * Call syncdb to create tables for tests.models (since during
         default testrunner's db creation modeltranslation.tests was not in INSTALLED_APPS
         """
-        super(ModeltranslationTestBase, cls).setUpClass()
+        super(ModeltranslationTransactionTestBase, cls).setUpClass()
         if not ModeltranslationTestBase.synced:
             # In order to perform only one syncdb
             ModeltranslationTestBase.synced = True
@@ -110,6 +110,10 @@ class ModeltranslationTestBase(TestCase):
 
     def tearDown(self):
         trans_real.activate(self._old_language)
+
+
+class ModeltranslationTestBase(ModeltranslationTransactionTestBase, TestCase):
+    pass
 
 
 class TestAutodiscover(ModeltranslationTestBase):
@@ -450,6 +454,8 @@ class ModeltranslationTest(ModeltranslationTestBase):
         )
         self._test_constructor(keywords)
 
+
+class ModeltranslationTransactionTest(ModeltranslationTransactionTestBase):
     def test_unique_nullable_field(self):
         from django.db import transaction
         models.UniqueNullableModel.objects.create()
