@@ -27,7 +27,15 @@
          widgets to preserve ``None``.
          (thanks to Wojtek Ruszczewski,
           resolves issue #163)
+  FIXED: Admin prepopulated_fields is now handled properly.
+         (thanks to Rafleze,
+          resolves issue #181 and #190)
+  FIXED: Form saving when translated field is excluded (e.g. in admin)
+         (resolves issue #183)
 
+CHANGED: Every model's manager is patched as MultiLingual, not only objects.
+         (resolved issue #198)
+CHANGED: Display "make null" checkboxes in model forms.
 CHANGED: MODELTRANSLATION_DEBUG setting defaults to False instead of
          settings.DEBUG.
 CHANGED: Drop support for Python 2.5 and Django 1.3.
