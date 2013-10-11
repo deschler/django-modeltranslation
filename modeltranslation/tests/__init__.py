@@ -451,6 +451,7 @@ class ModeltranslationTest(ModeltranslationTestBase):
         self._test_constructor(keywords)
 
     def test_unique_nullable_field(self):
+        from django.db import transaction
         models.UniqueNullableModel.objects.create()
         models.UniqueNullableModel.objects.create()
         models.UniqueNullableModel.objects.create(title=None)
@@ -458,8 +459,10 @@ class ModeltranslationTest(ModeltranslationTestBase):
 
         models.UniqueNullableModel.objects.create(title='')
         self.assertRaises(IntegrityError, models.UniqueNullableModel.objects.create, title='')
+        transaction.rollback()  # Postgres
         models.UniqueNullableModel.objects.create(title='foo')
         self.assertRaises(IntegrityError, models.UniqueNullableModel.objects.create, title='foo')
+        transaction.rollback()  # Postgres
 
 
 class FallbackTests(ModeltranslationTestBase):
