@@ -548,6 +548,45 @@ class FallbackTests(ModeltranslationTestBase):
                 with override('en'):
                     self.assertEqual(m.title, '')  # '' is the default
 
+    def test_fallback_undefined(self):
+        """
+        Checks if a sensible value is considered undefined and triggers
+        fallbacks. Tests if the value can be overridden as documented.
+        """
+        with reload_override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=self.test_fallback):
+            # Non-nullable CharField falls back on empty strings.
+            m = models.FallbackModel(title_en='value', title_de='')
+            with override('en'):
+                self.assertEqual(m.title, 'value')
+            with override('de'):
+                self.assertEqual(m.title, 'value')
+
+            # Nullable CharField does not fall back on empty strings.
+            m = models.FallbackModel(description_en='value', description_de='')
+            with override('en'):
+                self.assertEqual(m.description, 'value')
+            with override('de'):
+                self.assertEqual(m.description, '')
+
+            # Nullable CharField does fall back on None.
+            m = models.FallbackModel(description_en='value', description_de=None)
+            with override('en'):
+                self.assertEqual(m.description, 'value')
+            with override('de'):
+                self.assertEqual(m.description, 'value')
+
+            # The undefined value may be overridden.
+            m = models.FallbackModel2(title_en='value', title_de='')
+            with override('en'):
+                self.assertEqual(m.title, 'value')
+            with override('de'):
+                self.assertEqual(m.title, '')
+            m = models.FallbackModel2(title_en='value', title_de='no title')
+            with override('en'):
+                self.assertEqual(m.title, 'value')
+            with override('de'):
+                self.assertEqual(m.title, 'value')
+
 
 class FileFieldsTest(ModeltranslationTestBase):
 
@@ -1959,16 +1998,38 @@ class TranslationAdminTest(ModeltranslationTestBase):
         trans_real.activate('de')
         self.assertEqual(get_language(), 'de')
 
+        # Non-translated slug based on translated field (using active language)
         class NameModelAdmin(admin.TranslationAdmin):
             prepopulated_fields = {'slug': ('firstname',)}
         ma = NameModelAdmin(models.NameModel, self.site)
         self.assertEqual(ma.prepopulated_fields, {'slug': ('firstname_de',)})
 
+        # Checking multi-field
         class NameModelAdmin(admin.TranslationAdmin):
             prepopulated_fields = {'slug': ('firstname', 'lastname',)}
         ma = NameModelAdmin(models.NameModel, self.site)
         self.assertEqual(ma.prepopulated_fields, {'slug': ('firstname_de', 'lastname_de',)})
 
+        # Non-translated slug based on non-translated field (no change)
+        class NameModelAdmin(admin.TranslationAdmin):
+            prepopulated_fields = {'slug': ('age',)}
+        ma = NameModelAdmin(models.NameModel, self.site)
+        self.assertEqual(ma.prepopulated_fields, {'slug': ('age',)})
+
+        # Translated slug based on non-translated field (all populated on the same value)
+        class NameModelAdmin(admin.TranslationAdmin):
+            prepopulated_fields = {'slug2': ('age',)}
+        ma = NameModelAdmin(models.NameModel, self.site)
+        self.assertEqual(ma.prepopulated_fields, {'slug2_en': ('age',), 'slug2_de': ('age',)})
+
+        # Translated slug based on translated field (corresponding)
+        class NameModelAdmin(admin.TranslationAdmin):
+            prepopulated_fields = {'slug2': ('firstname',)}
+        ma = NameModelAdmin(models.NameModel, self.site)
+        self.assertEqual(ma.prepopulated_fields, {'slug2_en': ('firstname_en',),
+                                                  'slug2_de': ('firstname_de',)})
+
+        # Check that current active language is used
         trans_real.activate('en')
         self.assertEqual(get_language(), 'en')
 
@@ -1977,10 +2038,12 @@ class TranslationAdminTest(ModeltranslationTestBase):
         ma = NameModelAdmin(models.NameModel, self.site)
         self.assertEqual(ma.prepopulated_fields, {'slug': ('firstname_en',)})
 
-        class NameModelAdmin(admin.TranslationAdmin):
-            prepopulated_fields = {'slug': ('firstname', 'lastname',)}
-        ma = NameModelAdmin(models.NameModel, self.site)
-        self.assertEqual(ma.prepopulated_fields, {'slug': ('firstname_en', 'lastname_en',)})
+        # Prepopulation language can be overriden by MODELTRANSLATION_PREPOPULATE_LANGUAGE
+        with reload_override_settings(MODELTRANSLATION_PREPOPULATE_LANGUAGE='de'):
+            class NameModelAdmin(admin.TranslationAdmin):
+                prepopulated_fields = {'slug': ('firstname',)}
+            ma = NameModelAdmin(models.NameModel, self.site)
+            self.assertEqual(ma.prepopulated_fields, {'slug': ('firstname_de',)})
 
     def test_proxymodel_field_argument(self):
         class ProxyTestModelAdmin(admin.TranslationAdmin):
@@ -2161,6 +2224,12 @@ class TestManager(ModeltranslationTestBase):
         self.assertEqual(2, models.CustomManagerTestModel.objects.count())
         with override('de'):
             self.assertEqual(1, models.CustomManagerTestModel.objects.count())
+
+    def test_non_objects_manager(self):
+        """Test if managers other than ``objects`` are patched too"""
+        from modeltranslation.manager import MultilingualManager
+        manager = models.CustomManagerTestModel.another_mgr_name
+        self.assertTrue(isinstance(manager, MultilingualManager))
 
     def test_custom_manager2(self):
         """Test if user-defined queryset is still working"""

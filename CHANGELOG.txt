@@ -1,3 +1,6 @@
+  ADDED: A setting to control which language are slug fields based on
+         (thanks to Konrad Wojas,
+          resolves issue #194)
   ADDED: A noinput option to the sync_translation_fields management command.
          (thanks to cuchac,
           resolves issues #179 and #184)
@@ -19,6 +22,11 @@
          (resolves issue #169)
   FIXED: Handling of 3rd party apps' ModelForms.
          (resolves issue #167)
+  FIXED: Triggering field fallback on its default value rather than empty
+         string only. Also enhance nullable fields in forms with proper
+         widgets to preserve ``None``.
+         (thanks to Wojtek Ruszczewski,
+          resolves issue #163)
 
 CHANGED: MODELTRANSLATION_DEBUG setting defaults to False instead of
          settings.DEBUG.
@@ -28,6 +36,7 @@ CHANGED: Drop support for Python 2.5 and Django 1.3.
 v0.6.1
 ======
 Date: 2013-03-17
+Packaged from revision fc8a3034897b8b818c74f41c43a92001e536d970
 
   FIXED: Joined query does not use translated fields.
          (resolves issue #162)

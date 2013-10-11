@@ -37,6 +37,7 @@ class FallbackModel(models.Model):
     text = models.TextField(blank=True, null=True)
     url = models.URLField(blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
+    description = models.CharField(max_length=255, null=True)
 
 
 class FallbackModel2(models.Model):
@@ -228,7 +229,9 @@ class GroupFieldsetsModel(models.Model):
 class NameModel(models.Model):
     firstname = models.CharField(max_length=50)
     lastname = models.CharField(max_length=50)
+    age = models.CharField(max_length=50)
     slug = models.SlugField(max_length=100)
+    slug2 = models.SlugField(max_length=100)
 
 
 ########## Integration testing
@@ -263,6 +266,8 @@ class CustomManager(models.Manager):
 class CustomManagerTestModel(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
     objects = CustomManager()
+
+    another_mgr_name = CustomManager()
 
 
 class CustomQuerySet(models.query.QuerySet):

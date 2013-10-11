@@ -91,10 +91,13 @@ Multilingual Manager
 
 .. versionadded:: 0.5
 
-Every model registered for translation is patched so that its manager becomes a subclass
+Every model registered for translation is patched so that all its managers become subclasses
 of ``MultilingualManager`` (of course, if a custom manager was defined on the model, its
 functions will be retained). ``MultilingualManager`` simplifies language-aware queries,
 especially on third-party apps, by rewriting query field names.
+
+Every model's manager is patched, not only ``objects`` (even managers inherited from abstract base
+classes).
 
 For example::
 
@@ -203,11 +206,17 @@ Falling back
 ------------
 
 Modeltranslation provides mechanism to control behaviour of data access in case of empty
-translation values.
+translation values. This mechanism affects field access.
 
 Consider ``News`` example: a creator of some news hasn't specified it's german title and content,
 but only english ones. Then if a german visitor is viewing site, we would rather show him english
-title/content of the news than display empty strings. This is called *fallback*.
+title/content of the news than display empty strings. This is called *fallback*. ::
+
+    News.title_en = 'English title'
+    News.title_de = ''
+    print News.title
+    # If current active language is german, it should display title_de field value ('').
+    # But if fallback is enabled, it would display 'English title' instead.
 
 There are several ways of controlling fallback, described below.
 
@@ -290,6 +299,28 @@ Fallback values can be also customized per model field::
 If current language and all fallback languages yield no field value, and no fallback values are
 defined, then modeltranslation will use field's default value.
 
+Fallback undefined
+******************
+
+.. versionadded:: 0.7
+
+Another question is what do we consider "no value", on what value should we fall back to other
+translations? For text fields the empty string can usually be considered as the undefined value,
+but other fields may have different concepts of empty or missing value.
+
+Modeltranslation defaults to using the field's default value as the undefined value (the empty
+string for non-nullable ``CharFields``). This requires calling ``get_default`` for every field
+access, which in some cases may be expensive.
+
+If you'd like to fallback on a different value or your default is expensive to calculate, provide
+a custom undefined value (for a field or model)::
+
+    class NewsTranslationOptions(TranslationOptions):
+        fields = ('title', 'text',)
+        fallback_undefined = {
+            'title': 'no title',
+            'text': None
+        }
 
 The State of the Original Field
 -------------------------------

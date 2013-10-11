@@ -5,15 +5,17 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib import admin
 from django.contrib.admin.options import BaseModelAdmin, flatten_fieldsets, InlineModelAdmin
 from django.contrib.contenttypes import generic
+from django import forms
 
 # Ensure that models are registered for translation before TranslationAdmin
 # runs. The import is supposed to resolve a race condition between model import
 # and translation registration in production (see issue #19).
 import modeltranslation.models  # NOQA
-from modeltranslation.settings import DEFAULT_LANGUAGE
+from modeltranslation import settings as mt_settings
 from modeltranslation.translator import translator
 from modeltranslation.utils import (
     get_translation_fields, build_css_class, build_localized_fieldname, get_language, unique)
+from modeltranslation.widgets import ClearableWidgetWrapper
 
 from django.template import TemplateDoesNotExist
 from django.template.loader import find_template
@@ -59,12 +61,14 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         else:
             orig_formfield = self.formfield_for_dbfield(orig_field, **kwargs)
             field.widget = deepcopy(orig_formfield.widget)
+            if db_field.null and isinstance(field.widget, (forms.TextInput, forms.Textarea)):
+                field.widget = ClearableWidgetWrapper(field.widget)
             css_classes = field.widget.attrs.get('class', '').split(' ')
             css_classes.append('mt')
             # Add localized fieldname css class
             css_classes.append(build_css_class(db_field.name, 'mt-field'))
 
-            if db_field.language == DEFAULT_LANGUAGE:
+            if db_field.language == mt_settings.DEFAULT_LANGUAGE:
                 # Add another css class to identify a default modeltranslation
                 # widget.
                 css_classes.append('mt-default')
@@ -94,6 +98,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         Returns a new list with replaced fields. If `option` contains no
         registered fields, it is returned unmodified.
 
+        >>> self = TranslationAdmin()  # PyFlakes
         >>> print(self.trans_opts.fields.keys())
         ['title',]
         >>> get_translation_fields(self.trans_opts.fields.keys()[0])
@@ -133,35 +138,24 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         return fieldsets
 
     def _patch_prepopulated_fields(self):
+        def localize(sources, lang):
+            "Append lang suffix (if applicable) to field list"
+            def append_lang(source):
+                if source in self.trans_opts.fields:
+                    return build_localized_fieldname(source, lang)
+                return source
+            return tuple(map(append_lang, sources))
+
         prepopulated_fields = {}
         for dest, sources in self.prepopulated_fields.items():
             if dest in self.trans_opts.fields:
-                for lang in settings.LANGUAGES:
-                    lang = lang[0].replace('-', '_')
-                    key = "%s_%s" % (dest,lang)
-                    values = []
-                    for source in sources:
-                        if source in self.trans_opts.fields:
-                            values.append("%s_%s" % (source,lang))
-                        else:
-                            values.append(source)
-                    prepopulated_fields[key] = values
+                for lang in mt_settings.AVAILABLE_LANGUAGES:
+                    key = build_localized_fieldname(dest, lang)
+                    prepopulated_fields[key] = localize(sources, lang)
             else:
-                key = dest
-                values = []
-                if hasattr(settings,"MODELTRANSLATION_DEFAULT_LANGUAGE"):
-                    lang = settings.MODELTRANSLATION_DEFAULT_LANGUAGE
-                else:
-                    lang = settings.LANGUAGES[0][0]
-                for source in sources:
-                    if source in self.trans_opts.fields:
-                        lang = lang.replace('-', '_')
-                        values.append("%s_%s" % (source,lang))
-                    else:
-                        values.append(source)
-                prepopulated_fields[key] = values
+                lang = mt_settings.PREPOPULATE_LANGUAGE or get_language()
+                prepopulated_fields[dest] = localize(sources, lang)
         self.prepopulated_fields = prepopulated_fields
-
 
     def _do_get_form_or_formset(self, request, obj, **kwargs):
         """
