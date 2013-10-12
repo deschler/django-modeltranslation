@@ -122,6 +122,9 @@ These manager methods perform rewriting:
 - ``filter()``, ``exclude()``, ``get()``
 - ``order_by()``
 - ``update()``
+- ``only()``, ``defer()``
+- ``values()``, ``values_list()``
+- ``dates()``
 - ``create()``, with optional auto-population_ feature
 
 In order not to introduce differences between ``X.objects.create(...)`` and ``X(...)``, model
@@ -130,6 +133,9 @@ constructor is also patched and performs rewriting of field names prior to regul
 If one wants to turn rewriting of field names off, this can be easily achieved with
 ``rewrite(mode)`` method. ``mode`` is a boolean specifying whether rewriting should be applied.
 It can be changed several times inside a query. So ``X.objects.rewrite(False)`` turns rewriting off.
+
+``MultilingualManager`` offers one additional method: ``raw_values``. It returns actual values from
+the database, without field names rewriting. Useful for checking translated field database value.
 
 Auto-population
 ***************

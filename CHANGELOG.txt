@@ -10,8 +10,9 @@
   ADDED: Convenient admin classes which already contain proper Media
          definitions.
          (resolves issue #171)
-  ADDED: Only/defer methods to MultilingualManager.
-         (resolves issue #166)
+  ADDED: Only, defer, values, values_list, dates, raw_values methods to
+         MultilingualManager.
+         (resolves issue #166 adn #173)
   ADDED: Support for ForeignKey and OneToOneField.
          (thanks to Braden MacDonald and Jacek Tomaszewski,
           resolves issue #161)
@@ -35,6 +36,8 @@
           resolves issue #181 and #190)
   FIXED: Form saving when translated field is excluded (e.g. in admin)
          (resolves issue #183)
+  FIXED: Multilingual clones are Multilingual too.
+         (resolved issue #189)
 
 CHANGED: Every model's manager is patched as MultiLingual, not only objects.
          (resolved issue #198)
