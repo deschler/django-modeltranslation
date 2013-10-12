@@ -75,7 +75,7 @@ class TranslationOptions(with_metaclass(FieldsAggregationMetaClass, object)):
         """
         Update with options from a superclass.
         """
-        if other.model._meta.abstract:
+        if other.model._meta.abstract or self.model._meta.proxy:
             self.local_fields.update(other.local_fields)
         self.fields.update(other.fields)
 
