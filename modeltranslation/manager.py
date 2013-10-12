@@ -235,6 +235,37 @@ class MultilingualQuerySet(models.query.QuerySet):
         fields = self._append_translated(fields)
         return super(MultilingualQuerySet, self).only(*fields)
 
+    # This method was not present in django-linguo
+    def raw_values(self, *fields):
+        return super(MultilingualQuerySet, self).values(*fields)
+
+    # This method was not present in django-linguo
+    def values(self, *fields):
+        if not self._rewrite:
+            return super(MultilingualQuerySet, self).values(*fields)
+        new_args = []
+        for key in fields:
+            new_args.append(rewrite_lookup_key(self.model, key))
+        vqs = super(MultilingualQuerySet, self).values(*new_args)
+        vqs.field_names = list(fields)
+        return vqs
+
+    # This method was not present in django-linguo
+    def values_list(self, *fields, **kwargs):
+        if not self._rewrite:
+            return super(MultilingualQuerySet, self).values_list(*fields, **kwargs)
+        new_args = []
+        for key in fields:
+            new_args.append(rewrite_lookup_key(self.model, key))
+        return super(MultilingualQuerySet, self).values_list(*new_args, **kwargs)
+
+    # This method was not present in django-linguo
+    def dates(self, field_name, *args, **kwargs):
+        if not self._rewrite:
+            return super(MultilingualQuerySet, self).dates(field_name, *args, **kwargs)
+        new_key = rewrite_lookup_key(self.model, field_name)
+        return super(MultilingualQuerySet, self).dates(new_key, *args, **kwargs)
+
 
 class MultilingualManager(models.Manager):
     use_for_related_fields = True
@@ -244,6 +275,9 @@ class MultilingualManager(models.Manager):
 
     def populate(self, *args, **kwargs):
         return self.get_query_set().populate(*args, **kwargs)
+
+    def raw_values(self, *args, **kwargs):
+        return self.get_query_set().raw_values(*args, **kwargs)
 
     def get_query_set(self):
         qs = super(MultilingualManager, self).get_query_set()

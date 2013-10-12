@@ -1397,7 +1397,7 @@ class OtherFieldsTest(ModeltranslationTestBase):
         self.assertEqual('aaaaa', inst.trans)
 
         inst.save()
-        db_values = models.DescriptorModel.objects.values('normal', 'trans_en', 'trans_de')[0]
+        db_values = models.DescriptorModel.objects.raw_values('normal', 'trans_en', 'trans_de')[0]
         self.assertEqual(3, db_values['normal'])
         self.assertEqual(5, db_values['trans_de'])
         self.assertEqual(0, db_values['trans_en'])
@@ -1417,7 +1417,7 @@ class OtherFieldsTest(ModeltranslationTestBase):
         inst.trans_de = 4
         self.assertEqual('aaaa', inst.trans_de)
         inst.save()
-        db_values = models.DescriptorModel.objects.values('normal', 'trans_en', 'trans_de')[0]
+        db_values = models.DescriptorModel.objects.raw_values('normal', 'trans_en', 'trans_de')[0]
         self.assertEqual(3, db_values['normal'])
         self.assertEqual(4, db_values['trans_de'])
         self.assertEqual(1, db_values['trans_en'])
@@ -1839,8 +1839,8 @@ class UpdateCommandTest(ModeltranslationTestBase):
         models.TestModel.objects.all().rewrite(False).update(title='initial')
 
         # Check raw data using ``values``
-        obj1 = models.TestModel.objects.filter(pk=pk1).values()[0]
-        obj2 = models.TestModel.objects.filter(pk=pk2).values()[0]
+        obj1 = models.TestModel.objects.filter(pk=pk1).raw_values()[0]
+        obj2 = models.TestModel.objects.filter(pk=pk2).raw_values()[0]
         self.assertEqual('', obj1['title_de'])
         self.assertEqual('initial', obj1['title'])
         self.assertEqual('already', obj2['title_de'])
@@ -2384,6 +2384,33 @@ class TestManager(ModeltranslationTestBase):
 
         self.assertEqual(titles_for_en, ('most', 'more_en', 'more_de', 'least'))
         self.assertEqual(titles_for_de, ('most', 'more_de', 'more_en', 'least'))
+
+    def test_values(self):
+        manager = models.ManagerTestModel.objects
+        manager.create(title_en='en', title_de='de')
+
+        raw_obj = manager.raw_values('title')[0]
+        obj = manager.values('title')[0]
+        with override('de'):
+            raw_obj2 = manager.raw_values('title')[0]
+            obj2 = manager.values('title')[0]
+
+        # Raw_values returns real database values regardless of current language
+        self.assertEqual(raw_obj['title'], raw_obj2['title'])
+        # Values present language-aware data, from the moment of retrieval
+        self.assertEqual(obj['title'],  'en')
+        self.assertEqual(obj2['title'], 'de')
+
+        # Values_list behave similarly
+        self.assertEqual(list(manager.values_list('title', flat=True)), ['en'])
+        with override('de'):
+            self.assertEqual(list(manager.values_list('title', flat=True)), ['de'])
+
+        # One can always turn rewrite off
+        a = list(manager.rewrite(False).values_list('title', flat=True))
+        with override('de'):
+            b = list(manager.rewrite(False).values_list('title', flat=True))
+        self.assertEqual(a, b)
 
     def test_custom_manager(self):
         """Test if user-defined manager is still working"""
