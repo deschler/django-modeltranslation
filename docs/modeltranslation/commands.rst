@@ -76,3 +76,7 @@ Allowed modes are listed :ref:`here <auto-population-modes>`. To choose ``False`
 
     If ``populate`` is not specified, then current auto-population mode is used. *Current* means
     the one set by :ref:`settings <settings-modeltranslation_auto_populate>`.
+
+Moreover, this ``loaddata`` command version can override the nasty habit of changing locale to
+`en-us`. By default, it will retain proper locale. To get back to old behaviour, set
+:ref:`settings-modeltranslation_loaddata_retain_locale` to ``False``.

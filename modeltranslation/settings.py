@@ -51,3 +51,5 @@ for key, value in FALLBACK_LANGUAGES.items():
             raise ImproperlyConfigured(
                 'MODELTRANSLATION_FALLBACK_LANGUAGES: "%s" not in LANGUAGES setting.' % lang)
 ENABLE_FALLBACKS = getattr(settings, 'MODELTRANSLATION_ENABLE_FALLBACKS', True)
+
+LOADDATA_RETAIN_LOCALE = getattr(settings, 'MODELTRANSLATION_LOADDATA_RETAIN_LOCALE', True)

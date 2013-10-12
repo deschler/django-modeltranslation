@@ -17,6 +17,9 @@
           resolves issue #161)
   ADDED: An auto-population option to the loaddata command.
          (resolves issue #160)
+  ADDED: A MODELTRANSLATION_LOADDATA_RETAIN_LOCALE setting for loaddata
+         command to leave locale alone.
+         (resolves issue #151)
 
   FIXED: Compatibility with Django 1.6 development version.
          (resolves issue #169)
