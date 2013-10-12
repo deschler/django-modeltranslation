@@ -12,7 +12,7 @@
          (resolves issue #171)
   ADDED: Only/defer methods to MultilingualManager.
          (resolves issue #166)
-  ADDED: Support for ForeignKey.
+  ADDED: Support for ForeignKey and OneToOneField.
          (thanks to Braden MacDonald and Jacek Tomaszewski,
           resolves issue #161)
   ADDED: An auto-population option to the loaddata command.

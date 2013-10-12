@@ -28,6 +28,7 @@ SUPPORTED_FIELDS = (
     fields.files.FileField,
     fields.files.ImageField,
     fields.related.ForeignKey,
+    # Above implies also OneToOneField
 )
 try:
     SUPPORTED_FIELDS += (fields.GenericIPAddressField,)  # Django 1.4+ only
@@ -303,3 +304,16 @@ class TranslatedRelationIdDescriptor(object):
             if val is not None:
                 return val
         return None
+
+
+class LanguageCacheSingleObjectDescriptor(object):
+    """
+    A Mixin for RelatedObjectDescriptors which use current language in cache lookups.
+    """
+    accessor = None  # needs to be set on instance
+
+    @property
+    def cache_name(self):
+        lang = get_language()
+        cache = build_localized_fieldname(self.accessor, lang)
+        return "_%s_cache" % cache

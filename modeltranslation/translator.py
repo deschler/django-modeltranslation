@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 from django.conf import settings
 from django.utils.six import with_metaclass
-from django.db.models import Manager, ForeignKey
+from django.db.models import Manager, ForeignKey, OneToOneField
 from django.db.models.base import ModelBase
 from django.db.models.signals import post_init
 from django.dispatch import receiver
 
 from modeltranslation import settings as mt_settings
 from modeltranslation.fields import (NONE, create_translation_field, TranslationFieldDescriptor,
-                                     TranslatedRelationIdDescriptor)
+                                     TranslatedRelationIdDescriptor,
+                                     LanguageCacheSingleObjectDescriptor)
 from modeltranslation.manager import MultilingualManager, rewrite_lookup_key
 from modeltranslation.utils import build_localized_fieldname
 
@@ -274,6 +275,17 @@ def populate_translation_fields(sender, kwargs):
                 raise AttributeError("Unknown population mode '%s'." % populate)
 
 
+def patch_related_object_descriptor_caching(ro_descriptor):
+    """
+    Patch SingleRelatedObjectDescriptor or ReverseSingleRelatedObjectDescriptor to use
+    language-aware caching.
+    """
+    class NewSingleObjectDescriptor(LanguageCacheSingleObjectDescriptor, ro_descriptor.__class__):
+        pass
+    ro_descriptor.accessor = ro_descriptor.related.get_accessor_name()
+    ro_descriptor.__class__ = NewSingleObjectDescriptor
+
+
 class Translator(object):
     """
     A Translator object encapsulates an instance of a translator. Models are
@@ -371,6 +383,11 @@ class Translator(object):
                         other_opts.related = True
                         other_opts.related_fields.append(field.related_query_name())
                         add_manager(field.rel.to)  # Add manager in case of non-registered model
+
+                if isinstance(field, OneToOneField):
+                    # Fix translated_field caching for SingleRelatedObjectDescriptor
+                    sro_descriptor = getattr(field.rel.to, field.related.get_accessor_name())
+                    patch_related_object_descriptor_caching(sro_descriptor)
 
     def unregister(self, model_or_iterable):
         """

@@ -55,7 +55,7 @@ class FileFieldsModel(models.Model):
     image = models.ImageField(upload_to='modeltranslation_tests', null=True, blank=True)
 
 
-########## Foreign Key fields testing
+########## Foreign Key / OneToOneField testing
 
 class NonTranslated(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
@@ -67,6 +67,14 @@ class ForeignKeyModel(models.Model):
     optional = models.ForeignKey(TestModel, blank=True, null=True)
     hidden = models.ForeignKey(TestModel, blank=True, null=True, related_name="+")
     non = models.ForeignKey(NonTranslated, blank=True, null=True, related_name="test_fks")
+
+
+class OneToOneFieldModel(models.Model):
+    title = models.CharField(ugettext_lazy('title'), max_length=255)
+    test = models.OneToOneField(TestModel, null=True, related_name="test_o2o")
+    optional = models.OneToOneField(TestModel, blank=True, null=True)
+    # No hidden option for OneToOne
+    non = models.OneToOneField(NonTranslated, blank=True, null=True, related_name="test_o2o")
 
 
 ########## Custom fields testing

@@ -7,7 +7,7 @@ from modeltranslation.tests.models import (
     DescriptorModel, AbstractModelA, AbstractModelB, Slugged, MetaData, Displayable, Page,
     RichText, RichTextPage, MultitableModelA, MultitableModelB, MultitableModelC, ManagerTestModel,
     CustomManagerTestModel, CustomManager2TestModel, GroupFieldsetsModel, NameModel,
-    ThirdPartyRegisteredModel, ProxyTestModel, UniqueNullableModel)
+    ThirdPartyRegisteredModel, ProxyTestModel, UniqueNullableModel, OneToOneFieldModel)
 
 
 class TestTranslationOptions(TranslationOptions):
@@ -49,11 +49,16 @@ class FileFieldsModelTranslationOptions(TranslationOptions):
 translator.register(FileFieldsModel, FileFieldsModelTranslationOptions)
 
 
-########## Foreign Key fields testing
+########## Foreign Key / OneToOneField testing
 
 class ForeignKeyModelTranslationOptions(TranslationOptions):
     fields = ('title', 'test', 'optional', 'hidden', 'non',)
 translator.register(ForeignKeyModel, ForeignKeyModelTranslationOptions)
+
+
+class OneToOneFieldModelTranslationOptions(TranslationOptions):
+    fields = ('title', 'test', 'optional', 'non',)
+translator.register(OneToOneFieldModel, OneToOneFieldModelTranslationOptions)
 
 
 ########## Custom fields testing

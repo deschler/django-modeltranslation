@@ -178,7 +178,7 @@ Model Field                     0.4 0.5 0.7
 ``TimeField``                   |n| |y| |y|
 ``URLField``                    |i| |i| |i|
 ``ForeignKey``                  |n| |n| |y|
-``OneToOneField``               |n| |n| |n|
+``OneToOneField``               |n| |n| |y|
 ``ManyToManyField``             |n| |n| |n|
 =============================== === === ===
 
