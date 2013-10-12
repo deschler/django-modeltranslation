@@ -739,11 +739,16 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         self.assertEqual(inst.optional_en_id, test_inst2.pk)
         self.assertEqual(inst.optional_en.title, 'title2_en')
 
-        # Check filtering in direct way + lookup spanning
+        # Test caching
         inst.test_en = test_inst2
         inst.save()
-        manager = self.model.objects
+        trans_real.activate("de")
+        self.assertEqual(inst.test, test_inst1)
+        trans_real.activate("en")
+        self.assertEqual(inst.test, test_inst2)
 
+        # Check filtering in direct way + lookup spanning
+        manager = self.model.objects
         trans_real.activate("de")
         self.assertEqual(manager.filter(test=test_inst1).count(), 1)
         self.assertEqual(manager.filter(test_en=test_inst1).count(), 0)
