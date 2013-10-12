@@ -90,10 +90,15 @@ class MultilingualQuerySet(models.query.QuerySet):
                 self.query.add_ordering(*ordering)
 
     # This method was not present in django-linguo
-    def _clone(self, *args, **kwargs):
+    def _clone(self, klass=None, *args, **kwargs):
+        if klass is not None and not issubclass(klass, MultilingualQuerySet):
+            class NewClass(klass, MultilingualQuerySet):
+                pass
+            NewClass.__name__ = 'Multilingual%s' % klass.__name__
+            klass = NewClass
         kwargs.setdefault('_rewrite', self._rewrite)
         kwargs.setdefault('_populate', self._populate)
-        return super(MultilingualQuerySet, self)._clone(*args, **kwargs)
+        return super(MultilingualQuerySet, self)._clone(klass, *args, **kwargs)
 
     # This method was not present in django-linguo
     def rewrite(self, mode=True):
