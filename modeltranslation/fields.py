@@ -159,7 +159,7 @@ class TranslationField(object):
     def get_attname_column(self):
         attname = self.get_attname()
         if self.translated_field.db_column:
-            column = build_localized_fieldname(self.translated_field.db_column)
+            column = build_localized_fieldname(self.translated_field.db_column, self.language)
         else:
             column = attname
         return attname, column
