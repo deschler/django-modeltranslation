@@ -76,6 +76,9 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
                     orig_formfield.blank = True
                     field.required = True
                     field.blank = False
+                    # Hide clearable widget for required fields
+                    if isinstance(field.widget, ClearableWidgetWrapper):
+                        field.widget = field.widget.widget
             field.widget.attrs['class'] = ' '.join(css_classes)
 
     def _exclude_original_fields(self, exclude=None):
