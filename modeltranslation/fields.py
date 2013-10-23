@@ -45,7 +45,7 @@ class NONE:
     pass
 
 
-def create_translation_field(model, field_name, lang):
+def create_translation_field(model, field_name, lang, empty_value):
     """
     Translation field factory. Returns a ``TranslationField`` based on a
     fieldname and a language.
@@ -58,13 +58,15 @@ def create_translation_field(model, field_name, lang):
     If the class is neither a subclass of fields in ``SUPPORTED_FIELDS``, nor
     in ``CUSTOM_FIELDS`` an ``ImproperlyConfigured`` exception will be raised.
     """
+    if empty_value not in ('', 'both', None, NONE):
+        raise ImproperlyConfigured('%s is not a valid empty_value.' % empty_value)
     field = model._meta.get_field(field_name)
     cls_name = field.__class__.__name__
     if not (isinstance(field, SUPPORTED_FIELDS) or cls_name in mt_settings.CUSTOM_FIELDS):
         raise ImproperlyConfigured(
             '%s is not supported by modeltranslation.' % cls_name)
     translation_class = field_factory(field.__class__)
-    return translation_class(translated_field=field, language=lang)
+    return translation_class(translated_field=field, language=lang, empty_value=empty_value)
 
 
 def field_factory(baseclass):
@@ -95,7 +97,7 @@ class TranslationField(object):
     The translation field needs to know which language it contains therefore
     that needs to be specified when the field is created.
     """
-    def __init__(self, translated_field, language, *args, **kwargs):
+    def __init__(self, translated_field, language, empty_value, *args, **kwargs):
         # Update the dict of this field with the content of the original one
         # This might be a bit radical?! Seems to work though...
         self.__dict__.update(translated_field.__dict__)
@@ -103,6 +105,9 @@ class TranslationField(object):
         # Store the originally wrapped field for later
         self.translated_field = translated_field
         self.language = language
+        self.empty_value = empty_value
+        if empty_value is NONE:
+            self.empty_value = None if translated_field.null else ''
 
         # Translation are always optional (for now - maybe add some parameters
         # to the translation options for configuring this)
@@ -166,27 +171,43 @@ class TranslationField(object):
 
     def formfield(self, *args, **kwargs):
         """
-        If the original field is nullable and uses ``forms.CharField`` subclass
-        as its form input, we patch the form field, so it doesn't cast ``None``
-        to anything.
+        Returns proper formfield, according to empty_values setting
+        (only for ``forms.CharField`` subclasses).
 
-        The ``forms.CharField`` somewhat surprising behaviour is documented as a
-        "won't fix": https://code.djangoproject.com/ticket/9590.
+        There are 3 different formfields:
+        - CharField that stores all empty values as empty strings;
+        - NullCharField that stores all empty values as None (Null);
+        - NullableField that can store both None and empty_string.
 
+        By default, if no empty_values was specified in model's translation options,
+        NullCharField would be used if the original field is nullable, CharField otherwise.
+
+        This can be overridden by setting empty_values to '' or None.
+
+        Setting 'both' will result in NullableField being used.
         Textual widgets (subclassing ``TextInput`` or ``Textarea``) used for
         nullable fields are enriched with a clear checkbox, allowing ``None``
         values to be preserved rather than saved as empty strings.
+
+        The ``forms.CharField`` somewhat surprising behaviour is documented as a
+        "won't fix": https://code.djangoproject.com/ticket/9590.
         """
         formfield = super(TranslationField, self).formfield(*args, **kwargs)
-        if self.null:
-            if isinstance(formfield, forms.CharField):
+        if isinstance(formfield, forms.CharField):
+            if self.empty_value is None:
+                from modeltranslation.forms import NullCharField
+                form_class = formfield.__class__
+                kwargs['form_class'] = type(
+                    'Null%s' % form_class.__name__, (NullCharField, form_class), {})
+                formfield = super(TranslationField, self).formfield(*args, **kwargs)
+            elif self.empty_value == 'both':
                 from modeltranslation.forms import NullableField
                 form_class = formfield.__class__
                 kwargs['form_class'] = type(
                     'Nullable%s' % form_class.__name__, (NullableField, form_class), {})
                 formfield = super(TranslationField, self).formfield(*args, **kwargs)
-            if isinstance(formfield.widget, (forms.TextInput, forms.Textarea)):
-                formfield.widget = ClearableWidgetWrapper(formfield.widget)
+                if isinstance(formfield.widget, (forms.TextInput, forms.Textarea)):
+                    formfield.widget = ClearableWidgetWrapper(formfield.widget)
         return formfield
 
     def save_form_data(self, instance, data):

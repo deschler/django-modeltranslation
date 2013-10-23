@@ -12,6 +12,7 @@ from modeltranslation.tests.models import (
 
 class TestTranslationOptions(TranslationOptions):
     fields = ('title', 'text', 'url', 'email',)
+    empty_values = ''
 translator.register(TestModel, TestTranslationOptions)
 
 

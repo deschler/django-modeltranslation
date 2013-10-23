@@ -19,6 +19,7 @@ from modeltranslation.widgets import ClearableWidgetWrapper
 
 class TranslationBaseModelAdmin(BaseModelAdmin):
     _orig_was_required = {}
+    both_empty_values_fields = ()
 
     def __init__(self, *args, **kwargs):
         super(TranslationBaseModelAdmin, self).__init__(*args, **kwargs)
@@ -57,7 +58,17 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         else:
             orig_formfield = self.formfield_for_dbfield(orig_field, **kwargs)
             field.widget = deepcopy(orig_formfield.widget)
-            if db_field.null and isinstance(field.widget, (forms.TextInput, forms.Textarea)):
+            if orig_field.name in self.both_empty_values_fields:
+                from modeltranslation.forms import NullableField, NullCharField
+                form_class = field.__class__
+                if issubclass(form_class, NullCharField):
+                    # NullableField don't work with NullCharField
+                    form_class.__bases__ = tuple(
+                        b for b in form_class.__bases__ if b != NullCharField)
+                field.__class__ = type(
+                    'Nullable%s' % form_class.__name__, (NullableField, form_class), {})
+            if ((db_field.empty_value == 'both' or orig_field.name in self.both_empty_values_fields)
+                    and isinstance(field.widget, (forms.TextInput, forms.Textarea))):
                 field.widget = ClearableWidgetWrapper(field.widget)
             css_classes = field.widget.attrs.get('class', '').split(' ')
             css_classes.append('mt')
