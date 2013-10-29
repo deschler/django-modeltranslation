@@ -295,7 +295,8 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
         if self.declared_fieldsets:
             return self._do_get_fieldsets_pre_form_or_formset()
         return self._group_fieldsets(
-            self._do_get_fieldsets_post_form_or_formset(request, self.get_form(request, obj), obj))
+            self._do_get_fieldsets_post_form_or_formset(
+                request, self.get_form(request, obj, fields=None), obj))
 
 
 class TranslationInlineModelAdmin(TranslationBaseModelAdmin, InlineModelAdmin):
