@@ -34,7 +34,6 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         elif self.fields:
             return [(None, {'fields': self.replace_orig_field(self.fields)})]
         return None
-
     declared_fieldsets = property(_declared_fieldsets)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
@@ -70,7 +69,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
                 # widget.
                 css_classes.append('mt-default')
                 if (orig_formfield.required or self._orig_was_required.get(
-                            '%s.%s' % (orig_field.model._meta, orig_field.name))):
+                        '%s.%s' % (orig_field.model._meta, orig_field.name))):
                     # In case the original form field was required, make the
                     # default translation field required instead.
                     orig_formfield.required = False
@@ -122,7 +121,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
                     index = option_new.index(opt)
                     option_new[index:index + 1] = get_translation_fields(opt)
                 elif isinstance(opt, (tuple, list)) and (
-                    [o for o in opt if o in self.trans_opts.fields]):
+                        [o for o in opt if o in self.trans_opts.fields]):
                     index = option_new.index(opt)
                     option_new[index:index + 1] = self.replace_orig_field(opt)
             option = option_new
@@ -140,12 +139,10 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
     def _patch_prepopulated_fields(self):
         def localize(sources, lang):
             "Append lang suffix (if applicable) to field list"
-
             def append_lang(source):
                 if source in self.trans_opts.fields:
                     return build_localized_fieldname(source, lang)
                 return source
-
             return tuple(map(append_lang, sources))
 
         prepopulated_fields = {}
@@ -172,7 +169,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
             # Take the custom ModelForm's Meta.exclude into account only if the
             # ModelAdmin doesn't define its own.
             exclude.extend(self.form._meta.exclude)
-            # If exclude is an empty list we pass None to be consistant with the
+        # If exclude is an empty list we pass None to be consistant with the
         # default on modelform_factory
         exclude = self.replace_orig_field(exclude) or None
         exclude = self._exclude_original_fields(exclude)
@@ -343,8 +340,6 @@ class TabbedDjangoJqueryTranslationAdmin(TranslationAdmin):
         css = {
             'all': ('modeltranslation/css/tabbed_translation_fields.css',),
         }
-
-
 TabbedTranslationAdmin = TabbedDjangoJqueryTranslationAdmin
 
 
