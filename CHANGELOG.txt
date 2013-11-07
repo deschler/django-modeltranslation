@@ -1,3 +1,20 @@
+v0.7.1
+======
+
+  ADDED: Configurable formfields. The ultimate approach to nullable CharFields.
+         (thanks Jacek Tomaszewski,
+          resolves issue #211, ref #163, #187)
+
+  FIXED: Recursion problem with fieldset handling in Django 1.6.
+         (thanks to Bas Peschier,
+          resolves issue #214)
+
+
+v0.7
+====
+Date: 2013-10-19
+Packaged from revision 89f5e6712aaf5d5ec7e2d61940dc1a71fb08ca94
+
   ADDED: A setting to control which language are slug fields based on
          (thanks to Konrad Wojas,
           resolves issue #194)
