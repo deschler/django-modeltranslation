@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django import forms
+from django.core import validators
 
 from modeltranslation.fields import TranslationField
 
@@ -12,7 +13,17 @@ class TranslationModelForm(forms.ModelForm):
                 del self.fields[f.name]
 
 
-class NullableField(object):
+class NullCharField(forms.CharField):
+    """
+    CharField subclass that returns ``None`` when ``CharField`` would return empty string.
+    """
+    def to_python(self, value):
+        if value in validators.EMPTY_VALUES:
+            return None
+        return super(NullCharField, self).to_python(value)
+
+
+class NullableField(forms.Field):
     """
     Form field mixin that ensures that ``None`` is not cast to anything (like
     the empty string with ``CharField`` and its derivatives).

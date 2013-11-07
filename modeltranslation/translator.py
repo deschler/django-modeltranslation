@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from django.conf import settings
 from django.utils.six import with_metaclass
 from django.db.models import Manager, ForeignKey, OneToOneField
 from django.db.models.base import ModelBase
@@ -11,7 +10,7 @@ from modeltranslation.fields import (NONE, create_translation_field, Translation
                                      TranslatedRelationIdDescriptor,
                                      LanguageCacheSingleObjectDescriptor)
 from modeltranslation.manager import MultilingualManager, rewrite_lookup_key
-from modeltranslation.utils import build_localized_fieldname
+from modeltranslation.utils import build_localized_fieldname, parse_field
 
 
 class AlreadyRegistered(Exception):
@@ -105,13 +104,15 @@ def add_translation_fields(model, opts):
 
     Adds newly created translation fields to the given translation options.
     """
+    model_empty_values = getattr(opts, 'empty_values', NONE)
     for field_name in opts.local_fields.keys():
-        for l in settings.LANGUAGES:
+        field_empty_value = parse_field(model_empty_values, field_name, NONE)
+        for l in mt_settings.AVAILABLE_LANGUAGES:
             # Create a dynamic translation field
             translation_field = create_translation_field(
-                model=model, field_name=field_name, lang=l[0])
+                model=model, field_name=field_name, lang=l, empty_value=field_empty_value)
             # Construct the name for the localized field
-            localized_field_name = build_localized_fieldname(field_name, l[0])
+            localized_field_name = build_localized_fieldname(field_name, l)
             # Check if the model already has a field by that name
             if hasattr(model, localized_field_name):
                 raise ValueError(
@@ -356,14 +357,8 @@ class Translator(object):
             model_fallback_undefined = getattr(opts, 'fallback_undefined', NONE)
             for field_name in opts.local_fields.keys():
                 field = model._meta.get_field(field_name)
-                if isinstance(model_fallback_values, dict):
-                    field_fallback_value = model_fallback_values.get(field_name, NONE)
-                else:
-                    field_fallback_value = model_fallback_values
-                if isinstance(model_fallback_undefined, dict):
-                    field_fallback_undefined = model_fallback_undefined.get(field_name, NONE)
-                else:
-                    field_fallback_undefined = model_fallback_undefined
+                field_fallback_value = parse_field(model_fallback_values, field_name, NONE)
+                field_fallback_undefined = parse_field(model_fallback_undefined, field_name, NONE)
                 descriptor = TranslationFieldDescriptor(
                     field,
                     fallback_languages=model_fallback_languages,
