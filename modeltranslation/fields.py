@@ -177,7 +177,7 @@ class TranslationField(object):
         There are 3 different formfields:
         - CharField that stores all empty values as empty strings;
         - NullCharField that stores all empty values as None (Null);
-        - NullableField that can store both None and empty_string.
+        - NullableField that can store both None and empty string.
 
         By default, if no empty_values was specified in model's translation options,
         NullCharField would be used if the original field is nullable, CharField otherwise.
