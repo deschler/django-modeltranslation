@@ -131,7 +131,9 @@ def add_manager(model):
 
     Custom managers are merged with MultilingualManager.
     """
-    for _, attname, cls in model._meta.concrete_managers:
+    if model._meta.abstract:
+        return
+    for _, attname, cls in model._meta.concrete_managers + model._meta.abstract_managers:
         current_manager = getattr(model, attname)
         if isinstance(current_manager, MultilingualManager):
             continue
