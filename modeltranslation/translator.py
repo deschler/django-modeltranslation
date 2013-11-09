@@ -74,7 +74,7 @@ class TranslationOptions(with_metaclass(FieldsAggregationMetaClass, object)):
         """
         Update with options from a superclass.
         """
-        if other.model._meta.abstract or self.model._meta.proxy:
+        if other.model._meta.abstract:
             self.local_fields.update(other.local_fields)
         self.fields.update(other.fields)
 
@@ -122,6 +122,11 @@ def add_translation_fields(model, opts):
             # django model fields and therefore adds them via add_to_class
             model.add_to_class(localized_field_name, translation_field)
             opts.add_translation_field(field_name, translation_field)
+
+    # Rebuild information about parents fields. If there are opts.local_fields, field cache would be
+    # invalidated (by model._meta.add_field() function). Otherwise, we need to do it manually.
+    if len(opts.local_fields) == 0:
+        model._meta._fill_fields_cache()
 
 
 def add_manager(model):
