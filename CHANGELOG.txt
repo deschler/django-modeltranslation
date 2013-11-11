@@ -1,5 +1,21 @@
+v0.7.2
+======
+
+  ADDED: Documentation about empty_values.
+         (thanks Jacek Tomaszewski,
+          resolves issue #211)
+
+  FIXED: Proxy model handling.
+         (thanks Jacek Tomaszewsk)
+  FIXED: Abstract managers patching.
+         (thanks Jacek Tomaszewski,
+          resolves issue #212)
+
+
 v0.7.1
 ======
+Date: 2013-11-07
+Packaged from revision f7c7ea174344f3dc0cf56ac3bf6e92878ed6baea
 
   ADDED: Configurable formfields. The ultimate approach to nullable CharFields.
          (thanks Jacek Tomaszewski,
