@@ -270,6 +270,15 @@ class TranslationFieldDescriptor(object):
         loc_field_name = build_localized_fieldname(self.field.name, get_language())
         setattr(instance, loc_field_name, value)
 
+    def meaningful_value(self, val, undefined):
+        """
+        Check if val is considered non-empty.
+        """
+        if isinstance(val, fields.files.FieldFile):
+            return val.name and not (
+                isinstance(undefined, fields.files.FieldFile) and val == undefined)
+        return val is not None and val != undefined
+
     def __get__(self, instance, owner):
         """
         Returns value from the translation field for the current language, or
@@ -287,13 +296,20 @@ class TranslationFieldDescriptor(object):
         for lang in langs:
             loc_field_name = build_localized_fieldname(self.field.name, lang)
             val = getattr(instance, loc_field_name, None)
-            if val is not None and val != undefined:
+            if self.meaningful_value(val, undefined):
                 return val
         if mt_settings.ENABLE_FALLBACKS and self.fallback_value is not NONE:
             return self.fallback_value
         else:
             if default is NONE:
                 default = self.field.get_default()
+            # Some fields like FileField behave strange, as their get_default() doesn't return
+            # instance of attr_class, but rather None or ''.
+            # Normally this case is handled in the descriptor, but since we have overridden it, we
+            # must mock it up.
+            if (isinstance(self.field, fields.files.FileField) and
+                    not isinstance(default, self.field.attr_class)):
+                return self.field.attr_class(instance, self.field, default)
             return default
 
 

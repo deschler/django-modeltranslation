@@ -671,6 +671,36 @@ class FileFieldsTest(ModeltranslationTestBase):
         inst.file_de.delete()
         inst.image_de.delete()
 
+    def test_empty_field(self):
+        from django.db.models.fields.files import FieldFile
+        inst = models.FileFieldsModel()
+        self.assertIsInstance(inst.file, FieldFile)
+        self.assertIsInstance(inst.file2, FieldFile)
+        inst.save()
+        inst = models.FileFieldsModel.objects.all()[0]
+        self.assertIsInstance(inst.file, FieldFile)
+        self.assertIsInstance(inst.file2, FieldFile)
+
+    def test_fallback(self):
+        from django.db.models.fields.files import FieldFile
+        with reload_override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=('en',)):
+            self.assertEqual(get_language(), 'de')
+            inst = models.FileFieldsModel()
+            inst.file_de = ''
+            inst.file_en = 'foo'
+            inst.file2_de = ''
+            inst.file2_en = 'bar'
+            self.assertIsInstance(inst.file, FieldFile)
+            self.assertIsInstance(inst.file2, FieldFile)
+            self.assertEqual(inst.file.name, 'foo')
+            self.assertEqual(inst.file2.name, 'bar')
+            inst.save()
+            inst = models.FileFieldsModel.objects.all()[0]
+            self.assertIsInstance(inst.file, FieldFile)
+            self.assertIsInstance(inst.file2, FieldFile)
+            self.assertEqual(inst.file.name, 'foo')
+            self.assertEqual(inst.file2.name, 'bar')
+
 
 class ForeignKeyFieldsTest(ModeltranslationTestBase):
     @classmethod

@@ -52,6 +52,7 @@ class FallbackModel2(models.Model):
 class FileFieldsModel(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
     file = models.FileField(upload_to='modeltranslation_tests', null=True, blank=True)
+    file2 = models.FileField(upload_to='modeltranslation_tests')
     image = models.ImageField(upload_to='modeltranslation_tests', null=True, blank=True)
 
 

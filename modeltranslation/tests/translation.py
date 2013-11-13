@@ -46,7 +46,7 @@ translator.register(FallbackModel2, FallbackModel2TranslationOptions)
 ########## File fields testing
 
 class FileFieldsModelTranslationOptions(TranslationOptions):
-    fields = ('title', 'file', 'image',)
+    fields = ('title', 'file', 'file2', 'image',)
 translator.register(FileFieldsModel, FileFieldsModelTranslationOptions)
 
 
