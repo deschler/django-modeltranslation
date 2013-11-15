@@ -321,7 +321,7 @@ class TranslationInlineModelAdmin(TranslationBaseModelAdmin, InlineModelAdmin):
         # is displayed above the new fieldsets.
         if self.declared_fieldsets:
             return self._do_get_fieldsets_pre_form_or_formset()
-        form = self.get_formset(request, obj).form
+        form = self.get_formset(request, obj, fields=None).form
         return self._do_get_fieldsets_post_form_or_formset(request, form, obj)
 
 
