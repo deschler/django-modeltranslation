@@ -210,7 +210,7 @@ class TranslationField(object):
                     formfield.widget = ClearableWidgetWrapper(formfield.widget)
         return formfield
 
-    def save_form_data(self, instance, data):
+    def save_form_data(self, instance, data, check=True):
         # Allow 3rd-party apps forms to be saved using only translated field name.
         # When translated field (e.g. 'name') is specified and translation field (e.g. 'name_en')
         # not, we assume that form was saved without knowledge of modeltranslation and we make
@@ -220,8 +220,8 @@ class TranslationField(object):
         # active language).
         # Questionable fields are stored in special variable, which is later handled by clean_fields
         # method on the model.
-        if self.language == get_language() and getattr(instance, self.name) and not data:
-            if not hasattr(instance, '_mt_form_pending_cleanr'):
+        if check and self.language == get_language() and getattr(instance, self.name) and not data:
+            if not hasattr(instance, '_mt_form_pending_clear'):
                 instance._mt_form_pending_clear = {}
             instance._mt_form_pending_clear[self.name] = data
         else:

@@ -188,9 +188,10 @@ def patch_clean_fields(model):
             #   translated field unchanged), as if field was omitted from form
             # - if no, then proceed as normally: clear the field
             for field_name, value in self._mt_form_pending_clear.items():
-                orig_field_name = self._meta.get_field(field_name).translated_field.name
+                field = self._meta.get_field(field_name)
+                orig_field_name = field.translated_field.name
                 if orig_field_name in exclude:
-                    setattr(self, field_name, value)
+                    field.save_form_data(self, value, check=False)
             delattr(self, '_mt_form_pending_clear')
         old_clean_fields(self, exclude)
     model.clean_fields = new_clean_fields
