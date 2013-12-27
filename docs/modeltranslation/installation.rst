@@ -63,9 +63,9 @@ in detail in the following sections:
 #. Create a ``translation.py`` in your app directory and register
    ``TranslationOptions`` for every model you want to translate.
 
-#. Sync the database using ``manage.py syncdb`` (note that this only applies
+#. Sync the database using ``./manage.py syncdb`` (note that this only applies
    if the models registered in the ``translation.py`` did not have been
-   synced to the database before. If they did - read further down what to do
+   synced to the database before. If they did - read :ref:`further down <db-fields>` what to do
    in that case.
 
 

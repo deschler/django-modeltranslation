@@ -10,7 +10,7 @@ The ``update_translation_fields`` Command
 
 In case the modeltranslation app was installed on an existing project and you
 have specified to translate fields of models which are already synced to the
-database, you have to update your database schema manually.
+database, you have to update your database schema (see :ref:`db-fields`).
 
 Unfortunately the newly added translation fields on the model will be empty
 then, and your templates will show the translated value of the fields (see
@@ -34,9 +34,11 @@ otherwise nothing is copied.
     the command will examine your ``settings.LANGUAGES`` variable and the first
     language declared there will be used as the default language.
 
-All translated models (as specified in the project's ``translation.py`` will be
+All translated models (as specified in the translation files) from all apps will be
 populated with initial data.
 
+
+.. _commands-sync_translation_fields:
 
 The ``sync_translation_fields`` Command
 ---------------------------------------
@@ -47,7 +49,12 @@ The ``sync_translation_fields`` Command
 
     $ ./manage.py sync_translation_fields
 
-.. todo:: Explain
+This command compares the database and translated models definitions (finding new translation
+fields) and provides SQL statements to alter tables. You should run this command after adding
+new language or deciding to translate new field in a ``TranslationOptions``.
+
+However, if you are using South in your project, in most cases it's recommended to use migration
+instead of ``sync_translation_fields``. See :ref:`db-fields` for detailed info and use cases.
 
 
 The ``loaddata`` Command
