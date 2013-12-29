@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-import sys
-if sys.version > '3':
-    long = int
-
 from django.core import validators
 from django.db import models
 from django.utils import six
@@ -113,7 +109,7 @@ class FancyDescriptor(object):
         return 'a' * length
 
     def __set__(self, obj, value):
-        if isinstance(value, (int, long)):
+        if isinstance(value, six.integer_types):
             obj.__dict__[self.field.name] = value
         elif isinstance(value, six.string_types):
             obj.__dict__[self.field.name] = len(value)

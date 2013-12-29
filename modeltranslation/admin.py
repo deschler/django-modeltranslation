@@ -215,7 +215,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         if exclude_languages:
             excl_languages = exclude_languages
         exclude = []
-        for orig_fieldname, translation_fields in self.trans_opts.fields.iteritems():
+        for orig_fieldname, translation_fields in self.trans_opts.fields.items():
             for tfield in translation_fields:
                 language = tfield.name.split('_')[-1]
                 if language in excl_languages and tfield not in exclude:
