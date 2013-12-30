@@ -19,6 +19,8 @@ Of course, upon saving, provided values would be set on proper attributes, depen
 current language.
 
 
+.. _formfield_nullability:
+
 Formfields and nullability
 --------------------------
 

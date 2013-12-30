@@ -55,6 +55,8 @@ translation will have been added some auto-magical fields. The next section
 explains how things are working under the hood.
 
 
+.. _TO_field_inheritance:
+
 ``TranslationOptions`` fields inheritance
 -----------------------------------------
 
@@ -159,6 +161,49 @@ the default translation fields added by the modeltranslation application
 with values from existing database fields, you
 can use the ``update_translation_fields`` command below. See
 :ref:`commands-update_translation_fields` for more info on this.
+
+
+``TranslationOptions`` attributes reference
+-------------------------------------------
+
+Quick cheatsheet with links to proper docs sections and examples showing expected syntax.
+
+Classes inheriting from ``TranslationOptions`` can have following attributes defined:
+
+.. attribute:: TranslationOptions.fields (required)
+
+    List of translatable model fields. See :ref:`registration`.
+
+    Some fields can be implicitly added through inheritance, see :ref:`TO_field_inheritance`.
+
+.. attribute:: TranslationOptions.fallback_languages
+
+    Control order of languages for fallback purposes. See :ref:`fallback_lang`. ::
+
+        fallback_languages = {'default': ('en', 'de', 'fr'), 'uk': ('ru',)}
+
+.. attribute:: TranslationOptions.fallback_values
+
+    Set the value that should be used if no fallback language yielded a value.
+    See :ref:`fallback_val`. ::
+
+        fallback_values = _('-- sorry, no translation provided --')
+        fallback_values = {'title': _('Object not translated'), 'text': '---'}
+
+.. attribute:: TranslationOptions.fallback_undefined
+
+    Set what value should be considered "no value". See :ref:`fallback_undef`. ::
+
+        fallback_undefined = None
+        fallback_undefined = {'title': 'no title', 'text': None}
+
+.. attribute:: TranslationOptions.empty_values
+
+    Override the value that should be saved in forms on empty fields.
+    See :ref:`formfield_nullability`. ::
+
+        empty_values = ''
+        empty_values = {'title': '', 'slug': None, 'desc': 'both'}
 
 
 .. _supported_field_matrix:

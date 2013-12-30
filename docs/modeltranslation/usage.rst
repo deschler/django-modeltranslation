@@ -226,6 +226,8 @@ title/content of the news than display empty strings. This is called *fallback*.
 
 There are several ways of controlling fallback, described below.
 
+.. _fallback_lang:
+
 Fallback languages
 ******************
 
@@ -275,6 +277,8 @@ Even more, all fallbacks may be switched on or off for just some exceptional blo
     with fallbacks(False):
         # Work with values for the active language only
 
+.. _fallback_val:
+
 Fallback values
 ***************
 
@@ -304,6 +308,8 @@ Fallback values can be also customized per model field::
 
 If current language and all fallback languages yield no field value, and no fallback values are
 defined, then modeltranslation will use field's default value.
+
+.. _fallback_undef:
 
 Fallback undefined
 ******************
