@@ -1,5 +1,30 @@
+v0.7.3
+======
+Date: 2014-01-05
+
+  ADDED: Documentation for TranslationOptions fields reference and
+         south/sync_translation_fields.
+
+  FIXED: Some python3 compatibility issues.
+         (thanks Jacek Tomaszewski,
+          resolves issue #220)
+  FIXED: Clearing translated FileFields does not work with easy_thumbnails.
+         (thanks Jacek Tomaszewski,
+          resolves issue #219)
+  FIXED: Compatibility with nested inlines.
+         (thanks abstraktor,
+          resolves issue #218)
+  FIXED: Admin inlines recursion problem in Django 1.6.
+         (thanks Oleg Prans,
+          resolves issue #214)
+  FIXED: Empty FileField handling.
+         (thanks Jacek Tomaszewski,
+          resolves issue #215)
+
+
 v0.7.2
 ======
+Date: 2013-11-11
 
   ADDED: Documentation about empty_values.
          (thanks Jacek Tomaszewski,
