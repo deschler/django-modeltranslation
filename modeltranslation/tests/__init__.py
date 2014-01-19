@@ -1,2 +1,2 @@
 # For Django < 1.6 testrunner
-from .tests import *
+from .tests import *  # NOQA
