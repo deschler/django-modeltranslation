@@ -45,8 +45,7 @@ def runtests():
         )
 
     failures = call_command(
-        'test', 'modeltranslation', interactive=False, failfast=False,
-        verbosity=2)
+        'test', 'modeltranslation', interactive=False, failfast=False, verbosity=2)
     sys.exit(bool(failures))
 
 
