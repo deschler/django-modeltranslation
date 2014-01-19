@@ -168,7 +168,6 @@ def patch_constructor(model):
     model.__init__ = new_init
 
 
-@receiver(post_init)
 def delete_mt_init(sender, instance, **kwargs):
     if hasattr(instance, '_mt_init'):
         del instance._mt_init
@@ -352,6 +351,9 @@ class Translator(object):
 
             # Patch __init__ to rewrite fields
             patch_constructor(model)
+
+            # Connect signal for model
+            post_init.connect(delete_mt_init, sender=model)
 
             # Patch clean_fields to verify form field clearing
             patch_clean_fields(model)
