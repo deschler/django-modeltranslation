@@ -116,9 +116,18 @@ and ``en`` in your project, set the ``LANGUAGES`` variable like this (where
     rather required for Django to be able to (statically) translate the verbose
     names of the languages using the standard ``i18n`` solution.
 
+.. note::
+    If, for some reason, you don't want to translate objects to exactly the same languages as
+    the site would be displayed into, you can set ``MODELTRANSLATION_LANGUAGES`` (see below).
+    For any language in ``LANGUAGES`` not present in ``MODELTRANSLATION_LANGUAGES``, the *default
+    language* will be used when accessing translated content. For any language in
+    ``MODELTRANSLATION_LANGUAGES`` not present in ``LANGUAGES``, probably nobody will see translated
+    content, since the site wouldn't be accessible in that language.
+
 .. warning::
     Modeltranslation does not enforce the ``LANGUAGES`` setting to be defined
-    in your project. When it isn't present, it defaults to Django's
+    in your project. When it isn't present (and neither is ``MODELTRANSLATION_LANGUAGES``), it
+    defaults to Django's
     `global LANGUAGES setting <https://github.com/django/django/blob/master/django/conf/global_settings.py>`_
     instead, and that are quite a number of languages!
 
@@ -145,6 +154,28 @@ the value has to be in ``settings.LANGUAGES``, otherwise an
 Example::
 
     MODELTRANSLATION_DEFAULT_LANGUAGE = 'en'
+
+
+``MODELTRANSLATION_LANGUAGES``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. versionadded:: 0.8
+
+Default: same as ``LANGUAGES``
+
+Allow to set languages the content will be translated into. If not set, by default all
+languages listed in ``LANGUAGES`` will be used.
+
+Example::
+
+    LANGUAGES = (
+        ('en', 'English'),
+        ('de', 'German'),
+        ('pl', 'Polish'),
+    )
+    MODELTRANSLATION_LANGUAGES = ('en', 'de')
+
+.. note:: We doubt this setting will ever be needed, but why not add it since we can?
 
 
 .. _settings-modeltranslation_fallback_languages:
