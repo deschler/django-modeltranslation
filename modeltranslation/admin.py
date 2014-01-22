@@ -345,7 +345,7 @@ class TabbedDjangoJqueryTranslationAdmin(TranslationAdmin):
     class Media:
         js = (
             'modeltranslation/js/force_jquery.js',
-            'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/jquery-ui.min.js',
+            '//ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/jquery-ui.min.js',
             'modeltranslation/js/tabbed_translation_fields.js',
         )
         css = {
@@ -357,8 +357,8 @@ TabbedTranslationAdmin = TabbedDjangoJqueryTranslationAdmin
 class TabbedExternalJqueryTranslationAdmin(TranslationAdmin):
     class Media:
         js = (
-            'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
-            'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js',
+            '//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
+            '//ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js',
             'modeltranslation/js/tabbed_translation_fields.js',
         )
         css = {
