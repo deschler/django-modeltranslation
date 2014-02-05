@@ -16,6 +16,7 @@ from django.core.management.color import no_style
 from django.db import connection, transaction
 from django.utils.six import moves
 
+from modeltranslation.settings import AVAILABLE_LANGUAGES
 from modeltranslation.translator import translator
 from modeltranslation.utils import build_localized_fieldname
 
@@ -102,7 +103,7 @@ class Command(NoArgsCommand):
         Gets only missings fields.
         """
         db_table_fields = self.get_table_fields(db_table)
-        for lang_code, lang_name in settings.LANGUAGES:
+        for lang_code in AVAILABLE_LANGUAGES:
             if build_localized_fieldname(field_name, lang_code) not in db_table_fields:
                 yield lang_code
 
