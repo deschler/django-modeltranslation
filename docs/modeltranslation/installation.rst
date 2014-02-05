@@ -175,7 +175,9 @@ Example::
     )
     MODELTRANSLATION_LANGUAGES = ('en', 'de')
 
-.. note:: We doubt this setting will ever be needed, but why not add it since we can?
+.. note::
+    This setting may become useful if your users shall produce content for a restricted
+    set of languages, while your application is translated into a greater number of locales.
 
 
 .. _settings-modeltranslation_fallback_languages:
