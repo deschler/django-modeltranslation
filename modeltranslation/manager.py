@@ -6,6 +6,7 @@ django-linguo by Zach Mathew
 https://github.com/zmathew/django-linguo
 """
 from django.db import models
+from django.db.models import FieldDoesNotExist
 from django.db.models.fields.related import RelatedField, RelatedObject
 from django.db.models.sql.where import Constraint
 from django.utils.tree import Node
@@ -71,6 +72,27 @@ def get_fields_to_translatable_models(model):
         _F2TM_CACHE[model] = results
     return _F2TM_CACHE[model]
 
+_C2F_CACHE = {}
+
+
+def get_field_by_colum_name(model, col):
+    # First, try field with the column name
+    try:
+        field = model._meta.get_field(col)
+        if field.column == col:
+            return field
+    except FieldDoesNotExist:
+        pass
+    field = _C2F_CACHE.get((model, col), None)
+    if field:
+        return field
+    # D'oh, need to search through all of them.
+    for field in model._meta.fields:
+        if field.column == col:
+            _C2F_CACHE[(model, col)] = field
+            return field
+    assert False, "No field found for column %s" % col
+
 
 class MultilingualQuerySet(models.query.QuerySet):
     def __init__(self, *args, **kwargs):
@@ -126,6 +148,8 @@ class MultilingualQuerySet(models.query.QuerySet):
         """
         if isinstance(q, tuple) and isinstance(q[0], Constraint):
             c = q[0]
+            if c.field is None:
+                c.field = get_field_by_colum_name(self.model, c.col)
             new_name = rewrite_lookup_key(self.model, c.field.name)
             if c.field.name != new_name:
                 c.field = self.model._meta.get_field(new_name)

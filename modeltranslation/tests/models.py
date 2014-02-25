@@ -262,7 +262,7 @@ class ManagerTestModel(models.Model):
 
 class CustomManager(models.Manager):
     def get_query_set(self):
-        return super(CustomManager, self).get_query_set().filter(title__contains='a')
+        return super(CustomManager, self).get_query_set().filter(title__contains='a').exclude(description__contains='x')
 
     def foo(self):
         return 'bar'
@@ -270,6 +270,7 @@ class CustomManager(models.Manager):
 
 class CustomManagerTestModel(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
+    description = models.CharField(max_length=255, null=True, db_column='xyz')
     objects = CustomManager()
 
     another_mgr_name = CustomManager()
