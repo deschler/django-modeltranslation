@@ -92,3 +92,16 @@ backward compatibility:
 .inline-group .tabular .datetime br {
     display: none;
 }
+
+/*Yawd admin patch*/
+div.inline-wrapper div.tabular td {
+    vertical-align: top;
+}
+
+div.inline-wrapper div.tabular td input {
+    margin-top:40px;
+}
+
+div.inline-wrapper div.tabular td.ui-tabs input {
+    margin-top:0px;
+}

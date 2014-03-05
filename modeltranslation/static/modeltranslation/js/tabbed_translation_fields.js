@@ -150,7 +150,7 @@ var google, django, gettext;
                     insertionPoint;
                 tabsContainer.append(tabsList);
                 $.each(lang, function (lang, el) {
-                    var container = $(el).closest('.form-row'),
+                    var container = $(el).closest('.form-row, .field'),
                         label = $('label', container),
                         fieldLabel = container.find('label'),
                         tabId = 'tab_' + $(el).attr('id'),
@@ -359,7 +359,8 @@ var google, django, gettext;
                                         language.replace('_', '-') + '</option>'));
                 });
                 this.update(tabs);
-                $('#content').find('h1').append('&nbsp;').append(self.$select);
+
+                $('#content, .container-fluid').find('h1').append('&nbsp;').append(self.$select);
             },
 
             update: function(tabs) {
@@ -393,6 +394,7 @@ var google, django, gettext;
                 $fields: $('.mt').filter(
                     'input:visible, textarea:visible, select:visible, iframe').filter(':parents(.tabular)')
             });
+
             MainSwitch.init(grouper.groupedTranslations, createTabs(grouper.groupedTranslations));
 
             // Note: The add another functionality in admin is injected through inline javascript,
@@ -404,7 +406,7 @@ var google, django, gettext;
             });
 
             // Group fields in (existing) tabular inlines
-            $('div.inline-group > div.tabular').each(function () {
+            $('div.inline-group > div.tabular, div.inline-wrapper > div.tabular').each(function () {
                 var tabularInlineGroup = new TabularInlineGroup({
                     'id': $(this).parent().attr('id')
                 });
