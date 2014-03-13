@@ -141,12 +141,20 @@ def add_manager(model):
         current_manager = getattr(model, attname)
         if isinstance(current_manager, MultilingualManager):
             continue
+        prev_class = current_manager.__class__
         if current_manager.__class__ is Manager:
             current_manager.__class__ = MultilingualManager
         else:
             class NewMultilingualManager(MultilingualManager, current_manager.__class__):
                 pass
             current_manager.__class__ = NewMultilingualManager
+        if model._default_manager.__class__ is prev_class:
+            # Normally model._default_manager is a reference to one of model's managers
+            # (and would be patched by the way).
+            # However, in some rare situations (mostly proxy models)
+            # model._default_manager is not the same instance as one of managers, but it
+            # share the same class.
+            model._default_manager.__class__ = current_manager.__class__
 
 
 def patch_constructor(model):
