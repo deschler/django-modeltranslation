@@ -262,7 +262,8 @@ class ManagerTestModel(models.Model):
 
 class CustomManager(models.Manager):
     def get_query_set(self):
-        return super(CustomManager, self).get_query_set().filter(title__contains='a').exclude(description__contains='x')
+        return (super(CustomManager, self).get_query_set().filter(title__contains='a')
+                .exclude(description__contains='x'))
 
     def foo(self):
         return 'bar'
