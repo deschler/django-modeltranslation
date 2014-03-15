@@ -2173,8 +2173,8 @@ class TranslationAdminTest(ModeltranslationTestBase):
         # (email only) and one for each translation field (text and title).
         fieldsets = [
             ('', {'fields': ['email']}),
-            ('title', {'classes': ('mt-fieldset',), 'fields': ['title_de', 'title_en']}),
-            ('text', {'classes': ('mt-fieldset',), 'fields': ['text_de', 'text_en']}),
+            ('Title', {'classes': ('mt-fieldset',), 'fields': ['title_de', 'title_en']}),
+            ('Text', {'classes': ('mt-fieldset',), 'fields': ['text_de', 'text_en']}),
         ]
         self.assertEqual(ma.get_fieldsets(request), fieldsets)
         self.assertEqual(ma.get_fieldsets(request, self.test_obj), fieldsets)
@@ -2187,8 +2187,8 @@ class TranslationAdminTest(ModeltranslationTestBase):
             exclude = ('email',)
         ma = GroupFieldsetsModelAdmin(models.GroupFieldsetsModel, self.site)
         fieldsets = [
-            ('title', {'classes': ('mt-fieldset',), 'fields': ['title_de', 'title_en']}),
-            ('text', {'classes': ('mt-fieldset',), 'fields': ['text_de', 'text_en']}),
+            ('Title', {'classes': ('mt-fieldset',), 'fields': ['title_de', 'title_en']}),
+            ('Text', {'classes': ('mt-fieldset',), 'fields': ['text_de', 'text_en']}),
         ]
         self.assertEqual(ma.get_fieldsets(request), fieldsets)
         self.assertEqual(ma.get_fieldsets(request, self.test_obj), fieldsets)
@@ -2200,7 +2200,7 @@ class TranslationAdminTest(ModeltranslationTestBase):
         ma = GroupFieldsetsModelAdmin(models.GroupFieldsetsModel, self.site)
         fieldsets = [
             ('', {'fields': ['email']}),
-            ('title', {'classes': ('mt-fieldset',), 'fields': ['title_de', 'title_en']})
+            ('Title', {'classes': ('mt-fieldset',), 'fields': ['title_de', 'title_en']})
         ]
         self.assertEqual(ma.get_fieldsets(request), fieldsets)
         self.assertEqual(ma.get_fieldsets(request, self.test_obj), fieldsets)
