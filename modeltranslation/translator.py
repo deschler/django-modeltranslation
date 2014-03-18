@@ -81,8 +81,8 @@ class TranslationOptions(with_metaclass(FieldsAggregationMetaClass, object)):
             if isinstance(self.required_languages, (tuple, list)):
                 self._check_languages(self.required_languages)
             else:
-                self._check_languages(self.required_languages.iterkeys(), extra=('default',))
-                for fieldnames in self.required_languages.itervalues():
+                self._check_languages(self.required_languages.keys(), extra=('default',))
+                for fieldnames in self.required_languages.values():
                     if any(f not in self.fields for f in fieldnames):
                         raise ImproperlyConfigured(
                             'Fieldname in required_languages which is not in fields option.')
