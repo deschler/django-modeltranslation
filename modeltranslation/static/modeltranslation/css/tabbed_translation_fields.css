@@ -36,7 +36,7 @@ backward compatibility:
 .ui-tabs .ui-tabs-panel { display: block; border-width: 0; padding: 1em 1.4em; background: none; }
 .ui-tabs .ui-tabs-hide {
     position: absolute;
-    left: -10000px;
+    display: none;
 }
 
 /* custom tabs theme */
