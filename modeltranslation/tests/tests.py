@@ -2442,6 +2442,29 @@ class TestManager(ModeltranslationTestBase):
             b = list(manager.rewrite(False).values_list('title', flat=True))
         self.assertEqual(a, b)
 
+        i2 = manager.create(title_en='en2', title_de='de2')
+
+        # This is somehow repetitive...
+        self.assertEqual('en', get_language())
+        self.assertDictListEqual(manager.values('title'), [{'title': 'en'}, {'title': 'en2'}])
+        with override('de'):
+            self.assertDictListEqual(manager.values('title'), [{'title': 'de'}, {'title': 'de2'}])
+
+        # When no fields are passed, list all fields in current language.
+        self.assertDictListEqual(manager.values(), [
+            {'id': 1, 'title': 'en', 'visits': 0, 'description': None},
+            {'id': 2, 'title': 'en2', 'visits': 0, 'description': None}
+        ])
+
+        # Raw_values
+        self.assertDictListEqual(manager.raw_values(), manager.rewrite(False).values())
+        i2.delete()
+        self.assertDictListEqual(manager.raw_values(), [
+            {'id': 1, 'title': 'en', 'title_en': 'en', 'title_de': 'de',
+             'visits': 0, 'visits_en': 0, 'visits_de': 0,
+             'description': None, 'description_en': None, 'description_de': None},
+        ])
+
     def test_custom_manager(self):
         """Test if user-defined manager is still working"""
         n = models.CustomManagerTestModel(title='')
@@ -2675,31 +2698,6 @@ class TestManager(ModeltranslationTestBase):
         self.assertEqual(len(l1), len(l2))
         for (a, b) in zip(l1, l2):
             self.assertDictEqual(a, b)
-
-    def test_values(self):
-        manager = models.ManagerTestModel.objects
-        manager.create(title_en='en', title_de='de')
-        i2 = manager.create(title_en='en2', title_de='de2')
-
-        self.assertEqual('en', get_language())
-        self.assertDictListEqual(manager.values('title'), [{'title': 'en'}, {'title': 'en2'}])
-        with override('de'):
-            self.assertDictListEqual(manager.values('title'), [{'title': 'de'}, {'title': 'de2'}])
-
-        # When no fields are passed, list all fields in current language.
-        self.assertDictListEqual(manager.values(), [
-            {'id': 1, 'title': 'en', 'visits': 0, 'description': None},
-            {'id': 2, 'title': 'en2', 'visits': 0, 'description': None}
-        ])
-
-        # Raw_values
-        self.assertDictListEqual(manager.raw_values(), manager.rewrite(False).values())
-        i2.delete()
-        self.assertDictListEqual(manager.raw_values(), [
-            {'id': 1, 'title': 'en', 'title_en': 'en', 'title_de': 'de',
-             'visits': 0, 'visits_en': 0, 'visits_de': 0,
-             'description': None, 'description_en': None, 'description_de': None},
-        ])
 
 
 class TranslationModelFormTest(ModeltranslationTestBase):
