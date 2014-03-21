@@ -12,6 +12,7 @@ from django.db.models.sql.where import Constraint
 from django.utils.tree import Node
 
 from modeltranslation import settings
+from modeltranslation.fields import TranslationField
 from modeltranslation.utils import (build_localized_fieldname, get_language,
                                     auto_populate)
 
@@ -267,6 +268,10 @@ class MultilingualQuerySet(models.query.QuerySet):
     def values(self, *fields):
         if not self._rewrite:
             return super(MultilingualQuerySet, self).values(*fields)
+        if not fields:
+            # Emulate original queryset behaviour: get all fields that are not translation fields
+            fields = [f.attname for f in self.model._meta.fields
+                      if not isinstance(f, TranslationField)]
         new_args = []
         for key in fields:
             new_args.append(rewrite_lookup_key(self.model, key))
