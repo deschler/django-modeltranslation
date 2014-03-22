@@ -2417,7 +2417,7 @@ class TestManager(ModeltranslationTestBase):
 
     def test_values(self):
         manager = models.ManagerTestModel.objects
-        manager.create(title_en='en', title_de='de')
+        id1 = manager.create(title_en='en', title_de='de').pk
 
         raw_obj = manager.raw_values('title')[0]
         obj = manager.values('title')[0]
@@ -2443,6 +2443,7 @@ class TestManager(ModeltranslationTestBase):
         self.assertEqual(a, b)
 
         i2 = manager.create(title_en='en2', title_de='de2')
+        id2 = i2.pk
 
         # This is somehow repetitive...
         self.assertEqual('en', get_language())
@@ -2452,19 +2453,20 @@ class TestManager(ModeltranslationTestBase):
 
         # When no fields are passed, list all fields in current language.
         self.assertEqual(list(manager.values()), [
-            {'id': 1, 'title': 'en', 'visits': 0, 'description': None},
-            {'id': 2, 'title': 'en2', 'visits': 0, 'description': None}
+            {'id': id1, 'title': 'en', 'visits': 0, 'description': None},
+            {'id': id2, 'title': 'en2', 'visits': 0, 'description': None}
         ])
         # Similar for values_list
-        self.assertEqual(list(manager.values_list()), [(1, 'en', 0, None), (2, 'en2', 0, None)])
+        self.assertEqual(list(manager.values_list()), [(id1, 'en', 0, None), (id2, 'en2', 0, None)])
         with override('de'):
-            self.assertEqual(list(manager.values_list()), [(1, 'de', 0, None), (2, 'de2', 0, None)])
+            self.assertEqual(list(manager.values_list()),
+                             [(id1, 'de', 0, None), (id2, 'de2', 0, None)])
 
         # Raw_values
         self.assertEqual(list(manager.raw_values()), list(manager.rewrite(False).values()))
         i2.delete()
         self.assertEqual(list(manager.raw_values()), [
-            {'id': 1, 'title': 'en', 'title_en': 'en', 'title_de': 'de',
+            {'id': id1, 'title': 'en', 'title_en': 'en', 'title_de': 'de',
              'visits': 0, 'visits_en': 0, 'visits_de': 0,
              'description': None, 'description_en': None, 'description_de': None},
         ])
