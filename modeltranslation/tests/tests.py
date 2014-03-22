@@ -2446,20 +2446,24 @@ class TestManager(ModeltranslationTestBase):
 
         # This is somehow repetitive...
         self.assertEqual('en', get_language())
-        self.assertDictListEqual(manager.values('title'), [{'title': 'en'}, {'title': 'en2'}])
+        self.assertEqual(list(manager.values('title')), [{'title': 'en'}, {'title': 'en2'}])
         with override('de'):
-            self.assertDictListEqual(manager.values('title'), [{'title': 'de'}, {'title': 'de2'}])
+            self.assertEqual(list(manager.values('title')), [{'title': 'de'}, {'title': 'de2'}])
 
         # When no fields are passed, list all fields in current language.
-        self.assertDictListEqual(manager.values(), [
+        self.assertEqual(list(manager.values()), [
             {'id': 1, 'title': 'en', 'visits': 0, 'description': None},
             {'id': 2, 'title': 'en2', 'visits': 0, 'description': None}
         ])
+        # Similar for values_list
+        self.assertEqual(list(manager.values_list()), [(1, 'en', 0, None), (2, 'en2', 0, None)])
+        with override('de'):
+            self.assertEqual(list(manager.values_list()), [(1, 'de', 0, None), (2, 'de2', 0, None)])
 
         # Raw_values
-        self.assertDictListEqual(manager.raw_values(), manager.rewrite(False).values())
+        self.assertEqual(list(manager.raw_values()), list(manager.rewrite(False).values()))
         i2.delete()
-        self.assertDictListEqual(manager.raw_values(), [
+        self.assertEqual(list(manager.raw_values()), [
             {'id': 1, 'title': 'en', 'title_en': 'en', 'title_de': 'de',
              'visits': 0, 'visits_en': 0, 'visits_de': 0,
              'description': None, 'description_en': None, 'description_de': None},
@@ -2693,11 +2697,6 @@ class TestManager(ModeltranslationTestBase):
         # Check if fields assigned in constructor hasn't been ignored.
         self.assertEqual(inst.titlea, 'title_a')
         self.assertEqual(inst.titleb, 'title_b')
-
-    def assertDictListEqual(self, l1, l2):
-        self.assertEqual(len(l1), len(l2))
-        for (a, b) in zip(l1, l2):
-            self.assertDictEqual(a, b)
 
 
 class TranslationModelFormTest(ModeltranslationTestBase):

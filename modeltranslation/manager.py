@@ -194,6 +194,9 @@ class MultilingualQuerySet(models.query.QuerySet):
             kwargs[new_key] = self._rewrite_f(val)
         return super(MultilingualQuerySet, self)._filter_or_exclude(negate, *args, **kwargs)
 
+    def _get_original_fields(self):
+        return [f.attname for f in self.model._meta.fields if not isinstance(f, TranslationField)]
+
     def order_by(self, *field_names):
         """
         Change translatable field names in an ``order_by`` argument
@@ -270,8 +273,7 @@ class MultilingualQuerySet(models.query.QuerySet):
             return super(MultilingualQuerySet, self).values(*fields)
         if not fields:
             # Emulate original queryset behaviour: get all fields that are not translation fields
-            fields = [f.attname for f in self.model._meta.fields
-                      if not isinstance(f, TranslationField)]
+            fields = self._get_original_fields()
         new_args = []
         for key in fields:
             new_args.append(rewrite_lookup_key(self.model, key))
@@ -283,6 +285,9 @@ class MultilingualQuerySet(models.query.QuerySet):
     def values_list(self, *fields, **kwargs):
         if not self._rewrite:
             return super(MultilingualQuerySet, self).values_list(*fields, **kwargs)
+        if not fields:
+            # Emulate original queryset behaviour: get all fields that are not translation fields
+            fields = self._get_original_fields()
         new_args = []
         for key in fields:
             new_args.append(rewrite_lookup_key(self.model, key))
