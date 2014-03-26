@@ -2499,7 +2499,7 @@ class TestManager(ModeltranslationTestBase):
         self.assertEqual(list(manager.raw_values()), list(manager.rewrite(False).values()))
         i2.delete()
         self.assertEqual(list(manager.raw_values()), [
-            {'id': id1, 'title': '', 'title_en': 'en', 'title_de': 'de',
+            {'id': id1, 'title': 'en', 'title_en': 'en', 'title_de': 'de',
              'visits': 0, 'visits_en': 0, 'visits_de': 0,
              'description': None, 'description_en': None, 'description_de': None},
         ])

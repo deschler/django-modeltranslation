@@ -87,6 +87,8 @@ class OriginalTranslationField(fields.Field):
         if self._prev_descriptor and self.name == self.attname:
             return self._prev_descriptor.__get__(model_instance, None)
         value = super(OriginalTranslationField, self).pre_save(model_instance, add)
+        if add:
+            return value
         # Get value stored at instantiation time
         return model_instance.__dict__.get(self.attname, value)
 
