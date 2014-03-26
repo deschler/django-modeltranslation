@@ -43,14 +43,14 @@ to be supported in early development stages of a new Django version, we aim
 to achieve support once it has seen its first release candidate.
 
 The supported Python versions can be derived from the supported Django versions.
-Example where we support Python 2.5, 2.6 and 2.7:
+Example (from the past) where we support Python 2.5, 2.6 and 2.7:
 
  * Django 1.3 (old stable) supports Python 2.5, 2.6, 2.7
  * Django 1.4 (current stable) supports Python 2.5, 2.6, 2.7
  * Django 1.5 (dev) supports Python 2.6, 2.7
 
-Python 3 is currently not supported, but should be added no later than it becomes
-officially supported by Django.
+Python 3 is supported since 0.7 release. Although 0.6 release supported Django 1.5
+(which started Python 3 compliance), it was not Python 3 ready yet.
 
 
 Unittests
@@ -73,7 +73,8 @@ Continuous Integration
 
 The project uses `Travis CI`_ for continuous integration tests. Hooks provided
 by Github are active, so that each push and pull request is automatically run
-against our `Travis CI config`_.
+against our `Travis CI config`_, checking code against different databases,
+Python and Django versions.
 
 
 Contributing Documentation
