@@ -272,7 +272,7 @@ class ModeltranslationTest(ModeltranslationTestBase):
         self.assertEqual(orig.creation_counter, de.creation_counter)
         # But they compare unequal
         self.assertNotEqual(orig, en)
-        self.assertNotEqual(orig, de)
+        self.assertNotEqual(de, orig)
         self.assertNotEqual(en, de)
         # Their hashes too
         self.assertNotEqual(hash(orig), hash(en))

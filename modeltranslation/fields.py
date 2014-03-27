@@ -83,6 +83,17 @@ def original_field_factory(baseclass):
 
 
 class OriginalTranslationField(fields.Field):
+    def __eq__(self, other):
+        if isinstance(other, TranslationField):
+            return other.__eq__(self)
+        return super(OriginalTranslationField, self).__eq__(other)
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __hash__(self):
+        return super(OriginalTranslationField, self).__hash__()
+
     def pre_save(self, model_instance, add):
         if self._prev_descriptor and self.name == self.attname:
             return self._prev_descriptor.__get__(model_instance, None)
