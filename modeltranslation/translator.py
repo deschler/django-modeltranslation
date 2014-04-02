@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.utils.six import with_metaclass
+from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Manager, ForeignKey, OneToOneField
 from django.db.models.base import ModelBase
 from django.db.models.signals import post_init
@@ -57,6 +58,7 @@ class TranslationOptions(with_metaclass(FieldsAggregationMetaClass, object)):
     with translated model. This model may be not translated itself.
     ``related_fields`` contains names of reverse lookup fields.
     """
+    required_languages = ()
 
     def __init__(self, model):
         """
@@ -68,6 +70,28 @@ class TranslationOptions(with_metaclass(FieldsAggregationMetaClass, object)):
         self.local_fields = dict((f, set()) for f in self.fields)
         self.fields = dict((f, set()) for f in self.fields)
         self.related_fields = []
+
+    def validate(self):
+        """
+        Perform options validation.
+        """
+        # TODO: at the moment only required_languages is validated.
+        # Maybe check other options as well?
+        if self.required_languages:
+            if isinstance(self.required_languages, (tuple, list)):
+                self._check_languages(self.required_languages)
+            else:
+                self._check_languages(self.required_languages.keys(), extra=('default',))
+                for fieldnames in self.required_languages.values():
+                    if any(f not in self.fields for f in fieldnames):
+                        raise ImproperlyConfigured(
+                            'Fieldname in required_languages which is not in fields option.')
+
+    def _check_languages(self, languages, extra=()):
+        correct = mt_settings.AVAILABLE_LANGUAGES + list(extra)
+        if any(l not in correct for l in languages):
+            raise ImproperlyConfigured(
+                'Language in required_languages which is not in AVAILABLE_LANGUAGES.')
 
     def update(self, other):
         """
@@ -141,12 +165,20 @@ def add_manager(model):
         current_manager = getattr(model, attname)
         if isinstance(current_manager, MultilingualManager):
             continue
+        prev_class = current_manager.__class__
         if current_manager.__class__ is Manager:
             current_manager.__class__ = MultilingualManager
         else:
             class NewMultilingualManager(MultilingualManager, current_manager.__class__):
                 pass
             current_manager.__class__ = NewMultilingualManager
+        if model._default_manager.__class__ is prev_class:
+            # Normally model._default_manager is a reference to one of model's managers
+            # (and would be patched by the way).
+            # However, in some rare situations (mostly proxy models)
+            # model._default_manager is not the same instance as one of managers, but it
+            # share the same class.
+            model._default_manager.__class__ = current_manager.__class__
 
 
 def patch_constructor(model):
@@ -333,6 +365,9 @@ class Translator(object):
 
             # Find inherited fields and create options instance for the model.
             opts = self._get_options_for_model(model, opts_class, **options)
+
+            # Now, when all fields are initialized and inherited, validate configuration.
+            opts.validate()
 
             # Mark the object explicitly as registered -- registry caches
             # options of all models, registered or not.

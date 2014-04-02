@@ -24,8 +24,8 @@ Outside a view (or a template), i.e. in normal Python code, a call to the
 ``get_language`` function still returns a value, but it might not what you
 expect. Since no request is involved, Django's machinery for discovering the
 user's preferred language is not activated. For this reason modeltranslation
-adds a thin wrapper around the function which guarantees that the returned
-language is listed in the ``LANGUAGES`` setting.
+adds a thin wrapper (``modeltranslation.utils.get_language``) around the function
+which guarantees that the returned language is listed in the ``LANGUAGES`` setting.
 
 The unittests use the ``django.utils.translation.trans_real`` functions to
 activate and deactive a specific language outside a view function.

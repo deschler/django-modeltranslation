@@ -16,7 +16,7 @@ class UniqueNullableModel(models.Model):
     title = models.CharField(null=True, unique=True, max_length=255)
 
 
-########## Proxy model testing
+# ######### Proxy model testing
 
 class ProxyTestModel(TestModel):
     class Meta:
@@ -26,7 +26,7 @@ class ProxyTestModel(TestModel):
         return self.title
 
 
-########## Fallback values testing
+# ######### Fallback values testing
 
 class FallbackModel(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
@@ -43,7 +43,7 @@ class FallbackModel2(models.Model):
     email = models.EmailField(blank=True, null=True)
 
 
-########## File fields testing
+# ######### File fields testing
 
 class FileFieldsModel(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
@@ -52,7 +52,7 @@ class FileFieldsModel(models.Model):
     image = models.ImageField(upload_to='modeltranslation_tests', null=True, blank=True)
 
 
-########## Foreign Key / OneToOneField testing
+# ######### Foreign Key / OneToOneField testing
 
 class NonTranslated(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
@@ -74,7 +74,7 @@ class OneToOneFieldModel(models.Model):
     non = models.OneToOneField(NonTranslated, blank=True, null=True, related_name="test_o2o")
 
 
-########## Custom fields testing
+# ######### Custom fields testing
 
 class OtherFieldsModel(models.Model):
     """
@@ -139,7 +139,7 @@ class DescriptorModel(models.Model):
     trans = FancyField()
 
 
-########## Multitable inheritance testing
+# ######### Multitable inheritance testing
 
 class MultitableModelA(models.Model):
     titlea = models.CharField(ugettext_lazy('title a'), max_length=255)
@@ -157,7 +157,7 @@ class MultitableModelD(MultitableModelB):
     titled = models.CharField(ugettext_lazy('title d'), max_length=255)
 
 
-########## Abstract inheritance testing
+# ######### Abstract inheritance testing
 
 class AbstractModelA(models.Model):
     titlea = models.CharField(ugettext_lazy('title a'), max_length=255)
@@ -178,7 +178,7 @@ class AbstractModelB(AbstractModelA):
         self.titleb = 'title_b'
 
 
-########## Fields inheritance testing
+# ######### Fields inheritance testing
 
 class Slugged(models.Model):
     slug = models.CharField(max_length=255)
@@ -219,7 +219,7 @@ class RichTextPage(Page, RichText):
     pass
 
 
-########## Admin testing
+# ######### Admin testing
 
 class DataModel(models.Model):
     data = models.TextField(blank=True, null=True)
@@ -239,7 +239,7 @@ class NameModel(models.Model):
     slug2 = models.SlugField(max_length=100)
 
 
-########## Integration testing
+# ######### Integration testing
 
 class ThirdPartyModel(models.Model):
     name = models.CharField(max_length=20)
@@ -249,7 +249,7 @@ class ThirdPartyRegisteredModel(models.Model):
     name = models.CharField(max_length=20)
 
 
-########## Manager testing
+# ######### Manager testing
 
 class ManagerTestModel(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
@@ -262,7 +262,8 @@ class ManagerTestModel(models.Model):
 
 class CustomManager(models.Manager):
     def get_query_set(self):
-        return super(CustomManager, self).get_query_set().filter(title__contains='a')
+        return (super(CustomManager, self).get_query_set().filter(title__contains='a')
+                .exclude(description__contains='x'))
 
     def foo(self):
         return 'bar'
@@ -270,6 +271,7 @@ class CustomManager(models.Manager):
 
 class CustomManagerTestModel(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
+    description = models.CharField(max_length=255, null=True, db_column='xyz')
     objects = CustomManager()
 
     another_mgr_name = CustomManager()
@@ -287,3 +289,12 @@ class CustomManager2(models.Manager):
 class CustomManager2TestModel(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
     objects = CustomManager2()
+
+
+# ######### Required fields testing
+
+class RequiredModel(models.Model):
+    non_req = models.CharField(max_length=10, blank=True)
+    req = models.CharField(max_length=10)
+    req_reg = models.CharField(max_length=10)
+    req_en_reg = models.CharField(max_length=10)

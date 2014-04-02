@@ -8,11 +8,6 @@ from django.conf import settings
 INSTALLED_APPS = tuple(settings.INSTALLED_APPS) + (
     'modeltranslation.tests',
 )
-# IMO this is unimportant
-#if django.VERSION[0] >= 1 and django.VERSION[1] >= 3:
-    #INSTALLED_APPS += ('django.contrib.staticfiles',)
-
-#STATIC_URL = '/static/'
 
 LANGUAGES = (('de', 'Deutsch'),
              ('en', 'English'))

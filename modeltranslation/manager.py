@@ -6,11 +6,13 @@ django-linguo by Zach Mathew
 https://github.com/zmathew/django-linguo
 """
 from django.db import models
+from django.db.models import FieldDoesNotExist
 from django.db.models.fields.related import RelatedField, RelatedObject
 from django.db.models.sql.where import Constraint
 from django.utils.tree import Node
 
 from modeltranslation import settings
+from modeltranslation.fields import TranslationField
 from modeltranslation.utils import (build_localized_fieldname, get_language,
                                     auto_populate)
 
@@ -71,6 +73,27 @@ def get_fields_to_translatable_models(model):
         _F2TM_CACHE[model] = results
     return _F2TM_CACHE[model]
 
+_C2F_CACHE = {}
+
+
+def get_field_by_colum_name(model, col):
+    # First, try field with the column name
+    try:
+        field = model._meta.get_field(col)
+        if field.column == col:
+            return field
+    except FieldDoesNotExist:
+        pass
+    field = _C2F_CACHE.get((model, col), None)
+    if field:
+        return field
+    # D'oh, need to search through all of them.
+    for field in model._meta.fields:
+        if field.column == col:
+            _C2F_CACHE[(model, col)] = field
+            return field
+    assert False, "No field found for column %s" % col
+
 
 class MultilingualQuerySet(models.query.QuerySet):
     def __init__(self, *args, **kwargs):
@@ -126,6 +149,8 @@ class MultilingualQuerySet(models.query.QuerySet):
         """
         if isinstance(q, tuple) and isinstance(q[0], Constraint):
             c = q[0]
+            if c.field is None:
+                c.field = get_field_by_colum_name(self.model, c.col)
             new_name = rewrite_lookup_key(self.model, c.field.name)
             if c.field.name != new_name:
                 c.field = self.model._meta.get_field(new_name)
@@ -168,6 +193,9 @@ class MultilingualQuerySet(models.query.QuerySet):
             del kwargs[key]
             kwargs[new_key] = self._rewrite_f(val)
         return super(MultilingualQuerySet, self)._filter_or_exclude(negate, *args, **kwargs)
+
+    def _get_original_fields(self):
+        return [f.attname for f in self.model._meta.fields if not isinstance(f, TranslationField)]
 
     def order_by(self, *field_names):
         """
@@ -243,6 +271,9 @@ class MultilingualQuerySet(models.query.QuerySet):
     def values(self, *fields):
         if not self._rewrite:
             return super(MultilingualQuerySet, self).values(*fields)
+        if not fields:
+            # Emulate original queryset behaviour: get all fields that are not translation fields
+            fields = self._get_original_fields()
         new_args = []
         for key in fields:
             new_args.append(rewrite_lookup_key(self.model, key))
@@ -254,6 +285,9 @@ class MultilingualQuerySet(models.query.QuerySet):
     def values_list(self, *fields, **kwargs):
         if not self._rewrite:
             return super(MultilingualQuerySet, self).values_list(*fields, **kwargs)
+        if not fields:
+            # Emulate original queryset behaviour: get all fields that are not translation fields
+            fields = self._get_original_fields()
         new_args = []
         for key in fields:
             new_args.append(rewrite_lookup_key(self.model, key))

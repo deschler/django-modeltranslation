@@ -38,7 +38,7 @@ from modeltranslation.utils import (build_css_class, build_localized_fieldname,
 request = None
 
 # How many models are registered for tests.
-TEST_MODELS = 27
+TEST_MODELS = 28
 
 
 class reload_override_settings(override_settings):
@@ -2173,8 +2173,8 @@ class TranslationAdminTest(ModeltranslationTestBase):
         # (email only) and one for each translation field (text and title).
         fieldsets = [
             ('', {'fields': ['email']}),
-            ('title', {'classes': ('mt-fieldset',), 'fields': ['title_de', 'title_en']}),
-            ('text', {'classes': ('mt-fieldset',), 'fields': ['text_de', 'text_en']}),
+            ('Title', {'classes': ('mt-fieldset',), 'fields': ['title_de', 'title_en']}),
+            ('Text', {'classes': ('mt-fieldset',), 'fields': ['text_de', 'text_en']}),
         ]
         self.assertEqual(ma.get_fieldsets(request), fieldsets)
         self.assertEqual(ma.get_fieldsets(request, self.test_obj), fieldsets)
@@ -2187,8 +2187,8 @@ class TranslationAdminTest(ModeltranslationTestBase):
             exclude = ('email',)
         ma = GroupFieldsetsModelAdmin(models.GroupFieldsetsModel, self.site)
         fieldsets = [
-            ('title', {'classes': ('mt-fieldset',), 'fields': ['title_de', 'title_en']}),
-            ('text', {'classes': ('mt-fieldset',), 'fields': ['text_de', 'text_en']}),
+            ('Title', {'classes': ('mt-fieldset',), 'fields': ['title_de', 'title_en']}),
+            ('Text', {'classes': ('mt-fieldset',), 'fields': ['text_de', 'text_en']}),
         ]
         self.assertEqual(ma.get_fieldsets(request), fieldsets)
         self.assertEqual(ma.get_fieldsets(request, self.test_obj), fieldsets)
@@ -2200,7 +2200,7 @@ class TranslationAdminTest(ModeltranslationTestBase):
         ma = GroupFieldsetsModelAdmin(models.GroupFieldsetsModel, self.site)
         fieldsets = [
             ('', {'fields': ['email']}),
-            ('title', {'classes': ('mt-fieldset',), 'fields': ['title_de', 'title_en']})
+            ('Title', {'classes': ('mt-fieldset',), 'fields': ['title_de', 'title_en']})
         ]
         self.assertEqual(ma.get_fieldsets(request), fieldsets)
         self.assertEqual(ma.get_fieldsets(request, self.test_obj), fieldsets)
@@ -2417,7 +2417,7 @@ class TestManager(ModeltranslationTestBase):
 
     def test_values(self):
         manager = models.ManagerTestModel.objects
-        manager.create(title_en='en', title_de='de')
+        id1 = manager.create(title_en='en', title_de='de').pk
 
         raw_obj = manager.raw_values('title')[0]
         obj = manager.values('title')[0]
@@ -2441,6 +2441,35 @@ class TestManager(ModeltranslationTestBase):
         with override('de'):
             b = list(manager.rewrite(False).values_list('title', flat=True))
         self.assertEqual(a, b)
+
+        i2 = manager.create(title_en='en2', title_de='de2')
+        id2 = i2.pk
+
+        # This is somehow repetitive...
+        self.assertEqual('en', get_language())
+        self.assertEqual(list(manager.values('title')), [{'title': 'en'}, {'title': 'en2'}])
+        with override('de'):
+            self.assertEqual(list(manager.values('title')), [{'title': 'de'}, {'title': 'de2'}])
+
+        # When no fields are passed, list all fields in current language.
+        self.assertEqual(list(manager.values()), [
+            {'id': id1, 'title': 'en', 'visits': 0, 'description': None},
+            {'id': id2, 'title': 'en2', 'visits': 0, 'description': None}
+        ])
+        # Similar for values_list
+        self.assertEqual(list(manager.values_list()), [(id1, 'en', 0, None), (id2, 'en2', 0, None)])
+        with override('de'):
+            self.assertEqual(list(manager.values_list()),
+                             [(id1, 'de', 0, None), (id2, 'de2', 0, None)])
+
+        # Raw_values
+        self.assertEqual(list(manager.raw_values()), list(manager.rewrite(False).values()))
+        i2.delete()
+        self.assertEqual(list(manager.raw_values()), [
+            {'id': id1, 'title': 'en', 'title_en': 'en', 'title_de': 'de',
+             'visits': 0, 'visits_en': 0, 'visits_de': 0,
+             'description': None, 'description_en': None, 'description_de': None},
+        ])
 
     def test_custom_manager(self):
         """Test if user-defined manager is still working"""
@@ -2709,3 +2738,46 @@ class ProxyModelTest(ModeltranslationTestBase):
         self.assertEqual(n.title, m.title)
         self.assertEqual(n.title_de, m.title_de)
         self.assertEqual(n.title_en, m.title_en)
+
+
+class TestRequired(ModeltranslationTestBase):
+    def assertRequired(self, field_name):
+        self.assertFalse(self.opts.get_field(field_name).blank)
+
+    def assertNotRequired(self, field_name):
+        self.assertTrue(self.opts.get_field(field_name).blank)
+
+    def test_required(self):
+        self.opts = models.RequiredModel._meta
+
+        # All non required
+        self.assertNotRequired('non_req')
+        self.assertNotRequired('non_req_en')
+        self.assertNotRequired('non_req_de')
+
+        # Original required, but translated fields not - default behaviour
+        self.assertRequired('req')
+        self.assertNotRequired('req_en')
+        self.assertNotRequired('req_de')
+
+        # Set all translated field required
+        self.assertRequired('req_reg')
+        self.assertRequired('req_reg_en')
+        self.assertRequired('req_reg_de')
+
+        # Set some translated field required
+        self.assertRequired('req_en_reg')
+        self.assertRequired('req_en_reg_en')
+        self.assertNotRequired('req_en_reg_de')
+
+        # Test validation
+        inst = models.RequiredModel()
+        inst.req = 'abc'
+        inst.req_reg = 'def'
+        try:
+            inst.full_clean()
+        except ValidationError as e:
+            error_fields = set(e.message_dict.keys())
+            self.assertEqual(set(('req_reg_en', 'req_en_reg', 'req_en_reg_en')), error_fields)
+        else:
+            self.fail('ValidationError not raised!')
