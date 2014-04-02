@@ -174,12 +174,39 @@ var google, django, gettext;
                             '><a href="#' + tabId + '">' + lang.replace('_', '-') + '</a></li>');
                     tabsList.append(tab);
                     tabsContainer.append(panel);
+                    
+                    addOriginalContentInTab(tab);
                 });
                 insertionPoint.el[insertionPoint.insert](tabsContainer);
                 tabsContainer.tabs();
                 tabs.push(tabsContainer);
             });
             return tabs;
+        }
+
+        // Add the original content value (first tab content), in other tabs.
+        function addOriginalContentInTab(tab) {
+            $(tab).find('a').click(function() {
+                
+                var idDefaultAnchor = $(this).closest('ul').find('a:first').attr('id');
+                var idThisAnchor = $(this).attr('id');
+
+                if (idThisAnchor != idDefaultAnchor) {
+                    var DefaultTabContent = $('div[aria-labelledby="'+idDefaultAnchor+'"]');
+                    var DefaultValue = $(DefaultTabContent).find('input, textarea').val();
+                    var ThisTabContent = $('div[aria-labelledby="'+idThisAnchor+'"]').find('.form-row');
+                    
+                    // Check if exist...
+                    var DefaultValueContent = $(ThisTabContent).find('div.mt-original');
+                    if (DefaultValueContent.length == 0) {
+                        DefaultValueContent = $('<div/>', {'class': 'mt-original'})
+                                              .html('Original: <span class="mt-original-content"></span>')
+                                              .appendTo(ThisTabContent);
+                    }
+
+                    $(DefaultValueContent).find('span.mt-original-content').html(DefaultValue);
+                }
+            });
         }
 
         function handleAddAnotherInline() {
@@ -372,6 +399,9 @@ var google, django, gettext;
                         } catch(e) {
                             tab.tabs('option', 'active', parseInt(self.$select.val(), 10));
                         }
+
+                        // For run trigger in addOriginalContentInTab function...
+                        $('ul.ui-tabs-nav li.ui-state-active a').trigger('click');
                     });
                 });
             },
