@@ -91,6 +91,9 @@ Make sure that the ``modeltranslation`` app is listed in your
         ....
     )
 
+.. important::
+    If you want to use the admin integration, ``modeltranslation`` must be put
+    before ``django.contrib.admin``.
 
 .. _settings-languages:
 
