@@ -70,8 +70,11 @@ class Command(NoArgsCommand):
             db_table = model._meta.db_table
             model_full_name = '%s.%s' % (model._meta.app_label, model._meta.module_name)
             opts = translator.get_options_for_model(model)
-            for field_name in opts.local_fields.keys():
-                missing_langs = list(self.get_missing_languages(field_name, db_table))
+            for field_name, fields in opts.local_fields.items():
+                # Take `db_column` attribute into account
+                field = list(fields)[0]
+                column_name = field.db_column if field.db_column else field_name
+                missing_langs = list(self.get_missing_languages(column_name, db_table))
                 if missing_langs:
                     found_missing_fields = True
                     print_missing_langs(missing_langs, field_name, model_full_name)
