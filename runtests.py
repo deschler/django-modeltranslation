@@ -2,6 +2,7 @@
 import os
 import sys
 
+import django
 from django.conf import settings
 from django.core.management import call_command
 
@@ -34,18 +35,21 @@ def runtests():
 
         # Configure test environment
         settings.configure(
-            DATABASES = DATABASES,
-            INSTALLED_APPS = (
+            DATABASES=DATABASES,
+            INSTALLED_APPS=(
                 'modeltranslation',
             ),
-            ROOT_URLCONF = None, # tests override urlconf, but it still needs to be defined
-            LANGUAGES = (
+            ROOT_URLCONF=None,  # tests override urlconf, but it still needs to be defined
+            LANGUAGES=(
                 ('en', 'English'),
             ),
         )
 
+    if django.get_version() >= '1.7':
+        django.setup()
     failures = call_command(
         'test', 'modeltranslation', interactive=False, failfast=False, verbosity=2)
+
     sys.exit(bool(failures))
 
 
