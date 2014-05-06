@@ -3,6 +3,9 @@
 ModelForms
 ==========
 
+``ModelForms`` for multilanguage models are defined and handled as typical ``ModelForms``.
+Please note, however, that they shouldn't be defined next to models (see :ref:`a note <register-precautions>`).
+
 Editing multilanguage models with all translation fields in the admin backend is quite sensible.
 However, presenting all model fields to the user on the frontend may be not the right way.
 Here comes the ``TranslationModelForm`` which strip out all translation fields::

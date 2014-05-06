@@ -128,6 +128,28 @@ As these fields are added to the registered model class as fully valid Django
 model fields, they will appear in the db schema for the model although it has
 not been specified on the model explicitly.
 
+.. _register-precautions:
+
+Precautions regarding registration approach
+*******************************************
+
+Be aware that registration approach (as opposed to base-class approach) to
+models translation has a few caveats, though (despite many pros).
+
+First important thing to note is the fact that translatable models are being patched - that means
+their fields list is not final until the `MT` code executes. In normal circumstances it shouldn't
+affect anything - as long as ``models.py`` contain only models' related code.
+
+For example: consider a project when a ``ModelForm`` is declared in ``models.py`` just after
+its model. When the file is executed, the form gets prepared - but it will be frozen with
+old fields list (without translation fields). That's because ``ModelForm`` will be created before
+`MT` would add new fields to the model (``ModelForm`` gather fields info at class creation time, not
+instantiation time). Proper solution is to define the form in ``forms.py``, which wouldn't be
+imported alongside with ``models.py`` (and rather imported from views file or urlconf).
+
+Generally, for seamless integration with `MT` (and as sensible design, anyway),
+the ``models.py`` should contain only bare models and model related logic.
+
 .. _db-fields:
 
 Committing fields to database
