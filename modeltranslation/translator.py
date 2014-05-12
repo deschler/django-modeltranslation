@@ -152,6 +152,13 @@ def add_translation_fields(model, opts):
         model._meta._fill_fields_cache()
 
 
+def has_custom_queryset(manager):
+    "Check whether manager (or its parents) has declared some custom get_queryset method."
+    old_diff = getattr(manager, 'get_query_set', None) != getattr(Manager, 'get_query_set', None)
+    new_diff = getattr(manager, 'get_queryset', None) != getattr(Manager, 'get_queryset', None)
+    return old_diff or new_diff
+
+
 def add_manager(model):
     """
     Monkey patches the original model to use MultilingualManager instead of
@@ -170,7 +177,7 @@ def add_manager(model):
         else:
             class NewMultilingualManager(MultilingualManager, manager.__class__):
                 use_for_related_fields = getattr(
-                    manager.__class__, "use_for_related_fields", False)
+                    manager.__class__, "use_for_related_fields", not has_custom_queryset(manager))
             manager.__class__ = NewMultilingualManager
 
     for _, attname, cls in model._meta.concrete_managers + model._meta.abstract_managers:
