@@ -200,7 +200,7 @@ var google, django, gettext;
                     var DefaultValueContent = $(ThisTabContent).find('div.mt-original');
                     if (DefaultValueContent.length == 0) {
                         DefaultValueContent = $('<div/>', {'class': 'mt-original'})
-                                              .html('Original: <span class="mt-original-content"></span>')
+                                              .html('<label>Original:</label> <span class="mt-original-content"></span>')
                                               .appendTo(ThisTabContent);
 			$(DefaultValueContent).prev().addClass("mt-prev-original");
                     }
@@ -450,6 +450,13 @@ var google, django, gettext;
                     });
                 });
             });
+
+	    // If have a default language....
+	    try {
+		var idioma = $("h1 select option:contains('"+mt_default_lang+"')").val();
+		$("h1 select").val(idioma).trigger("change");
+	    } catch(err) {}
         }
+	
     });
 }());
