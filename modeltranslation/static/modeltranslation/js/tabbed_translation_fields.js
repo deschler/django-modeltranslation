@@ -202,6 +202,7 @@ var google, django, gettext;
                         DefaultValueContent = $('<div/>', {'class': 'mt-original'})
                                               .html('Original: <span class="mt-original-content"></span>')
                                               .appendTo(ThisTabContent);
+			$(DefaultValueContent).prev().addClass("mt-prev-original");
                     }
 
                     $(DefaultValueContent).find('span.mt-original-content').html(DefaultValue);
