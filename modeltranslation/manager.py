@@ -314,7 +314,11 @@ class MultilingualManager(models.Manager):
         return self.get_queryset().raw_values(*args, **kwargs)
 
     def get_queryset(self):
-        qs = super(MultilingualManager, self).get_query_set()
+        if hasattr(super(MultilingualManager, self), 'get_queryset'):
+            qs = super(MultilingualManager, self).get_queryset()
+        else:  # Django 1.4 / 1.5 compat
+            qs = super(MultilingualManager, self).get_query_set()
+
         if qs.__class__ == models.query.QuerySet:
             qs.__class__ = MultilingualQuerySet
         else:
