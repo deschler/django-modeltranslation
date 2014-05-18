@@ -305,15 +305,15 @@ class MultilingualManager(models.Manager):
     use_for_related_fields = True
 
     def rewrite(self, *args, **kwargs):
-        return self.get_query_set().rewrite(*args, **kwargs)
+        return self.get_queryset().rewrite(*args, **kwargs)
 
     def populate(self, *args, **kwargs):
-        return self.get_query_set().populate(*args, **kwargs)
+        return self.get_queryset().populate(*args, **kwargs)
 
     def raw_values(self, *args, **kwargs):
-        return self.get_query_set().raw_values(*args, **kwargs)
+        return self.get_queryset().raw_values(*args, **kwargs)
 
-    def get_query_set(self):
+    def get_queryset(self):
         qs = super(MultilingualManager, self).get_query_set()
         if qs.__class__ == models.query.QuerySet:
             qs.__class__ = MultilingualQuerySet
@@ -325,3 +325,5 @@ class MultilingualManager(models.Manager):
         qs._post_init()
         qs._rewrite_applied_operations()
         return qs
+
+    get_query_set = get_queryset
