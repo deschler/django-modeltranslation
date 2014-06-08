@@ -10,7 +10,6 @@ You will need to execute this command in two cases:
 Credits: Heavily inspired by django-transmeta's sync_transmeta_db command.
 """
 from optparse import make_option
-from django.conf import settings
 from django.core.management.base import NoArgsCommand
 from django.core.management.color import no_style
 from django.db import connection, transaction
