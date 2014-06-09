@@ -387,7 +387,10 @@ class Translator(object):
             opts.registered = True
 
             # Add translation fields to the model.
-            add_translation_fields(model, opts)
+            if model._meta.proxy:
+                delete_cache_fields(model)
+            else:
+                add_translation_fields(model, opts)
 
             # Delete all fields cache for related model (parent and children)
             for related_obj in model._meta.get_all_related_objects():
