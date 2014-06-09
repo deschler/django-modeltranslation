@@ -10,6 +10,12 @@ from django.db.models import FieldDoesNotExist
 from django.db.models.fields.related import RelatedField, RelatedObject
 from django.db.models.sql.where import Constraint
 from django.utils.tree import Node
+try:
+    from django.db.models.lookups import Lookup
+    from django.db.models.sql.datastructures import Col
+    NEW_LOOKUPS = True
+except ImportError:
+    NEW_LOOKUPS = False
 
 from modeltranslation import settings
 from modeltranslation.fields import TranslationField
@@ -143,11 +149,26 @@ class MultilingualQuerySet(models.query.QuerySet):
         self._rewrite_where(self.query.having)
         self._rewrite_order()
 
+    # This method was not present in django-linguo
+    def _rewrite_col(self, col):
+        """Django 1.7 column name rewriting"""
+        if isinstance(col, Col):
+            new_name = rewrite_lookup_key(self.model, col.target.name)
+            if col.target.name != new_name:
+                new_field = self.model._meta.get_field(new_name)
+                if col.target is col.source:
+                    col.source = new_field
+                col.target = new_field
+        elif hasattr(col, 'col'):
+            self._rewrite_col(col.col)
+        elif hasattr(col, 'lhs'):
+            self._rewrite_col(col.lhs)
+
     def _rewrite_where(self, q):
         """
         Rewrite field names inside WHERE tree.
         """
-        if isinstance(q, tuple) and isinstance(q[0], Constraint):
+        if not NEW_LOOKUPS and isinstance(q, tuple) and isinstance(q[0], Constraint):
             c = q[0]
             if c.field is None:
                 c.field = get_field_by_colum_name(self.model, c.col)
@@ -155,6 +176,8 @@ class MultilingualQuerySet(models.query.QuerySet):
             if c.field.name != new_name:
                 c.field = self.model._meta.get_field(new_name)
                 c.col = c.field.column
+        elif NEW_LOOKUPS and isinstance(q, Lookup):
+            self._rewrite_col(q.lhs)
         if isinstance(q, Node):
             for child in q.children:
                 self._rewrite_where(child)
