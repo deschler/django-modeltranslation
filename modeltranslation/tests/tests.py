@@ -5,6 +5,7 @@ import os
 import shutil
 import imp
 
+import django
 from django import forms
 from django.conf import settings as django_settings
 from django.contrib.admin.sites import AdminSite
@@ -2295,6 +2296,8 @@ class ThirdPartyAppIntegrationTest(ModeltranslationTestBase):
         class CreationForm(forms.ModelForm):
             class Meta:
                 model = self.model
+                if django.get_version() >= '1.6':
+                    fields = '__all__'
 
         creation_form = CreationForm({'name': 'abc'})
         inst = creation_form.save()
@@ -2715,6 +2718,8 @@ class TranslationModelFormTest(ModeltranslationTestBase):
         class TestModelForm(TranslationModelForm):
             class Meta:
                 model = models.TestModel
+                if django.get_version() >= '1.6':
+                    fields = '__all__'
 
         form = TestModelForm()
         self.assertEqual(list(form.base_fields),
