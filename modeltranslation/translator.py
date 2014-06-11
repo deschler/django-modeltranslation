@@ -152,6 +152,13 @@ def add_translation_fields(model, opts):
         model._meta._fill_fields_cache()
 
 
+def has_custom_queryset(manager):
+    "Check whether manager (or its parents) has declared some custom get_queryset method."
+    old_diff = getattr(manager, 'get_query_set', None) != getattr(Manager, 'get_query_set', None)
+    new_diff = getattr(manager, 'get_queryset', None) != getattr(Manager, 'get_queryset', None)
+    return old_diff or new_diff
+
+
 def add_manager(model):
     """
     Monkey patches the original model to use MultilingualManager instead of
@@ -161,17 +168,22 @@ def add_manager(model):
     """
     if model._meta.abstract:
         return
+
+    def patch_manager_class(manager):
+        if isinstance(manager, MultilingualManager):
+            return
+        if manager.__class__ is Manager:
+            manager.__class__ = MultilingualManager
+        else:
+            class NewMultilingualManager(MultilingualManager, manager.__class__):
+                use_for_related_fields = getattr(
+                    manager.__class__, "use_for_related_fields", not has_custom_queryset(manager))
+            manager.__class__ = NewMultilingualManager
+
     for _, attname, cls in model._meta.concrete_managers + model._meta.abstract_managers:
         current_manager = getattr(model, attname)
-        if isinstance(current_manager, MultilingualManager):
-            continue
         prev_class = current_manager.__class__
-        if current_manager.__class__ is Manager:
-            current_manager.__class__ = MultilingualManager
-        else:
-            class NewMultilingualManager(MultilingualManager, current_manager.__class__):
-                pass
-            current_manager.__class__ = NewMultilingualManager
+        patch_manager_class(current_manager)
         if model._default_manager.__class__ is prev_class:
             # Normally model._default_manager is a reference to one of model's managers
             # (and would be patched by the way).
@@ -179,6 +191,7 @@ def add_manager(model):
             # model._default_manager is not the same instance as one of managers, but it
             # share the same class.
             model._default_manager.__class__ = current_manager.__class__
+    patch_manager_class(model._base_manager)
 
 
 def patch_constructor(model):
@@ -374,7 +387,10 @@ class Translator(object):
             opts.registered = True
 
             # Add translation fields to the model.
-            add_translation_fields(model, opts)
+            if model._meta.proxy:
+                delete_cache_fields(model)
+            else:
+                add_translation_fields(model, opts)
 
             # Delete all fields cache for related model (parent and children)
             for related_obj in model._meta.get_all_related_objects():

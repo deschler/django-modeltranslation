@@ -5,6 +5,7 @@ import os
 import shutil
 import imp
 
+import django
 from django import forms
 from django.conf import settings as django_settings
 from django.contrib.admin.sites import AdminSite
@@ -15,23 +16,27 @@ from django.core.files.storage import default_storage
 from django.core.management import call_command
 from django.db import IntegrityError
 from django.db.models import Q, F
-from django.db.models.loading import AppCache
 from django.test import TestCase, TransactionTestCase
 from django.test.utils import override_settings
 from django.utils import six
 from django.utils.translation import get_language, override, trans_real
 
+try:
+    from django.apps import apps as django_apps
+    NEW_APP_CACHE = True
+except ImportError:
+    from django.db.models.loading import AppCache
+    NEW_APP_CACHE = False
+
+
 from modeltranslation import admin, settings as mt_settings, translator
 from modeltranslation.forms import TranslationModelForm
 from modeltranslation.models import autodiscover
-from modeltranslation.tests import models
-from modeltranslation.tests.translation import (FallbackModel2TranslationOptions,
-                                                FieldInheritanceCTranslationOptions,
-                                                FieldInheritanceETranslationOptions)
 from modeltranslation.tests.test_settings import TEST_SETTINGS
 from modeltranslation.utils import (build_css_class, build_localized_fieldname,
                                     auto_populate, fallbacks)
 
+models = translation = None
 
 # None of the following tests really depend on the content of the request,
 # so we'll just pass in None.
@@ -61,7 +66,7 @@ def default_fallback():
 @override_settings(**TEST_SETTINGS)
 class ModeltranslationTransactionTestBase(TransactionTestCase):
     urls = 'modeltranslation.tests.urls'
-    cache = AppCache()
+    cache = django_apps if NEW_APP_CACHE else AppCache()
     synced = False
 
     @classmethod
@@ -76,11 +81,9 @@ class ModeltranslationTransactionTestBase(TransactionTestCase):
             # In order to perform only one syncdb
             ModeltranslationTestBase.synced = True
             with override_settings(**TEST_SETTINGS):
-                import sys
-
                 # 1. Reload translation in case USE_I18N was False
-                from django.utils import translation
-                imp.reload(translation)
+                from django.utils import translation as dj_trans
+                imp.reload(dj_trans)
 
                 # 2. Reload MT because LANGUAGES likely changed.
                 imp.reload(mt_settings)
@@ -90,19 +93,23 @@ class ModeltranslationTransactionTestBase(TransactionTestCase):
                 # 3. Reset test models (because autodiscover have already run, those models
                 #    have translation fields, but for languages previously defined. We want
                 #    to be sure that 'de' and 'en' are available)
-                del cls.cache.app_models['tests']
-                imp.reload(models)
-                cls.cache.load_app('modeltranslation.tests')
-                sys.modules.pop('modeltranslation.tests.translation', None)
+                if not NEW_APP_CACHE:
+                    cls.cache.load_app('modeltranslation.tests')
 
                 # 4. Autodiscover
-                from modeltranslation import models as aut_models
-                imp.reload(aut_models)
+                from modeltranslation.models import handle_translation_registrations
+                handle_translation_registrations()
 
                 # 5. Syncdb (``migrate=False`` in case of south)
                 from django.db import connections, DEFAULT_DB_ALIAS
                 call_command('syncdb', verbosity=0, migrate=False, interactive=False,
                              database=connections[DEFAULT_DB_ALIAS].alias, load_initial_data=False)
+
+                # A rather dirty trick to import models into module namespace, but not before
+                # tests app has been added into INSTALLED_APPS and loaded
+                # (that's why this is not imported in normal import section)
+                global models, translation
+                from modeltranslation.tests import models, translation  # NOQA
 
     def setUp(self):
         self._old_language = get_language()
@@ -151,7 +158,10 @@ class TestAutodiscover(ModeltranslationTestBase):
     def tearDown(self):
         import sys
         # Rollback model classes
-        del self.cache.app_models['test_app']
+        if NEW_APP_CACHE:
+            del self.cache.all_models['test_app']
+        else:
+            del self.cache.app_models['test_app']
         from .test_app import models
         imp.reload(models)
         # Delete translation modules from import cache
@@ -412,7 +422,7 @@ class ModeltranslationTest(ModeltranslationTestBase):
         self.assertEqual(n.title, '')  # Falling back to default field value
         self.assertEqual(
             n.text,
-            FallbackModel2TranslationOptions.fallback_values['text'])
+            translation.FallbackModel2TranslationOptions.fallback_values['text'])
 
     def _compare_instances(self, x, y, field):
         self.assertEqual(getattr(x, field), getattr(y, field),
@@ -1840,7 +1850,7 @@ class ModelInheritanceFieldAggregationTest(ModeltranslationTestBase):
     in modeltranslation.
     """
     def test_field_aggregation(self):
-        clsb = FieldInheritanceCTranslationOptions
+        clsb = translation.FieldInheritanceCTranslationOptions
         self.assertTrue('titlea' in clsb.fields)
         self.assertTrue('titleb' in clsb.fields)
         self.assertTrue('titlec' in clsb.fields)
@@ -1848,7 +1858,7 @@ class ModelInheritanceFieldAggregationTest(ModeltranslationTestBase):
         self.assertEqual(tuple, type(clsb.fields))
 
     def test_multi_inheritance(self):
-        clsb = FieldInheritanceETranslationOptions
+        clsb = translation.FieldInheritanceETranslationOptions
         self.assertTrue('titlea' in clsb.fields)
         self.assertTrue('titleb' in clsb.fields)
         self.assertTrue('titlec' in clsb.fields)
@@ -2286,6 +2296,8 @@ class ThirdPartyAppIntegrationTest(ModeltranslationTestBase):
         class CreationForm(forms.ModelForm):
             class Meta:
                 model = self.model
+                if django.get_version() >= '1.6':
+                    fields = '__all__'
 
         creation_form = CreationForm({'name': 'abc'})
         inst = creation_form.save()
@@ -2706,6 +2718,8 @@ class TranslationModelFormTest(ModeltranslationTestBase):
         class TestModelForm(TranslationModelForm):
             class Meta:
                 model = models.TestModel
+                if django.get_version() >= '1.6':
+                    fields = '__all__'
 
         form = TestModelForm()
         self.assertEqual(list(form.base_fields),

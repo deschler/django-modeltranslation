@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import django
 
 
 def autodiscover():
@@ -74,4 +75,5 @@ def handle_translation_registrations(*args, **kwargs):
     autodiscover()
 
 
-handle_translation_registrations()
+if django.get_version() < '1.7':
+    handle_translation_registrations()

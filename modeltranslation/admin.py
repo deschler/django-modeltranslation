@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from copy import deepcopy
 
+import django
 from django.contrib import admin
 from django.contrib.admin.options import BaseModelAdmin, flatten_fieldsets, InlineModelAdmin
 from django.contrib.contenttypes import generic
@@ -9,7 +10,8 @@ from django import forms
 # Ensure that models are registered for translation before TranslationAdmin
 # runs. The import is supposed to resolve a race condition between model import
 # and translation registration in production (see issue #19).
-import modeltranslation.models  # NOQA
+if django.get_version() < '1.7':
+    import modeltranslation.models  # NOQA
 from modeltranslation import settings as mt_settings
 from modeltranslation.translator import translator
 from modeltranslation.utils import (

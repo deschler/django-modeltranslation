@@ -9,7 +9,13 @@ Requirements
 +------------------+------------+-----------+
 | Modeltranslation | Python     | Django    |
 +==================+============+===========+
-| >=0.7            | 3.2 - 3.3  | 1.5 - 1.6 |
+| >=0.8            | 3.2 - 3.3  | 1.5 - 1.7 |
+|                  +------------+-----------+
+|                  | 2.7        |       1.7 |
+|                  +------------+-----------+
+|                  | 2.6 - 2.7  | 1.4 - 1.6 |
++------------------+------------+-----------+
+| ==0.7            | 3.2 - 3.3  | 1.5 - 1.6 |
 |                  +------------+-----------+
 |                  | 2.6 - 2.7  | 1.4 - 1.6 |
 +------------------+------------+-----------+
@@ -91,6 +97,9 @@ Make sure that the ``modeltranslation`` app is listed in your
         ....
     )
 
+.. important::
+    If you want to use the admin integration, ``modeltranslation`` must be put
+    before ``django.contrib.admin``.
 
 .. _settings-languages:
 

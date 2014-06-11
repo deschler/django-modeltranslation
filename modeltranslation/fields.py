@@ -249,6 +249,9 @@ class TranslationField(object):
         else:
             super(TranslationField, self).save_form_data(instance, data)
 
+    def deconstruct(self):
+        return self.translated_field.deconstruct()
+
     def south_field_triple(self):
         """
         Returns a suitable description of this field for South.
