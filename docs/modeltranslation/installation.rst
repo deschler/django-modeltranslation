@@ -9,9 +9,15 @@ Requirements
 +------------------+------------+-----------+
 | Modeltranslation | Python     | Django    |
 +==================+============+===========+
-| >=0.7            | 3.2 - 3.3  |       1.5 |
+| >=0.8            | 3.2 - 3.3  | 1.5 - 1.7 |
 |                  +------------+-----------+
-|                  | 2.6 - 2.7  | 1.4 - 1.5 |
+|                  | 2.7        |       1.7 |
+|                  +------------+-----------+
+|                  | 2.6 - 2.7  | 1.4 - 1.6 |
++------------------+------------+-----------+
+| ==0.7            | 3.2 - 3.3  | 1.5 - 1.6 |
+|                  +------------+-----------+
+|                  | 2.6 - 2.7  | 1.4 - 1.6 |
 +------------------+------------+-----------+
 | ==0.5, ==0.6     | 2.6 - 2.7  |       1.5 |
 |                  +------------+-----------+
@@ -63,9 +69,9 @@ in detail in the following sections:
 #. Create a ``translation.py`` in your app directory and register
    ``TranslationOptions`` for every model you want to translate.
 
-#. Sync the database using ``manage.py syncdb`` (note that this only applies
+#. Sync the database using ``./manage.py syncdb`` (note that this only applies
    if the models registered in the ``translation.py`` did not have been
-   synced to the database before. If they did - read further down what to do
+   synced to the database before. If they did - read :ref:`further down <db-fields>` what to do
    in that case.
 
 
@@ -91,6 +97,9 @@ Make sure that the ``modeltranslation`` app is listed in your
         ....
     )
 
+.. important::
+    If you want to use the admin integration, ``modeltranslation`` must be put
+    before ``django.contrib.admin``.
 
 .. _settings-languages:
 
@@ -116,9 +125,18 @@ and ``en`` in your project, set the ``LANGUAGES`` variable like this (where
     rather required for Django to be able to (statically) translate the verbose
     names of the languages using the standard ``i18n`` solution.
 
+.. note::
+    If, for some reason, you don't want to translate objects to exactly the same languages as
+    the site would be displayed into, you can set ``MODELTRANSLATION_LANGUAGES`` (see below).
+    For any language in ``LANGUAGES`` not present in ``MODELTRANSLATION_LANGUAGES``, the *default
+    language* will be used when accessing translated content. For any language in
+    ``MODELTRANSLATION_LANGUAGES`` not present in ``LANGUAGES``, probably nobody will see translated
+    content, since the site wouldn't be accessible in that language.
+
 .. warning::
     Modeltranslation does not enforce the ``LANGUAGES`` setting to be defined
-    in your project. When it isn't present, it defaults to Django's
+    in your project. When it isn't present (and neither is ``MODELTRANSLATION_LANGUAGES``), it
+    defaults to Django's
     `global LANGUAGES setting <https://github.com/django/django/blob/master/django/conf/global_settings.py>`_
     instead, and that are quite a number of languages!
 
@@ -145,6 +163,30 @@ the value has to be in ``settings.LANGUAGES``, otherwise an
 Example::
 
     MODELTRANSLATION_DEFAULT_LANGUAGE = 'en'
+
+
+``MODELTRANSLATION_LANGUAGES``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. versionadded:: 0.8
+
+Default: same as ``LANGUAGES``
+
+Allow to set languages the content will be translated into. If not set, by default all
+languages listed in ``LANGUAGES`` will be used.
+
+Example::
+
+    LANGUAGES = (
+        ('en', 'English'),
+        ('de', 'German'),
+        ('pl', 'Polish'),
+    )
+    MODELTRANSLATION_LANGUAGES = ('en', 'de')
+
+.. note::
+    This setting may become useful if your users shall produce content for a restricted
+    set of languages, while your application is translated into a greater number of locales.
 
 
 .. _settings-modeltranslation_fallback_languages:
@@ -318,3 +360,17 @@ Default: ``True``
 .. versionadded:: 0.6
 
 Control if :ref:`fallback <fallback>` (both language and value) will occur.
+
+
+.. _settings-modeltranslation_loaddata_retain_locale:
+
+``MODELTRANSLATION_LOADDATA_RETAIN_LOCALE``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Default: ``True``
+
+.. versionadded:: 0.7
+
+Control if the ``loaddata`` command should leave the settings-defined locale alone. Setting it
+to ``False`` will result in previous behaviour of ``loaddata``: inserting fixtures to database
+under `en-us` locale.

@@ -148,3 +148,13 @@ def fallbacks(enable=True):
         yield
     finally:
         settings.ENABLE_FALLBACKS = current_enable_fallbacks
+
+
+def parse_field(setting, field_name, default):
+    """
+    Extract result from single-value or dict-type setting like fallback_values.
+    """
+    if isinstance(setting, dict):
+        return setting.get(field_name, default)
+    else:
+        return setting

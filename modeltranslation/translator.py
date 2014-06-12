@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
-from django.conf import settings
 from django.utils.six import with_metaclass
-from django.db.models import Manager, ForeignKey
+from django.core.exceptions import ImproperlyConfigured
+from django.db.models import Manager, ForeignKey, OneToOneField
 from django.db.models.base import ModelBase
 from django.db.models.signals import post_init
-from django.dispatch import receiver
 
 from modeltranslation import settings as mt_settings
 from modeltranslation.fields import (NONE, create_translation_field, TranslationFieldDescriptor,
-                                     TranslatedRelationIdDescriptor)
+                                     TranslatedRelationIdDescriptor,
+                                     LanguageCacheSingleObjectDescriptor)
 from modeltranslation.manager import MultilingualManager, rewrite_lookup_key
-from modeltranslation.utils import build_localized_fieldname
+from modeltranslation.utils import build_localized_fieldname, parse_field
 
 
 class AlreadyRegistered(Exception):
@@ -58,6 +58,7 @@ class TranslationOptions(with_metaclass(FieldsAggregationMetaClass, object)):
     with translated model. This model may be not translated itself.
     ``related_fields`` contains names of reverse lookup fields.
     """
+    required_languages = ()
 
     def __init__(self, model):
         """
@@ -69,6 +70,28 @@ class TranslationOptions(with_metaclass(FieldsAggregationMetaClass, object)):
         self.local_fields = dict((f, set()) for f in self.fields)
         self.fields = dict((f, set()) for f in self.fields)
         self.related_fields = []
+
+    def validate(self):
+        """
+        Perform options validation.
+        """
+        # TODO: at the moment only required_languages is validated.
+        # Maybe check other options as well?
+        if self.required_languages:
+            if isinstance(self.required_languages, (tuple, list)):
+                self._check_languages(self.required_languages)
+            else:
+                self._check_languages(self.required_languages.keys(), extra=('default',))
+                for fieldnames in self.required_languages.values():
+                    if any(f not in self.fields for f in fieldnames):
+                        raise ImproperlyConfigured(
+                            'Fieldname in required_languages which is not in fields option.')
+
+    def _check_languages(self, languages, extra=()):
+        correct = mt_settings.AVAILABLE_LANGUAGES + list(extra)
+        if any(l not in correct for l in languages):
+            raise ImproperlyConfigured(
+                'Language in required_languages which is not in AVAILABLE_LANGUAGES.')
 
     def update(self, other):
         """
@@ -104,13 +127,15 @@ def add_translation_fields(model, opts):
 
     Adds newly created translation fields to the given translation options.
     """
+    model_empty_values = getattr(opts, 'empty_values', NONE)
     for field_name in opts.local_fields.keys():
-        for l in settings.LANGUAGES:
+        field_empty_value = parse_field(model_empty_values, field_name, NONE)
+        for l in mt_settings.AVAILABLE_LANGUAGES:
             # Create a dynamic translation field
             translation_field = create_translation_field(
-                model=model, field_name=field_name, lang=l[0])
+                model=model, field_name=field_name, lang=l, empty_value=field_empty_value)
             # Construct the name for the localized field
-            localized_field_name = build_localized_fieldname(field_name, l[0])
+            localized_field_name = build_localized_fieldname(field_name, l)
             # Check if the model already has a field by that name
             if hasattr(model, localized_field_name):
                 raise ValueError(
@@ -121,6 +146,18 @@ def add_translation_fields(model, opts):
             model.add_to_class(localized_field_name, translation_field)
             opts.add_translation_field(field_name, translation_field)
 
+    # Rebuild information about parents fields. If there are opts.local_fields, field cache would be
+    # invalidated (by model._meta.add_field() function). Otherwise, we need to do it manually.
+    if len(opts.local_fields) == 0:
+        model._meta._fill_fields_cache()
+
+
+def has_custom_queryset(manager):
+    "Check whether manager (or its parents) has declared some custom get_queryset method."
+    old_diff = getattr(manager, 'get_query_set', None) != getattr(Manager, 'get_query_set', None)
+    new_diff = getattr(manager, 'get_queryset', None) != getattr(Manager, 'get_queryset', None)
+    return old_diff or new_diff
+
 
 def add_manager(model):
     """
@@ -129,16 +166,32 @@ def add_manager(model):
 
     Custom managers are merged with MultilingualManager.
     """
-    for _, attname, cls in model._meta.concrete_managers:
-        current_manager = getattr(model, attname)
-        if isinstance(current_manager, MultilingualManager):
-            continue
-        if current_manager.__class__ is Manager:
-            current_manager.__class__ = MultilingualManager
+    if model._meta.abstract:
+        return
+
+    def patch_manager_class(manager):
+        if isinstance(manager, MultilingualManager):
+            return
+        if manager.__class__ is Manager:
+            manager.__class__ = MultilingualManager
         else:
-            class NewMultilingualManager(MultilingualManager, current_manager.__class__):
-                pass
-            current_manager.__class__ = NewMultilingualManager
+            class NewMultilingualManager(MultilingualManager, manager.__class__):
+                use_for_related_fields = getattr(
+                    manager.__class__, "use_for_related_fields", not has_custom_queryset(manager))
+            manager.__class__ = NewMultilingualManager
+
+    for _, attname, cls in model._meta.concrete_managers + model._meta.abstract_managers:
+        current_manager = getattr(model, attname)
+        prev_class = current_manager.__class__
+        patch_manager_class(current_manager)
+        if model._default_manager.__class__ is prev_class:
+            # Normally model._default_manager is a reference to one of model's managers
+            # (and would be patched by the way).
+            # However, in some rare situations (mostly proxy models)
+            # model._default_manager is not the same instance as one of managers, but it
+            # share the same class.
+            model._default_manager.__class__ = current_manager.__class__
+    patch_manager_class(model._base_manager)
 
 
 def patch_constructor(model):
@@ -159,10 +212,32 @@ def patch_constructor(model):
     model.__init__ = new_init
 
 
-@receiver(post_init)
 def delete_mt_init(sender, instance, **kwargs):
     if hasattr(instance, '_mt_init'):
         del instance._mt_init
+
+
+def patch_clean_fields(model):
+    """
+    Patch clean_fields method to handle different form types submission.
+    """
+    old_clean_fields = model.clean_fields
+
+    def new_clean_fields(self, exclude=None):
+        if hasattr(self, '_mt_form_pending_clear'):
+            # Some form translation fields has been marked as clearing value.
+            # Check if corresponding translated field was also saved (not excluded):
+            # - if yes, it seems like form for MT-unaware app. Ignore clearing (left value from
+            #   translated field unchanged), as if field was omitted from form
+            # - if no, then proceed as normally: clear the field
+            for field_name, value in self._mt_form_pending_clear.items():
+                field = self._meta.get_field(field_name)
+                orig_field_name = field.translated_field.name
+                if orig_field_name in exclude:
+                    field.save_form_data(self, value, check=False)
+            delattr(self, '_mt_form_pending_clear')
+        old_clean_fields(self, exclude)
+    model.clean_fields = new_clean_fields
 
 
 def patch_metaclass(model):
@@ -252,6 +327,17 @@ def populate_translation_fields(sender, kwargs):
                 raise AttributeError("Unknown population mode '%s'." % populate)
 
 
+def patch_related_object_descriptor_caching(ro_descriptor):
+    """
+    Patch SingleRelatedObjectDescriptor or ReverseSingleRelatedObjectDescriptor to use
+    language-aware caching.
+    """
+    class NewSingleObjectDescriptor(LanguageCacheSingleObjectDescriptor, ro_descriptor.__class__):
+        pass
+    ro_descriptor.accessor = ro_descriptor.related.get_accessor_name()
+    ro_descriptor.__class__ = NewSingleObjectDescriptor
+
+
 class Translator(object):
     """
     A Translator object encapsulates an instance of a translator. Models are
@@ -293,12 +379,18 @@ class Translator(object):
             # Find inherited fields and create options instance for the model.
             opts = self._get_options_for_model(model, opts_class, **options)
 
+            # Now, when all fields are initialized and inherited, validate configuration.
+            opts.validate()
+
             # Mark the object explicitly as registered -- registry caches
             # options of all models, registered or not.
             opts.registered = True
 
             # Add translation fields to the model.
-            add_translation_fields(model, opts)
+            if model._meta.proxy:
+                delete_cache_fields(model)
+            else:
+                add_translation_fields(model, opts)
 
             # Delete all fields cache for related model (parent and children)
             for related_obj in model._meta.get_all_related_objects():
@@ -310,6 +402,12 @@ class Translator(object):
             # Patch __init__ to rewrite fields
             patch_constructor(model)
 
+            # Connect signal for model
+            post_init.connect(delete_mt_init, sender=model)
+
+            # Patch clean_fields to verify form field clearing
+            patch_clean_fields(model)
+
             # Patch __metaclass__ to allow deferring to work
             patch_metaclass(model)
 
@@ -319,14 +417,8 @@ class Translator(object):
             model_fallback_undefined = getattr(opts, 'fallback_undefined', NONE)
             for field_name in opts.local_fields.keys():
                 field = model._meta.get_field(field_name)
-                if isinstance(model_fallback_values, dict):
-                    field_fallback_value = model_fallback_values.get(field_name, NONE)
-                else:
-                    field_fallback_value = model_fallback_values
-                if isinstance(model_fallback_undefined, dict):
-                    field_fallback_undefined = model_fallback_undefined.get(field_name, NONE)
-                else:
-                    field_fallback_undefined = model_fallback_undefined
+                field_fallback_value = parse_field(model_fallback_values, field_name, NONE)
+                field_fallback_undefined = parse_field(model_fallback_undefined, field_name, NONE)
                 descriptor = TranslationFieldDescriptor(
                     field,
                     fallback_languages=model_fallback_languages,
@@ -346,6 +438,11 @@ class Translator(object):
                         other_opts.related = True
                         other_opts.related_fields.append(field.related_query_name())
                         add_manager(field.rel.to)  # Add manager in case of non-registered model
+
+                if isinstance(field, OneToOneField):
+                    # Fix translated_field caching for SingleRelatedObjectDescriptor
+                    sro_descriptor = getattr(field.rel.to, field.related.get_accessor_name())
+                    patch_related_object_descriptor_caching(sro_descriptor)
 
     def unregister(self, model_or_iterable):
         """

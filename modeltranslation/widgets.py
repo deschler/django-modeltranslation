@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+from django import VERSION
 from django.forms.widgets import Media, Widget, CheckboxInput
 from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
@@ -37,7 +38,7 @@ class ClearableWidgetWrapper(Widget):
         Allows overriding the empty value.
         """
         self.widget = widget
-        self.checkbox = CheckboxInput()
+        self.checkbox = CheckboxInput(attrs={'tabindex': '-1'})
         self.empty_value = empty_value
 
     def __getattr__(self, name):
@@ -84,13 +85,14 @@ class ClearableWidgetWrapper(Widget):
             return self.empty_value
         return self.widget.value_from_datadict(data, files, name)
 
-    def _has_changed(self, initial, data):
-        """
-        Widget implementation equates ``None``s with empty strings.
-        """
-        if (initial is None and data is not None) or (initial is not None and data is None):
-            return True
-        return self.widget._has_changed(initial, data)
+    if VERSION < (1, 6):  # In Django 1.6 formfields should implement _has_changed
+        def _has_changed(self, initial, data):
+            """
+            Widget implementation equates ``None``s with empty strings.
+            """
+            if (initial is None and data is not None) or (initial is not None and data is None):
+                return True
+            return self.widget._has_changed(initial, data)
 
     def clear_checkbox_name(self, name):
         """

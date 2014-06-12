@@ -23,6 +23,10 @@ Contributors
 * Chris Adams
 * Dominique Lederer
 * Braden MacDonald
+* Karol Fuksiewicz
+* Konrad Wojas
+* Bas Peschier
+* Oleg Prans
 * And many more ... (if you miss your name here, please let us know!)
 
 .. _django-linguo: https://github.com/zmathew/django-linguo

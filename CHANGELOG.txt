@@ -1,3 +1,61 @@
+v0.7.3
+======
+Date: 2014-01-05
+
+  ADDED: Documentation for TranslationOptions fields reference and
+         south/sync_translation_fields.
+
+  FIXED: Some python3 compatibility issues.
+         (thanks Jacek Tomaszewski,
+          resolves issue #220)
+  FIXED: Clearing translated FileFields does not work with easy_thumbnails.
+         (thanks Jacek Tomaszewski,
+          resolves issue #219)
+  FIXED: Compatibility with nested inlines.
+         (thanks abstraktor,
+          resolves issue #218)
+  FIXED: Admin inlines recursion problem in Django 1.6.
+         (thanks Oleg Prans,
+          resolves issue #214)
+  FIXED: Empty FileField handling.
+         (thanks Jacek Tomaszewski,
+          resolves issue #215)
+
+
+v0.7.2
+======
+Date: 2013-11-11
+
+  ADDED: Documentation about empty_values.
+         (thanks Jacek Tomaszewski,
+          resolves issue #211)
+
+  FIXED: Proxy model handling.
+         (thanks Jacek Tomaszewsk)
+  FIXED: Abstract managers patching.
+         (thanks Jacek Tomaszewski,
+          resolves issue #212)
+
+
+v0.7.1
+======
+Date: 2013-11-07
+Packaged from revision f7c7ea174344f3dc0cf56ac3bf6e92878ed6baea
+
+  ADDED: Configurable formfields. The ultimate approach to nullable CharFields.
+         (thanks Jacek Tomaszewski,
+          resolves issue #211, ref #163, #187)
+
+  FIXED: Recursion problem with fieldset handling in Django 1.6.
+         (thanks to Bas Peschier,
+          resolves issue #214)
+
+
+v0.7
+====
+Date: 2013-10-19
+Packaged from revision 89f5e6712aaf5d5ec7e2d61940dc1a71fb08ca94
+
   ADDED: A setting to control which language are slug fields based on
          (thanks to Konrad Wojas,
           resolves issue #194)
@@ -10,13 +68,17 @@
   ADDED: Convenient admin classes which already contain proper Media
          definitions.
          (resolves issue #171)
-  ADDED: Only/defer methods to MultilingualManager.
-         (resolves issue #166)
-  ADDED: Support for ForeignKey.
+  ADDED: Only, defer, values, values_list, dates, raw_values methods to
+         MultilingualManager.
+         (resolves issue #166 adn #173)
+  ADDED: Support for ForeignKey and OneToOneField.
          (thanks to Braden MacDonald and Jacek Tomaszewski,
           resolves issue #161)
   ADDED: An auto-population option to the loaddata command.
          (resolves issue #160)
+  ADDED: A MODELTRANSLATION_LOADDATA_RETAIN_LOCALE setting for loaddata
+         command to leave locale alone.
+         (resolves issue #151)
 
   FIXED: Compatibility with Django 1.6 development version.
          (resolves issue #169)
@@ -27,7 +89,17 @@
          widgets to preserve ``None``.
          (thanks to Wojtek Ruszczewski,
           resolves issue #163)
+  FIXED: Admin prepopulated_fields is now handled properly.
+         (thanks to Rafleze,
+          resolves issue #181 and #190)
+  FIXED: Form saving when translated field is excluded (e.g. in admin)
+         (resolves issue #183)
+  FIXED: Multilingual clones are Multilingual too.
+         (resolved issue #189)
 
+CHANGED: Every model's manager is patched as MultiLingual, not only objects.
+         (resolved issue #198)
+CHANGED: Display "make null" checkboxes in model forms.
 CHANGED: MODELTRANSLATION_DEBUG setting defaults to False instead of
          settings.DEBUG.
 CHANGED: Drop support for Python 2.5 and Django 1.3.

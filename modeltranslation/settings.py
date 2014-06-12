@@ -5,7 +5,8 @@ from django.core.exceptions import ImproperlyConfigured
 
 TRANSLATION_FILES = tuple(getattr(settings, 'MODELTRANSLATION_TRANSLATION_FILES', ()))
 
-AVAILABLE_LANGUAGES = [l[0] for l in settings.LANGUAGES]
+AVAILABLE_LANGUAGES = getattr(settings, 'MODELTRANSLATION_LANGUAGES',
+                              [l[0] for l in settings.LANGUAGES])
 DEFAULT_LANGUAGE = getattr(settings, 'MODELTRANSLATION_DEFAULT_LANGUAGE', None)
 if DEFAULT_LANGUAGE and DEFAULT_LANGUAGE not in AVAILABLE_LANGUAGES:
     raise ImproperlyConfigured('MODELTRANSLATION_DEFAULT_LANGUAGE not in LANGUAGES setting.')
@@ -51,3 +52,5 @@ for key, value in FALLBACK_LANGUAGES.items():
             raise ImproperlyConfigured(
                 'MODELTRANSLATION_FALLBACK_LANGUAGES: "%s" not in LANGUAGES setting.' % lang)
 ENABLE_FALLBACKS = getattr(settings, 'MODELTRANSLATION_ENABLE_FALLBACKS', True)
+
+LOADDATA_RETAIN_LOCALE = getattr(settings, 'MODELTRANSLATION_LOADDATA_RETAIN_LOCALE', True)

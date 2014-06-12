@@ -1,7 +1,12 @@
 # -*- coding: utf-8 -*-
 from copy import deepcopy
+<<<<<<< HEAD
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
+=======
+
+import django
+>>>>>>> upstream/master
 from django.contrib import admin
 from django.contrib.admin.options import BaseModelAdmin, flatten_fieldsets, InlineModelAdmin
 from django.contrib.contenttypes import generic
@@ -10,7 +15,8 @@ from django import forms
 # Ensure that models are registered for translation before TranslationAdmin
 # runs. The import is supposed to resolve a race condition between model import
 # and translation registration in production (see issue #19).
-import modeltranslation.models  # NOQA
+if django.get_version() < '1.7':
+    import modeltranslation.models  # NOQA
 from modeltranslation import settings as mt_settings
 from modeltranslation.translator import translator
 from modeltranslation.utils import (
@@ -23,6 +29,7 @@ from django.template.loader import find_template
 
 class TranslationBaseModelAdmin(BaseModelAdmin):
     _orig_was_required = {}
+    both_empty_values_fields = ()
 
     def __init__(self, *args, **kwargs):
         super(TranslationBaseModelAdmin, self).__init__(*args, **kwargs)
@@ -61,7 +68,17 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         else:
             orig_formfield = self.formfield_for_dbfield(orig_field, **kwargs)
             field.widget = deepcopy(orig_formfield.widget)
-            if db_field.null and isinstance(field.widget, (forms.TextInput, forms.Textarea)):
+            if orig_field.name in self.both_empty_values_fields:
+                from modeltranslation.forms import NullableField, NullCharField
+                form_class = field.__class__
+                if issubclass(form_class, NullCharField):
+                    # NullableField don't work with NullCharField
+                    form_class.__bases__ = tuple(
+                        b for b in form_class.__bases__ if b != NullCharField)
+                field.__class__ = type(
+                    'Nullable%s' % form_class.__name__, (NullableField, form_class), {})
+            if ((db_field.empty_value == 'both' or orig_field.name in self.both_empty_values_fields)
+                    and isinstance(field.widget, (forms.TextInput, forms.Textarea))):
                 field.widget = ClearableWidgetWrapper(field.widget)
             css_classes = field.widget.attrs.get('class', '').split(' ')
             css_classes.append('mt')
@@ -80,6 +97,9 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
                     orig_formfield.blank = True
                     field.required = True
                     field.blank = False
+                    # Hide clearable widget for required fields
+                    if isinstance(field.widget, ClearableWidgetWrapper):
+                        field.widget = field.widget.widget
             field.widget.attrs['class'] = ' '.join(css_classes)
 
     def _exclude_original_fields(self, exclude=None):
@@ -205,7 +225,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         if exclude_languages:
             excl_languages = exclude_languages
         exclude = []
-        for orig_fieldname, translation_fields in self.trans_opts.fields.iteritems():
+        for orig_fieldname, translation_fields in self.trans_opts.fields.items():
             for tfield in translation_fields:
                 language = tfield.name.split('_')[-1]
                 if language in excl_languages and tfield not in exclude:
@@ -287,7 +307,7 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin, TranslationM
                     # Extract the original field's verbose_name for use as this
                     # fieldset's label - using ugettext_lazy in your model
                     # declaration can make that translatable.
-                    label = self.model._meta.get_field(orig_field).verbose_name
+                    label = self.model._meta.get_field(orig_field).verbose_name.capitalize()
                     temp_fieldsets[orig_field] = (label, {
                         'fields': trans_fieldnames,
                         'classes': ('mt-fieldset',)
@@ -309,7 +329,8 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin, TranslationM
         if self.declared_fieldsets:
             return self._do_get_fieldsets_pre_form_or_formset()
         return self._group_fieldsets(
-            self._do_get_fieldsets_post_form_or_formset(request, self.get_form(request, obj), obj))
+            self._do_get_fieldsets_post_form_or_formset(
+                request, self.get_form(request, obj, fields=None), obj))
 
     def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
         context['selected_language'] = get_language()
@@ -346,7 +367,7 @@ class TranslationInlineModelAdmin(TranslationBaseModelAdmin, InlineModelAdmin):
         # is displayed above the new fieldsets.
         if self.declared_fieldsets:
             return self._do_get_fieldsets_pre_form_or_formset()
-        form = self.get_formset(request, obj).form
+        form = self.get_formset(request, obj, fields=None).form
         return self._do_get_fieldsets_post_form_or_formset(request, form, obj)
 
 
@@ -370,7 +391,7 @@ class TabbedDjangoJqueryTranslationAdmin(TranslationAdmin):
     class Media:
         js = (
             'modeltranslation/js/force_jquery.js',
-            'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/jquery-ui.min.js',
+            '//ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/jquery-ui.min.js',
             'modeltranslation/js/tabbed_translation_fields.js',
         )
         css = {
@@ -382,8 +403,8 @@ TabbedTranslationAdmin = TabbedDjangoJqueryTranslationAdmin
 class TabbedExternalJqueryTranslationAdmin(TranslationAdmin):
     class Media:
         js = (
-            'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
-            'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js',
+            '//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
+            '//ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js',
             'modeltranslation/js/tabbed_translation_fields.js',
         )
         css = {

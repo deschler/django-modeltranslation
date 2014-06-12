@@ -319,3 +319,17 @@ A few simple policies are applied:
 
     class NewsAdmin(TranslationAdmin):
         group_fieldsets = True
+
+
+.. _admin-formfield:
+
+Formfields with None-checkbox
+*****************************
+
+There is the special widget which allow to choose whether empty field value should be stores as
+empty string or ``None`` (see :ref:`forms-formfield-both`).
+In ``TranslationAdmin`` some fields can use this widget regardless of their ``empty_values``
+setting::
+
+    class NewsAdmin(TranslationAdmin):
+        both_empty_values_fields = ('title', 'text')

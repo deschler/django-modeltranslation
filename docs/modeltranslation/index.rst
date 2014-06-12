@@ -14,6 +14,7 @@ Table of Contents
    installation
    registration
    usage
+   forms
    admin
    commands
    caveats

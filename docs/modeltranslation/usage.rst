@@ -122,6 +122,9 @@ These manager methods perform rewriting:
 - ``filter()``, ``exclude()``, ``get()``
 - ``order_by()``
 - ``update()``
+- ``only()``, ``defer()``
+- ``values()``, ``values_list()``
+- ``dates()``
 - ``create()``, with optional auto-population_ feature
 
 In order not to introduce differences between ``X.objects.create(...)`` and ``X(...)``, model
@@ -130,6 +133,9 @@ constructor is also patched and performs rewriting of field names prior to regul
 If one wants to turn rewriting of field names off, this can be easily achieved with
 ``rewrite(mode)`` method. ``mode`` is a boolean specifying whether rewriting should be applied.
 It can be changed several times inside a query. So ``X.objects.rewrite(False)`` turns rewriting off.
+
+``MultilingualManager`` offers one additional method: ``raw_values``. It returns actual values from
+the database, without field names rewriting. Useful for checking translated field database value.
 
 Auto-population
 ***************
@@ -220,6 +226,8 @@ title/content of the news than display empty strings. This is called *fallback*.
 
 There are several ways of controlling fallback, described below.
 
+.. _fallback_lang:
+
 Fallback languages
 ******************
 
@@ -269,6 +277,8 @@ Even more, all fallbacks may be switched on or off for just some exceptional blo
     with fallbacks(False):
         # Work with values for the active language only
 
+.. _fallback_val:
+
 Fallback values
 ***************
 
@@ -298,6 +308,8 @@ Fallback values can be also customized per model field::
 
 If current language and all fallback languages yield no field value, and no fallback values are
 defined, then modeltranslation will use field's default value.
+
+.. _fallback_undef:
 
 Fallback undefined
 ******************

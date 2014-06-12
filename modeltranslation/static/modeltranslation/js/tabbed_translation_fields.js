@@ -67,6 +67,9 @@ var google, django, gettext;
                 } else if (idBits.length === 4) {
                     // Handle standard inlines with model used by inline more than once
                     idPrefix = idBits[0] + '-' + idBits[1] + '-' + idBits[2] + '-' + idPrefix;
+                } else if (idBits.length === 5 && idBits[3] != '__prefix__') {
+                    // Handle nested inlines (https://github.com/Soaa-/django-nested-inlines)
+                    idPrefix = idBits[0] + '-' + idBits[1] + '-' + idBits[2] + '-' + idBits[3] + '-' + this.origFieldname;
                 } else if (idBits.length === 6) {
                     // Handle generic inlines
                     idPrefix = idBits[0] + '-' + idBits[1] + '-' + idBits[2] + '-' +
@@ -388,7 +391,7 @@ var google, django, gettext;
             // Group normal fields and fields in (existing) stacked inlines
             var grouper = new TranslationFieldGrouper({
                 $fields: $('.mt').filter(
-                    'input:visible, textarea:visible, select:visible').filter(':parents(.tabular)')
+                    'input:visible, textarea:visible, select:visible, iframe').filter(':parents(.tabular)')
             });
             MainSwitch.init(grouper.groupedTranslations, createTabs(grouper.groupedTranslations));
 

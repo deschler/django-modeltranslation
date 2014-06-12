@@ -6,11 +6,19 @@ django-linguo by Zach Mathew
 https://github.com/zmathew/django-linguo
 """
 from django.db import models
+from django.db.models import FieldDoesNotExist
 from django.db.models.fields.related import RelatedField, RelatedObject
 from django.db.models.sql.where import Constraint
 from django.utils.tree import Node
+try:
+    from django.db.models.lookups import Lookup
+    from django.db.models.sql.datastructures import Col
+    NEW_LOOKUPS = True
+except ImportError:
+    NEW_LOOKUPS = False
 
 from modeltranslation import settings
+from modeltranslation.fields import TranslationField
 from modeltranslation.utils import (build_localized_fieldname, get_language,
                                     auto_populate)
 
@@ -71,6 +79,27 @@ def get_fields_to_translatable_models(model):
         _F2TM_CACHE[model] = results
     return _F2TM_CACHE[model]
 
+_C2F_CACHE = {}
+
+
+def get_field_by_colum_name(model, col):
+    # First, try field with the column name
+    try:
+        field = model._meta.get_field(col)
+        if field.column == col:
+            return field
+    except FieldDoesNotExist:
+        pass
+    field = _C2F_CACHE.get((model, col), None)
+    if field:
+        return field
+    # D'oh, need to search through all of them.
+    for field in model._meta.fields:
+        if field.column == col:
+            _C2F_CACHE[(model, col)] = field
+            return field
+    assert False, "No field found for column %s" % col
+
 
 class MultilingualQuerySet(models.query.QuerySet):
     def __init__(self, *args, **kwargs):
@@ -90,10 +119,15 @@ class MultilingualQuerySet(models.query.QuerySet):
                 self.query.add_ordering(*ordering)
 
     # This method was not present in django-linguo
-    def _clone(self, *args, **kwargs):
+    def _clone(self, klass=None, *args, **kwargs):
+        if klass is not None and not issubclass(klass, MultilingualQuerySet):
+            class NewClass(klass, MultilingualQuerySet):
+                pass
+            NewClass.__name__ = 'Multilingual%s' % klass.__name__
+            klass = NewClass
         kwargs.setdefault('_rewrite', self._rewrite)
         kwargs.setdefault('_populate', self._populate)
-        return super(MultilingualQuerySet, self)._clone(*args, **kwargs)
+        return super(MultilingualQuerySet, self)._clone(klass, *args, **kwargs)
 
     # This method was not present in django-linguo
     def rewrite(self, mode=True):
@@ -115,16 +149,35 @@ class MultilingualQuerySet(models.query.QuerySet):
         self._rewrite_where(self.query.having)
         self._rewrite_order()
 
+    # This method was not present in django-linguo
+    def _rewrite_col(self, col):
+        """Django 1.7 column name rewriting"""
+        if isinstance(col, Col):
+            new_name = rewrite_lookup_key(self.model, col.target.name)
+            if col.target.name != new_name:
+                new_field = self.model._meta.get_field(new_name)
+                if col.target is col.source:
+                    col.source = new_field
+                col.target = new_field
+        elif hasattr(col, 'col'):
+            self._rewrite_col(col.col)
+        elif hasattr(col, 'lhs'):
+            self._rewrite_col(col.lhs)
+
     def _rewrite_where(self, q):
         """
         Rewrite field names inside WHERE tree.
         """
-        if isinstance(q, tuple) and isinstance(q[0], Constraint):
+        if not NEW_LOOKUPS and isinstance(q, tuple) and isinstance(q[0], Constraint):
             c = q[0]
+            if c.field is None:
+                c.field = get_field_by_colum_name(self.model, c.col)
             new_name = rewrite_lookup_key(self.model, c.field.name)
             if c.field.name != new_name:
                 c.field = self.model._meta.get_field(new_name)
                 c.col = c.field.column
+        elif NEW_LOOKUPS and isinstance(q, Lookup):
+            self._rewrite_col(q.lhs)
         if isinstance(q, Node):
             for child in q.children:
                 self._rewrite_where(child)
@@ -163,6 +216,9 @@ class MultilingualQuerySet(models.query.QuerySet):
             del kwargs[key]
             kwargs[new_key] = self._rewrite_f(val)
         return super(MultilingualQuerySet, self)._filter_or_exclude(negate, *args, **kwargs)
+
+    def _get_original_fields(self):
+        return [f.attname for f in self.model._meta.fields if not isinstance(f, TranslationField)]
 
     def order_by(self, *field_names):
         """
@@ -230,18 +286,62 @@ class MultilingualQuerySet(models.query.QuerySet):
         fields = self._append_translated(fields)
         return super(MultilingualQuerySet, self).only(*fields)
 
+    # This method was not present in django-linguo
+    def raw_values(self, *fields):
+        return super(MultilingualQuerySet, self).values(*fields)
+
+    # This method was not present in django-linguo
+    def values(self, *fields):
+        if not self._rewrite:
+            return super(MultilingualQuerySet, self).values(*fields)
+        if not fields:
+            # Emulate original queryset behaviour: get all fields that are not translation fields
+            fields = self._get_original_fields()
+        new_args = []
+        for key in fields:
+            new_args.append(rewrite_lookup_key(self.model, key))
+        vqs = super(MultilingualQuerySet, self).values(*new_args)
+        vqs.field_names = list(fields)
+        return vqs
+
+    # This method was not present in django-linguo
+    def values_list(self, *fields, **kwargs):
+        if not self._rewrite:
+            return super(MultilingualQuerySet, self).values_list(*fields, **kwargs)
+        if not fields:
+            # Emulate original queryset behaviour: get all fields that are not translation fields
+            fields = self._get_original_fields()
+        new_args = []
+        for key in fields:
+            new_args.append(rewrite_lookup_key(self.model, key))
+        return super(MultilingualQuerySet, self).values_list(*new_args, **kwargs)
+
+    # This method was not present in django-linguo
+    def dates(self, field_name, *args, **kwargs):
+        if not self._rewrite:
+            return super(MultilingualQuerySet, self).dates(field_name, *args, **kwargs)
+        new_key = rewrite_lookup_key(self.model, field_name)
+        return super(MultilingualQuerySet, self).dates(new_key, *args, **kwargs)
+
 
 class MultilingualManager(models.Manager):
     use_for_related_fields = True
 
     def rewrite(self, *args, **kwargs):
-        return self.get_query_set().rewrite(*args, **kwargs)
+        return self.get_queryset().rewrite(*args, **kwargs)
 
     def populate(self, *args, **kwargs):
-        return self.get_query_set().populate(*args, **kwargs)
+        return self.get_queryset().populate(*args, **kwargs)
 
-    def get_query_set(self):
-        qs = super(MultilingualManager, self).get_query_set()
+    def raw_values(self, *args, **kwargs):
+        return self.get_queryset().raw_values(*args, **kwargs)
+
+    def get_queryset(self):
+        if hasattr(super(MultilingualManager, self), 'get_queryset'):
+            qs = super(MultilingualManager, self).get_queryset()
+        else:  # Django 1.4 / 1.5 compat
+            qs = super(MultilingualManager, self).get_query_set()
+
         if qs.__class__ == models.query.QuerySet:
             qs.__class__ = MultilingualQuerySet
         else:
@@ -252,3 +352,5 @@ class MultilingualManager(models.Manager):
         qs._post_init()
         qs._rewrite_applied_operations()
         return qs
+
+    get_query_set = get_queryset
