@@ -192,6 +192,8 @@ can use the ``update_translation_fields`` command below. See
 Required fields
 ---------------
 
+.. versionadded:: 0.8
+
 By default, all translation fields are optional (not required). It can be changed using special
 attribute on ``TranslationOptions``, though::
 

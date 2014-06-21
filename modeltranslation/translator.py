@@ -88,7 +88,7 @@ class TranslationOptions(with_metaclass(FieldsAggregationMetaClass, object)):
                             'Fieldname in required_languages which is not in fields option.')
 
     def _check_languages(self, languages, extra=()):
-        correct = mt_settings.AVAILABLE_LANGUAGES + list(extra)
+        correct = list(mt_settings.AVAILABLE_LANGUAGES) + list(extra)
         if any(l not in correct for l in languages):
             raise ImproperlyConfigured(
                 'Language in required_languages which is not in AVAILABLE_LANGUAGES.')
