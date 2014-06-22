@@ -25,7 +25,7 @@ setup(
               'modeltranslation.management.commands'],
     package_data={'modeltranslation': ['static/modeltranslation/css/*.css',
                                        'static/modeltranslation/js/*.js']},
-    requires=['django(>=1.3)'],
+    requires=['django(>=1.4)'],
     download_url='https://github.com/deschler/django-modeltranslation/archive/%s.tar.gz' % version,
     classifiers=[
         'Programming Language :: Python',
