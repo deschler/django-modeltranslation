@@ -1,3 +1,42 @@
+v0.8b1
+======
+Date: 2014-06-22
+
+  ADDED: Detect custom get_queryset on managers.
+         (resolves issue #242,
+          thanks Jacek Tomaszewski)
+  ADDED: Support for Django 1.7 and the new app-loading refactor.
+         (resolves issue #237)
+
+  FIXED: Fixed sync_translation_fields to be compatible with PostgreSQL.
+         (resolves issue #247,
+          thanks Jacek Tomaszewski)
+  FIXED: Fieldset headers are not capitalized when group_fieldsets is enabled.
+         (resolves issue #234,
+          thanks Jacek Tomaszewski)
+  FIXED: Exclude for nullable field manager rewriting.
+         (resolves issue #231,
+          thanks Jacek Tomaszewski)
+  FIXED: Use AVAILABLE_LANGUAGES in sync_translation_fields management
+         command to detect missing fields.
+         (resolves issue #227,
+          thanks Mathieu Leplatre)
+  FIXED: Take db_column into account while syncing fields
+         (resolves issue #225,
+          thanks Mathieu Leplatre)
+
+CHANGED: Moved to get_queryset, which resolves a deprecation warning.
+         (resolves issue #244,
+          thanks Thom Wiggers)
+CHANGED: Considered iframes in tabbed_translation_fields.js to support
+         third party apps like django-summernote.
+         (resolves issue #229,
+          thanks Francesc Arpí Roca)
+CHANGED: Removed the http protocol from jquery-ui url in admin Media class.
+         (resolves issue #224,
+          thanks Francesc Arpí Roca)
+
+
 v0.7.3
 ======
 Date: 2014-01-05
