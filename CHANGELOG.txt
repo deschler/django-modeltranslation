@@ -7,10 +7,14 @@ Date: 2014-06-22
           thanks Jacek Tomaszewski)
   ADDED: Support for Django 1.7 and the new app-loading refactor.
          (resolves issue #237)
+  ADDED: Added required_languages TranslationOptions
+         (resolves issue #143)
 
   FIXED: Fixed sync_translation_fields to be compatible with PostgreSQL.
          (resolves issue #247,
           thanks Jacek Tomaszewski)
+  FIXED: Manager .values() with no fields specified behaves as expected.
+         (resolves issue #247)
   FIXED: Fieldset headers are not capitalized when group_fieldsets is enabled.
          (resolves issue #234,
           thanks Jacek Tomaszewski)
