@@ -17,8 +17,13 @@ def autodiscover():
     from modeltranslation.translator import translator
     from modeltranslation.settings import TRANSLATION_FILES, DEBUG
 
-    for app in settings.INSTALLED_APPS:
-        mod = import_module(app)
+    if django.get_version() < '1.7':
+        mods = [(app, import_module(app)) for app in settings.INSTALLED_APPS]
+    else:
+        from django.apps import apps
+        mods = [(app_config.name, app_config.module) for app_config in apps.get_app_configs()]
+
+    for (app, mod) in mods:
         # Attempt to import the app's translation module.
         module = '%s.translation' % app
         before_import_registry = copy.copy(translator._registry)

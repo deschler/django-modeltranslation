@@ -95,6 +95,12 @@ class ModeltranslationTransactionTestBase(TransactionTestCase):
                 #    to be sure that 'de' and 'en' are available)
                 if not NEW_APP_CACHE:
                     cls.cache.load_app('modeltranslation.tests')
+                else:
+                    del cls.cache.all_models['tests']
+                    import sys
+                    sys.modules.pop('modeltranslation.tests.models', None)
+                    sys.modules.pop('modeltranslation.tests.translation', None)
+                    cls.cache.get_app_config('tests').import_models(cls.cache.all_models['tests'])
 
                 # 4. Autodiscover
                 from modeltranslation.models import handle_translation_registrations
