@@ -101,6 +101,12 @@ Make sure that the ``modeltranslation`` app is listed in your
     If you want to use the admin integration, ``modeltranslation`` must be put
     before ``django.contrib.admin``.
 
+.. important::
+    If you want to use the ``django-debug-toolbar`` together with `MT`, put ``debug_toolbar``
+    as first entry in ``INSTALLED_APPS`` or use
+    `explicit setup
+    <http://django-debug-toolbar.readthedocs.org/en/latest/installation.html#explicit-setup>`_.
+
 .. _settings-languages:
 
 ``LANGUAGES``
