@@ -2510,6 +2510,12 @@ class TestManager(ModeltranslationTestBase):
         with override('de'):
             self.assertEqual(1, models.CustomManagerTestModel.objects.count())
 
+    def test_custom_manager_custom_method_name(self):
+        """Test if custom method also returns MultilingualQuerySet"""
+        from modeltranslation.manager import MultilingualQuerySet
+        qs = models.CustomManagerTestModel.objects.custom_qs()
+        self.assertIsInstance(qs, MultilingualQuerySet)
+
     def test_non_objects_manager(self):
         """Test if managers other than ``objects`` are patched too"""
         from modeltranslation.manager import MultilingualManager

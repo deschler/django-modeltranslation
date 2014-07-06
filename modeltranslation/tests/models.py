@@ -267,6 +267,11 @@ class CustomManager(models.Manager):
         return queryset.filter(title__contains='a').exclude(description__contains='x')
     get_query_set = get_queryset
 
+    def custom_qs(self):
+        sup = super(CustomManager, self)
+        queryset = sup.get_queryset() if hasattr(sup, 'get_queryset') else sup.get_query_set()
+        return queryset
+
     def foo(self):
         return 'bar'
 

@@ -324,7 +324,38 @@ class MultilingualQuerySet(models.query.QuerySet):
         return super(MultilingualQuerySet, self).dates(new_key, *args, **kwargs)
 
 
-class MultilingualManager(models.Manager):
+def get_queryset(obj):
+    if hasattr(obj, 'get_queryset'):
+        return obj.get_queryset()
+    else:  # Django 1.4 / 1.5 compat
+        return obj.get_query_set()
+
+
+class MultilingualQuerysetManager(models.Manager):
+    """
+    This class gets hooked in MRO just before plain Manager, so that every call to
+    get_queryset returns MultilingualQuerySet.
+    """
+    def get_queryset(self):
+        qs = get_queryset(super(MultilingualQuerysetManager, self))
+        return self._patch_queryset(qs)
+
+    def _patch_queryset(self, qs):
+        if qs.__class__ == models.query.QuerySet:
+            qs.__class__ = MultilingualQuerySet
+        else:
+            class NewClass(qs.__class__, MultilingualQuerySet):
+                pass
+            NewClass.__name__ = 'Multilingual%s' % qs.__class__.__name__
+            qs.__class__ = NewClass
+        qs._post_init()
+        qs._rewrite_applied_operations()
+        return qs
+
+    get_query_set = get_queryset
+
+
+class MultilingualManager(MultilingualQuerysetManager):
     use_for_related_fields = True
 
     def rewrite(self, *args, **kwargs):
@@ -337,20 +368,15 @@ class MultilingualManager(models.Manager):
         return self.get_queryset().raw_values(*args, **kwargs)
 
     def get_queryset(self):
-        if hasattr(super(MultilingualManager, self), 'get_queryset'):
-            qs = super(MultilingualManager, self).get_queryset()
-        else:  # Django 1.4 / 1.5 compat
-            qs = super(MultilingualManager, self).get_query_set()
-
-        if qs.__class__ == models.query.QuerySet:
-            qs.__class__ = MultilingualQuerySet
-        else:
-            class NewClass(qs.__class__, MultilingualQuerySet):
-                pass
-            NewClass.__name__ = 'Multilingual%s' % qs.__class__.__name__
-            qs.__class__ = NewClass
-        qs._post_init()
-        qs._rewrite_applied_operations()
-        return qs
+        """
+        This method is repeated because some managers that don't use super() or alter queryset class
+        may return queryset that is not subclass of MultilingualQuerySet.
+        """
+        qs = get_queryset(super(MultilingualManager, self))
+        if isinstance(qs, MultilingualQuerySet):
+            # Is already patched by MultilingualQuerysetManager - in most of the cases
+            # when custom managers use super() properly in get_queryset.
+            return qs
+        return self._patch_queryset(qs)
 
     get_query_set = get_queryset

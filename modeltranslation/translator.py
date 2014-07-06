@@ -9,7 +9,8 @@ from modeltranslation import settings as mt_settings
 from modeltranslation.fields import (NONE, create_translation_field, TranslationFieldDescriptor,
                                      TranslatedRelationIdDescriptor,
                                      LanguageCacheSingleObjectDescriptor)
-from modeltranslation.manager import MultilingualManager, rewrite_lookup_key
+from modeltranslation.manager import (MultilingualManager, MultilingualQuerysetManager,
+                                      rewrite_lookup_key)
 from modeltranslation.utils import build_localized_fieldname, parse_field
 
 
@@ -175,7 +176,8 @@ def add_manager(model):
         if manager.__class__ is Manager:
             manager.__class__ = MultilingualManager
         else:
-            class NewMultilingualManager(MultilingualManager, manager.__class__):
+            class NewMultilingualManager(MultilingualManager, manager.__class__,
+                                         MultilingualQuerysetManager):
                 use_for_related_fields = getattr(
                     manager.__class__, "use_for_related_fields", not has_custom_queryset(manager))
             manager.__class__ = NewMultilingualManager
