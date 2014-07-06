@@ -148,6 +148,16 @@ class MultilingualQuerySet(models.query.QuerySet):
         self._rewrite_where(self.query.where)
         self._rewrite_where(self.query.having)
         self._rewrite_order()
+        self._rewrite_select_related()
+
+    # This method was not present in django-linguo
+    def select_related(self, *fields, **kwargs):
+        if not self._rewrite:
+            return super(MultilingualQuerySet, self).select_related(*fields, **kwargs)
+        new_args = []
+        for key in fields:
+            new_args.append(rewrite_order_lookup_key(self.model, key))
+        return super(MultilingualQuerySet, self).select_related(*new_args, **kwargs)
 
     # This method was not present in django-linguo
     def _rewrite_col(self, col):
@@ -185,6 +195,13 @@ class MultilingualQuerySet(models.query.QuerySet):
     def _rewrite_order(self):
         self.query.order_by = [rewrite_order_lookup_key(self.model, field_name)
                                for field_name in self.query.order_by]
+
+    def _rewrite_select_related(self):
+        if isinstance(self.query.select_related, dict):
+            new = []
+            for field_name, value in self.query.select_related.items():
+                new[rewrite_order_lookup_key(self.model, field_name)] = value
+            self.query.select_related = new
 
     # This method was not present in django-linguo
     def _rewrite_q(self, q):

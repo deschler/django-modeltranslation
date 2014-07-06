@@ -486,6 +486,8 @@ class Translator(object):
         Returns an instance of translation options with translated fields
         defined for the ``model`` and inherited from superclasses.
         """
+        if model._deferred:
+            model = model.__bases__[0]
         if model not in self._registry:
             # Create a new type for backwards compatibility.
             opts = type("%sTranslationOptions" % model.__name__,

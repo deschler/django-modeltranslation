@@ -2718,6 +2718,25 @@ class TestManager(ModeltranslationTestBase):
             self.assertDeferred(True, 'title', 'title_de')
             self.assertDeferred(True, 'text', 'email', 'url')
 
+    def test_deferred_fk(self):
+        """
+        Check if ``select_related`` is rewritten and also
+        if ``only`` and ``defer`` are working with deferred classes
+        """
+        test = models.TestModel.objects.create(title_de='title_de', title_en='title_en')
+        with auto_populate('all'):
+            models.ForeignKeyModel.objects.create(test=test)
+
+        item = models.ForeignKeyModel.objects.select_related("test").defer("test__text")[0]
+        self.assertTrue(item.test.__class__._deferred)
+        self.assertEqual('title_en', item.test.title)
+        self.assertEqual('title_en', item.test.__class__.objects.only('title')[0].title)
+        with override('de'):
+            item = models.ForeignKeyModel.objects.select_related("test").defer("test__text")[0]
+            self.assertTrue(item.test.__class__._deferred)
+            self.assertEqual('title_de', item.test.title)
+            self.assertEqual('title_de', item.test.__class__.objects.only('title')[0].title)
+
     def test_constructor_inheritance(self):
         inst = models.AbstractModelB()
         # Check if fields assigned in constructor hasn't been ignored.
