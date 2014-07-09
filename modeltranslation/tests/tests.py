@@ -2737,6 +2737,39 @@ class TestManager(ModeltranslationTestBase):
             self.assertEqual('title_de', item.test.title)
             self.assertEqual('title_de', item.test.__class__.objects.only('title')[0].title)
 
+    def test_deferred_spanning(self):
+        test = models.TestModel.objects.create(title_de='title_de', title_en='title_en')
+        with auto_populate('all'):
+            models.ForeignKeyModel.objects.create(test=test)
+
+        item1 = models.ForeignKeyModel.objects.select_related("test").defer("test__text")[0].test
+        item2 = models.TestModel.objects.defer("text")[0]
+        self.assertIs(item1.__class__, item2.__class__)
+        # DeferredAttribute descriptors are present
+        self.assertIn('text_en', dir(item1.__class__))
+        self.assertIn('text_de', dir(item1.__class__))
+
+    def test_translation_fields_appending(self):
+        from modeltranslation.manager import append_lookup_keys, append_lookup_key
+        self.assertEqual(set(['untrans']), append_lookup_key(models.ForeignKeyModel, 'untrans'))
+        self.assertEqual(set(['title', 'title_en', 'title_de']),
+                         append_lookup_key(models.ForeignKeyModel, 'title'))
+        self.assertEqual(set(['test', 'test_en', 'test_de']),
+                         append_lookup_key(models.ForeignKeyModel, 'test'))
+        self.assertEqual(set(['title__eq', 'title_en__eq', 'title_de__eq']),
+                         append_lookup_key(models.ForeignKeyModel, 'title__eq'))
+        self.assertEqual(set(['test__smt', 'test_en__smt', 'test_de__smt']),
+                         append_lookup_key(models.ForeignKeyModel, 'test__smt'))
+        big_set = set(['test__url', 'test__url_en', 'test__url_de',
+                       'test_en__url', 'test_en__url_en', 'test_en__url_de',
+                       'test_de__url', 'test_de__url_en', 'test_de__url_de'])
+        self.assertEqual(big_set, append_lookup_key(models.ForeignKeyModel, 'test__url'))
+        self.assertEqual(set(['untrans__url', 'untrans__url_en', 'untrans__url_de']),
+                         append_lookup_key(models.ForeignKeyModel, 'untrans__url'))
+
+        self.assertEqual(big_set.union(['title', 'title_en', 'title_de']),
+                         append_lookup_keys(models.ForeignKeyModel, ['test__url', 'title']))
+
     def test_constructor_inheritance(self):
         inst = models.AbstractModelB()
         # Check if fields assigned in constructor hasn't been ignored.

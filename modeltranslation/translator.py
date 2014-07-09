@@ -487,7 +487,7 @@ class Translator(object):
         defined for the ``model`` and inherited from superclasses.
         """
         if model._deferred:
-            model = model.__bases__[0]
+            model = model._meta.proxy_for_model
         if model not in self._registry:
             # Create a new type for backwards compatibility.
             opts = type("%sTranslationOptions" % model.__name__,

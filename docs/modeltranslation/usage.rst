@@ -125,6 +125,7 @@ These manager methods perform rewriting:
 - ``only()``, ``defer()``
 - ``values()``, ``values_list()``
 - ``dates()``
+- ``select_related()``
 - ``create()``, with optional auto-population_ feature
 
 In order not to introduce differences between ``X.objects.create(...)`` and ``X(...)``, model

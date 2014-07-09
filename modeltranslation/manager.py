@@ -5,6 +5,8 @@ django-linguo by Zach Mathew
 
 https://github.com/zmathew/django-linguo
 """
+import itertools
+
 from django.db import models
 from django.db.models import FieldDoesNotExist
 from django.db.models.fields.related import RelatedField, RelatedObject
@@ -46,12 +48,45 @@ def rewrite_lookup_key(model, lookup_key):
     if len(pieces) > 1:
         # Check if we are doing a lookup to a related trans model
         fields_to_trans_models = get_fields_to_translatable_models(model)
-        for field_to_trans, transmodel in fields_to_trans_models:
-            # Check ``original key``, as pieces[0] may have been already rewritten.
-            if original_key == field_to_trans:
-                pieces[1] = rewrite_lookup_key(transmodel, pieces[1])
-                break
+        # Check ``original key``, as pieces[0] may have been already rewritten.
+        if original_key in fields_to_trans_models:
+            transmodel = fields_to_trans_models[original_key]
+            pieces[1] = rewrite_lookup_key(transmodel, pieces[1])
     return '__'.join(pieces)
+
+
+def append_translated(model, fields):
+    "If translated field is encountered, add also all its translation fields."
+    fields = set(fields)
+    from modeltranslation.translator import translator
+    opts = translator.get_options_for_model(model)
+    for key, translated in opts.fields.items():
+        if key in fields:
+            fields = fields.union(f.name for f in translated)
+    return fields
+
+
+def append_lookup_key(model, lookup_key):
+    "Transform spanned__lookup__key into all possible translation versions, on all levels"
+    pieces = lookup_key.split('__', 1)
+
+    fields = append_translated(model, (pieces[0],))
+
+    if len(pieces) > 1:
+        # Check if we are doing a lookup to a related trans model
+        fields_to_trans_models = get_fields_to_translatable_models(model)
+        if pieces[0] in fields_to_trans_models:
+            transmodel = fields_to_trans_models[pieces[0]]
+            rest = append_lookup_key(transmodel, pieces[1])
+            fields = set('__'.join(pr) for pr in itertools.product(fields, rest))
+        else:
+            fields = set('%s__%s' % (f, pieces[1]) for f in fields)
+    return fields
+
+
+def append_lookup_keys(model, fields):
+    union = lambda x, y: x.union(y)
+    return reduce(union, (append_lookup_key(model, field) for field in fields), set())
 
 
 def rewrite_order_lookup_key(model, lookup_key):
@@ -76,7 +111,7 @@ def get_fields_to_translatable_models(model):
             if isinstance(field_object, RelatedObject):
                 if get_translatable_fields_for_model(field_object.model) is not None:
                     results.append((field_name, field_object.model))
-        _F2TM_CACHE[model] = results
+        _F2TM_CACHE[model] = dict(results)
     return _F2TM_CACHE[model]
 
 _C2F_CACHE = {}
@@ -154,9 +189,13 @@ class MultilingualQuerySet(models.query.QuerySet):
     def select_related(self, *fields, **kwargs):
         if not self._rewrite:
             return super(MultilingualQuerySet, self).select_related(*fields, **kwargs)
+        # TO CONSIDER: whether this should rewrite only current language, or all languages?
+        # fk -> [fk, fk_en] (with en=active) VS fk -> [fk, fk_en, fk_de, fk_fr ...] (for all langs)
+
+        # new_args = append_lookup_keys(self.model, fields)
         new_args = []
         for key in fields:
-            new_args.append(rewrite_order_lookup_key(self.model, key))
+            new_args.append(rewrite_lookup_key(self.model, key))
         return super(MultilingualQuerySet, self).select_related(*new_args, **kwargs)
 
     # This method was not present in django-linguo
@@ -283,24 +322,14 @@ class MultilingualQuerySet(models.query.QuerySet):
         with auto_populate(self._populate_mode):
             return super(MultilingualQuerySet, self).get_or_create(**kwargs)
 
-    def _append_translated(self, fields):
-        "If translated field is encountered, add also all its translation fields."
-        fields = set(fields)
-        from modeltranslation.translator import translator
-        opts = translator.get_options_for_model(self.model)
-        for key, translated in opts.fields.items():
-            if key in fields:
-                fields = fields.union(f.name for f in translated)
-        return fields
-
     # This method was not present in django-linguo
     def defer(self, *fields):
-        fields = self._append_translated(fields)
+        fields = append_lookup_keys(self.model, fields)
         return super(MultilingualQuerySet, self).defer(*fields)
 
     # This method was not present in django-linguo
     def only(self, *fields):
-        fields = self._append_translated(fields)
+        fields = append_lookup_keys(self.model, fields)
         return super(MultilingualQuerySet, self).only(*fields)
 
     # This method was not present in django-linguo

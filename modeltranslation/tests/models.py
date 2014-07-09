@@ -64,6 +64,7 @@ class ForeignKeyModel(models.Model):
     optional = models.ForeignKey(TestModel, blank=True, null=True)
     hidden = models.ForeignKey(TestModel, blank=True, null=True, related_name="+")
     non = models.ForeignKey(NonTranslated, blank=True, null=True, related_name="test_fks")
+    untrans = models.ForeignKey(TestModel, blank=True, null=True, related_name="test_fks_un")
 
 
 class OneToOneFieldModel(models.Model):
