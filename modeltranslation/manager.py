@@ -11,6 +11,7 @@ from django.db import models
 from django.db.models import FieldDoesNotExist
 from django.db.models.fields.related import RelatedField, RelatedObject
 from django.db.models.sql.where import Constraint
+from django.utils.six import moves
 from django.utils.tree import Node
 try:
     from django.db.models.lookups import Lookup
@@ -85,8 +86,7 @@ def append_lookup_key(model, lookup_key):
 
 
 def append_lookup_keys(model, fields):
-    union = lambda x, y: x.union(y)
-    return reduce(union, (append_lookup_key(model, field) for field in fields), set())
+    return moves.reduce(set.union, (append_lookup_key(model, field) for field in fields), set())
 
 
 def rewrite_order_lookup_key(model, lookup_key):
