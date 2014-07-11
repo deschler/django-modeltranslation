@@ -251,7 +251,7 @@ class TranslationField(object):
 
     def deconstruct(self):
         name, path, args, kwargs = self.translated_field.deconstruct()
-        return unicode(self.name), path, args, kwargs
+        return self.name.decode('utf-8'), path, args, kwargs
 
     def south_field_triple(self):
         """
