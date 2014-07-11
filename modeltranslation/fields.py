@@ -250,7 +250,8 @@ class TranslationField(object):
             super(TranslationField, self).save_form_data(instance, data)
 
     def deconstruct(self):
-        return self.translated_field.deconstruct()
+        name, path, args, kwargs = self.translated_field.deconstruct()
+        return unicode(self.name), path, args, kwargs
 
     def south_field_triple(self):
         """
