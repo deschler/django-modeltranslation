@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import six
+
 from django import forms
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import fields
@@ -251,7 +253,7 @@ class TranslationField(object):
 
     def deconstruct(self):
         name, path, args, kwargs = self.translated_field.deconstruct()
-        return self.name.decode('utf-8'), path, args, kwargs
+        return six.text_type(self.name), path, args, kwargs
 
     def south_field_triple(self):
         """
