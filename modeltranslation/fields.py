@@ -252,6 +252,8 @@ class TranslationField(object):
 
     def deconstruct(self):
         name, path, args, kwargs = self.translated_field.deconstruct()
+        if self.null is True:
+            kwargs.update({'null': True})
         return six.text_type(self.name), path, args, kwargs
 
     def south_field_triple(self):
