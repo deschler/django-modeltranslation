@@ -2366,6 +2366,10 @@ class TestManager(ModeltranslationTestBase):
             self.assertEqual('title en', m.title_en)
             self.assertEqual('new', m.title_de)
 
+        # Test Python3 "dictionary changed size during iteration"
+        self.assertEqual(1, models.ManagerTestModel.objects.filter(title='en',
+                                                                   title_en='en').count())
+
     def test_q(self):
         """Test if Q queries are rewritten."""
         n = models.ManagerTestModel(title='')

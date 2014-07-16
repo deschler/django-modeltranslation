@@ -267,7 +267,7 @@ class MultilingualQuerySet(models.query.QuerySet):
         if not self._rewrite:
             return super(MultilingualQuerySet, self)._filter_or_exclude(negate, *args, **kwargs)
         args = map(self._rewrite_q, args)
-        for key, val in kwargs.items():
+        for key, val in list(kwargs.items()):
             new_key = rewrite_lookup_key(self.model, key)
             del kwargs[key]
             kwargs[new_key] = self._rewrite_f(val)
@@ -291,7 +291,7 @@ class MultilingualQuerySet(models.query.QuerySet):
     def update(self, **kwargs):
         if not self._rewrite:
             return super(MultilingualQuerySet, self).update(**kwargs)
-        for key, val in kwargs.items():
+        for key, val in list(kwargs.items()):
             new_key = rewrite_lookup_key(self.model, key)
             del kwargs[key]
             kwargs[new_key] = self._rewrite_f(val)
