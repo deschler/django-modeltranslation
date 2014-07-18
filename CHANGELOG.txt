@@ -1,3 +1,26 @@
+v0.8b2
+======
+Date: 2014-07-18
+
+  ADDED: Explicit support for Python 3.4 (should have already worked for
+         older versions that supported Python 3).
+         (resolves issue #254)
+  ADDED: Support for Django 1.7 migrations.
+
+  FIXED: Dict iteration Exception under Python 3.
+         (resolves issue #256,
+          thanks Jacek Tomaszewski)
+  FIXED: Reduce usage under Python 3.
+         (thanks Jacek Tomaszewski)
+  FIXED: Support for AppConfigs in INSTALLED_APPS
+         (resolves issue #252,
+          thanks Warnar Boekkooi, Jacek Tomaszewski)
+  FIXED: Rewrite field names in select_related. Fix deffered models registry.
+         Rewrite spanned queries on all levels for defer/only.
+         (resolves issue #248,
+          thanks Jacek Tomaszewski)
+
+
 v0.8b1
 ======
 Date: 2014-06-22

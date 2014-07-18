@@ -30,6 +30,7 @@ Contributors
 * Francesc Arpí Roca
 * Mathieu Leplatre
 * Thom Wiggers
+* Warnar Boekkooi
 * And many more ... (if you miss your name here, please let us know!)
 
 .. _django-linguo: https://github.com/zmathew/django-linguo
