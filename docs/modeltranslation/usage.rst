@@ -3,7 +3,7 @@
 Accessing Translated and Translation Fields
 ===========================================
 
-The modeltranslation app changes the behaviour of the translated fields. To
+Modeltranslation changes the behaviour of the translated fields. To
 explain this consider the news example from the :ref:`registration` chapter
 again. The original ``News`` model looked like this::
 
@@ -11,7 +11,7 @@ again. The original ``News`` model looked like this::
         title = models.CharField(max_length=255)
         text = models.TextField()
 
-Now that it is registered with the modeltranslation app the model looks
+Now that it is registered with modeltranslation the model looks
 like this - note the additional fields automatically added by the app::
 
     class News(models.Model):
@@ -160,21 +160,22 @@ Moreover, some fields can be explicitly assigned different values::
 
 It will result in ``title_de == 'enigma'`` and other ``title_?? == '-- no translation yet --'``.
 
-There is another way of altering the current population status, an ``auto_populate`` context manager::
+There is another way of altering the current population status, an ``auto_populate`` context
+manager::
 
     from modeltranslation.utils import auto_populate
 
     with auto_populate(True):
         x = News.objects.create(title='bar')
 
-Auto-population tooks place also in model constructor, what is extremely useful when loading
+Auto-population takes place also in model constructor, what is extremely useful when loading
 non-translated fixtures. Just remember to use the context manager::
 
      with auto_populate():  # True can be ommited
-            call_command('loaddata', 'fixture.json')  # Some fixture loading
+        call_command('loaddata', 'fixture.json')  # Some fixture loading
 
-            z = News(title='bar')
-            print z.title_en, z.title_de  # prints 'bar bar'
+        z = News(title='bar')
+        print z.title_en, z.title_de  # prints 'bar bar'
 
 There is a more convenient way than calling ``populate`` manager method or entering
 ``auto_populate`` manager context all the time:
@@ -186,7 +187,7 @@ It controls the default population behaviour.
 Auto-population modes
 ^^^^^^^^^^^^^^^^^^^^^
 
-There are 4 different population modes:
+There are four different population modes:
 
 ``False``
     [set by default]
@@ -212,17 +213,17 @@ There are 4 different population modes:
 Falling back
 ------------
 
-Modeltranslation provides mechanism to control behaviour of data access in case of empty
+Modeltranslation provides a mechanism to control behaviour of data access in case of empty
 translation values. This mechanism affects field access.
 
-Consider ``News`` example: a creator of some news hasn't specified it's german title and content,
-but only english ones. Then if a german visitor is viewing site, we would rather show him english
-title/content of the news than display empty strings. This is called *fallback*. ::
+Consider the ``News`` example: a creator of some news hasn't specified its German title and
+content, but only English ones. Then if a German visitor is viewing the site, we would rather show
+him English title/content of the news than display empty strings. This is called *fallback*. ::
 
     News.title_en = 'English title'
     News.title_de = ''
     print News.title
-    # If current active language is german, it should display title_de field value ('').
+    # If current active language is German, it should display the title_de field value ('').
     # But if fallback is enabled, it would display 'English title' instead.
 
 There are several ways of controlling fallback, described below.
@@ -234,17 +235,17 @@ Fallback languages
 
 .. versionadded:: 0.5
 
-:ref:`settings-modeltranslation_fallback_languages` setting allows to set order of *fallback
-languages*. By default it is only ``DEFAULT_LANGUAGE``.
+:ref:`settings-modeltranslation_fallback_languages` setting allows to set the order of *fallback
+languages*. By default that's the ``DEFAULT_LANGUAGE``.
 
 For example, setting ::
 
     MODELTRANSLATION_FALLBACK_LANGUAGES = ('en', 'de', 'fr')
 
-means: if current active language field value is unset, try english value. If it is also unset,
-try german, and so on - until some language yield non-empty value of the field.
+means: if current active language field value is unset, try English value. If it is also unset,
+try German, and so on - until some language yields a non-empty value of the field.
 
-There is also option to define fallback by language, using dict syntax::
+There is also an option to define a fallback by language, using dict syntax::
 
     MODELTRANSLATION_FALLBACK_LANGUAGES = {
         'default': ('en', 'de', 'fr'),
@@ -255,11 +256,11 @@ There is also option to define fallback by language, using dict syntax::
 The ``default`` key is required and its value denote languages which are always tried at the end.
 With such a setting:
 
-- for `uk` (Ukrainian) order of fallback languages is: ``('ru', 'en', 'de', 'fr')``
-- for `fr` order of fallback languages is: ``('de', 'en')`` - `fr` obviously is not fallback, since
-  it's active language; and `de` would be tried before `en`
-- for `en` and `de` fallback order is ``('de', 'fr')`` and ``('en', 'fr')``, respectively
-- for any other language order of fallback languages is just ``('en', 'de', 'fr')``
+- for `uk` the order of fallback languages is: ``('ru', 'en', 'de', 'fr')``
+- for `fr` the order of fallback languages is: ``('de', 'en')`` - Note, that `fr` obviously is not
+  a fallback, since its active language and `de` would be tried before `en`
+- for `en` and `de` the fallback order is ``('de', 'fr')`` and ``('en', 'fr')``, respectively
+- for any other language the order of fallback languages is just ``('en', 'de', 'fr')``
 
 What is more, fallback languages order can be overridden per model, using ``TranslationOptions``::
 
@@ -286,7 +287,7 @@ Fallback values
 .. versionadded:: 0.4
 
 But what if current language and all fallback languages yield no field value? Then modeltranslation
-will use field's *fallback value*, if one was defined.
+will use the field's *fallback value*, if one was defined.
 
 Fallback values are defined in ``TranslationOptions``, for example::
 
@@ -308,7 +309,7 @@ Fallback values can be also customized per model field::
         }
 
 If current language and all fallback languages yield no field value, and no fallback values are
-defined, then modeltranslation will use field's default value.
+defined, then modeltranslation will use the field's default value.
 
 .. _fallback_undef:
 
@@ -319,13 +320,13 @@ Fallback undefined
 
 Another question is what do we consider "no value", on what value should we fall back to other
 translations? For text fields the empty string can usually be considered as the undefined value,
-but other fields may have different concepts of empty or missing value.
+but other fields may have different concepts of empty or missing values.
 
 Modeltranslation defaults to using the field's default value as the undefined value (the empty
 string for non-nullable ``CharFields``). This requires calling ``get_default`` for every field
 access, which in some cases may be expensive.
 
-If you'd like to fallback on a different value or your default is expensive to calculate, provide
+If you'd like to fall back on a different value or your default is expensive to calculate, provide
 a custom undefined value (for a field or model)::
 
     class NewsTranslationOptions(TranslationOptions):

@@ -2,7 +2,7 @@
 Modeltranslation
 ================
 
-The modeltranslation application can be used to translate dynamic content of
+The modeltranslation application is used to translate dynamic content of
 existing Django models to an arbitrary number of languages without having to
 change the original model classes. It uses a registration approach (comparable
 to Django's admin app) to be able to add translations to existing or new
@@ -21,11 +21,12 @@ model class.
 Features
 ========
 
-- Add translations without changing existing models
-- Fast, because translation fields are stored in the same table
-- Supports inherited models
-- Django admin support
-- Unlimited number of target languages
+- Add translations without changing existing models or views
+- Translation fields are stored in the same table (no expensive joins)
+- Supports inherited models (abstract and multi-table inheritance)
+- Handle more than just text fields
+- Django admin integration
+- Flexible fallbacks, auto-population and more!
 
 
 Project Home

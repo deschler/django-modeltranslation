@@ -59,20 +59,20 @@ Setup
 To setup the application please follow these steps. Each step is described
 in detail in the following sections:
 
-1. Add the ``modeltranslation`` app to the ``INSTALLED_APPS`` variable of your
+1. Add ``modeltranslation`` to the ``INSTALLED_APPS`` variable of your
    project's ``settings.py``.
 
-#. Set ``USE_I18N = True`` in ``settings.py``.
+2. Set ``USE_I18N = True`` in ``settings.py``.
 
-#. Configure your ``LANGUAGES`` in ``settings.py``.
+3. Configure your ``LANGUAGES`` in ``settings.py``.
 
-#. Create a ``translation.py`` in your app directory and register
+4. Create a ``translation.py`` in your app directory and register
    ``TranslationOptions`` for every model you want to translate.
 
-#. Sync the database using ``./manage.py syncdb`` (note that this only applies
-   if the models registered in the ``translation.py`` did not have been
-   synced to the database before. If they did - read :ref:`further down <db-fields>` what to do
-   in that case.
+5. Sync the database using ``python manage.py syncdb``.
+
+   .. note:: This only applies if the models registered in ``translation.py`` haven't been
+             synced to the database before. If they have, please read :ref:`db-fields`.
 
 
 Configuration
@@ -94,6 +94,7 @@ Make sure that the ``modeltranslation`` app is listed in your
     INSTALLED_APPS = (
         ...
         'modeltranslation',
+        'django.contrib.admin',  # optional
         ....
     )
 
@@ -102,9 +103,9 @@ Make sure that the ``modeltranslation`` app is listed in your
     before ``django.contrib.admin``.
 
 .. important::
-    If you want to use the ``django-debug-toolbar`` together with `MT`, put ``debug_toolbar``
-    as first entry in ``INSTALLED_APPS`` or use
-    `explicit setup
+    If you want to use the ``django-debug-toolbar`` together with
+    modeltranslation, put ``debug_toolbar`` as first entry in
+    ``INSTALLED_APPS`` or use `explicit setup
     <http://django-debug-toolbar.readthedocs.org/en/latest/installation.html#explicit-setup>`_.
 
 .. _settings-languages:
@@ -115,10 +116,10 @@ Make sure that the ``modeltranslation`` app is listed in your
 The ``LANGUAGES`` variable must contain all languages used for translation. The
 first language is treated as the *default language*.
 
-The modeltranslation application uses the list of languages to add localized
-fields to the models registered for translation. To use the languages ``de``
-and ``en`` in your project, set the ``LANGUAGES`` variable like this (where
-``de`` is the default language)::
+Modeltranslation uses the list of languages to add localized fields to the
+models registered for translation. To use the languages ``de`` and ``en`` in
+your project, set the ``LANGUAGES`` variable like this (where ``de`` is the
+default language)::
 
     gettext = lambda s: s
     LANGUAGES = (
@@ -144,7 +145,7 @@ and ``en`` in your project, set the ``LANGUAGES`` variable like this (where
     in your project. When it isn't present (and neither is ``MODELTRANSLATION_LANGUAGES``), it
     defaults to Django's
     `global LANGUAGES setting <https://github.com/django/django/blob/master/django/conf/global_settings.py>`_
-    instead, and that are quite a number of languages!
+    instead, and that are quite a few languages!
 
 
 Advanced Settings
@@ -379,4 +380,4 @@ Default: ``True``
 
 Control if the ``loaddata`` command should leave the settings-defined locale alone. Setting it
 to ``False`` will result in previous behaviour of ``loaddata``: inserting fixtures to database
-under `en-us` locale.
+under ``en-us`` locale.

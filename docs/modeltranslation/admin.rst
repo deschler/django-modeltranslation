@@ -30,7 +30,7 @@ formfield_for_dbfield
 
 The ``TranslationBaseModelAdmin`` class, which ``TranslationAdmin`` and all
 inline related classes in modeltranslation derive from, implements a special
-method which is ``def formfield_for_dbfield(self, db_field, **kwargs)``. This
+method which is ``formfield_for_dbfield(self, db_field, **kwargs)``. This
 method does the following:
 
 1. Copies the widget of the original field to each of its translation fields.
@@ -78,7 +78,7 @@ TranslationAdmin in Combination with Other Admin Classes
 If there already exists a custom admin class for a translated model and you
 don't want or can't edit that class directly there is another solution.
 
-Taken a (fictional) reusable blog app which defines a model ``Entry`` and a
+Taken a reusable blog app which defines a model ``Entry`` and a
 corresponding admin class called ``EntryAdmin``. This app is not yours and you
 don't want to touch it at all.
 
