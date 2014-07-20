@@ -2,7 +2,7 @@
 from django import forms
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import fields
-from django.utils import six
+from django.utils import six, translation
 
 from modeltranslation import settings as mt_settings
 from modeltranslation.utils import (
@@ -148,6 +148,12 @@ class TranslationField(object):
         # Copy the verbose name and append a language suffix
         # (will show up e.g. in the admin).
         self.verbose_name = build_localized_verbose_name(translated_field.verbose_name, language)
+
+        # Override default with statically translated value for this language
+        if self.default != fields.NOT_PROVIDED and (
+                isinstance(self, fields.CharField) or isinstance(self, fields.TextField)):
+            with translation.override(self.language):
+                self.default = six.text_type(self.default)
 
         # ForeignKey support - rewrite related_name
         if self.rel and self.related and not self.rel.is_hidden():
