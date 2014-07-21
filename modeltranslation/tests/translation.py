@@ -8,7 +8,7 @@ from modeltranslation.tests.models import (
     RichText, RichTextPage, MultitableModelA, MultitableModelB, MultitableModelC, ManagerTestModel,
     CustomManagerTestModel, CustomManager2TestModel, GroupFieldsetsModel, NameModel,
     ThirdPartyRegisteredModel, ProxyTestModel, UniqueNullableModel, OneToOneFieldModel,
-    RequiredModel)
+    RequiredModel, DefaultModel)
 
 
 class TestTranslationOptions(TranslationOptions):
@@ -198,3 +198,10 @@ class RequiredTranslationOptions(TranslationOptions):
         'default': ('req_reg',),  # for all other languages
     }
 translator.register(RequiredModel, RequiredTranslationOptions)
+
+
+# ######### Default override testing
+
+class DefaultTranslationOptions(TranslationOptions):
+    fields = ('title', 'text',)
+translator.register(DefaultModel, DefaultTranslationOptions)

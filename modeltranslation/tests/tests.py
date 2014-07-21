@@ -43,7 +43,7 @@ models = translation = None
 request = None
 
 # How many models are registered for tests.
-TEST_MODELS = 28
+TEST_MODELS = 29
 
 
 class reload_override_settings(override_settings):
@@ -2282,6 +2282,34 @@ class TranslationAdminTest(ModeltranslationTestBase):
         self.assertEqual(
             tuple(ma.get_form(request, self.test_obj).base_fields.keys()), tuple(fields))
 
+    def test_default(self):
+        n = models.DefaultModel.objects.create()
+
+        class DefaultModelForm(forms.ModelForm):
+            class Meta:
+                model = models.DefaultModel
+
+        class DefaultModelAdmin(admin.TranslationAdmin):
+            form = DefaultModelForm
+
+        ma = DefaultModelAdmin(models.DefaultModel, AdminSite())
+
+        trans_real.activate('de')
+        self.assertEqual(get_language(), 'de')
+        self.assertEqual('Ein Standardtitel', ma.get_form(request).base_fields['title_de'].initial)
+        self.assertEqual('Some default title', ma.get_form(request).base_fields['title_en'].initial)
+        self.assertEqual('Ein Standardtext', ma.get_form(request).base_fields['text_de'].initial)
+        self.assertEqual('Some default text', ma.get_form(request).base_fields['text_en'].initial)
+
+        trans_real.activate('en')
+        self.assertEqual(get_language(), 'en')
+        self.assertEqual('Ein Standardtitel', ma.get_form(request).base_fields['title_de'].initial)
+        self.assertEqual('Some default title', ma.get_form(request).base_fields['title_en'].initial)
+        self.assertEqual('Ein Standardtext', ma.get_form(request).base_fields['text_de'].initial)
+        self.assertEqual('Some default text', ma.get_form(request).base_fields['text_en'].initial)
+
+        n.delete()
+
 
 class ThirdPartyAppIntegrationTest(ModeltranslationTestBase):
     """
@@ -2863,3 +2891,31 @@ class TestRequired(ModeltranslationTestBase):
             self.assertEqual(set(('req_reg_en', 'req_en_reg', 'req_en_reg_en')), error_fields)
         else:
             self.fail('ValidationError not raised!')
+
+
+class TestDefault(ModeltranslationTestBase):
+    def test_create(self):
+        n = models.DefaultModel.objects.create()
+
+        trans_real.activate('de')
+        self.assertEqual(get_language(), 'de')
+        self.assertEqual('Ein Standardtitel', n.title_de)
+        self.assertEqual('Some default title', n.title_en)
+        self.assertEqual('Ein Standardtext', n.text_de)
+        self.assertEqual('Some default text', n.text_en)
+        # The descriptor should still work the usual way
+        self.assertEqual('Ein Standardtitel', n.title)
+        self.assertEqual('Ein Standardtext', n.text)
+
+        # We expect this to behave the same in any active locale
+        trans_real.activate('en')
+        self.assertEqual(get_language(), 'en')
+        self.assertEqual('Ein Standardtitel', n.title_de)
+        self.assertEqual('Some default title', n.title_en)
+        self.assertEqual('Ein Standardtext', n.text_de)
+        self.assertEqual('Some default text', n.text_en)
+        # The descriptor should still work the usual way
+        self.assertEqual('Some default title', n.title)
+        self.assertEqual('Some default text', n.text)
+
+        n.delete()

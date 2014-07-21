@@ -307,3 +307,10 @@ class RequiredModel(models.Model):
     req = models.CharField(max_length=10)
     req_reg = models.CharField(max_length=10)
     req_en_reg = models.CharField(max_length=10)
+
+
+# ######### Default override testing
+
+class DefaultModel(models.Model):
+    title = models.CharField(max_length=50, blank=True, default=ugettext_lazy('Some default title'))
+    text = models.TextField(blank=True, default=ugettext_lazy('Some default text'))
