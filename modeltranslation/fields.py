@@ -149,12 +149,6 @@ class TranslationField(object):
         # (will show up e.g. in the admin).
         self.verbose_name = build_localized_verbose_name(translated_field.verbose_name, language)
 
-        # Override default with statically translated value for this language
-        if self.default != fields.NOT_PROVIDED and (
-                isinstance(self, fields.CharField) or isinstance(self, fields.TextField)):
-            with translation.override(self.language):
-                self.default = six.text_type(self.default)
-
         # ForeignKey support - rewrite related_name
         if self.rel and self.related and not self.rel.is_hidden():
             import copy
@@ -189,6 +183,15 @@ class TranslationField(object):
 
     def __hash__(self):
         return hash((self.creation_counter, self.language))
+
+    def get_default(self):
+        """
+        Override default with statically translated string for this language.
+        """
+        if self.has_default():
+            with translation.override(self.language):
+                return super(TranslationField, self).get_default()
+        return super(TranslationField, self).get_default()
 
     def get_attname_column(self):
         attname = self.get_attname()
