@@ -23,7 +23,7 @@ except ImportError:
 from modeltranslation import settings
 from modeltranslation.fields import TranslationField
 from modeltranslation.utils import (build_localized_fieldname, get_language,
-                                    auto_populate)
+                                    auto_populate, resolution_order)
 
 
 def get_translatable_fields_for_model(model):
@@ -55,6 +55,18 @@ def rewrite_lookup_key(model, lookup_key):
             pieces[1] = rewrite_lookup_key(transmodel, pieces[1])
     return '__'.join(pieces)
 
+
+def append_fallback(model, fields):
+    "If translated field is encountered, add also all its fallback fields."
+    fields = set(fields)
+    from modeltranslation.translator import translator
+    opts = translator.get_options_for_model(model)
+    for key, _ in opts.fields.items():
+        if key in fields:
+            langs = resolution_order(get_language(), getattr(model, key).fallback_languages)
+            fields = fields.union(build_localized_fieldname(key, lang) for lang in langs)
+            fields.remove(key)
+    return fields
 
 def append_translated(model, fields):
     "If translated field is encountered, add also all its translation fields."
@@ -343,12 +355,7 @@ class MultilingualQuerySet(models.query.QuerySet):
         if not fields:
             # Emulate original queryset behaviour: get all fields that are not translation fields
             fields = self._get_original_fields()
-        new_args = []
-        for key in fields:
-            new_args.append(rewrite_lookup_key(self.model, key))
-        vqs = super(MultilingualQuerySet, self).values(*new_args)
-        vqs.field_names = list(fields)
-        return vqs
+        return self._clone(klass=FallbackValuesQuerySet, setup=True, _fields=fields)
 
     # This method was not present in django-linguo
     def values_list(self, *fields, **kwargs):
@@ -357,6 +364,7 @@ class MultilingualQuerySet(models.query.QuerySet):
         if not fields:
             # Emulate original queryset behaviour: get all fields that are not translation fields
             fields = self._get_original_fields()
+        #new_args = append_fallback(self.model, fields)
         new_args = []
         for key in fields:
             new_args.append(rewrite_lookup_key(self.model, key))
@@ -368,6 +376,17 @@ class MultilingualQuerySet(models.query.QuerySet):
             return super(MultilingualQuerySet, self).dates(field_name, *args, **kwargs)
         new_key = rewrite_lookup_key(self.model, field_name)
         return super(MultilingualQuerySet, self).dates(new_key, *args, **kwargs)
+
+
+class FallbackValuesQuerySet(models.query.ValuesQuerySet, MultilingualQuerySet):
+    def _setup_query(self):
+        new_args = []
+        original = self._fields
+        for key in original:
+            new_args.append(rewrite_lookup_key(self.model, key))
+        self._fields = new_args
+        super(FallbackValuesQuerySet, self)._setup_query()
+        self.field_names = list(original)
 
 
 def get_queryset(obj):

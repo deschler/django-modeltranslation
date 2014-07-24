@@ -2436,6 +2436,18 @@ class TestManager(ModeltranslationTestBase):
 
         self.assertEqual(titles_for_en, ('most', 'more_en', 'more_de', 'least'))
         self.assertEqual(titles_for_de, ('most', 'more_de', 'more_en', 'least'))
+    
+    def test_values_fallback(self):
+        manager = models.ManagerTestModel.objects
+        id1 = manager.create(title_en='en', title_de='').pk
+        self.assertEqual('en', get_language())
+        
+        with default_fallback():
+            obj = manager.values('title')[0]
+            with override('de'):
+                obj2 = manager.values('title')[0]
+        self.assertEqual(obj['title'],  'en')
+        self.assertEqual(obj2['title'],  'en')
 
     def test_values(self):
         manager = models.ManagerTestModel.objects
