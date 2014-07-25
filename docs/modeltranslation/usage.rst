@@ -123,7 +123,7 @@ These manager methods perform rewriting:
 - ``order_by()``
 - ``update()``
 - ``only()``, ``defer()``
-- ``values()``, ``values_list()``
+- ``values()``, ``values_list()``, with :ref:`fallback <fallback>` mechanism
 - ``dates()``
 - ``select_related()``
 - ``create()``, with optional auto-population_ feature
@@ -214,17 +214,24 @@ Falling back
 ------------
 
 Modeltranslation provides a mechanism to control behaviour of data access in case of empty
-translation values. This mechanism affects field access.
+translation values. This mechanism affects field access, as well as ``values()``
+and ``values_list()`` manager methods.
 
 Consider the ``News`` example: a creator of some news hasn't specified its German title and
 content, but only English ones. Then if a German visitor is viewing the site, we would rather show
 him English title/content of the news than display empty strings. This is called *fallback*. ::
 
-    News.title_en = 'English title'
-    News.title_de = ''
-    print News.title
+    news.title_en = 'English title'
+    news.title_de = ''
+    print news.title
     # If current active language is German, it should display the title_de field value ('').
     # But if fallback is enabled, it would display 'English title' instead.
+
+    # Similarly for manager
+    news.save()
+    print News.objects.filter(pk=news.pk).values_list('title', flat=True)[0]
+    # As above: if current active language is German and fallback to English is enabled,
+    # it would display 'English title'.
 
 There are several ways of controlling fallback, described below.
 
