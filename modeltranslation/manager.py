@@ -367,14 +367,16 @@ class MultilingualQuerySet(models.query.QuerySet):
     def values_list(self, *fields, **kwargs):
         if not self._rewrite:
             return super(MultilingualQuerySet, self).values_list(*fields, **kwargs)
+        flat = kwargs.pop('flat', False)
+        if kwargs:
+            raise TypeError('Unexpected keyword arguments to values_list: %s' % (list(kwargs),))
+        if flat and len(fields) > 1:
+            raise TypeError("'flat' is not valid when values_list is "
+                            "called with more than one field.")
         if not fields:
             # Emulate original queryset behaviour: get all fields that are not translation fields
             fields = self._get_original_fields()
-        # new_args = append_fallback(self.model, fields)
-        new_args = []
-        for key in fields:
-            new_args.append(rewrite_lookup_key(self.model, key))
-        return super(MultilingualQuerySet, self).values_list(*new_args, **kwargs)
+        return self._clone(klass=FallbackValuesListQuerySet, setup=True, flat=flat, _fields=fields)
 
     # This method was not present in django-linguo
     def dates(self, field_name, *args, **kwargs):
@@ -413,6 +415,27 @@ class FallbackValuesQuerySet(models.query.ValuesQuerySet, MultilingualQuerySet):
         if setup and hasattr(c, '_setup_query'):
             c._setup_query()
         return c
+
+
+class FallbackValuesListQuerySet(FallbackValuesQuerySet):
+    def iterator(self):
+        for row in super(FallbackValuesListQuerySet, self).iterator():
+            if self.flat and len(self.original_fields) == 1:
+                yield row[self.original_fields[0]]
+            else:
+                yield tuple(row[f] for f in self.original_fields)
+
+    def _setup_query(self):
+        self.original_fields = self._fields
+        super(FallbackValuesListQuerySet, self)._setup_query()
+
+    def _clone(self, *args, **kwargs):
+        clone = super(FallbackValuesListQuerySet, self)._clone(*args, **kwargs)
+        clone.original_fields = self.original_fields
+        if not hasattr(clone, "flat"):
+            # Only assign flat if the clone didn't already get it from kwargs
+            clone.flat = self.flat
+        return clone
 
 
 def get_queryset(obj):
