@@ -14,8 +14,20 @@ may they use translations or not, and you never have to touch the original
 model class.
 
 
-.. image:: https://travis-ci.org/deschler/django-modeltranslation.png?branch=master
+.. image:: http://img.shields.io/travis/deschler/django-modeltranslation/master.svg?style=flat
     :target: https://travis-ci.org/deschler/django-modeltranslation
+
+.. image:: https://pypip.in/v/django-modeltranslation/badge.png?style=flat
+    :target: https://pypi.python.org/pypi/django-modeltranslation/
+    :alt: Latest PyPI version
+
+.. image:: https://pypip.in/py_versions/django-modeltranslation/badge.png?style=flat
+    :target: https://pypi.python.org/pypi/django-modeltranslation/
+    :alt: Supported Python versions
+
+.. image:: https://pypip.in/d/django-modeltranslation/badge.png?style=flat
+    :target: https://pypi.python.org/pypi/django-modeltranslation/
+    :alt: Number of PyPI downloads
 
 
 Features
@@ -35,7 +47,7 @@ https://github.com/deschler/django-modeltranslation
 
 Documentation
 -------------
-https://django-modeltranslation.readthedocs.org/en/latest/
+https://django-modeltranslation.readthedocs.org/en/latest
 
 Mailing List
 ------------
