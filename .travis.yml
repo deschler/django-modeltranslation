@@ -77,6 +77,9 @@ install:
   - IDJANGO=$(./travis.py $DJANGO)
   - pip install -q $IDJANGO
   - pip install -e . --use-mirrors
+  - pip install -q coveralls --use-mirrors
 script:
   - django-admin.py --version
-  - ./runtests.py
+  - coverage run --source=modeltranslation ./runtests.py
+after_success:
+  coveralls
