@@ -57,8 +57,12 @@ def rewrite_lookup_key(model, lookup_key):
 
 
 def append_fallback(model, fields):
-    "If translated field is encountered, add also all its fallback fields."
+    """
+    If translated field is encountered, add also all its fallback fields.
+    Returns tuple: (set_of_new_fields_to_use, set_of_translated_field_names)
+    """
     fields = set(fields)
+    trans = set()
     from modeltranslation.translator import translator
     opts = translator.get_options_for_model(model)
     for key, _ in opts.fields.items():
@@ -66,7 +70,9 @@ def append_fallback(model, fields):
             langs = resolution_order(get_language(), getattr(model, key).fallback_languages)
             fields = fields.union(build_localized_fieldname(key, lang) for lang in langs)
             fields.remove(key)
-    return fields
+            trans.add(key)
+    return fields, trans
+
 
 def append_translated(model, fields):
     "If translated field is encountered, add also all its translation fields."
@@ -364,7 +370,7 @@ class MultilingualQuerySet(models.query.QuerySet):
         if not fields:
             # Emulate original queryset behaviour: get all fields that are not translation fields
             fields = self._get_original_fields()
-        #new_args = append_fallback(self.model, fields)
+        # new_args = append_fallback(self.model, fields)
         new_args = []
         for key in fields:
             new_args.append(rewrite_lookup_key(self.model, key))
@@ -380,13 +386,33 @@ class MultilingualQuerySet(models.query.QuerySet):
 
 class FallbackValuesQuerySet(models.query.ValuesQuerySet, MultilingualQuerySet):
     def _setup_query(self):
-        new_args = []
         original = self._fields
-        for key in original:
-            new_args.append(rewrite_lookup_key(self.model, key))
-        self._fields = new_args
+        new_fields, self.translation_fields = append_fallback(self.model, original)
+        self._fields = list(new_fields)
+        self.fields_to_del = new_fields - set(original)
         super(FallbackValuesQuerySet, self)._setup_query()
-        self.field_names = list(original)
+
+    class X(object):
+        # This stupid class is needed as object use __slots__ and has no __dict__.
+        pass
+
+    def iterator(self):
+        instance = self.X()
+        for row in super(FallbackValuesQuerySet, self).iterator():
+            instance.__dict__.update(row)
+            for key in self.translation_fields:
+                row[key] = getattr(self.model, key).__get__(instance, None)
+            for key in self.fields_to_del:
+                del row[key]
+            yield row
+
+    def _clone(self, klass=None, setup=False, **kwargs):
+        c = super(FallbackValuesQuerySet, self)._clone(klass, **kwargs)
+        c.fields_to_del = self.fields_to_del
+        c.translation_fields = self.translation_fields
+        if setup and hasattr(c, '_setup_query'):
+            c._setup_query()
+        return c
 
 
 def get_queryset(obj):
