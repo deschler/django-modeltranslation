@@ -74,7 +74,14 @@ Continuous Integration
 The project uses `Travis CI`_ for continuous integration tests. Hooks provided
 by Github are active, so that each push and pull request is automatically run
 against our `Travis CI config`_, checking code against different databases,
-Python and Django versions.
+Python and Django versions. This includes automatic tracking of test coverage
+through `Coveralls`_.
+
+.. image:: http://img.shields.io/travis/deschler/django-modeltranslation/master.png?style=flat
+    :target: https://travis-ci.org/deschler/django-modeltranslation
+
+.. image:: http://img.shields.io/coveralls/deschler/django-modeltranslation.png?style=flat
+    :target: https://coveralls.io/r/deschler/django-modeltranslation
 
 
 Contributing Documentation
@@ -115,6 +122,7 @@ Please do not use the issue tracker for general questions, we run a dedicated
 .. _Github: https://github.com/deschler/django-modeltranslation
 .. _Travis CI: https://travis-ci.org/deschler/django-modeltranslation
 .. _Travis CI config: https://github.com/deschler/django-modeltranslation/blob/master/.travis.yml
+.. _Coveralls: https://coveralls.io/r/deschler/django-modeltranslation
 .. _reStructuredText: http://docutils.sourceforge.net/rst.html
 .. _Sphinx: http://sphinx-doc.org/
 .. _issue tracker: https://github.com/deschler/django-modeltranslation/issues
