@@ -169,7 +169,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
                 prepopulated_fields[dest] = localize(sources, lang)
         self.prepopulated_fields = prepopulated_fields
 
-    def _do_get_form_or_formset(self, request, obj, **kwargs):
+    def _get_form_or_formset(self, request, obj, **kwargs):
         """
         Code shared among get_form and get_formset.
         """
@@ -190,17 +190,17 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
 
         return kwargs
 
-    def _do_get_fieldsets_pre_form_or_formset(self):
+    def _get_fieldsets_pre_form_or_formset(self):
         """
-        Common get_fieldsets code shared among TranslationAdmin and
-        TranslationInlineModelAdmin.
+        Generic get_fieldsets code, shared by
+        TranslationAdmin and TranslationInlineModelAdmin.
         """
         return self._declared_fieldsets()
 
-    def _do_get_fieldsets_post_form_or_formset(self, request, form, obj=None):
+    def _get_fieldsets_post_form_or_formset(self, request, form, obj=None):
         """
-        Common get_fieldsets code shared among TranslationAdmin and
-        TranslationInlineModelAdmin.
+        Generic get_fieldsets code, shared by
+        TranslationAdmin and TranslationInlineModelAdmin.
         """
         base_fields = self.replace_orig_field(form.base_fields.keys())
         fields = base_fields + list(self.get_readonly_fields(request, obj))
@@ -208,8 +208,9 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
 
     def get_translation_field_excludes(self, exclude_languages=None):
         """
-        Returns a tuple of translation field names to exclude base on
+        Returns a tuple of translation field names to exclude based on
         `exclude_languages` arg.
+        TODO: Currently unused?
         """
         if exclude_languages is None:
             exclude_languages = []
@@ -226,7 +227,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         """
-        Hook for specifying custom readonly fields.
+        Hook to specify custom readonly fields.
         """
         return self.replace_orig_field(self.readonly_fields)
 
@@ -301,20 +302,20 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
         return fieldsets
 
     def get_form(self, request, obj=None, **kwargs):
-        kwargs = self._do_get_form_or_formset(request, obj, **kwargs)
+        kwargs = self._get_form_or_formset(request, obj, **kwargs)
         return super(TranslationAdmin, self).get_form(request, obj, **kwargs)
 
     def get_fieldsets(self, request, obj=None):
         if self.declared_fieldsets:
-            return self._do_get_fieldsets_pre_form_or_formset()
+            return self._get_fieldsets_pre_form_or_formset()
         return self._group_fieldsets(
-            self._do_get_fieldsets_post_form_or_formset(
+            self._get_fieldsets_post_form_or_formset(
                 request, self.get_form(request, obj, fields=None), obj))
 
 
 class TranslationInlineModelAdmin(TranslationBaseModelAdmin, InlineModelAdmin):
     def get_formset(self, request, obj=None, **kwargs):
-        kwargs = self._do_get_form_or_formset(request, obj, **kwargs)
+        kwargs = self._get_form_or_formset(request, obj, **kwargs)
         return super(TranslationInlineModelAdmin, self).get_formset(request, obj, **kwargs)
 
     def get_fieldsets(self, request, obj=None):
@@ -322,9 +323,9 @@ class TranslationInlineModelAdmin(TranslationBaseModelAdmin, InlineModelAdmin):
         # fieldset line with just the original model verbose_name of the model
         # is displayed above the new fieldsets.
         if self.declared_fieldsets:
-            return self._do_get_fieldsets_pre_form_or_formset()
+            return self._get_fieldsets_pre_form_or_formset()
         form = self.get_formset(request, obj, fields=None).form
-        return self._do_get_fieldsets_post_form_or_formset(request, form, obj)
+        return self._get_fieldsets_post_form_or_formset(request, form, obj)
 
 
 class TranslationTabularInline(TranslationInlineModelAdmin, admin.TabularInline):
