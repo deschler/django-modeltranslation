@@ -2314,7 +2314,7 @@ class ThirdPartyAppIntegrationTest(ModeltranslationTestBase):
         class CreationForm(forms.ModelForm):
             class Meta:
                 model = self.model
-                if django.get_version() >= '1.6':
+                if django.VERSION >= (1, 6):
                     fields = '__all__'
 
         creation_form = CreationForm({'name': 'abc'})
@@ -2798,7 +2798,7 @@ class TranslationModelFormTest(ModeltranslationTestBase):
         class TestModelForm(TranslationModelForm):
             class Meta:
                 model = models.TestModel
-                if django.get_version() >= '1.6':
+                if django.VERSION >= (1, 6):
                     fields = '__all__'
 
         form = TestModelForm()

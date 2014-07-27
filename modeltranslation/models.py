@@ -17,7 +17,7 @@ def autodiscover():
     from modeltranslation.translator import translator
     from modeltranslation.settings import TRANSLATION_FILES, DEBUG
 
-    if django.get_version() < '1.7':
+    if django.VERSION < (1, 7):
         mods = [(app, import_module(app)) for app in settings.INSTALLED_APPS]
     else:
         from django.apps import apps
@@ -80,5 +80,5 @@ def handle_translation_registrations(*args, **kwargs):
     autodiscover()
 
 
-if django.get_version() < '1.7':
+if django.VERSION < (1, 7):
     handle_translation_registrations()

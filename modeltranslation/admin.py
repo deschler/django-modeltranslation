@@ -10,7 +10,7 @@ from django import forms
 # Ensure that models are registered for translation before TranslationAdmin
 # runs. The import is supposed to resolve a race condition between model import
 # and translation registration in production (see issue #19).
-if django.get_version() < '1.7':
+if django.VERSION < (1, 7):
     import modeltranslation.models  # NOQA
 from modeltranslation import settings as mt_settings
 from modeltranslation.translator import translator
@@ -78,8 +78,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
             css_classes.append(build_css_class(db_field.name, 'mt-field'))
 
             if db_field.language == mt_settings.DEFAULT_LANGUAGE:
-                # Add another css class to identify a default modeltranslation
-                # widget.
+                # Add another css class to identify a default modeltranslation widget
                 css_classes.append('mt-default')
                 if (orig_formfield.required or self._orig_was_required.get(
                         '%s.%s' % (orig_field.model._meta, orig_field.name))):
@@ -171,7 +170,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
 
     def _get_form_or_formset(self, request, obj, **kwargs):
         """
-        Code shared among get_form and get_formset.
+        Generic code shared by get_form and get_formset.
         """
         if self.exclude is None:
             exclude = []

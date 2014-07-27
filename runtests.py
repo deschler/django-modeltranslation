@@ -45,7 +45,7 @@ def runtests():
             ),
         )
 
-    if django.get_version() >= '1.7':
+    if django.VERSION >= (1, 7):
         django.setup()
     failures = call_command(
         'test', 'modeltranslation', interactive=False, failfast=False, verbosity=2)
