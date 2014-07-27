@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import datetime
 from decimal import Decimal
+import imp
 import os
 import shutil
-import imp
 
 import django
 from django import forms
@@ -2135,6 +2135,18 @@ class TranslationAdminTest(ModeltranslationTestBase):
 
         # Remove translation for DataModel
         translator.translator.unregister(models.DataModel)
+
+    def test_list_editable(self):
+        class TestModelAdmin(admin.TranslationAdmin):
+            list_editable = ['title']
+            list_display = ['id', 'title']
+            list_display_links = ['id']
+
+        ma = TestModelAdmin(models.TestModel, self.site)
+        list_editable = ['title_de', 'title_en']
+        list_display = ['id', 'title_de', 'title_en']
+        self.assertEqual(tuple(ma.list_editable), tuple(list_editable))
+        self.assertEqual(tuple(ma.list_display), tuple(list_display))
 
     def test_build_css_class(self):
         with reload_override_settings(LANGUAGES=(('de', 'German'), ('en', 'English'),
