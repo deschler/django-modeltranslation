@@ -180,12 +180,45 @@ Invoking ``sync_translation_fields`` is plain easier.
 Note that all added fields are by default declared ``blank=True`` and
 ``null=True`` no matter if the original field is required or not. In other
 words - all translations are optional, unless an explicit option is
-provided - see below.
+provided - see :ref:`required_langs`.
 
 To populate the default translation fields added by modeltranslation with
 values from existing database fields, you can use the
-``update_translation_fields`` command below. See
+``update_translation_fields`` command. See
 :ref:`commands-update_translation_fields` for more info on this.
+
+
+.. _migrations:
+
+Migrations (Django 1.7)
+^^^^^^^^^^^^^^^^^^^^^^^
+
+.. versionadded:: 0.8
+
+Modeltranslation supports the migration system introduced by Django 1.7.
+Besides the normal workflow as described in Django's `Migration docs`_, you
+should do a migration whenever one of the following changes have been made to
+your project:
+
+- Added or removed a language through ``settings.LANGUAGES`` or
+  ``settings.MODELTRANSLATION LANGUAGES``.
+- Registered or unregistered a field through ``TranslationOptions.fields``.
+
+It doesn't matter if you are starting a fresh project or change an existing
+one, it's always:
+
+1. ``python manage.py makemigrations`` to create a new migration with
+   the added or removed fields.
+2. ``python manage.py migrate`` to apply the changes.
+
+.. As opposed to the statement made in :ref:`db-fields`, using the
+.. :ref:`sync_translation_fields <commands-sync_translation_fields>`
+.. management command together with the new migration system is not recommended.
+
+.. note::
+    Support for migrations is implemented through
+    ``fields.TranslationField.deconstruct(self)`` and respects changes to the
+    ``null`` option.
 
 
 .. _required_langs:
@@ -320,3 +353,6 @@ Model Field                     0.4 0.5 0.7
 .. |u| replace:: ?
 
 \* Implicitly supported (as subclass of a supported field)
+
+
+.. _Migration docs: https://docs.djangoproject.com/en/dev/topics/migrations/#workflow

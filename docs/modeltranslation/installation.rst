@@ -74,6 +74,10 @@ in detail in the following sections:
    .. note:: This only applies if the models registered in ``translation.py`` haven't been
              synced to the database before. If they have, please read :ref:`db-fields`.
 
+   .. note:: If you are using Django 1.7 and its internal migration system, run
+             ``python manage.py makemigrations``, followed by
+             ``python manage.py migrate`` instead. See :ref:`migrations` for details.
+
 
 Configuration
 =============
@@ -100,7 +104,8 @@ Make sure that the ``modeltranslation`` app is listed in your
 
 .. important::
     If you want to use the admin integration, ``modeltranslation`` must be put
-    before ``django.contrib.admin``.
+    before ``django.contrib.admin`` (only applies when using Django 1.7 or
+    above).
 
 .. important::
     If you want to use the ``django-debug-toolbar`` together with
