@@ -403,15 +403,19 @@ class ModeltranslationTest(ModeltranslationTestBase):
     def test_fallback_values_1(self):
         """
         If ``fallback_values`` is set to string, all untranslated fields would
-        return this string.
+        return this string. Even the fields with the translatable default value.
         """
         title1_de = "title de"
         n = models.FallbackModel(title=title1_de)
         n.save()
         n = models.FallbackModel.objects.get(title=title1_de)
+        self.assertEqual(n.text_en, "Some default text")
+        self.assertEqual(n.text_de, "Ein Standardtext")
         self.assertEqual(n.title, title1_de)
+        self.assertEqual(n.text, "fallback")
         trans_real.activate("en")
         self.assertEqual(n.title, "fallback")
+        self.assertEqual(n.text, "fallback")
 
     def test_fallback_values_2(self):
         """

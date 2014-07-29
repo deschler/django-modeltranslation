@@ -30,7 +30,7 @@ class ProxyTestModel(TestModel):
 
 class FallbackModel(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
-    text = models.TextField(blank=True, null=True)
+    text = models.TextField(blank=True, null=True, default=ugettext_lazy('Some default text'))
     url = models.URLField(blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
     description = models.CharField(max_length=255, null=True)
