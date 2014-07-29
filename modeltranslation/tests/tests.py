@@ -2449,6 +2449,38 @@ class TestManager(ModeltranslationTestBase):
         self.assertEqual(titles_for_en, ('most', 'more_en', 'more_de', 'least'))
         self.assertEqual(titles_for_de, ('most', 'more_de', 'more_en', 'least'))
 
+    def assert_fallback(self, method, expected1, *args, **kwargs):
+        transform = kwargs.pop('transform', lambda x: x)
+        expected2 = kwargs.pop('expected_de', expected1)
+        with default_fallback():
+            # Fallback is ('de',)
+            obj = method(*args, **kwargs)[0]
+            with override('de'):
+                obj2 = method(*args, **kwargs)[0]
+        self.assertEqual(transform(obj), expected1)
+        self.assertEqual(transform(obj2), expected2)
+
+    def test_values_fallback(self):
+        manager = models.ManagerTestModel.objects
+        manager.create(title_en='', title_de='de')
+        self.assertEqual('en', get_language())
+
+        self.assert_fallback(manager.values, 'de', 'title', transform=lambda x: x['title'])
+        self.assert_fallback(manager.values_list, 'de', 'title', flat=True)
+        self.assert_fallback(manager.values_list, ('de', '', 'de'), 'title', 'title_en', 'title_de')
+
+        # Settings are taken into account - fallback can be disabled
+        with override_settings(MODELTRANSLATION_ENABLE_FALLBACKS=False):
+            self.assert_fallback(manager.values, '', 'title', expected_de='de',
+                                 transform=lambda x: x['title'])
+
+        # Test fallback values
+        manager = models.FallbackModel.objects
+        manager.create()
+
+        self.assert_fallback(manager.values, 'fallback', 'title', transform=lambda x: x['title'])
+        self.assert_fallback(manager.values_list, ('fallback', 'fallback'), 'title', 'text')
+
     def test_values(self):
         manager = models.ManagerTestModel.objects
         id1 = manager.create(title_en='en', title_de='de').pk

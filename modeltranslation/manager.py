@@ -23,7 +23,7 @@ except ImportError:
 from modeltranslation import settings
 from modeltranslation.fields import TranslationField
 from modeltranslation.utils import (build_localized_fieldname, get_language,
-                                    auto_populate)
+                                    auto_populate, resolution_order)
 
 
 def get_translatable_fields_for_model(model):
@@ -54,6 +54,24 @@ def rewrite_lookup_key(model, lookup_key):
             transmodel = fields_to_trans_models[original_key]
             pieces[1] = rewrite_lookup_key(transmodel, pieces[1])
     return '__'.join(pieces)
+
+
+def append_fallback(model, fields):
+    """
+    If translated field is encountered, add also all its fallback fields.
+    Returns tuple: (set_of_new_fields_to_use, set_of_translated_field_names)
+    """
+    fields = set(fields)
+    trans = set()
+    from modeltranslation.translator import translator
+    opts = translator.get_options_for_model(model)
+    for key, _ in opts.fields.items():
+        if key in fields:
+            langs = resolution_order(get_language(), getattr(model, key).fallback_languages)
+            fields = fields.union(build_localized_fieldname(key, lang) for lang in langs)
+            fields.remove(key)
+            trans.add(key)
+    return fields, trans
 
 
 def append_translated(model, fields):
@@ -343,24 +361,22 @@ class MultilingualQuerySet(models.query.QuerySet):
         if not fields:
             # Emulate original queryset behaviour: get all fields that are not translation fields
             fields = self._get_original_fields()
-        new_args = []
-        for key in fields:
-            new_args.append(rewrite_lookup_key(self.model, key))
-        vqs = super(MultilingualQuerySet, self).values(*new_args)
-        vqs.field_names = list(fields)
-        return vqs
+        return self._clone(klass=FallbackValuesQuerySet, setup=True, _fields=fields)
 
     # This method was not present in django-linguo
     def values_list(self, *fields, **kwargs):
         if not self._rewrite:
             return super(MultilingualQuerySet, self).values_list(*fields, **kwargs)
+        flat = kwargs.pop('flat', False)
+        if kwargs:
+            raise TypeError('Unexpected keyword arguments to values_list: %s' % (list(kwargs),))
+        if flat and len(fields) > 1:
+            raise TypeError("'flat' is not valid when values_list is "
+                            "called with more than one field.")
         if not fields:
             # Emulate original queryset behaviour: get all fields that are not translation fields
             fields = self._get_original_fields()
-        new_args = []
-        for key in fields:
-            new_args.append(rewrite_lookup_key(self.model, key))
-        return super(MultilingualQuerySet, self).values_list(*new_args, **kwargs)
+        return self._clone(klass=FallbackValuesListQuerySet, setup=True, flat=flat, _fields=fields)
 
     # This method was not present in django-linguo
     def dates(self, field_name, *args, **kwargs):
@@ -368,6 +384,58 @@ class MultilingualQuerySet(models.query.QuerySet):
             return super(MultilingualQuerySet, self).dates(field_name, *args, **kwargs)
         new_key = rewrite_lookup_key(self.model, field_name)
         return super(MultilingualQuerySet, self).dates(new_key, *args, **kwargs)
+
+
+class FallbackValuesQuerySet(models.query.ValuesQuerySet, MultilingualQuerySet):
+    def _setup_query(self):
+        original = self._fields
+        new_fields, self.translation_fields = append_fallback(self.model, original)
+        self._fields = list(new_fields)
+        self.fields_to_del = new_fields - set(original)
+        super(FallbackValuesQuerySet, self)._setup_query()
+
+    class X(object):
+        # This stupid class is needed as object use __slots__ and has no __dict__.
+        pass
+
+    def iterator(self):
+        instance = self.X()
+        for row in super(FallbackValuesQuerySet, self).iterator():
+            instance.__dict__.update(row)
+            for key in self.translation_fields:
+                row[key] = getattr(self.model, key).__get__(instance, None)
+            for key in self.fields_to_del:
+                del row[key]
+            yield row
+
+    def _clone(self, klass=None, setup=False, **kwargs):
+        c = super(FallbackValuesQuerySet, self)._clone(klass, **kwargs)
+        c.fields_to_del = self.fields_to_del
+        c.translation_fields = self.translation_fields
+        if setup and hasattr(c, '_setup_query'):
+            c._setup_query()
+        return c
+
+
+class FallbackValuesListQuerySet(FallbackValuesQuerySet):
+    def iterator(self):
+        for row in super(FallbackValuesListQuerySet, self).iterator():
+            if self.flat and len(self.original_fields) == 1:
+                yield row[self.original_fields[0]]
+            else:
+                yield tuple(row[f] for f in self.original_fields)
+
+    def _setup_query(self):
+        self.original_fields = self._fields
+        super(FallbackValuesListQuerySet, self)._setup_query()
+
+    def _clone(self, *args, **kwargs):
+        clone = super(FallbackValuesListQuerySet, self)._clone(*args, **kwargs)
+        clone.original_fields = self.original_fields
+        if not hasattr(clone, "flat"):
+            # Only assign flat if the clone didn't already get it from kwargs
+            clone.flat = self.flat
+        return clone
 
 
 def get_queryset(obj):
