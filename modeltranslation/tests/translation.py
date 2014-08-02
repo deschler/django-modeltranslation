@@ -66,10 +66,8 @@ translator.register(OneToOneFieldModel, OneToOneFieldModelTranslationOptions)
 # ######### Custom fields testing
 
 class OtherFieldsModelTranslationOptions(TranslationOptions):
-    # fields = ('int', 'boolean', 'nullboolean', 'csi', 'float', 'decimal',
-    #           'ip', 'genericip')
     fields = ('int', 'boolean', 'nullboolean', 'csi', 'float', 'decimal',
-              'ip', 'date', 'datetime', 'time',)
+              'ip', 'genericip', 'date', 'datetime', 'time',)
 translator.register(OtherFieldsModel, OtherFieldsModelTranslationOptions)
 
 

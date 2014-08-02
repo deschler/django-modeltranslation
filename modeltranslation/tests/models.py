@@ -93,7 +93,7 @@ class OtherFieldsModel(models.Model):
     date = models.DateField(blank=True, null=True)
     datetime = models.DateTimeField(blank=True, null=True)
     time = models.TimeField(blank=True, null=True)
-#    genericip = models.GenericIPAddressField(blank=True, null=True)
+    genericip = models.GenericIPAddressField(blank=True, null=True)
 
 
 class FancyDescriptor(object):

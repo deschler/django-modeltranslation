@@ -23,6 +23,7 @@ SUPPORTED_FIELDS = (
     fields.FloatField,
     fields.DecimalField,
     fields.IPAddressField,
+    fields.GenericIPAddressField,
     fields.DateField,
     fields.DateTimeField,
     fields.TimeField,
@@ -31,10 +32,6 @@ SUPPORTED_FIELDS = (
     fields.related.ForeignKey,
     # Above implies also OneToOneField
 )
-try:
-    SUPPORTED_FIELDS += (fields.GenericIPAddressField,)  # Django 1.4+ only
-except AttributeError:
-    pass
 
 
 class NONE:

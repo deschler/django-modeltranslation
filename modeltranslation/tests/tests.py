@@ -1151,9 +1151,9 @@ class OtherFieldsTest(ModeltranslationTestBase):
         self.assertTrue('ip' in field_names)
         self.assertTrue('ip_de' in field_names)
         self.assertTrue('ip_en' in field_names)
-#        self.assertTrue('genericip' in field_names)
-#        self.assertTrue('genericip_de' in field_names)
-#        self.assertTrue('genericip_en' in field_names)
+        self.assertTrue('genericip' in field_names)
+        self.assertTrue('genericip_de' in field_names)
+        self.assertTrue('genericip_en' in field_names)
         self.assertTrue('float' in field_names)
         self.assertTrue('float_de' in field_names)
         self.assertTrue('float_en' in field_names)
@@ -1282,29 +1282,29 @@ class OtherFieldsTest(ModeltranslationTestBase):
         inst.ip = '1;2'
         self.assertRaises(ValidationError, inst.full_clean)
 
-#    def test_translated_models_genericipaddress_instance(self):
-#        inst = OtherFieldsModel()
-#        inst.genericip = '2a02:42fe::4'
-#        self.assertEqual('de', get_language())
-#        self.assertEqual('2a02:42fe::4', inst.genericip)
-#        self.assertEqual('2a02:42fe::4', inst.genericip_de)
-#        self.assertEqual(None, inst.genericip_en)
-#
-#        inst.genericip = '2a02:23fe::4'
-#        inst.save()
-#        self.assertEqual('2a02:23fe::4', inst.genericip)
-#        self.assertEqual('2a02:23fe::4', inst.genericip_de)
-#        self.assertEqual(None, inst.genericip_en)
-#
-#        trans_real.activate('en')
-#        inst.genericip = '2a02:42fe::4'
-#        self.assertEqual('2a02:42fe::4', inst.genericip)
-#        self.assertEqual('2a02:23fe::4', inst.genericip_de)
-#        self.assertEqual('2a02:42fe::4', inst.genericip_en)
-#
-#        # Check if validation is preserved
-#        inst.genericip = '1;2'
-#        self.assertRaises(ValidationError, inst.full_clean)
+    def test_translated_models_genericipaddress_instance(self):
+        inst = models.OtherFieldsModel()
+        inst.genericip = '2a02:42fe::4'
+        self.assertEqual('de', get_language())
+        self.assertEqual('2a02:42fe::4', inst.genericip)
+        self.assertEqual('2a02:42fe::4', inst.genericip_de)
+        self.assertEqual(None, inst.genericip_en)
+
+        inst.genericip = '2a02:23fe::4'
+        inst.save()
+        self.assertEqual('2a02:23fe::4', inst.genericip)
+        self.assertEqual('2a02:23fe::4', inst.genericip_de)
+        self.assertEqual(None, inst.genericip_en)
+
+        trans_real.activate('en')
+        inst.genericip = '2a02:42fe::4'
+        self.assertEqual('2a02:42fe::4', inst.genericip)
+        self.assertEqual('2a02:23fe::4', inst.genericip_de)
+        self.assertEqual('2a02:42fe::4', inst.genericip_en)
+
+        # Check if validation is preserved
+        inst.genericip = '1;2'
+        self.assertRaises(ValidationError, inst.full_clean)
 
     def test_translated_models_float_instance(self):
         inst = models.OtherFieldsModel()
