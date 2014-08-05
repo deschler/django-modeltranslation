@@ -194,7 +194,7 @@ var google, django, gettext;
                 if (idThisAnchor != idDefaultAnchor) {
                     var DefaultTabContent = $('div[aria-labelledby="'+idDefaultAnchor+'"]');
                     var DefaultValue = $(DefaultTabContent).find('input, textarea').val();
-                    var ThisTabContent = $('div[aria-labelledby="'+idThisAnchor+'"]').find('.form-row');
+                    var ThisTabContent = $('div[aria-labelledby="'+idThisAnchor+'"]').find('.form-row, div[class^="field-"]');
                     
                     // Check if exist...
                     var DefaultValueContent = $(ThisTabContent).find('div.mt-original');
@@ -361,6 +361,8 @@ var google, django, gettext;
                              '><a href="#' + tabId + '">' + lang.replace('_', '-') + '</a></li>');
                     tabsList.append($tab);
                     tabsContainer.append($panel);
+		    
+		    addOriginalContentInTab($tab);
                 });
                 insertionPoint.el[insertionPoint.insert](tabsContainer);
                 tabsContainer.tabs();
@@ -382,14 +384,18 @@ var google, django, gettext;
                         }
                     });
                 });
-                $.each(this.languages, function (idx, language) {
-                    self.$select.append($('<option value="' + idx + '">' +
-                                        language.replace('_', '-') + '</option>'));
-                });
+                this.addOptions();
                 this.update(tabs);
 
                 $('#content, .container-fluid').find('h1').append('&nbsp;').append(self.$select);
             },
+
+	    addOptions: function() {
+		$.each(this.languages, function (idx, language) {
+                    MainSwitch.$select.append($('<option value="' + idx + '">' +
+						language.replace('_', '-') + '</option>'));
+                });
+	    },
 
             update: function(tabs) {
                 var self = this;
@@ -405,6 +411,18 @@ var google, django, gettext;
                         $('ul.ui-tabs-nav li.ui-state-active a').trigger('click');
                     });
                 });
+
+		if ((self.$select.find("option").length == 0) && (tabs.length > 0)) {
+		    var tab = tabs[0];
+		    var langs = $(tab).find("ul li");
+		    $.each(langs, function(indx, langli) {
+			var lang = $(langli).attr("aria-controls").split("_");
+			lang = lang[lang.length-1];
+			if ($.inArray(lang, self.languages) < 0) {
+			    self.languages.push(lang);
+			}
+		    });
+		}
             },
 
             activateTab: function(tabs) {
@@ -443,6 +461,7 @@ var google, django, gettext;
                 });
                 MainSwitch.update(
                     createTabularTabs(tabularInlineGroup.getAllGroupedTranslations()));
+		MainSwitch.addOptions();
 
                 $(document).ready(function() {
                     $(window).load(function() {
