@@ -412,15 +412,20 @@ var google, django, gettext;
                     });
                 });
 
-		if ((self.$select.find("option").length == 0) && (tabs.length > 0)) {
-		    var tab = tabs[0];
-		    var langs = $(tab).find("ul li");
-		    $.each(langs, function(indx, langli) {
-			var lang = $(langli).attr("aria-controls").split("_");
-			lang = lang[lang.length-1];
-			if ($.inArray(lang, self.languages) < 0) {
-			    self.languages.push(lang);
+		if (self.$select.find("option").length == 0) {
+		    var tab = $("div.tabular th");
+		    var langs = $("div.tabular:eq(0)").find("th");
+		    
+		    $.each(langs, function(indx, langth) {
+			var lang = $(langth).text().split("[")[1];
+			
+			if (lang != undefined) {
+			    lang = lang.substring(0, 2);
+			    if ($.inArray(lang, self.languages) < 0) {
+			        self.languages.push(lang);
+			    }
 			}
+			
 		    });
 		}
             },
