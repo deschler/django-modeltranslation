@@ -15,9 +15,9 @@ env:
   - DJANGO=1.6 DB=sqlite
   - DJANGO=1.6 DB=postgres
   - DJANGO=1.6 DB=mysql
-  - DJANGO=https://www.djangoproject.com/download/1.7c2/tarball DB=sqlite
-  - DJANGO=https://www.djangoproject.com/download/1.7c2/tarball DB=postgres
-  - DJANGO=https://www.djangoproject.com/download/1.7c2/tarball DB=mysql
+  - DJANGO=1.7 DB=sqlite
+  - DJANGO=1.7 DB=postgres
+  - DJANGO=1.7 DB=mysql
 matrix:
   exclude:
     - python: "3.2"
@@ -40,11 +40,11 @@ matrix:
       env: DJANGO=1.4 DB=mysql
 
     - python: "2.6"
-      env: DJANGO=https://www.djangoproject.com/download/1.7c2/tarball DB=sqlite
+      env: DJANGO=1.7 DB=sqlite
     - python: "2.6"
-      env: DJANGO=https://www.djangoproject.com/download/1.7c2/tarball DB=postgres
+      env: DJANGO=1.7 DB=postgres
     - python: "2.6"
-      env: DJANGO=https://www.djangoproject.com/download/1.7c2/tarball DB=mysql
+      env: DJANGO=1.7 DB=mysql
 
     - python: "3.2"
       env: DJANGO=1.5 DB=mysql
@@ -59,11 +59,11 @@ matrix:
     - python: "3.4"
       env: DJANGO=1.6 DB=mysql
     - python: "3.2"
-      env: DJANGO=https://www.djangoproject.com/download/1.7c2/tarball DB=mysql
+      env: DJANGO=1.7 DB=mysql
     - python: "3.3"
-      env: DJANGO=https://www.djangoproject.com/download/1.7c2/tarball DB=mysql
+      env: DJANGO=1.7 DB=mysql
     - python: "3.4"
-      env: DJANGO=https://www.djangoproject.com/download/1.7c2/tarball DB=mysql
+      env: DJANGO=1.7 DB=mysql
 before_install:
   - pip install -q flake8 --use-mirrors
   - PYFLAKES_NODOCTEST=1 flake8 --max-line-length=100 modeltranslation
