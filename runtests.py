@@ -43,6 +43,7 @@ def runtests():
             LANGUAGES=(
                 ('en', 'English'),
             ),
+            MIDDLEWARE_CLASSES=(),
         )
 
     if django.VERSION >= (1, 7):
