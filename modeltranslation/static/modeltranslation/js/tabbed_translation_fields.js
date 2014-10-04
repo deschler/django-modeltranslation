@@ -3,8 +3,7 @@
 var google, django, gettext;
 
 (function () {
-    var t = jQuery || $ || django.jQuery;
-    jQuery = t;  // Note: This is not equivalent to "var jQuery = jQuery || ...".
+    var jQuery = window.jQuery || $ || django.jQuery;
 
     /* Add a new selector to jQuery that excludes parent items which match a given selector */
     jQuery.expr[':'].parents = function(a, i, m) {
