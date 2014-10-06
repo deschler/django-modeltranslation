@@ -1,3 +1,20 @@
+v0.8
+====
+Date: 2014-10-06
+
+  FIXED: JavaScript scoping issue with two jQuery versions in tabbed
+         translation fields.
+         (resolves issue #267,
+          thanks Wojtek Ruszczewski)
+
+  ADDED: Patch db_column of translation fields in migration files.
+         (resolves issue #264,
+          thanks Thom Wiggers and Jacek Tomaszewski)
+  ADDED: Fallback to values and values_list.
+         (resolves issue #258,
+          thanks Jacek Tomaszewski)
+
+
 v0.8b2
 ======
 Date: 2014-07-18
