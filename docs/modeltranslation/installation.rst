@@ -108,10 +108,11 @@ Make sure that the ``modeltranslation`` app is listed in your
     above).
 
 .. important::
-    If you want to use the ``django-debug-toolbar`` together with
-    modeltranslation, put ``debug_toolbar`` as first entry in
-    ``INSTALLED_APPS`` or use `explicit setup
+    If you want to use the ``django-debug-toolbar`` together with modeltranslation, use `explicit setup
     <http://django-debug-toolbar.readthedocs.org/en/latest/installation.html#explicit-setup>`_.
+    Otherwise tweak the order of ``INSTALLED_APPS``: try to put ``debug_toolbar`` as first entry in
+    ``INSTALLED_APPS`` (in Django < 1.7) or after ``modeltranslation`` (in Django >= 1.7). However,
+    only `explicit setup` is guaranteed to succeed.
 
 .. _settings-languages:
 
