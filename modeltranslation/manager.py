@@ -388,10 +388,13 @@ class MultilingualQuerysetManager(models.Manager):
 
     def _patch_queryset(self, qs):
         if not isinstance(qs, MultilingualQuerySet):
-            class NewClass(qs.__class__, MultilingualQuerySet):
-                pass
-            NewClass.__name__ = 'Multilingual%s' % qs.__class__.__name__
-            qs.__class__ = NewClass
+            if qs.__class__ == models.query.QuerySet:
+                qs.__class__ = MultilingualQuerySet
+            else:
+                class NewClass(qs.__class__, MultilingualQuerySet):
+                    pass
+                NewClass.__name__ = 'Multilingual%s' % qs.__class__.__name__
+                qs.__class__ = NewClass
         qs._post_init()
         qs._rewrite_applied_operations()
         return qs
