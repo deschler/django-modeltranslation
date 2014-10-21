@@ -473,13 +473,23 @@ class Translator(object):
                         (desc.__name__, model.__name__))
                 del self._registry[desc]
 
-    def get_registered_models(self, abstract=True):
+    def is_registered(self, model):
         """
-        Returns a list of all registered models, or just concrete
-        registered models.
+        Checks if a model is registered for translation.
         """
-        return [model for (model, opts) in self._registry.items()
-                if opts.registered and (not model._meta.abstract or abstract)]
+        return self._get_options_for_model(model).registered
+
+    def get_registered_models(self, abstract=True, app_config=None):
+        """
+        Returns a list of all registered models or just concrete registered
+        models, limited to models from an app if it's given.
+        """
+        if app_config is not None:
+            return [model for model in app_config.get_models() if
+                    self.is_registered(model) and (not model._meta.abstract or abstract)]
+        else:
+            return [model for (model, opts) in self._registry.items() if
+                    opts.registered and (not model._meta.abstract or abstract)]
 
     def _get_options_for_model(self, model, opts_class=None, **options):
         """

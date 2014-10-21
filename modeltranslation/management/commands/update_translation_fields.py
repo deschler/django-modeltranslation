@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from optparse import make_option
+
 from django.db.models import F, Q
 from django.core.management.base import NoArgsCommand
 
@@ -11,13 +13,24 @@ class Command(NoArgsCommand):
     help = ('Updates empty values of default translation fields using'
             ' values from original fields (in all translated models).')
 
+    option_list = NoArgsCommand.option_list + (
+        make_option('--app', '--app_config', default=None,
+                    help='Limit updating values to a single app. At least Django 1.7 required.'),
+    )
+
     def handle_noargs(self, **options):
-        verbosity = int(options['verbosity'])
-        if verbosity > 0:
+        self.verbosity = int(options['verbosity'])
+        self.app_config = options.get('app')
+        if self.app_config is not None:
+            from django.apps import AppConfig, apps
+            if not isinstance(self.app_config, AppConfig):
+                self.app_config = apps.get_app_config(self.app_config)
+
+        if self.verbosity > 0:
             self.stdout.write("Using default language: %s\n" % DEFAULT_LANGUAGE)
-        models = translator.get_registered_models(abstract=False)
+        models = translator.get_registered_models(abstract=False, app_config=self.app_config)
         for model in models:
-            if verbosity > 0:
+            if self.verbosity > 0:
                 self.stdout.write("Updating data of model '%s'\n" % model)
             opts = translator.get_options_for_model(model)
             for field_name in opts.fields.keys():
