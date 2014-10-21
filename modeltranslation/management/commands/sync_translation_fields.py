@@ -30,16 +30,19 @@ class Command(NoArgsCommand):
     option_list = NoArgsCommand.option_list + (
         make_option('--noinput', action='store_false', dest='interactive', default=True,
                     help='Do NOT prompt the user for input of any kind.'),
+        make_option('--app', default=None,
+                    help='Limit looking for missing columns to a single app.'),
     )
 
     def handle_noargs(self, **options):
         self.cursor = connection.cursor()
         self.introspection = connection.introspection
         self.interactive = options['interactive']
-        self.verbosity = int(options.get('verbosity'))
+        self.verbosity = int(options['verbosity'])
+        self.app = options.get('app') or options.get('app_config')
 
         found_missing_columns = False
-        models = translator.get_registered_models(abstract=False)
+        models = translator.get_registered_models(abstract=False, app=self.app)
         for model in models:
             db_table = model._meta.db_table
             model_full_name = '%s.%s' % (model._meta.app_label, model._meta.object_name)
