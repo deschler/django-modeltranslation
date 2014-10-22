@@ -11,7 +11,7 @@ from modeltranslation.fields import (NONE, create_translation_field, Translation
                                      LanguageCacheSingleObjectDescriptor)
 from modeltranslation.manager import (MultilingualManager, MultilingualQuerysetManager,
                                       rewrite_lookup_key)
-from modeltranslation.utils import build_localized_fieldname, parse_field
+from modeltranslation.utils import build_localized_fieldname, get_app_models, parse_field
 
 
 class AlreadyRegistered(Exception):
@@ -479,13 +479,13 @@ class Translator(object):
         """
         return self._get_options_for_model(model).registered
 
-    def get_registered_models(self, abstract=True, app_config=None):
+    def get_registered_models(self, abstract=True, app=None):
         """
         Returns a list of all registered models or just concrete registered
         models, limited to models from an app if it's given.
         """
-        if app_config is not None:
-            return [model for model in app_config.get_models() if
+        if app is not None:
+            return [model for model in get_app_models(app) if
                     self.is_registered(model) and (not model._meta.abstract or abstract)]
         else:
             return [model for (model, opts) in self._registry.items() if

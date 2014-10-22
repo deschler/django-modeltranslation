@@ -14,21 +14,17 @@ class Command(NoArgsCommand):
             ' values from original fields (in all translated models).')
 
     option_list = NoArgsCommand.option_list + (
-        make_option('--app', '--app_config', default=None,
+        make_option('--app', dest='app_config', default=None,
                     help='Limit updating values to a single app. At least Django 1.7 required.'),
     )
 
     def handle_noargs(self, **options):
         self.verbosity = int(options['verbosity'])
-        self.app_config = options.get('app')
-        if self.app_config is not None:
-            from django.apps import AppConfig, apps
-            if not isinstance(self.app_config, AppConfig):
-                self.app_config = apps.get_app_config(self.app_config)
+        self.app = options.get('app') or options.get('app_config')
 
         if self.verbosity > 0:
             self.stdout.write("Using default language: %s\n" % DEFAULT_LANGUAGE)
-        models = translator.get_registered_models(abstract=False, app_config=self.app_config)
+        models = translator.get_registered_models(abstract=False, app=self.app)
         for model in models:
             if self.verbosity > 0:
                 self.stdout.write("Updating data of model '%s'\n" % model)

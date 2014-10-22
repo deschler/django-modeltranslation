@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from contextlib import contextmanager
 
+import django
 from django.utils import six
 from django.utils.encoding import force_text
 from django.utils.translation import get_language as _get_language
@@ -20,6 +21,26 @@ def get_language():
     if lang in settings.AVAILABLE_LANGUAGES:
         return lang
     return settings.DEFAULT_LANGUAGE
+
+
+def get_app_models(app):
+    """
+    Returns all app models. The app can be:
+    * an app label -- a string;
+    * a pre-1.7 app -- a models module;
+    * a post-1.7 app -- an AppConfig instance;
+    """
+    if django.VERSION < (1, 7):
+        from types import ModuleType
+        from django.db.models import get_app, get_models
+        if not isinstance(app, ModuleType):
+            app = get_app(app)
+        return get_models(app)
+    else:
+        from django.apps import AppConfig, apps
+        if not isinstance(app, AppConfig):
+            app = apps.get_app_config(app)
+        return app.get_models()
 
 
 def get_translation_fields(field):
