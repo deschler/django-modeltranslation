@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
+from copy import copy
 import datetime
 from decimal import Decimal
 import imp
 import os
 import shutil
+import sys
 
 import django
 from django import forms
@@ -14,27 +16,28 @@ from django.core.exceptions import ValidationError, ImproperlyConfigured
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.core.management import call_command
-from django.db import IntegrityError
+from django.db import DEFAULT_DB_ALIAS, IntegrityError, connections, transaction
 from django.db.models import Q, F
+from django.db.models.fields.files import FieldFile
 from django.test import TestCase, TransactionTestCase
 from django.test.utils import override_settings
 from django.utils import six
 from django.utils.translation import get_language, override, trans_real
 
 try:
-    from django.apps import apps as django_apps
-    NEW_APP_CACHE = True
+    from django.apps import apps
 except ImportError:
-    from django.db.models.loading import AppCache
-    NEW_APP_CACHE = False
-
+    from django.db.models.loading import cache as app_cache
 
 from modeltranslation import admin, settings as mt_settings, translator
 from modeltranslation.forms import TranslationModelForm
-from modeltranslation.models import autodiscover
+from modeltranslation.management.commands import sync_translation_fields
+from modeltranslation.manager import (MultilingualManager, MultilingualQuerySet,
+                                      append_lookup_keys, append_lookup_key)
+from modeltranslation.models import autodiscover, handle_translation_registrations
 from modeltranslation.tests.test_settings import TEST_SETTINGS
-from modeltranslation.utils import (build_css_class, build_localized_fieldname,
-                                    auto_populate, fallbacks)
+from modeltranslation.utils import (auto_populate, build_css_class, build_localized_fieldname,
+                                    fallbacks, resolution_order)
 
 models = translation = None
 
@@ -43,7 +46,7 @@ models = translation = None
 request = None
 
 # How many models are registered for tests.
-TEST_MODELS = 28
+TEST_MODELS = 29
 
 
 class reload_override_settings(override_settings):
@@ -57,6 +60,26 @@ class reload_override_settings(override_settings):
         imp.reload(mt_settings)
 
 
+def reload_app(app_name):
+    """
+    Reloads an app allowing its models to be reregistered for translation
+    (e.g. with a different set of translation fields).
+    """
+    app_label = app_name.rsplit('.', 1)[-1]
+    app_models_module = sys.modules.pop('%s.models' % app_name, None)
+    sys.modules.pop('%s.translation' % app_name, None)
+    if django.VERSION >= (1, 7):
+        del apps.all_models[app_label]
+        apps.get_app_config(app_label).import_models(apps.all_models[app_label])
+    else:
+        if app_models_module is not None:
+            app_cache.app_store.pop(app_models_module, None)
+        app_cache.app_labels.pop(app_label, None)
+        app_cache.app_models.pop(app_label, None)
+        app_cache.app_errors.pop(app_label, None)
+        app_cache.load_app(app_name)
+
+
 # In this test suite fallback language is turned off. This context manager temporarily turns it on.
 def default_fallback():
     return reload_override_settings(
@@ -66,7 +89,6 @@ def default_fallback():
 @override_settings(**TEST_SETTINGS)
 class ModeltranslationTransactionTestBase(TransactionTestCase):
     urls = 'modeltranslation.tests.urls'
-    cache = django_apps if NEW_APP_CACHE else AppCache()
     synced = False
 
     @classmethod
@@ -93,21 +115,13 @@ class ModeltranslationTransactionTestBase(TransactionTestCase):
                 # 3. Reset test models (because autodiscover have already run, those models
                 #    have translation fields, but for languages previously defined. We want
                 #    to be sure that 'de' and 'en' are available)
-                if not NEW_APP_CACHE:
-                    cls.cache.load_app('modeltranslation.tests')
-                else:
-                    del cls.cache.all_models['tests']
-                    import sys
-                    sys.modules.pop('modeltranslation.tests.models', None)
-                    sys.modules.pop('modeltranslation.tests.translation', None)
-                    cls.cache.get_app_config('tests').import_models(cls.cache.all_models['tests'])
+                for app_name in TEST_SETTINGS['TEST_APPS']:
+                    reload_app(app_name)
 
                 # 4. Autodiscover
-                from modeltranslation.models import handle_translation_registrations
                 handle_translation_registrations()
 
                 # 5. Syncdb (``migrate=False`` in case of south)
-                from django.db import connections, DEFAULT_DB_ALIAS
                 call_command('syncdb', verbosity=0, migrate=False, interactive=False,
                              database=connections[DEFAULT_DB_ALIAS].alias, load_initial_data=False)
 
@@ -129,7 +143,23 @@ class ModeltranslationTestBase(ModeltranslationTransactionTestBase, TestCase):
     pass
 
 
-class TestAutodiscover(ModeltranslationTestBase):
+class DirtyRegistryTestBase(ModeltranslationTestBase):
+    """
+    Base for cases that need to restore translator registry after each test.
+
+    Registry changes done in some tests may not be suitable for tests that go
+    over everything registered (e.g. ``test_update_command``).
+    """
+    def setUp(self):
+        super(DirtyRegistryTestBase, self).setUp()
+        self._registry_copy = copy(translator.translator._registry)
+
+    def tearDown(self):
+        translator.translator._registry = self._registry_copy
+        super(DirtyRegistryTestBase, self).tearDown()
+
+
+class TestAutodiscover(DirtyRegistryTestBase):
     # The way the ``override_settings`` works on ``TestCase`` is wicked;
     # it patches ``_pre_setup`` and ``_post_teardown`` methods.
     # Because of this, if class B extends class A and both are ``override_settings``'ed,
@@ -147,27 +177,12 @@ class TestAutodiscover(ModeltranslationTestBase):
         imp.reload(mt_settings)  # restore mt_settings.FALLBACK_LANGUAGES
         super(TestAutodiscover, self)._post_teardown()
 
-    @classmethod
-    def setUpClass(cls):
-        """Save registry (and restore it after tests)."""
-        super(TestAutodiscover, cls).setUpClass()
-        from copy import copy
-        from modeltranslation.translator import translator
-        cls.registry_cpy = copy(translator._registry)
-
-    @classmethod
-    def tearDownClass(cls):
-        from modeltranslation.translator import translator
-        translator._registry = cls.registry_cpy
-        super(TestAutodiscover, cls).tearDownClass()
-
     def tearDown(self):
-        import sys
         # Rollback model classes
-        if NEW_APP_CACHE:
-            del self.cache.all_models['test_app']
+        if django.VERSION >= (1, 7):
+            del apps.all_models['test_app']
         else:
-            del self.cache.app_models['test_app']
+            del app_cache.app_models['test_app']
         from .test_app import models
         imp.reload(models)
         # Delete translation modules from import cache
@@ -473,7 +488,6 @@ class ModeltranslationTest(ModeltranslationTestBase):
 
 class ModeltranslationTransactionTest(ModeltranslationTransactionTestBase):
     def test_unique_nullable_field(self):
-        from django.db import transaction
         models.UniqueNullableModel.objects.create()
         models.UniqueNullableModel.objects.create()
         models.UniqueNullableModel.objects.create(title=None)
@@ -509,7 +523,6 @@ class FallbackTests(ModeltranslationTestBase):
         imp.reload(mt_settings)
 
     def test_resolution_order(self):
-        from modeltranslation.utils import resolution_order
         with reload_override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=self.test_fallback):
             self.assertEqual(('en', 'de'), resolution_order('en'))
             self.assertEqual(('de', 'en'), resolution_order('de'))
@@ -688,7 +701,6 @@ class FileFieldsTest(ModeltranslationTestBase):
         inst.image_de.delete()
 
     def test_empty_field(self):
-        from django.db.models.fields.files import FieldFile
         inst = models.FileFieldsModel()
         self.assertIsInstance(inst.file, FieldFile)
         self.assertIsInstance(inst.file2, FieldFile)
@@ -698,7 +710,6 @@ class FileFieldsTest(ModeltranslationTestBase):
         self.assertIsInstance(inst.file2, FieldFile)
 
     def test_fallback(self):
-        from django.db.models.fields.files import FieldFile
         with reload_override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=('en',)):
             self.assertEqual(get_language(), 'de')
             inst = models.FileFieldsModel()
@@ -1877,7 +1888,69 @@ class ModelInheritanceFieldAggregationTest(ModeltranslationTestBase):
         self.assertEqual(5, len(clsb.fields))  # there are no repetitions
 
 
-class UpdateCommandTest(ModeltranslationTestBase):
+class ManagementCommandsTests(DirtyRegistryTestBase):
+    def setUp(self):
+        super(ManagementCommandsTests, self).setUp()
+        connection = connections[DEFAULT_DB_ALIAS]
+        self.cursor = connection.cursor()
+        self.introspection = connection.introspection
+
+    def reregister_app(self, app_name):
+        """
+        Redoes registration of app models with the translator.
+        """
+        reload_app(app_name)
+        translator.translator._registry = {}  # Forget stale (reloaed) models.
+        handle_translation_registrations()
+
+    def db_columns(self, model):
+        """
+        Returns all columns in the database table for ``model``.
+        """
+        description = self.introspection.get_table_description(self.cursor, model._meta.db_table)
+        return tuple(f[0] for f in description)
+
+    def test_sync_command(self):
+        from .managed_app.models import News
+
+        # Should do nothing if columns for all languages already exist.
+        call_command('sync_translation_fields', app='managed_app',
+                     verbosity=0, interactive=False)
+        news_db_columns = self.db_columns(News)
+        self.assertNotIn('title_ht', news_db_columns)
+        self.assertNotIn('title_fo', news_db_columns)
+
+        # Adding a new language and syncing should create a new column.
+        with reload_override_settings(LANGUAGES=(('de', 'Deutsch'), ('ht', 'Kreyòl ayisyen'),)):
+            imp.reload(sync_translation_fields)
+            self.reregister_app('modeltranslation.tests.managed_app')
+            if django.VERSION < (1, 8):
+                call_command('sync_translation_fields', app='managed_app',
+                             verbosity=0, interactive=False)
+            else:
+                call_command('sync_translation_fields', '--app=managed_app',
+                             verbosity=0, interactive=False)
+            self.assertIn('title_ht', self.db_columns(News))
+
+        # An app config or models module can also be used in place of a label.
+        with reload_override_settings(LANGUAGES=(('de', 'Deutsch'), ('fo', 'føroyskt'),)):
+            imp.reload(sync_translation_fields)
+            self.reregister_app('modeltranslation.tests.managed_app')
+            if django.VERSION < (1, 7):
+                app_models = app_cache.get_app('managed_app')
+                call_command('sync_translation_fields', app=app_models,
+                             verbosity=0, interactive=False)
+            else:
+                app_config = apps.get_app_config('managed_app')
+                call_command('sync_translation_fields', app_config=app_config,
+                             verbosity=0, interactive=False)
+            self.assertIn('title_fo', self.db_columns(News))
+
+        # Both app argument styles properly limit models processed.
+        test_model_db_columns = self.db_columns(models.TestModel)
+        self.assertNotIn('title_ht', test_model_db_columns)
+        self.assertNotIn('title_fo', test_model_db_columns)
+
     def test_update_command(self):
         # Here it would be convenient to use fixtures - unfortunately,
         # fixtures loader doesn't use raw sql but rather creates objects,
@@ -2564,7 +2637,6 @@ class TestManager(ModeltranslationTestBase):
 
     def test_custom_manager_custom_method_name(self):
         """Test if custom method also returns MultilingualQuerySet"""
-        from modeltranslation.manager import MultilingualQuerySet
         qs = models.CustomManagerTestModel.objects.custom_qs()
         self.assertIsInstance(qs, MultilingualQuerySet)
 
@@ -2591,13 +2663,11 @@ class TestManager(ModeltranslationTestBase):
 
     def test_non_objects_manager(self):
         """Test if managers other than ``objects`` are patched too"""
-        from modeltranslation.manager import MultilingualManager
         manager = models.CustomManagerTestModel.another_mgr_name
         self.assertTrue(isinstance(manager, MultilingualManager))
 
     def test_custom_manager2(self):
         """Test if user-defined queryset is still working"""
-        from modeltranslation.manager import MultilingualManager, MultilingualQuerySet
         manager = models.CustomManager2TestModel.objects
         self.assertTrue(isinstance(manager, models.CustomManager2))
         self.assertTrue(isinstance(manager, MultilingualManager))
@@ -2823,7 +2893,6 @@ class TestManager(ModeltranslationTestBase):
         self.assertIn('text_de', dir(item1.__class__))
 
     def test_translation_fields_appending(self):
-        from modeltranslation.manager import append_lookup_keys, append_lookup_key
         self.assertEqual(set(['untrans']), append_lookup_key(models.ForeignKeyModel, 'untrans'))
         self.assertEqual(set(['title', 'title_en', 'title_de']),
                          append_lookup_key(models.ForeignKeyModel, 'title'))

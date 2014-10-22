@@ -5,9 +5,12 @@ Settings overrided for test time
 from django.conf import settings
 
 
-INSTALLED_APPS = tuple(settings.INSTALLED_APPS) + (
+TEST_APPS = (
     'modeltranslation.tests',
+    'modeltranslation.tests.managed_app',
 )
+
+INSTALLED_APPS = tuple(settings.INSTALLED_APPS) + TEST_APPS
 
 LANGUAGES = (('de', 'Deutsch'),
              ('en', 'English'))
