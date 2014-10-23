@@ -31,12 +31,14 @@ try:
 except ImportError:
     from django.db.models.loading import cache as app_cache
 
-from modeltranslation import admin, settings as mt_settings, translator
+from modeltranslation import admin, settings as mt_settings
 from modeltranslation.forms import TranslationModelForm
 from modeltranslation.manager import (MultilingualManager, MultilingualQuerySet,
                                       append_lookup_keys, append_lookup_key)
 from modeltranslation.models import autodiscover, handle_translation_registrations
 from modeltranslation.tests.test_settings import TEST_SETTINGS
+from modeltranslation.translator import (DescendantRegistered, NotRegistered, TranslationOptions,
+                                         translator)
 from modeltranslation.utils import (auto_populate, build_css_class, build_localized_fieldname,
                                     fallbacks, resolution_order)
 
@@ -111,7 +113,7 @@ def reload_app(app_name):
     # Remove stale models from the translator registry.
     is_model = lambda obj: inspect.isclass(obj) and issubclass(obj, Model)
     for name, model in inspect.getmembers(old_models, is_model):
-        translator.translator._registry.pop(model, None)
+        translator._registry.pop(model, None)
 
 
 # In this test suite fallback language is turned off. This context manager temporarily turns it on.
@@ -187,10 +189,10 @@ class DirtyRegistryTestBase(ModeltranslationTestBase):
     """
     def setUp(self):
         super(DirtyRegistryTestBase, self).setUp()
-        self._registry_copy = copy(translator.translator._registry)
+        self._registry_copy = copy(translator._registry)
 
     def tearDown(self):
-        translator.translator._registry = self._registry_copy
+        translator._registry = self._registry_copy
         super(DirtyRegistryTestBase, self).tearDown()
 
 
@@ -278,26 +280,22 @@ class ModeltranslationTest(ModeltranslationTestBase):
         self.assertEqual(2, len(langs))
         self.assertTrue('de' in langs)
         self.assertTrue('en' in langs)
-        self.assertTrue(translator.translator)
+        self.assertTrue(translator)
 
         # Check that all models are registered for translation
-        self.assertEqual(len(translator.translator.get_registered_models()), TEST_MODELS)
+        self.assertEqual(len(translator.get_registered_models()), TEST_MODELS)
 
         # Try to unregister a model that is not registered
-        self.assertRaises(translator.NotRegistered,
-                          translator.translator.unregister, models.BasePage)
+        self.assertRaises(NotRegistered, translator.unregister, models.BasePage)
 
         # Try to get options for a model that is not registered
-        self.assertRaises(translator.NotRegistered,
-                          translator.translator.get_options_for_model, User)
+        self.assertRaises(NotRegistered, translator.get_options_for_model, User)
 
         # Ensure that a base can't be registered after a subclass.
-        self.assertRaises(translator.DescendantRegistered,
-                          translator.translator.register, models.BasePage)
+        self.assertRaises(DescendantRegistered, translator.register, models.BasePage)
 
         # Or unregistered before it.
-        self.assertRaises(translator.DescendantRegistered,
-                          translator.translator.unregister, models.Slugged)
+        self.assertRaises(DescendantRegistered, translator.unregister, models.Slugged)
 
     def test_fields(self):
         field_names = dir(models.TestModel())
@@ -487,7 +485,7 @@ class ModeltranslationTest(ModeltranslationTestBase):
     def _test_constructor(self, keywords):
         n = models.TestModel(**keywords)
         m = models.TestModel.objects.create(**keywords)
-        opts = translator.translator.get_options_for_model(models.TestModel)
+        opts = translator.get_options_for_model(models.TestModel)
         for base_field, trans_fields in opts.fields.items():
             self._compare_instances(n, m, base_field)
             for lang_field in trans_fields:
@@ -1863,7 +1861,7 @@ class ModelInheritanceTest(ModeltranslationTestBase):
     def test_inheritance(self):
         def assertLocalFields(model, local_fields):
             # Proper fields are inherited.
-            opts = translator.translator.get_options_for_model(model)
+            opts = translator.get_options_for_model(model)
             self.assertEqual(set(opts.local_fields.keys()), set(local_fields))
             # Local translation fields are created on the model.
             model_local_fields = [f.name for f in model._meta.local_fields]
@@ -1874,7 +1872,7 @@ class ModelInheritanceTest(ModeltranslationTestBase):
 
         def assertFields(model, fields):
             # The given fields are inherited.
-            opts = translator.translator.get_options_for_model(model)
+            opts = translator.get_options_for_model(model)
             self.assertEqual(set(opts.fields.keys()), set(fields))
             # Inherited translation fields are available on the model.
             model_fields = model._meta.get_all_field_names()
@@ -2217,11 +2215,10 @@ class TranslationAdminTest(ModeltranslationTestBase):
             exclude = ('title', 'text',)
             inlines = [DataInline]
 
-        class DataTranslationOptions(translator.TranslationOptions):
+        class DataTranslationOptions(TranslationOptions):
             fields = ('data',)
 
-        translator.translator.register(models.DataModel,
-                                       DataTranslationOptions)
+        translator.register(models.DataModel, DataTranslationOptions)
         ma = TestModelAdmin(models.TestModel, self.site)
 
         fieldsets = [('Test', {'fields': ['data_de', 'data_en']})]
@@ -2243,7 +2240,7 @@ class TranslationAdminTest(ModeltranslationTestBase):
         self.assertEqual(ma_fieldsets, fieldsets)
 
         # Remove translation for DataModel
-        translator.translator.unregister(models.DataModel)
+        translator.unregister(models.DataModel)
 
     def test_list_editable(self):
         class TestModelAdmin(admin.TranslationAdmin):
