@@ -52,7 +52,7 @@ models = translation = None
 request = None
 
 # How many models are registered for tests.
-TEST_MODELS = 29
+TEST_MODELS = 28
 
 # Settings for modeltranslation tests. An additional TEST_APPS setting
 # specifies a list of apps that will be dynamically loaded and have their
@@ -288,7 +288,7 @@ class ModeltranslationTest(ModeltranslationTestBase):
         self.assertTrue(translator)
 
         # Check that all models are registered for translation
-        self.assertEqual(len(translator.get_registered_models()), TEST_MODELS)
+        self.assertEqual(len(translator.get_registered_models(app='tests')), TEST_MODELS)
 
         # Try to unregister a model that is not registered
         self.assertRaises(NotRegistered, translator.unregister, models.BasePage)
