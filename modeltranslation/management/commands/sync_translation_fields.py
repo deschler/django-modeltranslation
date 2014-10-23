@@ -17,9 +17,7 @@ from django.core.management.color import no_style
 from django.db import connection, transaction
 from django.utils.six import moves
 
-from modeltranslation.settings import AVAILABLE_LANGUAGES
 from modeltranslation.translator import translator
-from modeltranslation.utils import build_localized_fieldname
 
 
 class Command(NoArgsCommand):
@@ -48,10 +46,8 @@ class Command(NoArgsCommand):
             model_full_name = '%s.%s' % (model._meta.app_label, model._meta.object_name)
 
             opts = translator.get_options_for_model(model)
-            for field_name in opts.local_fields.keys():
-                field = model._meta.get_field(field_name)
-
-                missing_columns = self.find_missing_columns(field, db_table)
+            for field_name, local_fields in opts.local_fields.items():
+                missing_columns = self.find_missing_columns(local_fields, db_table)
                 if not missing_columns:
                     continue
                 found_missing_columns = True
@@ -60,7 +56,7 @@ class Command(NoArgsCommand):
                     self.stdout.write('Missing translation columns for field "%s": %s' % (
                         field_full_name, ', '.join(missing_columns.keys())))
 
-                statements = self.generate_add_column_statements(field, missing_columns, model)
+                statements = self.generate_add_column_statements(field_name, missing_columns, model)
                 if self.interactive or self.verbosity > 0:
                     self.stdout.write('\nStatements to be executed for "%s":' % field_full_name)
                     for statement in statements:
@@ -92,22 +88,21 @@ class Command(NoArgsCommand):
         if self.verbosity > 0 and not found_missing_columns:
             self.stdout.write('No new translatable fields detected')
 
-    def find_missing_columns(self, field, db_table):
+    def find_missing_columns(self, local_fields, db_table):
         """
-        Returns a dictionary of (code, column name) for languages for which
-        the given field doesn't have a translation column in the database.
+        Returns a dictionary of (code, column name) for translation fields
+        which do not have a column in the database table.
         """
         missing_columns = {}
-        db_column = field.db_column if field.db_column else field.name
         db_table_description = self.introspection.get_table_description(self.cursor, db_table)
         db_table_columns = [t[0] for t in db_table_description]
-        for lang_code in AVAILABLE_LANGUAGES:
-            lang_column = build_localized_fieldname(db_column, lang_code)
-            if lang_column not in db_table_columns:
-                missing_columns[lang_code] = lang_column
+        for field in local_fields:
+            db_column = field.db_column if field.db_column else field.name
+            if db_column not in db_table_columns:
+                missing_columns[field.language] = db_column
         return missing_columns
 
-    def generate_add_column_statements(self, field, missing_columns, model):
+    def generate_add_column_statements(self, field_name, missing_columns, model):
         """
         Returns database statements needed to add missing columns for the
         field.
@@ -116,13 +111,12 @@ class Command(NoArgsCommand):
         style = no_style()
         qn = connection.ops.quote_name
         db_table = model._meta.db_table
-        db_column_type = field.db_type(connection=connection)
+        db_column_type = model._meta.get_field(field_name).db_type(connection)
         for lang_column in missing_columns.values():
             statement = 'ALTER TABLE %s ADD COLUMN %s %s' % (qn(db_table),
                                                              style.SQL_FIELD(qn(lang_column)),
                                                              style.SQL_COLTYPE(db_column_type))
             if not model._meta.get_field(lang_column).null:
-                # Just "not field.null" if we change the nullability politics.
                 statement += ' ' + style.SQL_KEYWORD('NOT NULL')
             statements.append(statement + ';')
         return statements
