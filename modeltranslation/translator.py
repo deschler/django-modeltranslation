@@ -58,6 +58,9 @@ class TranslationOptions(with_metaclass(FieldsAggregationMetaClass, object)):
     ``related`` attribute inform whether this model is related part of some relation
     with translated model. This model may be not translated itself.
     ``related_fields`` contains names of reverse lookup fields.
+
+    ``default_language`` stores the ``mt_settings.DEFAULT_LANGUAGE`` that was
+    in effect when the model was patched.
     """
     required_languages = ()
 
@@ -71,6 +74,7 @@ class TranslationOptions(with_metaclass(FieldsAggregationMetaClass, object)):
         self.local_fields = dict((f, set()) for f in self.fields)
         self.fields = dict((f, set()) for f in self.fields)
         self.related_fields = []
+        self.default_language = None
 
     def validate(self):
         """
@@ -387,6 +391,10 @@ class Translator(object):
             # Mark the object explicitly as registered -- registry caches
             # options of all models, registered or not.
             opts.registered = True
+
+            # Remeber the current default language in case it changes to one that
+            # is not available for this field.
+            opts.default_language = mt_settings.DEFAULT_LANGUAGE
 
             # Add translation fields to the model.
             if model._meta.proxy:
