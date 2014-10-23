@@ -2004,7 +2004,7 @@ class ManagementCommandsTests(DirtyRegistryTestBase):
         self.assertEqual('already', obj2['title_de'])
         self.assertEqual('initial', obj2['title'])
 
-        call_command('update_translation_fields', verbosity=0)
+        call_command('update_translation_fields', verbosity=0, app='tests')
 
         obj1 = models.TestModel.objects.get(pk=pk1)
         obj2 = models.TestModel.objects.get(pk=pk2)
