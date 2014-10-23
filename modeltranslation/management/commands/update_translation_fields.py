@@ -14,8 +14,8 @@ class Command(NoArgsCommand):
             ' values from original fields (in all translated models).')
 
     option_list = NoArgsCommand.option_list + (
-        make_option('--app', dest='app_config', default=None,
-                    help='Limit updating values to a single app. At least Django 1.7 required.'),
+        make_option('--app', default=None,
+                    help='Limit updating values to a single app.'),
     )
 
     def handle_noargs(self, **options):

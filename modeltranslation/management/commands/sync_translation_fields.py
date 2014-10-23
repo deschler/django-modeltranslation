@@ -30,9 +30,8 @@ class Command(NoArgsCommand):
     option_list = NoArgsCommand.option_list + (
         make_option('--noinput', action='store_false', dest='interactive', default=True,
                     help='Do NOT prompt the user for input of any kind.'),
-        make_option('--app', dest='app_config', default=None,
-                    help='Limit looking for missing columns to a single app.'
-                         ' At least Django 1.7 required.'),
+        make_option('--app', default=None,
+                    help='Limit looking for missing columns to a single app.'),
     )
 
     def handle_noargs(self, **options):
