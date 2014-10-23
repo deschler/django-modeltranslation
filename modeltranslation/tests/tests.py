@@ -3,6 +3,7 @@ from copy import copy
 import datetime
 from decimal import Decimal
 import imp
+import inspect
 import os
 import shutil
 import sys
@@ -17,7 +18,7 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.core.management import call_command
 from django.db import DEFAULT_DB_ALIAS, IntegrityError, connections, transaction
-from django.db.models import Q, F
+from django.db.models import Model, Q, F
 from django.db.models.fields.files import FieldFile
 from django.test import TestCase, TransactionTestCase
 from django.test.utils import override_settings
@@ -63,20 +64,29 @@ def reload_app(app_name):
     """
     Reloads an app allowing its models to be reregistered for translation
     (e.g. with a different set of translation fields).
+
+    Note: Any references in the global or local scopes to objects (classes,
+    variables) imported from the reloaded app ``models`` or ``translation``
+    modules will become stale; please use sparringly.
     """
     app_label = app_name.rsplit('.', 1)[-1]
-    app_models_module = sys.modules.pop('%s.models' % app_name, None)
+    old_models = sys.modules.pop('%s.models' % app_name, None)
     sys.modules.pop('%s.translation' % app_name, None)
     if django.VERSION >= (1, 7):
         del apps.all_models[app_label]
         apps.get_app_config(app_label).import_models(apps.all_models[app_label])
     else:
-        if app_models_module is not None:
-            app_cache.app_store.pop(app_models_module, None)
+        if old_models is not None:
+            app_cache.app_store.pop(old_models, None)
         app_cache.app_labels.pop(app_label, None)
         app_cache.app_models.pop(app_label, None)
         app_cache.app_errors.pop(app_label, None)
         app_cache.load_app(app_name)
+
+    # Remove stale models from the translator registry.
+    is_model = lambda obj: inspect.isclass(obj) and issubclass(obj, Model)
+    for name, model in inspect.getmembers(old_models, is_model):
+        translator.translator._registry.pop(model, None)
 
 
 # In this test suite fallback language is turned off. This context manager temporarily turns it on.
@@ -1899,7 +1909,6 @@ class ManagementCommandsTests(DirtyRegistryTestBase):
         Redoes registration of app models with the translator.
         """
         reload_app(app_name)
-        translator.translator._registry = {}  # Forget stale (reloaed) models.
         handle_translation_registrations()
 
     def db_columns(self, model):
