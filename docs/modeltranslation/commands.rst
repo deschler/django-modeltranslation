@@ -8,6 +8,8 @@ Management Commands
 The ``update_translation_fields`` Command
 -----------------------------------------
 
+.. versionchanged:: 0.8
+
 In case modeltranslation was installed in an existing project and you
 have specified to translate fields of models which are already synced to the
 database, you have to update your database schema (see :ref:`db-fields`).
@@ -34,8 +36,9 @@ otherwise nothing is copied.
     the command will examine your ``settings.LANGUAGES`` variable and the first
     language declared there will be used as the default language.
 
-All translated models (as specified in the translation files) from all apps will be
-populated with initial data.
+On default, all translated models (as specified in the translation files) from
+all apps will be populated with initial data, but you can provide an ``--app``
+option to limit the population to models from a single app with a given label.
 
 
 .. _commands-sync_translation_fields:
@@ -44,6 +47,7 @@ The ``sync_translation_fields`` Command
 ---------------------------------------
 
 .. versionadded:: 0.4
+.. versionchanged:: 0.8
 
 .. code-block:: console
 
@@ -56,6 +60,8 @@ a registered model.
 
 However, if you are using South in your project, in most cases it's recommended to use migration
 instead of ``sync_translation_fields``. See :ref:`db-fields` for detailed info and use cases.
+
+You may limit detection of new fields to models from a single app using the ``--app`` option.
 
 
 The ``loaddata`` Command

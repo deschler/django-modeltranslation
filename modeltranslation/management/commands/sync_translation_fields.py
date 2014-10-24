@@ -10,6 +10,8 @@ You will need to execute this command in two cases:
 Credits: Heavily inspired by django-transmeta's sync_transmeta_db command.
 """
 from optparse import make_option
+
+import django
 from django.core.management.base import NoArgsCommand
 from django.core.management.color import no_style
 from django.db import connection, transaction
@@ -20,31 +22,6 @@ from modeltranslation.translator import translator
 from modeltranslation.utils import build_localized_fieldname
 
 
-def ask_for_confirmation(sql_sentences, model_full_name, interactive):
-    print('\nSQL to synchronize "%s" schema:' % model_full_name)
-    for sentence in sql_sentences:
-        print('   %s' % sentence)
-    while True:
-        prompt = '\nAre you sure that you want to execute the previous SQL: (y/n) [n]: '
-        if interactive:
-            answer = moves.input(prompt).strip()
-        else:
-            answer = 'y'
-        if answer == '':
-            return False
-        elif answer not in ('y', 'n', 'yes', 'no'):
-            print('Please answer yes or no')
-        elif answer == 'y' or answer == 'yes':
-            return True
-        else:
-            return False
-
-
-def print_missing_langs(missing_langs, field_name, model_name):
-    print('Missing languages in "%s" field from "%s" model: %s' % (
-        field_name, model_name, ", ".join(missing_langs)))
-
-
 class Command(NoArgsCommand):
     help = ('Detect new translatable fields or new available languages and'
             ' sync database structure. Does not remove columns of removed'
@@ -53,78 +30,99 @@ class Command(NoArgsCommand):
     option_list = NoArgsCommand.option_list + (
         make_option('--noinput', action='store_false', dest='interactive', default=True,
                     help='Do NOT prompt the user for input of any kind.'),
+        make_option('--app', default=None,
+                    help='Limit looking for missing columns to a single app.'),
     )
 
     def handle_noargs(self, **options):
-        """
-        Command execution.
-        """
         self.cursor = connection.cursor()
         self.introspection = connection.introspection
         self.interactive = options['interactive']
+        self.verbosity = int(options['verbosity'])
+        self.app = options.get('app') or options.get('app_config')
 
-        found_missing_fields = False
-        models = translator.get_registered_models(abstract=False)
+        found_missing_columns = False
+        models = translator.get_registered_models(abstract=False, app=self.app)
         for model in models:
             db_table = model._meta.db_table
-            model_full_name = '%s.%s' % (model._meta.app_label, model._meta.module_name)
+            model_full_name = '%s.%s' % (model._meta.app_label, model._meta.object_name)
+
             opts = translator.get_options_for_model(model)
-            for field_name, fields in opts.local_fields.items():
-                # Take `db_column` attribute into account
-                field = list(fields)[0]
-                column_name = field.db_column if field.db_column else field_name
-                missing_langs = list(self.get_missing_languages(column_name, db_table))
-                if missing_langs:
-                    found_missing_fields = True
-                    print_missing_langs(missing_langs, field_name, model_full_name)
-                    sql_sentences = self.get_sync_sql(field_name, missing_langs, model)
-                    execute_sql = ask_for_confirmation(
-                        sql_sentences, model_full_name, self.interactive)
-                    if execute_sql:
-                        print('Executing SQL...')
-                        for sentence in sql_sentences:
-                            self.cursor.execute(sentence)
-                        print('Done')
-                    else:
-                        print('SQL not executed')
+            for field_name in opts.local_fields.keys():
+                field = model._meta.get_field(field_name)
 
-        transaction.commit_unless_managed()
+                missing_columns = self.find_missing_columns(field, db_table)
+                if not missing_columns:
+                    continue
+                found_missing_columns = True
+                field_full_name = '%s.%s' % (model_full_name, field_name)
+                if self.verbosity > 0:
+                    self.stdout.write('Missing translation columns for field "%s": %s' % (
+                        field_full_name, ', '.join(missing_columns.keys())))
 
-        if not found_missing_fields:
-            print('No new translatable fields detected')
+                statements = self.generate_add_column_statements(field, missing_columns, model)
+                if self.interactive or self.verbosity > 0:
+                    self.stdout.write('\nStatements to be executed for "%s":' % field_full_name)
+                    for statement in statements:
+                        self.stdout.write('   %s' % statement)
+                if self.interactive:
+                    answer = None
+                    prompt = ('\nAre you sure that you want to execute the printed statements:'
+                              ' (y/n) [n]: ')
+                    while answer not in ('', 'y', 'n', 'yes', 'no'):
+                        answer = moves.input(prompt).strip()
+                        prompt = 'Please answer yes or no: '
+                    execute = (answer == 'y' or answer == 'yes')
+                else:
+                    execute = True
+                if execute:
+                    if self.verbosity > 0:
+                        self.stdout.write('Executing statements...')
+                    for statement in statements:
+                        self.cursor.execute(statement)
+                    if self.verbosity > 0:
+                        self.stdout.write('Done')
+                else:
+                    if self.verbosity > 0:
+                        self.stdout.write('Statements not executed')
 
-    def get_table_fields(self, db_table):
-        """
-        Gets table fields from schema.
-        """
-        db_table_desc = self.introspection.get_table_description(self.cursor, db_table)
-        return [t[0] for t in db_table_desc]
+        if django.VERSION < (1, 6) and found_missing_columns:
+            transaction.commit_unless_managed()
 
-    def get_missing_languages(self, field_name, db_table):
+        if self.verbosity > 0 and not found_missing_columns:
+            self.stdout.write('No new translatable fields detected')
+
+    def find_missing_columns(self, field, db_table):
         """
-        Gets only missings fields.
+        Returns a dictionary of (code, column name) for languages for which
+        the given field doesn't have a translation column in the database.
         """
-        db_table_fields = self.get_table_fields(db_table)
+        missing_columns = {}
+        db_column = field.db_column if field.db_column else field.name
+        db_table_description = self.introspection.get_table_description(self.cursor, db_table)
+        db_table_columns = [t[0] for t in db_table_description]
         for lang_code in AVAILABLE_LANGUAGES:
-            if build_localized_fieldname(field_name, lang_code) not in db_table_fields:
-                yield lang_code
+            lang_column = build_localized_fieldname(db_column, lang_code)
+            if lang_column not in db_table_columns:
+                missing_columns[lang_code] = lang_column
+        return missing_columns
 
-    def get_sync_sql(self, field_name, missing_langs, model):
+    def generate_add_column_statements(self, field, missing_columns, model):
         """
-        Returns SQL needed for sync schema for a new translatable field.
+        Returns database statements needed to add missing columns for the
+        field.
         """
-        qn = connection.ops.quote_name
+        statements = []
         style = no_style()
-        sql_output = []
+        qn = connection.ops.quote_name
         db_table = model._meta.db_table
-        for lang in missing_langs:
-            new_field = build_localized_fieldname(field_name, lang)
-            f = model._meta.get_field(new_field)
-            col_type = f.db_type(connection=connection)
-            field_sql = [style.SQL_FIELD(qn(f.column)), style.SQL_COLTYPE(col_type)]
-            # column creation
-            stmt = "ALTER TABLE %s ADD COLUMN %s" % (qn(db_table), ' '.join(field_sql))
-            if not f.null:
-                stmt += " " + style.SQL_KEYWORD('NOT NULL')
-            sql_output.append(stmt + ";")
-        return sql_output
+        db_column_type = field.db_type(connection=connection)
+        for lang_column in missing_columns.values():
+            statement = 'ALTER TABLE %s ADD COLUMN %s %s' % (qn(db_table),
+                                                             style.SQL_FIELD(qn(lang_column)),
+                                                             style.SQL_COLTYPE(db_column_type))
+            if not model._meta.get_field(lang_column).null:
+                # Just "not field.null" if we change the nullability politics.
+                statement += ' ' + style.SQL_KEYWORD('NOT NULL')
+            statements.append(statement + ';')
+        return statements
