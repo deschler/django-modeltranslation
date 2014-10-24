@@ -965,6 +965,10 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         self.assertEqual(manager.filter(test_fks__title='f_title_de').count(), 0)
         self.assertEqual(manager.filter(test_fks__title_de='f_title_de').count(), 1)
 
+    def test_indonesian(self):
+        field = models.ForeignKeyModel._meta.get_field('test')
+        self.assertNotEqual(field.attname, build_localized_fieldname(field.name, 'id'))
+
     def assertQuerysetsEqual(self, qs1, qs2):
         pk = lambda o: o.pk
         return self.assertEqual(sorted(qs1, key=pk), sorted(qs2, key=pk))
