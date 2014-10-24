@@ -36,7 +36,7 @@ from modeltranslation.forms import TranslationModelForm
 from modeltranslation.manager import (MultilingualManager, MultilingualQuerySet,
                                       append_lookup_keys, append_lookup_key)
 from modeltranslation.models import autodiscover, handle_translation_registrations
-from modeltranslation.tests.test_settings import TEST_SETTINGS
+from modeltranslation.tests import settings as test_settings
 from modeltranslation.translator import (DescendantRegistered, NotRegistered, TranslationOptions,
                                          translator)
 from modeltranslation.utils import (auto_populate, build_css_class, build_localized_fieldname,
@@ -53,6 +53,11 @@ request = None
 
 # How many models are registered for tests.
 TEST_MODELS = 29
+
+# Settings for modeltranslation tests. An additional TEST_APPS setting
+# specifies a list of apps that will be dynamically loaded and have their
+# models registered under the new settings (notably with LANGUAGES given).
+TEST_SETTINGS = dict((k, getattr(test_settings, k)) for k in dir(test_settings) if k == k.upper())
 
 
 def reload_module(module):
