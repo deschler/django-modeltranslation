@@ -8,7 +8,7 @@ Management Commands
 The ``update_translation_fields`` Command
 -----------------------------------------
 
-.. versionchanged:: 0.9
+.. versionchanged:: 0.8
 
 In case modeltranslation was installed in an existing project and you
 have specified to translate fields of models which are already synced to the
@@ -47,7 +47,7 @@ The ``sync_translation_fields`` Command
 ---------------------------------------
 
 .. versionadded:: 0.4
-.. versionchanged:: 0.9
+.. versionchanged:: 0.8
 
 .. code-block:: console
 
@@ -61,8 +61,7 @@ a registered model.
 However, if you are using South in your project, in most cases it's recommended to use migration
 instead of ``sync_translation_fields``. See :ref:`db-fields` for detailed info and use cases.
 
-It is possible to limit detecting of new fields to just a single app using the
-``--app`` option.
+You may limit detection of new fields to models from a single app using the ``--app`` option.
 
 
 The ``loaddata`` Command
