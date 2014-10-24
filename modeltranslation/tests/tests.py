@@ -2564,6 +2564,27 @@ class TestManager(ModeltranslationTestBase):
         qs = models.CustomManagerTestModel.objects.custom_qs()
         self.assertIsInstance(qs, MultilingualQuerySet)
 
+    def test_multilingual_queryset_pickling(self):
+        import pickle
+        from modeltranslation.manager import MultilingualQuerySet
+
+        # typical
+        models.CustomManagerTestModel.objects.create(title='a')
+        qs = models.CustomManagerTestModel.objects.all()
+        serialized = pickle.dumps(qs)
+        deserialized = pickle.loads(serialized)
+        self.assertIsInstance(deserialized, MultilingualQuerySet)
+        self.assertListEqual(list(qs), list(deserialized))
+
+        # Generated class
+        models.CustomManager2TestModel.objects.create()
+        qs = models.CustomManager2TestModel.objects.all()
+        serialized = pickle.dumps(qs)
+        deserialized = pickle.loads(serialized)
+        self.assertIsInstance(deserialized, MultilingualQuerySet)
+        self.assertIsInstance(deserialized, models.CustomQuerySet)
+        self.assertListEqual(list(qs), list(deserialized))
+
     def test_non_objects_manager(self):
         """Test if managers other than ``objects`` are patched too"""
         from modeltranslation.manager import MultilingualManager

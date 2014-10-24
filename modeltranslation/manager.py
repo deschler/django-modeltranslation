@@ -171,6 +171,9 @@ class MultilingualQuerySet(models.query.QuerySet):
                     ordering.append(rewrite_order_lookup_key(self.model, key))
                 self.query.add_ordering(*ordering)
 
+    def __reduce__(self):
+        return multilingual_queryset_factory, (self.__class__.__bases__[0],), self.__getstate__()
+
     # This method was not present in django-linguo
     def _clone(self, klass=None, *args, **kwargs):
         if klass is not None and not issubclass(klass, MultilingualQuerySet):
@@ -445,6 +448,16 @@ def get_queryset(obj):
         return obj.get_query_set()
 
 
+def multilingual_queryset_factory(old_cls, instantiate=True):
+    if old_cls == models.query.QuerySet:
+        NewClass = MultilingualQuerySet
+    else:
+        class NewClass(old_cls, MultilingualQuerySet):
+            pass
+        NewClass.__name__ = 'Multilingual%s' % old_cls.__name__
+    return NewClass() if instantiate else NewClass
+
+
 class MultilingualQuerysetManager(models.Manager):
     """
     This class gets hooked in MRO just before plain Manager, so that every call to
@@ -455,13 +468,7 @@ class MultilingualQuerysetManager(models.Manager):
         return self._patch_queryset(qs)
 
     def _patch_queryset(self, qs):
-        if qs.__class__ == models.query.QuerySet:
-            qs.__class__ = MultilingualQuerySet
-        else:
-            class NewClass(qs.__class__, MultilingualQuerySet):
-                pass
-            NewClass.__name__ = 'Multilingual%s' % qs.__class__.__name__
-            qs.__class__ = NewClass
+        qs.__class__ = multilingual_queryset_factory(qs.__class__, instantiate=False)
         qs._post_init()
         qs._rewrite_applied_operations()
         return qs
