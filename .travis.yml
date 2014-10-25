@@ -66,7 +66,7 @@ matrix:
       env: DJANGO=1.7 DB=mysql
 before_install:
   - pip install -q flake8 --use-mirrors
-  - PYFLAKES_NODOCTEST=1 flake8 --max-line-length=100 modeltranslation
+  - PYFLAKES_NODOCTEST=1 flake8 modeltranslation
 before_script:
   - mysql -e 'create database modeltranslation;'
   - psql -c 'create database modeltranslation;' -U postgres
