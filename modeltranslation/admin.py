@@ -342,7 +342,12 @@ class TranslationGenericStackedInline(TranslationInlineModelAdmin, generic.Gener
     pass
 
 
-class TabbedDjangoJqueryTranslationAdmin(TranslationAdmin):
+class TabbedDjango15JqueryTranslationAdmin(TranslationAdmin):
+    """
+    Convenience class which includes the necessary static files for tabbed
+    translation fields. Reuses Django's internal jquery version. Django 1.5
+    included jquery 1.4.2 which is known to work well with jquery-ui 1.8.2.
+    """
     class Media:
         js = (
             'modeltranslation/js/force_jquery.js',
@@ -352,16 +357,41 @@ class TabbedDjangoJqueryTranslationAdmin(TranslationAdmin):
         css = {
             'all': ('modeltranslation/css/tabbed_translation_fields.css',),
         }
-TabbedTranslationAdmin = TabbedDjangoJqueryTranslationAdmin
+
+
+class TabbedDjangoJqueryTranslationAdmin(TranslationAdmin):
+    """
+    Convenience class which includes the necessary media files for tabbed
+    translation fields. Reuses Django's internal jquery version.
+    """
+    class Media:
+        js = (
+            'modeltranslation/js/force_jquery.js',
+            '//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js',
+            'modeltranslation/js/tabbed_translation_fields.js',
+        )
+        css = {
+            'all': ('modeltranslation/css/tabbed_translation_fields.css',),
+        }
 
 
 class TabbedExternalJqueryTranslationAdmin(TranslationAdmin):
+    """
+    Convenience class which includes the necessary media files for tabbed
+    translation fields. Loads recent jquery version from a cdn.
+    """
     class Media:
         js = (
-            '//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
-            '//ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js',
+            '//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js',
+            '//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js',
             'modeltranslation/js/tabbed_translation_fields.js',
         )
         css = {
             'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
         }
+
+
+if django.VERSION < (1, 6):
+    TabbedTranslationAdmin = TabbedDjango15JqueryTranslationAdmin
+else:
+    TabbedTranslationAdmin = TabbedDjangoJqueryTranslationAdmin
