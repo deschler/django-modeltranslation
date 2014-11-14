@@ -4,14 +4,18 @@ from copy import deepcopy
 import django
 from django.contrib import admin
 from django.contrib.admin.options import BaseModelAdmin, flatten_fieldsets, InlineModelAdmin
-from django.contrib.contenttypes import generic
 from django import forms
 
 # Ensure that models are registered for translation before TranslationAdmin
 # runs. The import is supposed to resolve a race condition between model import
 # and translation registration in production (see issue #19).
 if django.VERSION < (1, 7):
+    from django.contrib.contenttypes.generic import GenericTabularInline
+    from django.contrib.contenttypes.generic import GenericStackedInline
     import modeltranslation.models  # NOQA
+else:
+    from django.contrib.contenttypes.admin import GenericTabularInline
+    from django.contrib.contenttypes.admin import GenericStackedInline
 from modeltranslation import settings as mt_settings
 from modeltranslation.translator import translator
 from modeltranslation.utils import (
@@ -334,11 +338,11 @@ class TranslationStackedInline(TranslationInlineModelAdmin, admin.StackedInline)
     pass
 
 
-class TranslationGenericTabularInline(TranslationInlineModelAdmin, generic.GenericTabularInline):
+class TranslationGenericTabularInline(TranslationInlineModelAdmin, GenericTabularInline):
     pass
 
 
-class TranslationGenericStackedInline(TranslationInlineModelAdmin, generic.GenericStackedInline):
+class TranslationGenericStackedInline(TranslationInlineModelAdmin, GenericStackedInline):
     pass
 
 
