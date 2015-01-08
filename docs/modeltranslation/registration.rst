@@ -354,5 +354,23 @@ Model Field                     0.4 0.5 0.7
 
 \* Implicitly supported (as subclass of a supported field)
 
+Autopopulating fields
+---------------------
+
+The utility function ``autotranslationoptionsfactory`` can be used to autopopulate CharFields and TextFields. This can be useful for registering large amounts of models with varying fields, without having to create the boilerplate registration code for each one.
+
+It takes 2 optional arguments 'include' and 'exclude', each one is a list of field names that should be included or excluded.
+
+It returns the AutoTranslationOptions class, which inherits from TranslationOptions, with appropriate fields set.
+
+
+Usage::
+
+    from modeltranslation.autotranslate import autotranslationoptionsfactory
+
+    for model in ModelClass1, ModelClass2, ModelClass3, ModelClass4, ModelClassN:
+        translator.register(model, autotranslationoptionsfactory(model), include=['image'], exclude=['countrycode'])
+
+
 
 .. _Migration docs: https://docs.djangoproject.com/en/dev/topics/migrations/#workflow
