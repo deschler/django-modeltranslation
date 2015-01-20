@@ -195,7 +195,7 @@ Example::
         ('de', 'German'),
         ('pl', 'Polish'),
     )
-    MODELTRANSLATION_LANGUAGES = ('en', 'de')
+    MODELTRANSLATION_LANGUAGES = ['en', 'de']
 
 .. note::
     This setting may become useful if your users shall produce content for a restricted
