@@ -258,7 +258,7 @@ class MultilingualQuerySet(models.query.QuerySet):
 
     def _rewrite_select_related(self):
         if isinstance(self.query.select_related, dict):
-            new = []
+            new = {}
             for field_name, value in self.query.select_related.items():
                 new[rewrite_order_lookup_key(self.model, field_name)] = value
             self.query.select_related = new
