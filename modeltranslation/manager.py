@@ -14,7 +14,6 @@ try:
     from django.db.models.fields.related import RelatedObject
     NEW_META_API = False
 except ImportError:
-    from django.db.models.fields.related import ManyToOneRel
     NEW_META_API = True
 
 from django.db.models.sql.where import Constraint
@@ -124,24 +123,28 @@ _F2TM_CACHE = {}
 
 
 def get_fields_to_translatable_models(model):
-    if model not in _F2TM_CACHE:
-        results = []
-        if NEW_META_API == True:
-            for f in model._meta.get_fields():
-                if get_translatable_fields_for_model(f.model) is not None:
-                    results.append((f.name, f.model))
-        else:
-            for field_name in model._meta.get_all_field_names():
-                field_object, modelclass, direct, m2m = model._meta.get_field_by_name(field_name)
-                # Direct relationship
-                if direct and isinstance(field_object, RelatedField):
-                    if get_translatable_fields_for_model(field_object.related.parent_model) is not None:
-                        results.append((field_name, field_object.related.parent_model))
-                # Reverse relationship
-                if isinstance(field_object, RelatedObject):
-                    if get_translatable_fields_for_model(field_object.model) is not None:
-                        results.append((field_name, field_object.model))
-        _F2TM_CACHE[model] = dict(results)
+    if model in _F2TM_CACHE:
+        return _F2TM_CACHE[model]
+
+    results = []
+    if NEW_META_API is True:
+        for f in model._meta.get_fields():
+            if get_translatable_fields_for_model(f.model) is not None:
+                results.append((f.name, f.model))
+    else:
+        for field_name in model._meta.get_all_field_names():
+            f, mclass, direct, m2m = model._meta.get_field_by_name(field_name)
+            # Direct relationship
+            if direct and isinstance(f, RelatedField):
+                if get_translatable_fields_for_model(
+                        f.related.parent_model) is not None:
+                    results.append((field_name, f.related.parent_model))
+            # Reverse relationship
+            if isinstance(f, RelatedObject):
+                if get_translatable_fields_for_model(
+                        f.model) is not None:
+                    results.append((field_name, f.model))
+    _F2TM_CACHE[model] = dict(results)
     return _F2TM_CACHE[model]
 
 _C2F_CACHE = {}
