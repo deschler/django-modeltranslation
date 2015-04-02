@@ -37,6 +37,7 @@ def runtests():
         settings.configure(
             DATABASES=DATABASES,
             INSTALLED_APPS=(
+                'django.contrib.contenttypes',
                 'modeltranslation',
             ),
             ROOT_URLCONF=None,  # tests override urlconf, but it still needs to be defined
