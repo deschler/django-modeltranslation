@@ -30,8 +30,8 @@ def runtests():
                 'NAME': 'modeltranslation'
             })
 
-        if django.VERSION < (1, 6):
-            DATABASES['default'].update(dict(OPTIONS={'autocommit': True}))
+            if django.VERSION < (1, 6):
+                DATABASES['default'].update(dict(OPTIONS={'autocommit': True}))
 
     # Configure test environment
     settings.configure(
@@ -48,8 +48,7 @@ def runtests():
 
     if django.VERSION >= (1, 7):
         django.setup()
-    failures = call_command(
-        'test', 'modeltranslation', interactive=False, failfast=False, verbosity=2)
+    failures = call_command('test', 'modeltranslation', interactive=False, failfast=False, verbosity=2)
 
     sys.exit(bool(failures))
 
