@@ -1,3 +1,15 @@
+v0.8.1
+======
+Date: 2015-04-02
+
+  FIXED: Using a queryset with select related.
+         (resolves issue #298, thanks Vladimir Sinitsin)
+  FIXED: Added missing jquery browser plugin.
+         (resolves issue #270, thanks Fabio Caccamo)
+  FIXED: Deprecated imports with Django >= 1.7
+         (resolves issue #283, thanks Alex Marandon)
+
+
 v0.8
 ====
 Date: 2014-10-06
