@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from contextlib import contextmanager
 
+from django.conf import settings as django_settings
 from django.utils import six
 from django.utils.encoding import force_text
 from django.utils.translation import get_language as _get_language
@@ -15,6 +16,8 @@ def get_language():
     settings.LANGUAGES (Django does not seem to guarantee this for us).
     """
     lang = _get_language()
+    if not lang:
+        lang = django_settings.LANGUAGE_CODE
     if lang not in settings.AVAILABLE_LANGUAGES and '-' in lang:
         lang = lang.split('-')[0]
     if lang in settings.AVAILABLE_LANGUAGES:

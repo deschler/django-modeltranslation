@@ -7,9 +7,10 @@ https://github.com/zmathew/django-linguo
 """
 import itertools
 
+import django
 from django.db import models
 from django.db.models import FieldDoesNotExist
-from django.db.models.fields.related import RelatedField, RelatedObject
+from django.db.models.fields.related import RelatedField
 from django.db.models.sql.where import Constraint
 from django.utils.six import moves
 from django.utils.tree import Node
@@ -24,6 +25,9 @@ from modeltranslation import settings
 from modeltranslation.fields import TranslationField
 from modeltranslation.utils import (build_localized_fieldname, get_language,
                                     auto_populate, resolution_order)
+
+if django.VERSION < (1, 8):
+    from django.db.models.fields.related import RelatedObject
 
 
 def get_translatable_fields_for_model(model):
@@ -121,14 +125,24 @@ def get_fields_to_translatable_models(model):
         results = []
         for field_name in model._meta.get_all_field_names():
             field_object, modelclass, direct, m2m = model._meta.get_field_by_name(field_name)
-            # Direct relationship
-            if direct and isinstance(field_object, RelatedField):
-                if get_translatable_fields_for_model(field_object.related.parent_model) is not None:
-                    results.append((field_name, field_object.related.parent_model))
-            # Reverse relationship
-            if isinstance(field_object, RelatedObject):
-                if get_translatable_fields_for_model(field_object.model) is not None:
-                    results.append((field_name, field_object.model))
+            if django.VERSION < (1, 8):
+                # Direct relationship
+                if direct and isinstance(field_object, RelatedField):
+                    if get_translatable_fields_for_model(field_object.related.parent_model) is not None:
+                        results.append((field_name, field_object.related.parent_model))
+                # Reverse relationship
+                if isinstance(field_object, RelatedObject):
+                    if get_translatable_fields_for_model(field_object.model) is not None:
+                        results.append((field_name, field_object.model))
+            else:  # Django >= 1.8
+                # Direct relationship
+                if direct and isinstance(field_object, RelatedField):
+                    if get_translatable_fields_for_model(field_object.related_model) is not None:
+                        results.append((field_object.name, field_object.related_model))
+                # Reverse relationship
+                if field_object.is_relation:
+                    if get_translatable_fields_for_model(field_object.related_model) is not None:
+                        results.append((field_name, field_object.model))
         _F2TM_CACHE[model] = dict(results)
     return _F2TM_CACHE[model]
 
