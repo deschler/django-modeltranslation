@@ -11,8 +11,6 @@ import django
 from django.db import models
 from django.db.models import FieldDoesNotExist
 from django.db.models.fields.related import RelatedField
-if django.VERSION < (1, 8):
-    from django.db.models.fields.related import RelatedObject
 from django.db.models.sql.where import Constraint
 from django.utils.six import moves
 from django.utils.tree import Node
@@ -27,6 +25,9 @@ from modeltranslation import settings
 from modeltranslation.fields import TranslationField
 from modeltranslation.utils import (build_localized_fieldname, get_language,
                                     auto_populate, resolution_order)
+
+if django.VERSION < (1, 8):
+    from django.db.models.fields.related import RelatedObject
 
 
 def get_translatable_fields_for_model(model):
