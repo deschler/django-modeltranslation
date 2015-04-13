@@ -31,6 +31,9 @@ Contributors
 * Mathieu Leplatre
 * Thom Wiggers
 * Warnar Boekkooi
+* Alex Marandon
+* Fabio Caccamo
+* Vladimir Sinitsin
 * And many more ... (if you miss your name here, please let us know!)
 
 .. _django-linguo: https://github.com/zmathew/django-linguo

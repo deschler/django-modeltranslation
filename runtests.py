@@ -27,28 +27,29 @@ def runtests():
             DATABASES['default'].update({
                 'ENGINE': 'django.db.backends.postgresql_psycopg2',
                 'USER': 'postgres',
-                'NAME': 'modeltranslation'
+                'NAME': 'modeltranslation',
+                'OPTIONS': {
+                    'autocommit': True,
+                }
             })
 
-            if django.VERSION < (1, 6):
-                DATABASES['default'].update(dict(OPTIONS={'autocommit': True}))
-
-    # Configure test environment
-    settings.configure(
-        DATABASES=DATABASES,
-        INSTALLED_APPS=(
-            'modeltranslation',
-        ),
-        ROOT_URLCONF=None,  # tests override urlconf, but it still needs to be defined
-        LANGUAGES=(
-            ('en', 'English'),
-        ),
-        MIDDLEWARE_CLASSES=(),
-    )
+        # Configure test environment
+        settings.configure(
+            DATABASES=DATABASES,
+            INSTALLED_APPS=(
+                'modeltranslation',
+            ),
+            ROOT_URLCONF=None,  # tests override urlconf, but it still needs to be defined
+            LANGUAGES=(
+                ('en', 'English'),
+            ),
+            MIDDLEWARE_CLASSES=(),
+        )
 
     if django.VERSION >= (1, 7):
         django.setup()
-    failures = call_command('test', 'modeltranslation', interactive=False, failfast=False, verbosity=2)
+    failures = call_command(
+        'test', 'modeltranslation', interactive=False, failfast=False, verbosity=2)
 
     sys.exit(bool(failures))
 
