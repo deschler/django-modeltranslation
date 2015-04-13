@@ -2772,7 +2772,7 @@ class TestManager(ModeltranslationTestBase):
             self.assertEqual('title_de', inst1.title)
             self.assertEqual('title_de', inst2.title)
 
-    def _deactivated_test_deferred(self):
+    def test_deferred(self):
         """
         Check if ``only`` and ``defer`` are working.
         """

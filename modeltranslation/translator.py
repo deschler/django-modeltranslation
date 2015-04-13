@@ -242,6 +242,22 @@ def patch_clean_fields(model):
     model.clean_fields = new_clean_fields
 
 
+def patch_get_deferred_fields(model):
+    """
+    Django >= 1.8: patch detecting deferred fields. Crucial for only/defer to work.
+    """
+    if not hasattr(model, 'get_deferred_fields'):
+        return
+    old_get_deferred_fields = model.get_deferred_fields
+
+    def new_get_deferred_fields(self):
+        sup = old_get_deferred_fields(self)
+        if hasattr(self, '_fields_were_deferred'):
+            sup.update(self._fields_were_deferred)
+        return sup
+    model.get_deferred_fields = new_get_deferred_fields
+
+
 def patch_metaclass(model):
     """
     Monkey patches original model metaclass to exclude translated fields on deferred subclasses.
@@ -260,8 +276,13 @@ def patch_metaclass(model):
         def __new__(cls, name, bases, attrs):
             if attrs.get('_deferred', False):
                 opts = translator.get_options_for_model(model)
+                were_deferred = set()
                 for field_name in opts.fields.keys():
-                    attrs.pop(field_name, None)
+                    if attrs.pop(field_name, None):
+                        # Field was deferred. Store this for future reference.
+                        were_deferred.add(field_name)
+                if len(were_deferred):
+                    attrs['_fields_were_deferred'] = were_deferred
             return super(translation_deferred_mcs, cls).__new__(cls, name, bases, attrs)
     # Assign to __metaclass__ wouldn't work, since metaclass search algorithm check for __class__.
     # http://docs.python.org/2/reference/datamodel.html#__metaclass__
@@ -410,8 +431,9 @@ class Translator(object):
             # Patch clean_fields to verify form field clearing
             patch_clean_fields(model)
 
-            # Patch __metaclass__ to allow deferring to work
+            # Patch __metaclass__ and other methods to allow deferring to work
             patch_metaclass(model)
+            patch_get_deferred_fields(model)
 
             # Substitute original field with descriptor
             model_fallback_languages = getattr(opts, 'fallback_languages', None)
