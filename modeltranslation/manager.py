@@ -9,7 +9,13 @@ import itertools
 
 from django.db import models
 from django.db.models import FieldDoesNotExist
-from django.db.models.fields.related import RelatedField, RelatedObject
+try:
+    from django.db.models.fields.related import RelatedObject
+    from django.db.models.fields.related import RelatedField
+    NEW_META_API = False
+except ImportError:
+    NEW_META_API = True
+
 from django.db.models.sql.where import Constraint
 from django.utils.six import moves
 from django.utils.tree import Node
@@ -117,8 +123,16 @@ _F2TM_CACHE = {}
 
 
 def get_fields_to_translatable_models(model):
-    if model not in _F2TM_CACHE:
-        results = []
+    if model in _F2TM_CACHE:
+        return _F2TM_CACHE[model]
+
+    results = []
+    if NEW_META_API:
+        for f in model._meta.get_fields():
+            if f.is_relation:
+                if get_translatable_fields_for_model(f.related_model) is not None:
+                    results.append((f.name, f.related_model))
+    else:
         for field_name in model._meta.get_all_field_names():
             field_object, modelclass, direct, m2m = model._meta.get_field_by_name(field_name)
             # Direct relationship
@@ -129,7 +143,7 @@ def get_fields_to_translatable_models(model):
             if isinstance(field_object, RelatedObject):
                 if get_translatable_fields_for_model(field_object.model) is not None:
                     results.append((field_name, field_object.model))
-        _F2TM_CACHE[model] = dict(results)
+    _F2TM_CACHE[model] = dict(results)
     return _F2TM_CACHE[model]
 
 _C2F_CACHE = {}
@@ -221,7 +235,7 @@ class MultilingualQuerySet(models.query.QuerySet):
 
     # This method was not present in django-linguo
     def _rewrite_col(self, col):
-        """Django 1.7 column name rewriting"""
+        """Django >= 1.7 column name rewriting"""
         if isinstance(col, Col):
             new_name = rewrite_lookup_key(self.model, col.target.name)
             if col.target.name != new_name:
@@ -282,6 +296,11 @@ class MultilingualQuerySet(models.query.QuerySet):
             return q
         if isinstance(q, Node):
             q.children = list(map(self._rewrite_f, q.children))
+        # Django >= 1.8
+        if hasattr(q, 'lhs'):
+            q.lhs = self._rewrite_f(q.lhs)
+        if hasattr(q, 'rhs'):
+            q.rhs = self._rewrite_f(q.rhs)
         return q
 
     def _filter_or_exclude(self, negate, *args, **kwargs):
