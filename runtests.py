@@ -28,15 +28,15 @@ def runtests():
                 'ENGINE': 'django.db.backends.postgresql_psycopg2',
                 'USER': 'postgres',
                 'NAME': 'modeltranslation',
-                'OPTIONS': {
-                    'autocommit': True,
-                }
             })
+            if django.VERSION < (1, 6):
+                DATABASES['default']['OPTIONS'] = {'autocommit': True}
 
         # Configure test environment
         settings.configure(
             DATABASES=DATABASES,
             INSTALLED_APPS=(
+                'django.contrib.contenttypes',
                 'modeltranslation',
             ),
             ROOT_URLCONF=None,  # tests override urlconf, but it still needs to be defined
