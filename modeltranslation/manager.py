@@ -129,7 +129,7 @@ def get_fields_to_translatable_models(model):
     results = []
     if NEW_META_API:
         for f in model._meta.get_fields():
-            if f.is_relation:
+            if f.is_relation and f.related_model:
                 if get_translatable_fields_for_model(f.related_model) is not None:
                     results.append((f.name, f.related_model))
     else:
