@@ -10,6 +10,7 @@ You will need to execute this command in two cases:
 Credits: Heavily inspired by django-transmeta's sync_transmeta_db command.
 """
 from optparse import make_option
+import django
 from django.core.management.base import NoArgsCommand
 from django.core.management.color import no_style
 from django.db import connection, transaction
@@ -67,7 +68,11 @@ class Command(NoArgsCommand):
         models = translator.get_registered_models(abstract=False)
         for model in models:
             db_table = model._meta.db_table
-            model_full_name = '%s.%s' % (model._meta.app_label, model._meta.module_name)
+            if django.VERSION < (1, 8):
+                model_name = model._meta.module_name
+            else:
+                model_name = model._meta.model_name
+            model_full_name = '%s.%s' % (model._meta.app_label, model_name)
             opts = translator.get_options_for_model(model)
             for field_name, fields in opts.local_fields.items():
                 # Take `db_column` attribute into account
