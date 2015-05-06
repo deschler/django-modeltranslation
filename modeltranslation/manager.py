@@ -129,7 +129,11 @@ def get_fields_to_translatable_models(model):
     results = []
     if NEW_META_API:
         for f in model._meta.get_fields():
-            if f.is_relation:
+            if f.is_relation and f.related_model:
+                # The new get_field() will find GenericForeignKey relations.
+                # In that case the 'related_model' attribute is set to None
+                # so it is necessary to check for this value before trying to
+                # get translatable fields.
                 if get_translatable_fields_for_model(f.related_model) is not None:
                     results.append((f.name, f.related_model))
     else:
