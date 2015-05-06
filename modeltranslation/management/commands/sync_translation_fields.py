@@ -93,7 +93,8 @@ class Command(NoArgsCommand):
                     else:
                         print('SQL not executed')
 
-        transaction.commit_unless_managed()
+        if django.VERSION < (1, 6):
+            transaction.commit_unless_managed()
 
         if not found_missing_fields:
             print('No new translatable fields detected')
