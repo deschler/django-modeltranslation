@@ -39,11 +39,6 @@ backward compatibility:
     display: none;
 }
 
-
-.ui-tabs .ui-tabs-nav li a:focus, .ui-tabs .ui-tabs-nav li a:focus {
-  outline: none !important;
-}
-
 /* custom tabs theme */
 .ui-tabs { padding: 0; }
 .ui-tabs .ui-tabs-nav { padding: 5px 0 0 10px; border-bottom: 1px solid #EEEEEE; }
