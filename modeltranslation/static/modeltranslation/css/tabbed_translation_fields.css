@@ -45,6 +45,7 @@ backward compatibility:
 .ui-tabs .ui-tabs-nav li { margin: 0; }
 .ui-tabs .ui-tabs-nav li.required { font-weight: bold; }
 .ui-tabs .ui-tabs-nav li a {
+    outline: none;
     border: 1px solid #CCCCCC;
     background: #eeeeee repeat-x;
     border-bottom-width: 0;
