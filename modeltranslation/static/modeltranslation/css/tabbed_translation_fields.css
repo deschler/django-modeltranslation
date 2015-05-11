@@ -79,11 +79,11 @@ backward compatibility:
     font-family: "Lucida Grande", "DejaVu Sans", "Bitstream Vera Sans", Verdana,Arial, sans-serif;
 }
 .inline-group .tabular tr td {
-    vertical-align: bottom;
+    vertical-align: middle;
 }
 .inline-group .tabular tr.has_original td.original,
 .inline-group .tabular tr td.delete {
-    vertical-align: top;
+    vertical-align: middle;
 }
 
 .inline-group .tabular .datetime > input {
