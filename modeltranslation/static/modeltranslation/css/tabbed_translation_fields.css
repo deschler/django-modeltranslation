@@ -39,6 +39,11 @@ backward compatibility:
     display: none;
 }
 
+
+.ui-tabs .ui-tabs-nav li a:focus, .ui-tabs .ui-tabs-nav li a:focus {
+  outline: none !important;
+}
+
 /* custom tabs theme */
 .ui-tabs { padding: 0; }
 .ui-tabs .ui-tabs-nav { padding: 5px 0 0 10px; border-bottom: 1px solid #EEEEEE; }
@@ -46,6 +51,7 @@ backward compatibility:
 .ui-tabs .ui-tabs-nav li.required { font-weight: bold; }
 .ui-tabs .ui-tabs-nav li a {
     border: 1px solid #CCCCCC;
+    outline: none;
     background: #eeeeee repeat-x;
     border-bottom-width: 0;
     color: #666666;
