@@ -150,7 +150,12 @@ def add_translation_fields(model, opts):
     # Rebuild information about parents fields. If there are opts.local_fields, field cache would be
     # invalidated (by model._meta.add_field() function). Otherwise, we need to do it manually.
     if len(opts.local_fields) == 0:
-        model._meta._fill_fields_cache()
+        try:
+            model._meta._fill_fields_cache()
+        except AttributeError:
+            # Django 1.8 removed _fill_fields_cache
+            model._meta._expire_cache()
+            model._meta.get_fields()
 
 
 def has_custom_queryset(manager):
