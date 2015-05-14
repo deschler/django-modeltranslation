@@ -1,3 +1,18 @@
+v0.9.1
+======
+Date: 2015-05-14
+
+  FIXED: Handled deprecation of _meta._fill_fields_cache() for Django 1.8
+         in add_translation_fields.
+         (resolves issue #304, thanks Mathias Ettinger and Daniel Loeb)
+  FIXED: Handled deprecation of transaction.commit_unless_managed for
+         Django 1.8 in sync_translation_fields management command.
+         (resolves issue #310)
+  FIXED: Fixed translatable fields discovery with the new _meta API and
+         generic relations for Django 1.8.
+         (resolves issue #309, thanks Morgan Aubert)
+
+
 v0.9
 ====
 Date: 2015-04-16
