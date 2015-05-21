@@ -19,7 +19,8 @@ else:
 from modeltranslation import settings as mt_settings
 from modeltranslation.translator import translator
 from modeltranslation.utils import (
-    get_translation_fields, build_css_class, build_localized_fieldname, get_language, unique)
+    get_translation_fields, build_css_class, build_localized_fieldname, get_language, 
+    get_language_bidi, unique)
 from modeltranslation.widgets import ClearableWidgetWrapper
 
 
@@ -80,7 +81,9 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
             css_classes.append('mt')
             # Add localized fieldname css class
             css_classes.append(build_css_class(db_field.name, 'mt-field'))
-
+            # Add mt-bidi css class if language is bidirectional
+            if(get_language_bidi(db_field.language)):
+                css_classes.append('mt-bidi')
             if db_field.language == mt_settings.DEFAULT_LANGUAGE:
                 # Add another css class to identify a default modeltranslation widget
                 css_classes.append('mt-default')
