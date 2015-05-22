@@ -12,6 +12,7 @@ from modeltranslation.fields import (NONE, create_translation_field, Translation
 from modeltranslation.manager import (MultilingualManager, MultilingualQuerysetManager,
                                       rewrite_lookup_key)
 from modeltranslation.utils import build_localized_fieldname, parse_field
+from modeltranslation.decorators import register
 
 
 class AlreadyRegistered(Exception):
