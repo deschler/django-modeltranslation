@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 from django.utils.translation import ugettext_lazy
 
-from modeltranslation.translator import translator, TranslationOptions
+from modeltranslation.translator import translator, register, TranslationOptions
 from modeltranslation.tests.models import (
     TestModel, FallbackModel, FallbackModel2, FileFieldsModel, ForeignKeyModel, OtherFieldsModel,
     DescriptorModel, AbstractModelA, AbstractModelB, Slugged, MetaData, Displayable, Page,
     RichText, RichTextPage, MultitableModelA, MultitableModelB, MultitableModelC, ManagerTestModel,
     CustomManagerTestModel, CustomManager2TestModel, GroupFieldsetsModel, NameModel,
     ThirdPartyRegisteredModel, ProxyTestModel, UniqueNullableModel, OneToOneFieldModel,
-    RequiredModel)
+    RequiredModel, DecoratedModel)
 
 
 class TestTranslationOptions(TranslationOptions):
@@ -196,3 +196,10 @@ class RequiredTranslationOptions(TranslationOptions):
         'default': ('req_reg',),  # for all other languages
     }
 translator.register(RequiredModel, RequiredTranslationOptions)
+
+
+# ######### Decorated registration testing
+
+@register(DecoratedModel)
+class DecoratedTranslationOptions(TranslationOptions):
+    fields = ('title',)
