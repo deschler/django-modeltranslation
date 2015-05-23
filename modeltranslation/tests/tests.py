@@ -42,7 +42,7 @@ models = translation = None
 request = None
 
 # How many models are registered for tests.
-TEST_MODELS = 28
+TEST_MODELS = 29
 
 
 class reload_override_settings(override_settings):

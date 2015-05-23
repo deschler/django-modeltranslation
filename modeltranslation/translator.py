@@ -549,3 +549,7 @@ class Translator(object):
 
 # This global object represents the singleton translator object
 translator = Translator()
+
+
+# Re-export the decorator for convenience
+from modeltranslation.decorators import register  # NOQA re-export

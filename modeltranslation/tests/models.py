@@ -307,3 +307,9 @@ class RequiredModel(models.Model):
     req = models.CharField(max_length=10)
     req_reg = models.CharField(max_length=10)
     req_en_reg = models.CharField(max_length=10)
+
+
+# ######### Decorated registration testing
+
+class DecoratedModel(models.Model):
+    title = models.CharField(ugettext_lazy('title'), max_length=255)
