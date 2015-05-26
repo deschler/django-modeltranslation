@@ -24,12 +24,14 @@ def get_language():
         return lang
     return settings.DEFAULT_LANGUAGE
 
+
 def get_language_bidi(lang):
     """
     Check if a language is bi-directional.
     """
     lang_info = get_language_info(lang)
     return lang_info['bidi']
+
 
 def get_translation_fields(field):
     """

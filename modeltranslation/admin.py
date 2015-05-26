@@ -19,7 +19,7 @@ else:
 from modeltranslation import settings as mt_settings
 from modeltranslation.translator import translator
 from modeltranslation.utils import (
-    get_translation_fields, build_css_class, build_localized_fieldname, get_language, 
+    get_translation_fields, build_css_class, build_localized_fieldname, get_language,
     get_language_bidi, unique)
 from modeltranslation.widgets import ClearableWidgetWrapper
 
