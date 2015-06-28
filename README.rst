@@ -14,21 +14,21 @@ may they use translations or not, and you never have to touch the original
 model class.
 
 
-.. image:: http://img.shields.io/travis/deschler/django-modeltranslation/master.png?style=flat
+.. image:: http://img.shields.io/travis/deschler/django-modeltranslation/master.png?style=flat-square
     :target: https://travis-ci.org/deschler/django-modeltranslation
 
-.. image:: http://img.shields.io/coveralls/deschler/django-modeltranslation.png?style=flat
+.. image:: http://img.shields.io/coveralls/deschler/django-modeltranslation.png?style=flat-square
     :target: https://coveralls.io/r/deschler/django-modeltranslation
 
-.. image:: https://pypip.in/v/django-modeltranslation/badge.png?style=flat
+.. image:: https://img.shields.io/pypi/v/django-modeltranslation.svg?style=flat-square
     :target: https://pypi.python.org/pypi/django-modeltranslation/
     :alt: Latest PyPI version
 
-.. image:: https://pypip.in/py_versions/django-modeltranslation/badge.png?style=flat
+.. image:: https://img.shields.io/pypi/pyversions/django-modeltranslation.svg?style=flat-square
     :target: https://pypi.python.org/pypi/django-modeltranslation/
     :alt: Supported Python versions
 
-.. image:: https://pypip.in/d/django-modeltranslation/badge.png?style=flat
+.. image:: https://img.shields.io/pypi/dm/django-modeltranslation.svg?style=flat-square
     :target: https://pypi.python.org/pypi/django-modeltranslation/
     :alt: Number of PyPI downloads
 
