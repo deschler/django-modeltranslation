@@ -445,14 +445,21 @@ class FallbackValuesQuerySet(models.query.ValuesQuerySet, MultilingualQuerySet):
 
 class FallbackValuesListQuerySet(FallbackValuesQuerySet):
     def iterator(self):
+        fields = self.original_fields
+        if hasattr(self, 'aggregate_names'):
+            # Django <1.8
+            fields += tuple(self.aggregate_names)
+        if hasattr(self, 'annotation_names'):
+            # Django >=1.8
+            fields += tuple(self.annotation_names)
         for row in super(FallbackValuesListQuerySet, self).iterator():
-            if self.flat and len(self.original_fields) == 1:
-                yield row[self.original_fields[0]]
+            if self.flat and len(fields) == 1:
+                yield row[fields[0]]
             else:
-                yield tuple(row[f] for f in self.original_fields)
+                yield tuple(row[f] for f in fields)
 
     def _setup_query(self):
-        self.original_fields = self._fields
+        self.original_fields = tuple(self._fields)
         super(FallbackValuesListQuerySet, self)._setup_query()
 
     def _clone(self, *args, **kwargs):
