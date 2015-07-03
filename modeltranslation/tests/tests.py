@@ -14,7 +14,7 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.core.management import call_command
 from django.db import IntegrityError
-from django.db.models import Q, F
+from django.db.models import Q, F, Count
 from django.test import TestCase, TransactionTestCase
 from django.test.utils import override_settings
 from django.utils import six
@@ -2550,6 +2550,14 @@ class TestManager(ModeltranslationTestBase):
              'visits': 0, 'visits_en': 0, 'visits_de': 0,
              'description': None, 'description_en': None, 'description_de': None},
         ])
+
+    def test_values_list_annotation(self):
+        models.TestModel(title='foo').save()
+        models.TestModel(title='foo').save()
+        self.assertEqual(
+            list(models.TestModel.objects.all().values_list('title').annotate(Count('id'))),
+            [('foo', 2)]
+        )
 
     def test_custom_manager(self):
         """Test if user-defined manager is still working"""
