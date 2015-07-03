@@ -1,3 +1,17 @@
+v0.10.0
+=======
+Date: 2015-07-03
+
+  ADDED: CSS support for bi-directional languages to TranslationAdmin
+         using mt-bidi class.
+         (resolves issue #317, thanks oliphunt)
+  ADDED: A decorator to handle registration of models.
+         (resolves issue #318, thanks zenoamaro)
+
+  FIXED: Handled annotation fields when using values_list.
+         (resolves issue #321, thanks Lukas Lundgren)
+
+
 v0.9.1
 ======
 Date: 2015-05-14

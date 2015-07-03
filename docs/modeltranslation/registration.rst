@@ -50,9 +50,11 @@ only imported. The ``NewsTranslationOptions`` derives from
 ``TranslationOptions`` and provides the ``fields`` attribute. Finally the model
 and its translation options are registered at the ``translator`` object.
 
+.. versionadded:: 0.10
+
 If you prefer, ``register`` is also available as a decorator, much like the
 one Django introduced for its admin in version 1.7. Usage is similar to the
-standard ``register``, just provide arguments as you normally would, except 
+standard ``register``, just provide arguments as you normally would, except
 the options class which will be the decorated one::
 
     from modeltranslation.translator import register, TranslationOptions

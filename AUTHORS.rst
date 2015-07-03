@@ -39,6 +39,9 @@ Contributors
 * Mathias Ettinger
 * Daniel Loeb
 * Stephen McDonald
+* Lukas Lundgren
+* zenoamaro
+* oliphunt
 * And many more ... (if you miss your name here, please let us know!)
 
 .. _django-linguo: https://github.com/zmathew/django-linguo
