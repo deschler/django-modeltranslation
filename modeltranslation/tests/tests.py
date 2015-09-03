@@ -1442,6 +1442,28 @@ class OtherFieldsTest(ModeltranslationTestBase):
         self.assertEqual(datetime.time(1, 2, 3), inst.time_de)
         self.assertEqual(datetime.time(23, 42, 0), inst.time_en)
 
+    def test_dates_queryset(self):
+        Model = models.OtherFieldsModel
+
+        Model.objects.create(datetime=datetime.datetime(2015, 9, 2, 0, 0))
+        Model.objects.create(datetime=datetime.datetime(2014, 8, 3, 0, 0))
+        Model.objects.create(datetime=datetime.datetime(2013, 7, 4, 0, 0))
+
+        qs = Model.objects.dates('datetime', 'year', 'DESC')
+
+        if django.VERSION[:2] < (1, 6):
+            self.assertEqual(list(qs), [
+                datetime.datetime(2015, 1, 1, 0, 0),
+                datetime.datetime(2014, 1, 1, 0, 0),
+                datetime.datetime(2013, 1, 1, 0, 0)
+            ])
+        else:
+            self.assertEqual(list(qs), [
+                datetime.date(2015, 1, 1),
+                datetime.date(2014, 1, 1),
+                datetime.date(2013, 1, 1)
+            ])
+
     def test_descriptors(self):
         # Descriptor store ints in database and returns string of 'a' of that length
         inst = models.DescriptorModel()

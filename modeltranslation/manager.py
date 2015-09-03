@@ -448,10 +448,10 @@ class FallbackValuesListQuerySet(FallbackValuesQuerySet):
         fields = self.original_fields
         if hasattr(self, 'aggregate_names'):
             # Django <1.8
-            fields += tuple(self.aggregate_names)
+            fields += tuple(f for f in self.aggregate_names if f not in fields)
         if hasattr(self, 'annotation_names'):
             # Django >=1.8
-            fields += tuple(self.annotation_names)
+            fields += tuple(f for f in self.annotation_names if f not in fields)
         for row in super(FallbackValuesListQuerySet, self).iterator():
             if self.flat and len(fields) == 1:
                 yield row[fields[0]]
