@@ -1,3 +1,11 @@
+v0.10.1
+=======
+Date: 2015-09-04
+
+  FIXED: FallbackValuesListQuerySet.iterator which broke ORM datetimes
+         (resolves issue #324, thanks Venelin Stoykov)
+
+
 v0.10.0
 =======
 Date: 2015-07-03
