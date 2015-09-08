@@ -500,13 +500,14 @@ class Translator(object):
                         (desc.__name__, model.__name__))
                 del self._registry[desc]
 
-    def get_registered_models(self, abstract=True):
+    def get_registered_models(self, abstract=True, unmanaged=True):
         """
         Returns a list of all registered models, or just concrete
         registered models.
         """
         return [model for (model, opts) in self._registry.items()
-                if opts.registered and (not model._meta.abstract or abstract)]
+                if opts.registered and (not model._meta.abstract or abstract)
+                and (model._meta.managed or unmanaged)]
 
     def _get_options_for_model(self, model, opts_class=None, **options):
         """

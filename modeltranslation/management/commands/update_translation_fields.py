@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from optparse import make_option
+
 from django.db.models import F, Q
 from django.core.management.base import NoArgsCommand
 
@@ -11,11 +13,20 @@ class Command(NoArgsCommand):
     help = ('Updates empty values of default translation fields using'
             ' values from original fields (in all translated models).')
 
+    option_list = NoArgsCommand.option_list + (
+        make_option('--managed-only',
+                    action='store_true',
+                    dest='managed_only',
+                    default=False,
+                    help='Only update managed models'),
+    )
+
     def handle_noargs(self, **options):
         verbosity = int(options['verbosity'])
         if verbosity > 0:
             self.stdout.write("Using default language: %s\n" % DEFAULT_LANGUAGE)
-        models = translator.get_registered_models(abstract=False)
+        unmanaged = not options['managed_only']
+        models = translator.get_registered_models(abstract=False, unmanaged=unmanaged)
         for model in models:
             if verbosity > 0:
                 self.stdout.write("Updating data of model '%s'\n" % model)
