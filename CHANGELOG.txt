@@ -1,3 +1,11 @@
+v0.10.2
+=======
+Date: 2015-10-27
+
+  FIXED: Proxy model inheritance for Django >=1.8
+         (resolves issues #304, thanks Stratos Moros)
+
+
 v0.10.1
 =======
 Date: 2015-09-04
