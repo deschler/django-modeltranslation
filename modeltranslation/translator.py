@@ -304,6 +304,9 @@ def delete_cache_fields(model):
         except AttributeError:
             pass
 
+    if hasattr(model._meta, '_expire_cache'):
+        model._meta._expire_cache()
+
 
 def populate_translation_fields(sender, kwargs):
     """
