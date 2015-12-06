@@ -82,6 +82,24 @@ matrix:
       env: DJANGO=1.9 DB=postgres
     - python: "3.3"
       env: DJANGO=1.9 DB=mysql
+    - python: "3.5"
+      env: DJANGO=1.5 DB=sqlite
+    - python: "3.5"
+      env: DJANGO=1.5 DB=postgres
+    - python: "3.5"
+      env: DJANGO=1.5 DB=mysql
+    - python: "3.5"
+      env: DJANGO=1.6 DB=sqlite
+    - python: "3.5"
+      env: DJANGO=1.6 DB=postgres
+    - python: "3.5"
+      env: DJANGO=1.6 DB=mysql
+    - python: "3.5"
+      env: DJANGO=1.7 DB=sqlite
+    - python: "3.5"
+      env: DJANGO=1.7 DB=postgres
+    - python: "3.5"
+      env: DJANGO=1.7 DB=mysql
 
     - python: "3.2"
       env: DJANGO=1.5 DB=mysql
@@ -136,6 +154,7 @@ install:
   - IDJANGO=$(./travis.py $DJANGO)
   - pip install -q $IDJANGO
   - pip install -e . --use-mirrors
+  - if [[ $TRAVIS_PYTHON_VERSION == '3.2' ]]; then pip install 'coverage<4.0.0'; fi
   - pip install -q coveralls --use-mirrors
 script:
   - django-admin.py --version

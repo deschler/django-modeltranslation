@@ -268,6 +268,12 @@ class TranslationField(object):
             kwargs['db_column'] = self.db_column
         return six.text_type(self.name), path, args, kwargs
 
+    def clone(self):
+        from django.utils.module_loading import import_string
+        name, path, args, kwargs = self.deconstruct()
+        cls = import_string(path)
+        return cls(*args, **kwargs)
+
     def south_field_triple(self):
         """
         Returns a suitable description of this field for South.
