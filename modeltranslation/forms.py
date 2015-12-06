@@ -35,6 +35,13 @@ class NullableField(forms.Field):
 
     # Django 1.6
     def _has_changed(self, initial, data):
+        return self.has_changed(initial, data)
+
+    def has_changed(self, initial, data):
         if (initial is None and data is not None) or (initial is not None and data is None):
             return True
-        return super(NullableField, self)._has_changed(initial, data)
+        obj = super(NullableField, self)
+        if hasattr(obj, 'has_changed'):
+            return obj.has_changed(initial, data)
+        else:  # Django < 1.9 compat
+            return obj._has_changed(initial, data)

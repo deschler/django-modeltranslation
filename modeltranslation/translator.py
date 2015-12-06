@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django import VERSION
 from django.utils.six import with_metaclass
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Manager, ForeignKey, OneToOneField
@@ -12,6 +13,9 @@ from modeltranslation.fields import (NONE, create_translation_field, Translation
 from modeltranslation.manager import (MultilingualManager, MultilingualQuerysetManager,
                                       rewrite_lookup_key)
 from modeltranslation.utils import build_localized_fieldname, parse_field
+
+
+NEW_RELATED_API = VERSION >= (1, 9)
 
 
 class AlreadyRegistered(Exception):
@@ -424,7 +428,10 @@ class Translator(object):
                 add_translation_fields(model, opts)
 
             # Delete all fields cache for related model (parent and children)
-            for related_obj in model._meta.get_all_related_objects():
+            related = ((f for f in model._meta.get_fields() if (f.one_to_many or f.one_to_one)
+                        and f.auto_created) if NEW_RELATED_API
+                       else model._meta.get_all_related_objects())
+            for related_obj in related:
                 delete_cache_fields(related_obj.model)
 
             # Set MultilingualManager
@@ -465,7 +472,13 @@ class Translator(object):
                     setattr(model, field.get_attname(), desc)
 
                     # Set related field names on other model
-                    if not field.rel.is_hidden():
+                    if NEW_RELATED_API and not field.remote_field.is_hidden():
+                        other_opts = self._get_options_for_model(field.remote_field.to)
+                        other_opts.related = True
+                        other_opts.related_fields.append(field.related_query_name())
+                        # Add manager in case of non-registered model
+                        add_manager(field.remote_field.to)
+                    elif not NEW_RELATED_API and not field.rel.is_hidden():
                         other_opts = self._get_options_for_model(field.rel.to)
                         other_opts.related = True
                         other_opts.related_fields.append(field.related_query_name())
@@ -473,7 +486,10 @@ class Translator(object):
 
                 if isinstance(field, OneToOneField):
                     # Fix translated_field caching for SingleRelatedObjectDescriptor
-                    sro_descriptor = getattr(field.rel.to, field.related.get_accessor_name())
+                    sro_descriptor = (
+                        getattr(field.remote_field.to, field.remote_field.get_accessor_name())
+                        if NEW_RELATED_API
+                        else getattr(field.rel.to, field.related.get_accessor_name()))
                     patch_related_object_descriptor_caching(sro_descriptor)
 
     def unregister(self, model_or_iterable):

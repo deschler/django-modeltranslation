@@ -70,9 +70,25 @@ class dummy_context_mgr():
         return False
 
 
+def get_field_names(model):
+    if django.VERSION < (1, 9):
+        return model._meta.get_all_field_names()
+    names = set()
+    fields = model._meta.get_fields()
+    for field in fields:
+        if field.is_relation and field.many_to_one and field.related_model is None:
+            continue
+        if field.model != model and field.model._meta.concrete_model == model._meta.concrete_model:
+            continue
+
+        names.add(field.name)
+        if hasattr(field, 'attname'):
+            names.add(field.attname)
+    return names
+
+
 @override_settings(**TEST_SETTINGS)
 class ModeltranslationTransactionTestBase(TransactionTestCase):
-    urls = 'modeltranslation.tests.urls'
     cache = django_apps if NEW_APP_CACHE else AppCache()
     synced = False
 
@@ -118,7 +134,7 @@ class ModeltranslationTransactionTestBase(TransactionTestCase):
                 # 5. Syncdb (``migrate=False`` in case of south)
                 from django.db import connections, DEFAULT_DB_ALIAS
                 cmd = 'syncdb' if django.VERSION < (1, 8) else 'migrate'
-                call_command(cmd, verbosity=0, migrate=False, interactive=False,
+                call_command(cmd, verbosity=0, migrate=False, interactive=False, run_syncdb=True,
                              database=connections[DEFAULT_DB_ALIAS].alias, load_initial_data=False)
 
                 # A rather dirty trick to import models into module namespace, but not before
@@ -846,7 +862,7 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
 
         # Check that the reverse accessors are created on the model:
         # Explicit related_name
-        testmodel_fields = models.TestModel._meta.get_all_field_names()
+        testmodel_fields = get_field_names(models.TestModel)
         testmodel_methods = dir(models.TestModel)
         self.assertIn('test_fks',    testmodel_fields)
         self.assertIn('test_fks_de', testmodel_fields)
@@ -1026,7 +1042,7 @@ class OneToOneFieldsTest(ForeignKeyFieldsTest):
 
         # Check that the reverse accessors are created on the model:
         # Explicit related_name
-        testmodel_fields = models.TestModel._meta.get_all_field_names()
+        testmodel_fields = get_field_names(models.TestModel)
         testmodel_methods = dir(models.TestModel)
         self.assertIn('test_o2o',    testmodel_fields)
         self.assertIn('test_o2o_de', testmodel_fields)
@@ -1801,7 +1817,7 @@ class ModelValidationTest(ModeltranslationTestBase):
 class ModelInheritanceTest(ModeltranslationTestBase):
     """Tests for inheritance support in modeltranslation."""
     def test_abstract_inheritance(self):
-        field_names_b = models.AbstractModelB._meta.get_all_field_names()
+        field_names_b = get_field_names(models.AbstractModelB)
         self.assertTrue('titlea' in field_names_b)
         self.assertTrue('titlea_de' in field_names_b)
         self.assertTrue('titlea_en' in field_names_b)
@@ -1813,12 +1829,12 @@ class ModelInheritanceTest(ModeltranslationTestBase):
         self.assertFalse('titled_en' in field_names_b)
 
     def test_multitable_inheritance(self):
-        field_names_a = models.MultitableModelA._meta.get_all_field_names()
+        field_names_a = get_field_names(models.MultitableModelA)
         self.assertTrue('titlea' in field_names_a)
         self.assertTrue('titlea_de' in field_names_a)
         self.assertTrue('titlea_en' in field_names_a)
 
-        field_names_b = models.MultitableModelB._meta.get_all_field_names()
+        field_names_b = get_field_names(models.MultitableModelB)
         self.assertTrue('titlea' in field_names_b)
         self.assertTrue('titlea_de' in field_names_b)
         self.assertTrue('titlea_en' in field_names_b)
@@ -1826,7 +1842,7 @@ class ModelInheritanceTest(ModeltranslationTestBase):
         self.assertTrue('titleb_de' in field_names_b)
         self.assertTrue('titleb_en' in field_names_b)
 
-        field_names_c = models.MultitableModelC._meta.get_all_field_names()
+        field_names_c = get_field_names(models.MultitableModelC)
         self.assertTrue('titlea' in field_names_c)
         self.assertTrue('titlea_de' in field_names_c)
         self.assertTrue('titlea_en' in field_names_c)
@@ -1837,7 +1853,7 @@ class ModelInheritanceTest(ModeltranslationTestBase):
         self.assertTrue('titlec_de' in field_names_c)
         self.assertTrue('titlec_en' in field_names_c)
 
-        field_names_d = models.MultitableModelD._meta.get_all_field_names()
+        field_names_d = get_field_names(models.MultitableModelD)
         self.assertTrue('titlea' in field_names_d)
         self.assertTrue('titlea_de' in field_names_d)
         self.assertTrue('titlea_en' in field_names_d)
@@ -1863,7 +1879,7 @@ class ModelInheritanceTest(ModeltranslationTestBase):
             opts = translator.translator.get_options_for_model(model)
             self.assertEqual(set(opts.fields.keys()), set(fields))
             # Inherited translation fields are available on the model.
-            model_fields = model._meta.get_all_field_names()
+            model_fields = get_field_names(model)
             for field in fields:
                 for lang in mt_settings.AVAILABLE_LANGUAGES:
                     translation_field = build_localized_fieldname(field, lang)
