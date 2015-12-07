@@ -1,3 +1,11 @@
+v0.11.0-rc1
+===========
+Date: 2015-12-07
+
+  ADDED: Support for Django 1.9
+         (resolves issues #349, thanks Jacek Tomaszewski)
+
+
 v0.10.2
 =======
 Date: 2015-10-27
