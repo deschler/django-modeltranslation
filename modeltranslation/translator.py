@@ -189,6 +189,18 @@ def add_manager(model):
                                          MultilingualQuerysetManager):
                 use_for_related_fields = getattr(
                     manager.__class__, "use_for_related_fields", not has_custom_queryset(manager))
+                _old_module = manager.__module__
+                _old_class = manager.__class__.__name__
+
+                def deconstruct(self):
+                    return (
+                        False,  # as_manager
+                        '%s.%s' % (self._old_module, self._old_class),  # manager_class
+                        None,  # qs_class
+                        self._constructor_args[0],  # args
+                        self._constructor_args[1],  # kwargs
+                    )
+
             manager.__class__ = NewMultilingualManager
 
     for _, attname, cls in model._meta.concrete_managers + model._meta.abstract_managers:

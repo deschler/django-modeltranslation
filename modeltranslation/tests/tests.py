@@ -27,6 +27,16 @@ except ImportError:
     from django.db.models.loading import AppCache
     NEW_APP_CACHE = False
 
+try:
+    from unittest import skipUnless
+except ImportError:
+    # Dummy replacement for Python 2.6
+    def skipUnless(condition, reason):
+        if not condition:
+            def decorator(test_item):
+                return lambda s: 42
+            return decorator
+        return lambda x: x  # identity
 
 from modeltranslation import admin, settings as mt_settings, translator
 from modeltranslation.forms import TranslationModelForm
@@ -35,6 +45,8 @@ from modeltranslation.tests.test_settings import TEST_SETTINGS
 from modeltranslation.utils import (build_css_class, build_localized_fieldname,
                                     auto_populate, fallbacks)
 
+MIGRATIONS = django.VERSION >= (1, 8)
+
 models = translation = None
 
 # None of the following tests really depend on the content of the request,
@@ -42,7 +54,7 @@ models = translation = None
 request = None
 
 # How many models are registered for tests.
-TEST_MODELS = 29
+TEST_MODELS = 29 + (1 if MIGRATIONS else 0)
 
 
 class reload_override_settings(override_settings):
@@ -131,9 +143,14 @@ class ModeltranslationTransactionTestBase(TransactionTestCase):
                 from modeltranslation.models import handle_translation_registrations
                 handle_translation_registrations()
 
-                # 5. Syncdb (``migrate=False`` in case of south)
+                # 5. makemigrations (``migrate=False`` in case of south)
                 from django.db import connections, DEFAULT_DB_ALIAS
-                cmd = 'syncdb' if django.VERSION < (1, 8) else 'migrate'
+                if MIGRATIONS:
+                    call_command('makemigrations', verbosity=2, interactive=False,
+                                 database=connections[DEFAULT_DB_ALIAS].alias)
+
+                # 6. Syncdb (``migrate=False`` in case of south)
+                cmd = 'migrate' if MIGRATIONS else 'syncdb'
                 call_command(cmd, verbosity=0, migrate=False, interactive=False, run_syncdb=True,
                              database=connections[DEFAULT_DB_ALIAS].alias, load_initial_data=False)
 
@@ -2623,6 +2640,20 @@ class TestManager(ModeltranslationTestBase):
         from modeltranslation.manager import MultilingualQuerySet
         qs = models.CustomManagerTestModel.objects.custom_qs()
         self.assertIsInstance(qs, MultilingualQuerySet)
+
+    @skipUnless(MIGRATIONS, 'migrations not available')
+    def test_3rd_party_custom_manager(self):
+        from django.contrib.auth.models import Group, GroupManager
+        from modeltranslation.manager import MultilingualManager
+        testmodel_fields = get_field_names(Group)
+        self.assertIn('name',    testmodel_fields)
+        self.assertIn('name_de', testmodel_fields)
+        self.assertIn('name_en', testmodel_fields)
+        self.assertIn('name_en', testmodel_fields)
+
+        self.assertIsInstance(Group.objects, MultilingualManager)
+        self.assertIsInstance(Group.objects, GroupManager)
+        self.assertIn('get_by_natural_key', dir(Group.objects))
 
     def test_multilingual_queryset_pickling(self):
         import pickle

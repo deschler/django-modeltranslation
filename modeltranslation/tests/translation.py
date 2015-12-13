@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django import VERSION
 from django.utils.translation import ugettext_lazy
 
 from modeltranslation.translator import translator, register, TranslationOptions
@@ -203,3 +204,13 @@ translator.register(RequiredModel, RequiredTranslationOptions)
 @register(DecoratedModel)
 class DecoratedTranslationOptions(TranslationOptions):
     fields = ('title',)
+
+
+# ######### 3-rd party with custom manager
+
+if VERSION >= (1, 8):
+    from django.contrib.auth.models import Group
+
+    @register(Group)
+    class GroupTranslationOptions(TranslationOptions):
+        fields = ('name',)
