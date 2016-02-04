@@ -21,5 +21,6 @@ def register(model_or_iterable, **options):
         if not issubclass(opts_class, TranslationOptions):
             raise ValueError('Wrapped class must subclass TranslationOptions.')
         translator.register(model_or_iterable, opts_class, **options)
+        return opts_class
 
     return wrapper
