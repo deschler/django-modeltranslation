@@ -440,9 +440,12 @@ class Translator(object):
                 add_translation_fields(model, opts)
 
             # Delete all fields cache for related model (parent and children)
-            related = ((f for f in model._meta.get_fields() if (f.one_to_many or f.one_to_one)
-                        and f.auto_created) if NEW_RELATED_API
-                       else model._meta.get_all_related_objects())
+            related = ((
+                f for f in model._meta.get_fields()
+                if (f.one_to_many or f.one_to_one) and
+                f.auto_created
+            ) if NEW_RELATED_API else model._meta.get_all_related_objects())
+
             for related_obj in related:
                 delete_cache_fields(related_obj.model)
 

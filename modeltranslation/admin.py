@@ -6,6 +6,13 @@ from django.contrib import admin
 from django.contrib.admin.options import BaseModelAdmin, flatten_fieldsets, InlineModelAdmin
 from django import forms
 
+from modeltranslation import settings as mt_settings
+from modeltranslation.translator import translator
+from modeltranslation.utils import (
+    get_translation_fields, build_css_class, build_localized_fieldname, get_language,
+    get_language_bidi, unique)
+from modeltranslation.widgets import ClearableWidgetWrapper
+
 # Ensure that models are registered for translation before TranslationAdmin
 # runs. The import is supposed to resolve a race condition between model import
 # and translation registration in production (see issue #19).
@@ -16,12 +23,6 @@ if django.VERSION < (1, 7):
 else:
     from django.contrib.contenttypes.admin import GenericTabularInline
     from django.contrib.contenttypes.admin import GenericStackedInline
-from modeltranslation import settings as mt_settings
-from modeltranslation.translator import translator
-from modeltranslation.utils import (
-    get_translation_fields, build_css_class, build_localized_fieldname, get_language,
-    get_language_bidi, unique)
-from modeltranslation.widgets import ClearableWidgetWrapper
 
 
 class TranslationBaseModelAdmin(BaseModelAdmin):
@@ -74,8 +75,12 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
                         b for b in form_class.__bases__ if b != NullCharField)
                 field.__class__ = type(
                     'Nullable%s' % form_class.__name__, (NullableField, form_class), {})
-            if ((db_field.empty_value == 'both' or orig_field.name in self.both_empty_values_fields)
-                    and isinstance(field.widget, (forms.TextInput, forms.Textarea))):
+            if (
+                (
+                    db_field.empty_value == 'both' or
+                    orig_field.name in self.both_empty_values_fields
+                ) and isinstance(field.widget, (forms.TextInput, forms.Textarea))
+            ):
                 field.widget = ClearableWidgetWrapper(field.widget)
             css_classes = field.widget.attrs.get('class', '').split(' ')
             css_classes.append('mt')
@@ -271,15 +276,15 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
             untranslated_fields = [
                 f.name for f in self.opts.fields if (
                     # Exclude the primary key field
-                    f is not self.opts.auto_field
+                    f is not self.opts.auto_field and
                     # Exclude non-editable fields
-                    and f.editable
+                    f.editable and
                     # Exclude the translation fields
-                    and not hasattr(f, 'translated_field')
+                    not hasattr(f, 'translated_field') and
                     # Honour field arguments. We rely on the fact that the
                     # passed fieldsets argument is already fully filtered
                     # and takes options like exclude into account.
-                    and f.name in flattened_fieldsets
+                    f.name in flattened_fieldsets
                 )
             ]
             # TODO: Allow setting a label
