@@ -1013,7 +1013,9 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         self.assertNotEqual(field.attname, build_localized_fieldname(field.name, 'id'))
 
     def assertQuerysetsEqual(self, qs1, qs2):
-        pk = lambda o: o.pk
+        def pk(o):
+            return o.pk
+
         return self.assertEqual(sorted(qs1, key=pk), sorted(qs2, key=pk))
 
 
@@ -2459,16 +2461,16 @@ class TestManager(ModeltranslationTestBase):
         n.save()
 
         self.assertEqual('en', get_language())
-        self.assertEqual(0, models.ManagerTestModel.objects.filter(Q(title='de')
-                                                                   | Q(pk=42)).count())
-        self.assertEqual(1, models.ManagerTestModel.objects.filter(Q(title='en')
-                                                                   | Q(pk=42)).count())
+        self.assertEqual(0, models.ManagerTestModel.objects.filter(Q(title='de') |
+                                                                   Q(pk=42)).count())
+        self.assertEqual(1, models.ManagerTestModel.objects.filter(Q(title='en') |
+                                                                   Q(pk=42)).count())
 
         with override('de'):
-            self.assertEqual(1, models.ManagerTestModel.objects.filter(Q(title='de')
-                                                                       | Q(pk=42)).count())
-            self.assertEqual(0, models.ManagerTestModel.objects.filter(Q(title='en')
-                                                                       | Q(pk=42)).count())
+            self.assertEqual(1, models.ManagerTestModel.objects.filter(Q(title='de') |
+                                                                       Q(pk=42)).count())
+            self.assertEqual(0, models.ManagerTestModel.objects.filter(Q(title='en') |
+                                                                       Q(pk=42)).count())
 
     def test_f(self):
         """Test if F queries are rewritten."""
