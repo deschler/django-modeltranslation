@@ -213,7 +213,7 @@ var google, django, gettext;
             this.getAllGroupedTranslations = function () {
                 var grouper = new TranslationFieldGrouper({
                     $fields: this.$table.find('.mt').filter(
-                        'input:visible, textarea:visible, select:visible')
+                        'input, textarea, select')
                 });
                 //this.requiredColumns = this.getRequiredColumns();
                 this.initTable();
