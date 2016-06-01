@@ -525,7 +525,7 @@ else:
                 # Django >=1.8
                 fields += tuple(f for f in self.annotation_names if f not in fields)
             for row in super(FallbackValuesListQuerySet, self).iterator():
-                if self.flat and len(fields) == 1:
+                if self.flat and len(self.original_fields) == 1:
                     yield row[fields[0]]
                 else:
                     yield tuple(row[f] for f in fields)

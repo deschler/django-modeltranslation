@@ -2608,6 +2608,10 @@ class TestManager(ModeltranslationTestBase):
              'description': None, 'description_en': None, 'description_de': None},
         ])
 
+        # annotation issue (#374)
+        self.assertEqual(list(manager.values_list('title', flat=True).annotate(Count('title'))),
+                         ['en'])
+
     def test_values_list_annotation(self):
         models.TestModel(title='foo').save()
         models.TestModel(title='foo').save()
