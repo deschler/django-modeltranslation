@@ -7,6 +7,7 @@ from modeltranslation.tests.models import (
     TestModel, FallbackModel, FallbackModel2, FileFieldsModel, ForeignKeyModel, OtherFieldsModel,
     DescriptorModel, AbstractModelA, AbstractModelB, Slugged, MetaData, Displayable, Page,
     RichText, RichTextPage, MultitableModelA, MultitableModelB, MultitableModelC, ManagerTestModel,
+    ManagerCheckTransTestModel, ManagerCheckTrans2TestModel,
     CustomManagerTestModel, CustomManager2TestModel, GroupFieldsetsModel, NameModel,
     ThirdPartyRegisteredModel, ProxyTestModel, UniqueNullableModel, OneToOneFieldModel,
     RequiredModel, DecoratedModel)
@@ -138,6 +139,16 @@ translator.register(RichTextPage)
 class ManagerTestModelTranslationOptions(TranslationOptions):
     fields = ('title', 'visits', 'description')
 translator.register(ManagerTestModel, ManagerTestModelTranslationOptions)
+
+
+class ManagerCheckTransTestModelTranslationOptions(TranslationOptions):
+    fields = ('title', 'visits', 'description', 'verified', 'subtitle')
+translator.register(ManagerCheckTransTestModel, ManagerCheckTransTestModelTranslationOptions)
+
+
+class ManagerCheckTrans2TestModelTranslationOptions(TranslationOptions):
+    fields = ('visits', 'description', 'verified', 'subtitle')
+translator.register(ManagerCheckTrans2TestModel, ManagerCheckTrans2TestModelTranslationOptions)
 
 
 class CustomManagerTestModelTranslationOptions(TranslationOptions):

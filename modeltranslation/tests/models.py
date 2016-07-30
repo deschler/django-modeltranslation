@@ -261,6 +261,26 @@ class ManagerTestModel(models.Model):
         ordering = ('-visits',)
 
 
+class ManagerCheckTransTestModel(models.Model):
+    title = models.CharField(ugettext_lazy('title'), max_length=255)
+    visits = models.IntegerField(ugettext_lazy('visits'), default=0)
+    description = models.CharField(max_length=255, null=True)
+    verified = models.BooleanField(ugettext_lazy('title'), default=True, blank=True)
+    subtitle = models.CharField(ugettext_lazy('title'), max_length=255, default='', blank=True)
+
+    class Meta:
+        ordering = ('-visits',)
+
+class ManagerCheckTrans2TestModel(models.Model):
+    # Model with non-required (i.e. blank=True) translation fields.
+    # Required field 'title' is not registered for translation
+    title = models.CharField(ugettext_lazy('title'), max_length=255)
+    visits = models.IntegerField(ugettext_lazy('visits'), blank=True)
+    description = models.CharField(max_length=255, null=True, blank=True)
+    verified = models.BooleanField(ugettext_lazy('title'), default=True, blank=True)
+    subtitle = models.CharField(ugettext_lazy('title'), max_length=255, default='', blank=True)
+
+
 class CustomManager(models.Manager):
     def get_queryset(self):
         sup = super(CustomManager, self)
