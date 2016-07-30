@@ -6,9 +6,10 @@ django-linguo by Zach Mathew
 https://github.com/zmathew/django-linguo
 """
 import itertools
+import re
 
 from django.db import models
-from django.db.models import FieldDoesNotExist
+from django.db.models import Q, FieldDoesNotExist, BooleanField, NullBooleanField
 try:
     from django.db.models.fields.related import RelatedObject
     from django.db.models.fields.related import RelatedField
@@ -455,6 +456,77 @@ class MultilingualQuerySet(models.query.QuerySet):
         new_key = rewrite_lookup_key(self.model, field_name)
         return super(MultilingualQuerySet, self).dates(new_key, *args, **kwargs)
 
+    def filter_translated(self, lang=None):
+        """
+        Returns queryset of translated objects for the language if specified.
+        If language is not specified, current language (i.e. returned by get_language()) is used.
+        """
+        query_expr = self._compose_query_for_translated(lang=lang)
+        return super(MultilingualQuerySet, self).filter(query_expr)
+
+    def annotate_translated(self, lang=None):
+        """
+        Returns queryset with column 'translated' set to 1 if translation check was successful or 0 otherwise.
+        If language is not specified, current language (i.e. returned by get_language()) is used.
+        """
+        sql_query_translated = self.filter_translated(lang=lang).query.__str__()
+        # Find in query string WHERE and return the remainder to create condition for CASE.
+        # ORDER BY may be in case of model's meta ordering
+        where_pattern = re.compile(r'(?<=WHERE\s)(?P<where_condition>.+?)(?=\sORDER BY|$)', re.M)
+        search_result = where_pattern.search(sql_query_translated)
+        if search_result:
+            sql_where_condition = search_result.group('where_condition')
+        else:
+            return self
+        # Replace 'table.field = ' for CHAR_LENGTH('table.field') = 0 to use in CASE condition
+        pattern = re.compile(r'(?<=\s|[(])(?P<db_column>[a-z0-9_."]+)\s=(?=\s+(OR|AND|[)]))', re.M)
+        sql_case_condition = pattern.sub('CHAR_LENGTH(\g<db_column>) = 0', sql_where_condition)
+        qs = self.extra(select={'translated': 'CASE WHEN %s THEN 1 ELSE 0 END' % (sql_case_condition,)})
+        return qs
+
+    def _compose_query_for_translated(self, lang=None):
+        """
+        Returns query expression for translated objects.
+
+        If model has registered required (i.e. blank=False) fields then if all required
+        translation field values of an instance are non-empty,
+        the instance is considered translated. Values of non-required fields (blank=True)
+        are ignored in this case.
+        If all fields registered for translation are non-required, then the instance
+        is considered translated if any field value is non-empty.
+
+        Boolean fields are ignored. Of course, we might have such very rare (and unimaginable)
+        case when we have only one required translation Boolean field, and if we ignore it for check,
+        then the instance will be considered translated if any non-required field is not empty.
+        """
+        if not lang:
+            lang = get_language()
+        model_fieldnames = get_translatable_fields_for_model(self.model)
+        required_fields_query = Q()
+        non_required_fields_query = Q()
+        for fieldname in model_fieldnames:
+            localized_fieldname = build_localized_fieldname(fieldname, lang)
+            field = self.model._meta.get_field(fieldname)
+
+            if isinstance(field, (BooleanField, NullBooleanField)):
+                field_q = Q()
+            elif field.empty_strings_allowed:
+                field_q = (~Q(**{localized_fieldname: ''}) & ~Q(**{localized_fieldname: None}))
+            else:
+                field_q = (~Q(**{localized_fieldname: None}))
+            # Objects are considered translated if all required fields are non-empty.
+            if not field.blank:
+                required_fields_query &= field_q
+            # If we have no required fields for translation, we should check non-required fields and
+            # In this case objects are regarded as translated if any of non-required translation field is non-empty.
+            else:
+                non_required_fields_query |= field_q
+
+        if required_fields_query:
+            return required_fields_query
+        else:
+            return non_required_fields_query
+
 
 if NEW_RELATED_API:
     class FallbackValuesIterable(ValuesIterable):
@@ -589,6 +661,12 @@ class MultilingualManager(MultilingualQuerysetManager):
 
     def raw_values(self, *args, **kwargs):
         return self.get_queryset().raw_values(*args, **kwargs)
+
+    def filter_translated(self, *args, **kwargs):
+        return self.get_queryset().filter_translated(*args, **kwargs)
+
+    def annotate_translated(self, *args, **kwargs):
+        return self.get_queryset().annotate_translated(*args, **kwargs)
 
     def get_queryset(self):
         """
