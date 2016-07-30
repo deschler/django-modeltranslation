@@ -265,8 +265,8 @@ class ManagerCheckTransTestModel(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
     visits = models.IntegerField(ugettext_lazy('visits'), default=0)
     description = models.CharField(max_length=255, null=True)
-    verified = models.BooleanField(ugettext_lazy('title'), default=True, blank=True)
-    subtitle = models.CharField(ugettext_lazy('title'), max_length=255, default='', blank=True)
+    verified = models.BooleanField(ugettext_lazy('verified'), default=True, blank=True)
+    subtitle = models.CharField(ugettext_lazy('subtitle'), max_length=255, default='', blank=True)
 
     class Meta:
         ordering = ('-visits',)
@@ -277,8 +277,8 @@ class ManagerCheckTrans2TestModel(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
     visits = models.IntegerField(ugettext_lazy('visits'), null=True, blank=True)
     description = models.CharField(max_length=255, null=True, blank=True)
-    verified = models.BooleanField(ugettext_lazy('title'), default=True, blank=True)
-    subtitle = models.CharField(ugettext_lazy('title'), max_length=255, default='', blank=True)
+    verified = models.BooleanField(ugettext_lazy('verified'), null=True, blank=True)
+    subtitle = models.CharField(ugettext_lazy('subtitle'), max_length=255, default='', blank=True)
 
 
 class CustomManager(models.Manager):
