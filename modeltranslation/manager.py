@@ -6,7 +6,6 @@ django-linguo by Zach Mathew
 https://github.com/zmathew/django-linguo
 """
 import itertools
-import re
 
 from django.db import models
 from django.db.models import Q, FieldDoesNotExist, BooleanField, NullBooleanField
@@ -33,6 +32,13 @@ try:
     NEW_LOOKUPS = True  # Django 1.7, 1.8
 except ImportError:
     NEW_LOOKUPS = False
+
+try:
+    from django.db.models import When, Case, Value
+    COND_EXPR_API = True # New in Django 1.8
+except ImportError:
+    import re
+    COND_EXPR_API = False  # Django 1.5 - 1.7
 
 from modeltranslation import settings
 from modeltranslation.fields import TranslationField
@@ -466,22 +472,31 @@ class MultilingualQuerySet(models.query.QuerySet):
 
     def annotate_translated(self, lang=None):
         """
-        Returns queryset with column 'translated' set to 1 if translation check was successful or 0 otherwise.
+        Returns queryset with column 'translated' set to True/1 if translation check
+        was successful or False/0 otherwise.
         If language is not specified, current language (i.e. returned by get_language()) is used.
         """
-        sql_query_translated = self.filter_translated(lang=lang).query.__str__()
-        # Find in query string WHERE and return the remainder to create condition for CASE.
-        # ORDER BY may be in case of model's meta ordering
-        where_pattern = re.compile(r'(?<=WHERE\s)(?P<where_condition>.+?)(?=\sORDER BY|$)', re.M)
-        search_result = where_pattern.search(sql_query_translated)
-        if search_result:
-            sql_where_condition = search_result.group('where_condition')
+        if COND_EXPR_API:
+            query_expr = self._compose_query_for_translated(lang=lang)
+            qs = self.annotate(translated=Case(
+                                             When(query_expr, then=Value(True)),
+                                             default=Value(False),
+                                             output_field=BooleanField(),
+                                             ),)
         else:
-            return self
-        # Replace 'table.field = ' for CHAR_LENGTH('table.field') = 0 to use in CASE condition
-        pattern = re.compile(r'(?<=\s|[(])(?P<db_column>[a-z0-9_."]+)\s=(?=\s+(OR|AND|[)]))', re.M)
-        sql_case_condition = pattern.sub('CHAR_LENGTH(\g<db_column>) = 0', sql_where_condition)
-        qs = self.extra(select={'translated': 'CASE WHEN %s THEN 1 ELSE 0 END' % (sql_case_condition,)})
+            sql_query_translated = self.filter_translated(lang=lang).query.__str__()
+            # Find in query string WHERE and return the remainder to create condition for CASE.
+            # ORDER BY may be in case of model's meta ordering
+            where_pattern = re.compile(r'(?<=WHERE\s)(?P<where_condition>.+?)(?=\sORDER BY|$)', re.M)
+            search_result = where_pattern.search(sql_query_translated)
+            if search_result:
+                sql_where_condition = search_result.group('where_condition')
+            else:
+                return self
+            # Replace 'table.field = ' for CHAR_LENGTH('table.field') = 0 to use in CASE condition
+            pattern = re.compile(r'(?<=\s|[(])(?P<db_column>[a-z0-9_."]+)\s=(?=\s+(OR|AND|[)]))', re.M)
+            sql_case_condition = pattern.sub('CHAR_LENGTH(\g<db_column>) = 0', sql_where_condition)
+            qs = self.extra(select={'translated': 'CASE WHEN %s THEN 1 ELSE 0 END' % (sql_case_condition,)})
         return qs
 
     def _compose_query_for_translated(self, lang=None):
