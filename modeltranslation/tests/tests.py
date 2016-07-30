@@ -2942,18 +2942,24 @@ class TestManager(ModeltranslationTestBase):
         self.assertEqual(inst.titlea, 'title_a')
         self.assertEqual(inst.titleb, 'title_b')
 
-    def test_check_translated(self):
-        """Test if queryset is annotated with or filtered by translation status for the specified language.
 
-        If model has registered required (i.e. blank=False) fields then if ANY of required
-        translation field values of an instance is empty (including '' for text fields),
-        the instance is considered untranslated. Values of non-required fields (blank=True)
-        are ignored in this case.
+class TestManagerTranslationCheck(TestManager):
+    """
+    If model has registered required (i.e. blank=False) fields then if ANY of required
+    translation field values of an instance is empty (including '' for text fields),
+    the instance is considered untranslated. Values of non-required fields (blank=True)
+    are ignored in this case.
+    If all fields registered for translation are non-required, then instance
+    is considered untranslated if ALL field values are empty.
 
-        If field default is other than '', it is considered as translated.
-        Boolean fields are considered translated.
+    If field default is other than '', it is considered as translated.
+    Boolean fields are considered translated.
 
-        """
+    """
+
+    def setUp(self):
+        super(TestManagerTranslationCheck, self).setUp()
+
         # For ManagerCheckTransTestModel only fields 'title', 'visits', 'description'
         # should be checked as they have blank=False. Moreover, as 'visits' has default=0 (not ''),
         # it is considered as translated.
@@ -3000,174 +3006,176 @@ class TestManager(ModeltranslationTestBase):
         m5.subtitle_de = 'm5 de subtitle'
         m5.save()
 
-        self.assertEqual('en', get_language())
-
-        self.assertEqual(3, models.ManagerCheckTransTestModel.objects.filter_translated().count())
-        self.assertEqual(3, models.ManagerCheckTransTestModel.objects.filter_translated(lang='en').count())
-        self.assertEqual(2, models.ManagerCheckTransTestModel.objects.filter_translated(lang='de').count())
-
-        qs = models.ManagerCheckTransTestModel.objects.filter(title__contains='condition')
-        self.assertEqual(2, qs.filter_translated().count())
-        self.assertEqual(2, qs.filter_translated(lang='en').count())
-        self.assertEqual(1, qs.filter_translated(lang='de').count())
-        self.assertEqual(4, qs.annotate_translated().count())
-
-        self.assertEqual(5, models.ManagerCheckTransTestModel.objects.annotate_translated().count())
-        self.assertEqual(5, models.ManagerCheckTransTestModel.objects.annotate_translated(lang='en').count())
-        self.assertEqual(5, models.ManagerCheckTransTestModel.objects.annotate_translated(lang='de').count())
-
-        qs_all = models.ManagerCheckTransTestModel.objects.all()
-        qs_en_annotated = qs_all.annotate_translated(lang='en')
-
-        m2_en = qs_en_annotated.get(title_en='m2 en title')
-        self.assertTrue(m2_en.translated)
-        m3_en = qs_en_annotated.get(title_en='m3 en title')
-        self.assertFalse(m3_en.translated)
-
-        qs_de_annotated = qs_all.annotate_translated(lang='de')
-        m2_de = qs_de_annotated.get(title_en='m2 en title')
-        self.assertFalse(m2_de.translated)
-        m3_de = qs_de_annotated.get(title_en='m3 en title')
-        self.assertTrue(m3_de.translated)
-
-        with override('de'):
-            self.assertEqual(2, models.ManagerCheckTransTestModel.objects.filter_translated().count())
-            self.assertEqual(3, models.ManagerCheckTransTestModel.objects.filter_translated(lang='en').count())
-            self.assertEqual(2, models.ManagerCheckTransTestModel.objects.filter_translated(lang='de').count())
-
-            qs = models.ManagerCheckTransTestModel.objects.filter(title__contains='condition')
-            self.assertEqual(1, qs.filter_translated().count())
-            self.assertEqual(2, qs.filter_translated(lang='en').count())
-            self.assertEqual(1, qs.filter_translated(lang='de').count())
-
-            self.assertEqual(4, qs.annotate_translated().count())
-
-            self.assertEqual(5, models.ManagerCheckTransTestModel.objects.annotate_translated().count())
-            self.assertEqual(5, models.ManagerCheckTransTestModel.objects.annotate_translated(lang='en').count())
-            self.assertEqual(5, models.ManagerCheckTransTestModel.objects.annotate_translated(lang='de').count())
-
-            qs_all = models.ManagerCheckTransTestModel.objects.all()
-            qs_en_annotated = qs_all.annotate_translated(lang='en')
-
-            m2_en = qs_en_annotated.get(title_en='m2 en title')
-            self.assertTrue(m2_en.translated)
-            m3_en = qs_en_annotated.get(title_en='m3 en title')
-            self.assertFalse(m3_en.translated)
-
-            qs_de_annotated = qs_all.annotate_translated(lang='de')
-            m2_de = qs_de_annotated.get(title_en='m2 en title')
-            self.assertFalse(m2_de.translated)
-            m3_de = qs_de_annotated.get(title_en='m3 en title')
-            self.assertTrue(m3_de.translated)
-
-    def test_check_non_required_translated(self):
-        """Test if queryset is annotated with or filtered by translation status for the specified language
-        for a model with all non-required (blank=True) translation fields.
-
-        If all fields registered for translation are non-required, then instance
-        is considered untranslated if ALL field values are empty.
-        If field default is other than '', the field is considered as translated.
-        Boolean fields are considered translated.
-
-        """
         # Registered translation fields of ManagerCheckTrans2TestModel are all non-required.
         # So fields 'visits', 'description', 'verified', 'subtitle' should be checked
         # Required field 'title' is not registered for translation so it is ignored.
 
         # Untranslated in en
         # Untranslated in de
-        m1 = models.ManagerCheckTrans2TestModel(title='original en title')
-        m1.save()
+        n1 = models.ManagerCheckTrans2TestModel(title='original en title')
+        n1.save()
 
         # Translated in en as 'visited_en' is non-empty
         # Untranslated in de
-        m2 = models.ManagerCheckTrans2TestModel(title='m2 title')
-        m2.visited_en = 0
-        m2.save()
+        n2 = models.ManagerCheckTrans2TestModel(title='n2 title')
+        n2.visited_en = 0
+        n2.save()
 
         # Untranslated in en as "subtitle_en' is '' and so is considered to be empty.
         # Translated in de as 'verified_de' is Boolean and therefore is non-empty.
-        m3 = models.ManagerCheckTrans2TestModel(title='m3 title')
-        m3.subtitle_en = ''
-        m3.verified_de = False
-        m3.save()
+        n3 = models.ManagerCheckTrans2TestModel(title='n3 title')
+        n3.subtitle_en = ''
+        n3.verified_de = False
+        n3.save()
 
         # Translated in en
         # Translated in de
-        m4 = models.ManagerCheckTrans2TestModel(title='condition')
-        m4.visits_en = 0
-        m4.description_en = 'm4 en description'
-        m4.verified_en = False
-        m4.subtitle_en = ''
-        m4.subtitle_de = 'm4 de subtitle'
-        m4.save()
+        n4 = models.ManagerCheckTrans2TestModel(title='condition')
+        n4.visits_en = 0
+        n4.description_en = 'n4 en description'
+        n4.verified_en = False
+        n4.subtitle_en = ''
+        n4.subtitle_de = 'n4 de subtitle'
+        n4.save()
 
         # Translated in en
         # Untranslated in de as 'description_de' is None.
-        m5 = models.ManagerCheckTrans2TestModel(title='')
-        m5.verified_en = False
-        m5.description_de = None
-        m5.save()
+        n5 = models.ManagerCheckTrans2TestModel(title='')
+        n5.verified_en = False
+        n5.description_de = None
+        n5.save()
 
+    def test_filter_translated(self):
+        """
+        Test if queryset is filtered by translation status for the specified language.
+        """
         self.assertEqual('en', get_language())
+
+        self.assertEqual(3, models.ManagerCheckTransTestModel.objects.filter_translated().count())
+        self.assertEqual(3, models.ManagerCheckTransTestModel.objects.filter_translated(lang='en').count())
+        self.assertEqual(2, models.ManagerCheckTransTestModel.objects.filter_translated(lang='de').count())
 
         self.assertEqual(3, models.ManagerCheckTrans2TestModel.objects.filter_translated().count())
         self.assertEqual(3, models.ManagerCheckTrans2TestModel.objects.filter_translated(lang='en').count())
         self.assertEqual(2, models.ManagerCheckTrans2TestModel.objects.filter_translated(lang='de').count())
 
-        qs = models.ManagerCheckTrans2TestModel.objects.filter(title__contains='condition')
-        self.assertEqual(2, qs.filter_translated().count())
-        self.assertEqual(2, qs.filter_translated(lang='en').count())
-        self.assertEqual(1, qs.filter_translated(lang='de').count())
-        self.assertEqual(4, qs.annotate_translated().count())
+        m_qs = models.ManagerCheckTransTestModel.objects.exclude(title__contains='condition')
+        self.assertEqual(2, m_qs.filter_translated().count())
+        self.assertEqual(2, m_qs.filter_translated(lang='en').count())
+        self.assertEqual(1, m_qs.filter_translated(lang='de').count())
 
-        self.assertEqual(5, models.ManagerCheckTrans2TestModel.objects.annotate_translated().count())
-        self.assertEqual(5, models.ManagerCheckTrans2TestModel.objects.annotate_translated(lang='en').count())
-        self.assertEqual(5, models.ManagerCheckTrans2TestModel.objects.annotate_translated(lang='de').count())
-
-        qs_all = models.ManagerCheckTrans2TestModel.objects.all()
-        qs_en_annotated = qs_all.annotate_translated(lang='en')
-
-        m2_en = qs_en_annotated.get(title='m2 title')
-        self.assertTrue(m2_en.translated)
-        m3_en = qs_en_annotated.get(title='m3 title')
-        self.assertFalse(m3_en.translated)
-
-        qs_de_annotated = qs_all.annotate_translated(lang='de')
-        m2_de = qs_de_annotated.get(title='m2 title')
-        self.assertFalse(m2_de.translated)
-        m3_de = qs_de_annotated.get(title='m3 title')
-        self.assertTrue(m3_de.translated)
+        n_qs = models.ManagerCheckTrans2TestModel.objects.exclude(title__contains='condition')
+        self.assertEqual(2, n_qs.filter_translated().count())
+        self.assertEqual(2, n_qs.filter_translated(lang='en').count())
+        self.assertEqual(1, n_qs.filter_translated(lang='de').count())
 
         with override('de'):
             self.assertEqual(2, models.ManagerCheckTransTestModel.objects.filter_translated().count())
             self.assertEqual(3, models.ManagerCheckTransTestModel.objects.filter_translated(lang='en').count())
             self.assertEqual(2, models.ManagerCheckTransTestModel.objects.filter_translated(lang='de').count())
 
-            qs = models.ManagerCheckTransTestModel.objects.filter(title__contains='condition')
-            self.assertEqual(1, qs.filter_translated().count())
-            self.assertEqual(2, qs.filter_translated(lang='en').count())
-            self.assertEqual(1, qs.filter_translated(lang='de').count())
+            self.assertEqual(3, models.ManagerCheckTrans2TestModel.objects.filter_translated().count())
+            self.assertEqual(3, models.ManagerCheckTrans2TestModel.objects.filter_translated(lang='en').count())
+            self.assertEqual(2, models.ManagerCheckTrans2TestModel.objects.filter_translated(lang='de').count())
 
-            self.assertEqual(4, qs.annotate_translated().count())
+            m_qs = models.ManagerCheckTransTestModel.objects.exclude(title__contains='condition')
+            self.assertEqual(1, m_qs.filter_translated().count())
+            self.assertEqual(2, m_qs.filter_translated(lang='en').count())
+            self.assertEqual(1, m_qs.filter_translated(lang='de').count())
+
+            n_qs = models.ManagerCheckTrans2TestModel.objects.exclude(title__contains='condition')
+            self.assertEqual(1, n_qs.filter_translated().count())
+            self.assertEqual(2, n_qs.filter_translated(lang='en').count())
+            self.assertEqual(1, n_qs.filter_translated(lang='de').count())
+
+
+    def test_annotate_translated(self):
+        """
+        Test if queryset is annotated with translation status for the specified language
+
+        """
+        self.assertEqual('en', get_language())
+
+        self.assertEqual(5, models.ManagerCheckTrans2TestModel.objects.annotate_translated().count())
+        self.assertEqual(5, models.ManagerCheckTrans2TestModel.objects.annotate_translated(lang='en').count())
+        self.assertEqual(5, models.ManagerCheckTrans2TestModel.objects.annotate_translated(lang='de').count())
+
+        m_qs = models.ManagerCheckTransTestModel.objects.exclude(title__contains='condition')
+        self.assertEqual(4, m_qs.annotate_translated().count())
+
+        n_qs = models.ManagerCheckTrans2TestModel.objects.exclude(title__contains='condition')
+        self.assertEqual(4, n_qs.annotate_translated().count())
+
+        m_qs_all = models.ManagerCheckTransTestModel.objects.all()
+
+        qs_en_annotated = m_qs_all.annotate_translated(lang='en')
+        m2_en = qs_en_annotated.get(title_en='m2 en title')
+        self.assertTrue(m2_en.translated)
+        m3_en = qs_en_annotated.get(title_en='m3 en title')
+        self.assertFalse(m3_en.translated)
+
+        qs_de_annotated = m_qs_all.annotate_translated(lang='de')
+        m2_de = qs_de_annotated.get(title_en='m2 en title')
+        self.assertFalse(m2_de.translated)
+        m3_de = qs_de_annotated.get(title_en='m3 en title')
+        self.assertTrue(m3_de.translated)
+
+        n_qs_all = models.ManagerCheckTrans2TestModel.objects.all()
+
+        qs_en_annotated = n_qs_all.annotate_translated(lang='en')
+        n2_en = qs_en_annotated.get(title='n2 title')
+        self.assertTrue(m2_en.translated)
+        n3_en = qs_en_annotated.get(title='n3 title')
+        self.assertFalse(m3_en.translated)
+
+        qs_de_annotated = n_qs_all.annotate_translated(lang='de')
+        n2_de = qs_de_annotated.get(title='n2 title')
+        self.assertFalse(n2_de.translated)
+        n3_de = qs_de_annotated.get(title='n3 title')
+        self.assertTrue(n3_de.translated)
+
+        with override('de'):
+            self.assertEqual(5, models.ManagerCheckTransTestModel.objects.annotate_translated().count())
+            self.assertEqual(5, models.ManagerCheckTransTestModel.objects.annotate_translated(lang='en').count())
+            self.assertEqual(5, models.ManagerCheckTransTestModel.objects.annotate_translated(lang='de').count())
 
             self.assertEqual(5, models.ManagerCheckTransTestModel.objects.annotate_translated().count())
             self.assertEqual(5, models.ManagerCheckTransTestModel.objects.annotate_translated(lang='en').count())
             self.assertEqual(5, models.ManagerCheckTransTestModel.objects.annotate_translated(lang='de').count())
 
-            qs_all = models.ManagerCheckTransTestModel.objects.all()
-            qs_en_annotated = qs_all.annotate_translated(lang='en')
+            m_qs = models.ManagerCheckTransTestModel.objects.exclude(title__contains='condition')
+            self.assertEqual(4, m_qs.annotate_translated().count())
 
-            m2_en = qs_en_annotated.get(title='m2 title')
+            n_qs = models.ManagerCheckTrans2TestModel.objects.exclude(title__contains='condition')
+            self.assertEqual(4, n_qs.annotate_translated().count())
+
+            m_qs_all = models.ManagerCheckTransTestModel.objects.all()
+
+            qs_en_annotated = m_qs_all.annotate_translated(lang='en')
+            m2_en = qs_en_annotated.get(title_en='m2 en title')
             self.assertTrue(m2_en.translated)
-            m3_en = qs_en_annotated.get(title='m3 title')
+            m3_en = qs_en_annotated.get(title_en='m3 en title')
             self.assertFalse(m3_en.translated)
 
-            qs_de_annotated = qs_all.annotate_translated(lang='de')
-            m2_de = qs_de_annotated.get(title='m2 title')
+            qs_de_annotated = m_qs_all.annotate_translated(lang='de')
+            m2_de = qs_de_annotated.get(title_en='m2 en title')
             self.assertFalse(m2_de.translated)
-            m3_de = qs_de_annotated.get(title='m3 title')
+            m3_de = qs_de_annotated.get(title_en='m3 en title')
             self.assertTrue(m3_de.translated)
+
+            n_qs_all = models.ManagerCheckTrans2TestModel.objects.all()
+
+            qs_en_annotated = n_qs_all.annotate_translated(lang='en')
+            n2_en = qs_en_annotated.get(title='n2 title')
+            self.assertTrue(m2_en.translated)
+            n3_en = qs_en_annotated.get(title='n3 title')
+            self.assertFalse(m3_en.translated)
+
+            qs_de_annotated = n_qs_all.annotate_translated(lang='de')
+            n2_de = qs_de_annotated.get(title='n2 title')
+            self.assertFalse(n2_de.translated)
+            n3_de = qs_de_annotated.get(title='n3 title')
+            self.assertTrue(n3_de.translated)
 
 
 class TranslationModelFormTest(ModeltranslationTestBase):

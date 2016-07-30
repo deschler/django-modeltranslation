@@ -275,7 +275,7 @@ class ManagerCheckTrans2TestModel(models.Model):
     # Model with non-required (i.e. blank=True) translation fields.
     # Required field 'title' is not registered for translation
     title = models.CharField(ugettext_lazy('title'), max_length=255)
-    visits = models.IntegerField(ugettext_lazy('visits'), blank=True)
+    visits = models.IntegerField(ugettext_lazy('visits'), null=True, blank=True)
     description = models.CharField(max_length=255, null=True, blank=True)
     verified = models.BooleanField(ugettext_lazy('title'), default=True, blank=True)
     subtitle = models.CharField(ugettext_lazy('title'), max_length=255, default='', blank=True)
