@@ -2945,24 +2945,23 @@ class TestManager(ModeltranslationTestBase):
 
 class TestManagerTranslationCheck(TestManager):
     """
-    If model has registered required (i.e. blank=False) fields then if ANY of required
-    translation field values of an instance is empty (including '' for text fields),
-    the instance is considered untranslated. Values of non-required fields (blank=True)
+    If model has registered required (i.e. blank=False) fields then if all required
+    translation field values of an instance are non-empty,
+    the instance is considered translated. Values of non-required fields (blank=True)
     are ignored in this case.
-    If all fields registered for translation are non-required, then instance
-    is considered untranslated if ALL field values are empty.
+    If all fields registered for translation are non-required, then the instance
+    is considered translated if any field value is non-empty.
 
-    If field default is other than '', it is considered as translated.
-    Boolean fields are ignored for check.
-
+    Boolean fields are ignored. Of course, we might have such very rare (and unimaginable)
+    case when we have only one required translation Boolean field, and if we ignore it for check,
+    then the instance will be considered translated if any non-required field is not empty.
     """
 
     def setUp(self):
         super(TestManagerTranslationCheck, self).setUp()
 
         # For ManagerCheckTransTestModel only fields 'title', 'visits', 'description'
-        # should be checked as they have blank=False. Moreover, as 'visits' has default=0 (not ''),
-        # it is considered as translated.
+        # should be checked as they have blank=False.
 
         # Untranslated in en as 'description' is ''
         # Untranslated in de as 'description' is '' and 'title_de' is ''
@@ -3007,7 +3006,8 @@ class TestManagerTranslationCheck(TestManager):
         m5.save()
 
         # Registered translation fields of ManagerCheckTrans2TestModel are all non-required.
-        # So fields 'visits', 'description', 'verified', 'subtitle' should be checked
+        # So fields 'visits', 'description', 'subtitle' should be checked.
+        # 'verified' is Boolean and so is ignored.
         # Required field 'title' is not registered for translation so it is ignored.
 
         # Untranslated in en
