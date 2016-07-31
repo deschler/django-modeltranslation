@@ -343,6 +343,101 @@ a custom undefined value (for a field or model)::
             'text': None
         }
 
+Filtering and annotating by translation status
+------------
+
+Sometimes, especially in case of mature Django projects, we want to filter querysets by translation
+status to show just translated instances to end user and annotate all instances with their
+translation status to use in custom admin.
+
+Again consider the ``News`` example: "news" already exists (say, before the project was translated),
+"news_en" and "news_de" were created when a multilingual support was enabled. ::
+
+    # "news" instance already exists. We have used
+    # :ref:`commands-update_translation_fields` to update title_en.
+    news.title_en = 'English title'
+    news.title_de = ''
+
+    # "news_en" were translated only into English
+    news_en = News.objects.create(title='')
+    news_en.title_en = 'News in English'
+    news_en.save()
+
+    # "news_de" were translated only into German
+    news_de = News.objects.create(title='')
+    news_de.title_de = 'News in German'
+    news_de.save()
+
+Then if a German visitor is viewing the site, we would like show
+him only title/content of the news that are translated into German, i.e. "news_de" only.
+For the same reason it's better an English visitor will see only "news" and "news_en".
+
+Modeltranslation provides a mechanism to check translation status of instances.
+If model has registered required (i.e. blank=False) fields then if all required
+translation field values of an instance are non-empty, the instance is considered translated.
+Values of non-required fields (blank=True) are ignored in this case.
+
+If all fields registered for translation are non-required, then the instance
+is considered translated if any field value is non-empty.
+
+Boolean fields are ignored. Of course, we might have such very rare (and unimaginable)
+case when we have only one required translation Boolean field, and if we ignore it for check,
+then the instance will be considered translated if any non-required field is not empty.
+
+This logic is implemented in ``filter_translated()``
+and ``annotate_translated()`` manager methods (queryset as well) described below.
+
+.. _filter_translated:
+
+Filter translated
+******************
+
+.. versionadded:: 0.12
+
+``filter_translated()`` returns queryset of translated objects for the language if specified.
+If language is not specified, current language is used. ::
+
+    # Assuming the current language is "en"
+    News.objects.filter_translated()  # returns "news" and "news_en"
+    News.objects.filter_translated(lang='de')  # returns "news_de"
+
+This method can be helpful to define your own get_queryset() method to control behaviour of views. ::
+
+    class TranslationViewMixin(object):
+
+        def get_queryset(self):
+            qs = super(TranslationViewMixin, self).get_queryset()
+            return qs.filter_translated()
+
+.. _annotate_translated:
+
+Annotate translated
+***************
+
+.. versionadded:: 0.12
+
+``annotate_translated()`` returns queryset with column 'translated' set to True (1 in case of
+Django < 1.8) if translation check was successful or False (0 respectively) otherwise.
+If language is not specified, current language is used. ::
+
+    # Assuming the current language is "en"
+    qs_en = News.objects.annotate_translated()
+    qs_en.get(title='News in English').translated # returns True
+    qs_en.get(title_de='News in German').translated # returns False
+    qs_de = News.objects.annotate_translated(lang='de')
+    qs_de.get(title='News in English').translated # returns False
+    qs_de.get(title_de='News in German').translated # returns True
+
+    # Queryset is only annotated with translation status in the specified language
+    assert qs_en.count() == qs_de.count()
+
+This method is useful when you somehow customized your admin and want to know which
+instances are translated in the specified language. ::
+
+    qs = News.objects.annotate_translated(lang='de')
+    # Get news untranslated in German
+    untranslated_news = [news for news in qs if not news.translated]
+
 The State of the Original Field
 -------------------------------
 
