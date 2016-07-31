@@ -271,6 +271,7 @@ class ManagerCheckTransTestModel(models.Model):
     class Meta:
         ordering = ('-visits',)
 
+
 class ManagerCheckTrans2TestModel(models.Model):
     # Model with non-required (i.e. blank=True) translation fields.
     # Required field 'title' is not registered for translation

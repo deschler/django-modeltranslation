@@ -35,7 +35,7 @@ except ImportError:
 
 try:
     from django.db.models import When, Case, Value
-    COND_EXPR_API = True # New in Django 1.8
+    COND_EXPR_API = True  # New in Django 1.8
 except ImportError:
     import re
     COND_EXPR_API = False  # Django 1.5 - 1.7
@@ -479,24 +479,24 @@ class MultilingualQuerySet(models.query.QuerySet):
         if COND_EXPR_API:
             query_expr = self._compose_query_for_translated(lang=lang)
             qs = self.annotate(translated=Case(
-                                             When(query_expr, then=Value(True)),
-                                             default=Value(False),
-                                             output_field=BooleanField(),
-                                             ),)
+                When(query_expr, then=Value(True)),
+                default=Value(False),
+                output_field=BooleanField(),
+                ),)
         else:
             sql_query_translated = self.filter_translated(lang=lang).query.__str__()
             # Find in query string WHERE and return the remainder to create condition for CASE.
             # ORDER BY may be in case of model's meta ordering
-            where_pattern = re.compile(r'(?<=WHERE\s)(?P<where_condition>.+?)(?=\sORDER BY|$)', re.M)
-            search_result = where_pattern.search(sql_query_translated)
+            where_re = re.compile(r'(?<=WHERE\s)(?P<where_condition>.+?)(?=\sORDER BY|$)')
+            search_result = where_re.search(sql_query_translated)
             if search_result:
-                sql_where_condition = search_result.group('where_condition')
+                sql_where = search_result.group('where_condition')
             else:
                 return self
             # Replace 'table.field = ' for CHAR_LENGTH('table.field') = 0 to use in CASE condition
-            pattern = re.compile(r'(?<=\s|[(])(?P<db_column>[a-z0-9_."]+)\s=(?=\s+(OR|AND|[)]))', re.M)
-            sql_case_condition = pattern.sub('CHAR_LENGTH(\g<db_column>) = 0', sql_where_condition)
-            qs = self.extra(select={'translated': 'CASE WHEN %s THEN 1 ELSE 0 END' % (sql_case_condition,)})
+            char_re = re.compile(r'(?<=\s|[(])(?P<db_column>[a-z0-9_."]+)\s=(?=\s+(OR|AND|[)]))')
+            sql_case = char_re.sub('CHAR_LENGTH(\g<db_column>) = 0', sql_where)
+            qs = self.extra(select={'translated': 'CASE WHEN %s THEN 1 ELSE 0 END' % (sql_case,)})
         return qs
 
     def _compose_query_for_translated(self, lang=None):
@@ -511,8 +511,9 @@ class MultilingualQuerySet(models.query.QuerySet):
         is considered translated if any field value is non-empty.
 
         Boolean fields are ignored. Of course, we might have such very rare (and unimaginable)
-        case when we have only one required translation Boolean field, and if we ignore it for check,
-        then the instance will be considered translated if any non-required field is not empty.
+        case when we have only one required translation Boolean field, and if we ignore it
+        for check, then the instance will be considered translated if any non-required field
+        is not empty.
         """
         if not lang:
             lang = get_language()
@@ -533,7 +534,8 @@ class MultilingualQuerySet(models.query.QuerySet):
             if not field.blank:
                 required_fields_query &= field_q
             # If we have no required fields for translation, we should check non-required fields and
-            # In this case objects are regarded as translated if any of non-required translation field is non-empty.
+            # In this case objects are regarded as translated if any of non-required translation
+            # field is non-empty.
             else:
                 non_required_fields_query |= field_q
 
