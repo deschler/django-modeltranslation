@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django import VERSION
+from django.conf import settings
 from django.utils.translation import ugettext_lazy
 
 from modeltranslation.translator import translator, register, TranslationOptions
@@ -208,7 +209,7 @@ class DecoratedTranslationOptions(TranslationOptions):
 
 # ######### 3-rd party with custom manager
 
-if VERSION >= (1, 8):
+if VERSION >= (1, 8) and "django.contrib.auth" in settings.INSTALLED_APPS:
     from django.contrib.auth.models import Group
 
     @register(Group)

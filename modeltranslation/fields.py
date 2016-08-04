@@ -310,6 +310,10 @@ class TranslationFieldDescriptor(object):
         """
         Updates the translation field for the current language.
         """
+        # In order for deferred fields to work, we also need to set the base value
+        instance.__dict__[self.field.name] = value
+        if isinstance(self.field, fields.related.ForeignKey):
+            instance.__dict__[self.field.get_attname()] = None if value is None else value.pk
         if getattr(instance, '_mt_init', False):
             # When assignment takes place in model instance constructor, don't set value.
             # This is essential for only/defer to work, but I think it's sensible anyway.
@@ -375,6 +379,8 @@ class TranslatedRelationIdDescriptor(object):
         # Localized field name with '_id'
         loc_attname = instance._meta.get_field(loc_field_name).get_attname()
         setattr(instance, loc_attname, value)
+        base_attname = instance._meta.get_field(self.field_name).get_attname()
+        instance.__dict__[base_attname] = value
 
     def __get__(self, instance, owner):
         if instance is None:

@@ -22,3 +22,5 @@ MODELTRANSLATION_AUTO_POPULATE = False
 MODELTRANSLATION_FALLBACK_LANGUAGES = ()
 
 ROOT_URLCONF = 'modeltranslation.tests.urls'
+
+MIGRATION_MODULES = {'auth': 'modeltranslation.tests.auth_migrations'}

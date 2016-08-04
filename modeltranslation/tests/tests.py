@@ -45,7 +45,9 @@ from modeltranslation.tests.test_settings import TEST_SETTINGS
 from modeltranslation.utils import (build_css_class, build_localized_fieldname,
                                     auto_populate, fallbacks)
 
-MIGRATIONS = django.VERSION >= (1, 8)
+MIGRATE_CMD = django.VERSION >= (1, 8)
+MIGRATIONS = MIGRATE_CMD and "django.contrib.auth" in TEST_SETTINGS['INSTALLED_APPS']
+NEW_DEFERRED_API = django.VERSION >= (1, 10)
 
 models = translation = None
 
@@ -118,6 +120,12 @@ class ModeltranslationTransactionTestBase(TransactionTestCase):
             mgr = (override_settings(**TEST_SETTINGS) if django.VERSION < (1, 8)
                    else dummy_context_mgr())
             with mgr:
+                # 0. Render initial migration of auth
+                from django.db import connections, DEFAULT_DB_ALIAS
+                if MIGRATIONS:
+                    call_command('makemigrations', 'auth', verbosity=2, interactive=False,
+                                 database=connections[DEFAULT_DB_ALIAS].alias)
+
                 # 1. Reload translation in case USE_I18N was False
                 from django.utils import translation as dj_trans
                 imp.reload(dj_trans)
@@ -134,25 +142,38 @@ class ModeltranslationTransactionTestBase(TransactionTestCase):
                     cls.cache.load_app('modeltranslation.tests')
                 else:
                     del cls.cache.all_models['tests']
+                    if MIGRATIONS:
+                        del cls.cache.all_models['auth']
                     import sys
                     sys.modules.pop('modeltranslation.tests.models', None)
                     sys.modules.pop('modeltranslation.tests.translation', None)
+                    if MIGRATIONS:
+                        sys.modules.pop('django.contrib.auth.models', None)
                     cls.cache.get_app_config('tests').import_models(cls.cache.all_models['tests'])
+                    if MIGRATIONS:
+                        cls.cache.get_app_config('auth').import_models(cls.cache.all_models['auth'])
 
                 # 4. Autodiscover
                 from modeltranslation.models import handle_translation_registrations
                 handle_translation_registrations()
 
                 # 5. makemigrations (``migrate=False`` in case of south)
-                from django.db import connections, DEFAULT_DB_ALIAS
                 if MIGRATIONS:
-                    call_command('makemigrations', verbosity=2, interactive=False,
+                    call_command('makemigrations', 'auth', verbosity=2, interactive=False,
                                  database=connections[DEFAULT_DB_ALIAS].alias)
 
                 # 6. Syncdb (``migrate=False`` in case of south)
-                cmd = 'migrate' if MIGRATIONS else 'syncdb'
+                cmd = 'migrate' if MIGRATE_CMD else 'syncdb'
                 call_command(cmd, verbosity=0, migrate=False, interactive=False, run_syncdb=True,
                              database=connections[DEFAULT_DB_ALIAS].alias, load_initial_data=False)
+
+                # 7. clean migrations
+                if MIGRATIONS:
+                    import glob
+                    dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                       "auth_migrations")
+                    for f in glob.glob(dir + "/000?_*.py*"):
+                        os.unlink(f)
 
                 # A rather dirty trick to import models into module namespace, but not before
                 # tests app has been added into INSTALLED_APPS and loaded
@@ -291,6 +312,21 @@ class ModeltranslationTest(ModeltranslationTestBase):
         # Or unregistered before it.
         self.assertRaises(translator.DescendantRegistered,
                           translator.translator.unregister, models.Slugged)
+
+    @skipUnless(NEW_DEFERRED_API, "Django 1.10 needed")
+    def test_registration_field_conflicts(self):
+        before = len(translator.translator.get_registered_models())
+
+        # Exception should be raised when conflicting field name detected
+        self.assertRaises(ValueError, translator.translator.register,
+                          models.ConflictModel, fields=('title',))
+        self.assertRaises(ValueError, translator.translator.register,
+                          models.AbstractConflictModelB, fields=('title',))
+        self.assertRaises(ValueError, translator.translator.register,
+                          models.MultitableConflictModelB, fields=('title',))
+
+        # Model should not be registered
+        self.assertEqual(len(translator.translator.get_registered_models()), before)
 
     def test_fields(self):
         field_names = dir(models.TestModel())
@@ -2647,7 +2683,7 @@ class TestManager(ModeltranslationTestBase):
         qs = models.CustomManagerTestModel.objects.custom_qs()
         self.assertIsInstance(qs, MultilingualQuerySet)
 
-    @skipUnless(MIGRATIONS, 'migrations not available')
+    @skipUnless(MIGRATIONS, 'migrations/auth not available')
     def test_3rd_party_custom_manager(self):
         from django.contrib.auth.models import Group, GroupManager
         from modeltranslation.manager import MultilingualManager
@@ -2855,13 +2891,20 @@ class TestManager(ModeltranslationTestBase):
             self.assertEqual('title_de', inst1.title)
             self.assertEqual('title_de', inst2.title)
 
+    def assertDeferredClass(self, item):
+        if NEW_DEFERRED_API:
+            self.assertTrue(len(item.get_deferred_fields()) > 0)
+        else:
+            self.assertTrue(item.__class__._deferred)
+
     def test_deferred(self):
         """
         Check if ``only`` and ``defer`` are working.
         """
         models.TestModel.objects.create(title_de='title_de', title_en='title_en')
         inst = models.TestModel.objects.only('title_en')[0]
-        self.assertNotEqual(inst.__class__, models.TestModel)
+        if not NEW_DEFERRED_API:
+            self.assertNotEqual(inst.__class__, models.TestModel)
         self.assertTrue(isinstance(inst, models.TestModel))
         self.assertDeferred(False, 'title_en')
 
@@ -2894,12 +2937,12 @@ class TestManager(ModeltranslationTestBase):
             models.ForeignKeyModel.objects.create(test=test)
 
         item = models.ForeignKeyModel.objects.select_related("test").defer("test__text")[0]
-        self.assertTrue(item.test.__class__._deferred)
+        self.assertDeferredClass(item.test)
         self.assertEqual('title_en', item.test.title)
         self.assertEqual('title_en', item.test.__class__.objects.only('title')[0].title)
         with override('de'):
             item = models.ForeignKeyModel.objects.select_related("test").defer("test__text")[0]
-            self.assertTrue(item.test.__class__._deferred)
+            self.assertDeferredClass(item.test)
             self.assertEqual('title_de', item.test.title)
             self.assertEqual('title_de', item.test.__class__.objects.only('title')[0].title)
 
