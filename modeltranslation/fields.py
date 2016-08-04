@@ -343,6 +343,7 @@ class TranslationFieldDescriptor(object):
         for lang in langs:
             loc_field_name = build_localized_fieldname(self.field.name, lang)
             val = getattr(instance, loc_field_name, None)
+            print "GOT!!!!", val, loc_field_name
             if self.meaningful_value(val, undefined):
                 return val
         if mt_settings.ENABLE_FALLBACKS and self.fallback_value is not NONE:

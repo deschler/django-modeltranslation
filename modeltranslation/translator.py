@@ -11,11 +11,12 @@ from modeltranslation.fields import (NONE, create_translation_field, Translation
                                      TranslatedRelationIdDescriptor,
                                      LanguageCacheSingleObjectDescriptor)
 from modeltranslation.manager import (MultilingualManager, MultilingualQuerysetManager,
-                                      rewrite_lookup_key)
+                                      rewrite_lookup_key, append_translated)
 from modeltranslation.utils import build_localized_fieldname, parse_field
 
 
 NEW_RELATED_API = VERSION >= (1, 9)
+NEW_DEFERRED_API = NEW_MANAGER_API = NEW_ABSTRACT_API = VERSION >= (1, 10)
 
 
 class AlreadyRegistered(Exception):
@@ -102,7 +103,7 @@ class TranslationOptions(with_metaclass(FieldsAggregationMetaClass, object)):
         """
         Update with options from a superclass.
         """
-        if other.model._meta.abstract:
+        if other.model._meta.abstract and not NEW_ABSTRACT_API:
             self.local_fields.update(other.local_fields)
         self.fields.update(other.fields)
 
@@ -118,6 +119,12 @@ class TranslationOptions(with_metaclass(FieldsAggregationMetaClass, object)):
         Return name of all fields that can be used in filtering.
         """
         return list(self.fields.keys()) + self.related_fields
+
+    def get_field_attnames(self):
+        """
+        Return names of all descriptor fields
+        """
+        return list(self.model._meta.get_field(f).get_attname() for f in self.fields.keys())
 
     def __str__(self):
         local = tuple(self.local_fields.keys())
@@ -144,7 +151,7 @@ def add_translation_fields(model, opts):
             # Check if the model already has a field by that name
             if hasattr(model, localized_field_name):
                 raise ValueError(
-                    "Error adding translation field. Model '%s' already contains a field named"
+                    "Error adding translation field. Model '%s' already contains a field named "
                     "'%s'." % (model._meta.object_name, localized_field_name))
             # This approach implements the translation fields as full valid
             # django model fields and therefore adds them via add_to_class
@@ -203,8 +210,9 @@ def add_manager(model):
 
             manager.__class__ = NewMultilingualManager
 
-    for _, attname, cls in model._meta.concrete_managers + model._meta.abstract_managers:
-        current_manager = getattr(model, attname)
+    managers = (model._meta.managers if NEW_MANAGER_API else
+                (getattr(model, x[1]) for x in model._meta.concrete_managers + model._meta.abstract_managers))
+    for current_manager in managers:
         prev_class = current_manager.__class__
         patch_manager_class(current_manager)
         if model._default_manager.__class__ is prev_class:
@@ -225,7 +233,7 @@ def patch_constructor(model):
 
     def new_init(self, *args, **kwargs):
         self._mt_init = True
-        if not self._deferred:
+        if NEW_DEFERRED_API or not self._deferred:
             populate_translation_fields(self.__class__, kwargs)
             for key, val in list(kwargs.items()):
                 new_key = rewrite_lookup_key(model, key)
@@ -263,7 +271,7 @@ def patch_clean_fields(model):
     model.clean_fields = new_clean_fields
 
 
-def patch_get_deferred_fields(model):
+def patch_get_deferred_fields(model, field_names):
     """
     Django >= 1.8: patch detecting deferred fields. Crucial for only/defer to work.
     """
@@ -275,8 +283,26 @@ def patch_get_deferred_fields(model):
         sup = old_get_deferred_fields(self)
         if hasattr(self, '_fields_were_deferred'):
             sup.update(self._fields_were_deferred)
+        sup = sup.difference(field_names)
+        print "DEFER", sup, field_names
         return sup
     model.get_deferred_fields = new_get_deferred_fields
+
+
+def patch_refresh_from_db(model):
+    """
+    Django >= 1.10: patch refreshing deferred fields. Crucial for only/defer to work.
+    """
+    if not hasattr(model, 'refresh_from_db'):
+        return
+    old_refresh_from_db = model.refresh_from_db
+
+    def new_refresh_from_db(self, using=None, fields=None):
+        if fields is not None:
+            fields = append_translated(self.__class__, fields)
+        print "ORIG", fields
+        return old_refresh_from_db(self, using, fields)
+    model.refresh_from_db = new_refresh_from_db
 
 
 def patch_metaclass(model):
@@ -462,8 +488,10 @@ class Translator(object):
             patch_clean_fields(model)
 
             # Patch __metaclass__ and other methods to allow deferring to work
-            patch_metaclass(model)
-            patch_get_deferred_fields(model)
+            if not NEW_DEFERRED_API:
+                patch_metaclass(model)
+            patch_get_deferred_fields(model, opts.get_field_attnames())
+            patch_refresh_from_db(model)
 
             # Substitute original field with descriptor
             model_fallback_languages = getattr(opts, 'fallback_languages', None)
@@ -547,7 +575,7 @@ class Translator(object):
         Returns an instance of translation options with translated fields
         defined for the ``model`` and inherited from superclasses.
         """
-        if model._deferred:
+        if not NEW_DEFERRED_API and model._deferred:
             model = model._meta.proxy_for_model
         if model not in self._registry:
             # Create a new type for backwards compatibility.
