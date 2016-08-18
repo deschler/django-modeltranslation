@@ -314,7 +314,6 @@ class TranslationFieldDescriptor(object):
         instance.__dict__[self.field.name] = value
         if isinstance(self.field, fields.related.ForeignKey):
             instance.__dict__[self.field.get_attname()] = None if value is None else value.pk
-        # print "SET", self.field.name, value
         if getattr(instance, '_mt_init', False):
             # When assignment takes place in model instance constructor, don't set value.
             # This is essential for only/defer to work, but I think it's sensible anyway.
@@ -348,7 +347,6 @@ class TranslationFieldDescriptor(object):
         for lang in langs:
             loc_field_name = build_localized_fieldname(self.field.name, lang)
             val = getattr(instance, loc_field_name, None)
-            # print "GOT!!!!", val, loc_field_name
             if self.meaningful_value(val, undefined):
                 return val
         if mt_settings.ENABLE_FALLBACKS and self.fallback_value is not NONE:
@@ -382,7 +380,6 @@ class TranslatedRelationIdDescriptor(object):
         loc_attname = instance._meta.get_field(loc_field_name).get_attname()
         setattr(instance, loc_attname, value)
         base_attname = instance._meta.get_field(self.field_name).get_attname()
-        # print "SET", base_attname, value
         instance.__dict__[base_attname] = value
 
     def __get__(self, instance, owner):

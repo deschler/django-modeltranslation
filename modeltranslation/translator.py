@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django import VERSION
 from django.utils.six import with_metaclass
-from django.core.exceptions import ImproperlyConfigured, FieldDoesNotExist
+from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Manager, ForeignKey, OneToOneField
 from django.db.models.base import ModelBase
 from django.db.models.signals import post_init
@@ -120,12 +120,6 @@ class TranslationOptions(with_metaclass(FieldsAggregationMetaClass, object)):
         """
         return list(self.fields.keys()) + self.related_fields
 
-    def get_field_attnames(self):
-        """
-        Return names of all descriptor fields
-        """
-        return list(self.model._meta.get_field(f).get_attname() for f in self.fields.keys())
-
     def __str__(self):
         local = tuple(self.local_fields.keys())
         inherited = tuple(set(self.fields.keys()) - set(local))
@@ -212,7 +206,8 @@ def add_manager(model):
             manager.__class__ = NewMultilingualManager
 
     managers = (model._meta.local_managers if NEW_MANAGER_API else
-                (getattr(model, x[1]) for x in model._meta.concrete_managers + model._meta.abstract_managers))
+                (getattr(model, x[1]) for x in
+                 model._meta.concrete_managers + model._meta.abstract_managers))
     for current_manager in managers:
         prev_class = current_manager.__class__
         patch_manager_class(current_manager)
@@ -274,7 +269,7 @@ def patch_clean_fields(model):
     model.clean_fields = new_clean_fields
 
 
-def patch_get_deferred_fields(model, field_names):
+def patch_get_deferred_fields(model):
     """
     Django >= 1.8: patch detecting deferred fields. Crucial for only/defer to work.
     """
@@ -286,8 +281,6 @@ def patch_get_deferred_fields(model, field_names):
         sup = old_get_deferred_fields(self)
         if hasattr(self, '_fields_were_deferred'):
             sup.update(self._fields_were_deferred)
-        # sup = sup.difference(field_names)
-        # print "DEFER", sup, field_names
         return sup
     model.get_deferred_fields = new_get_deferred_fields
 
@@ -303,7 +296,6 @@ def patch_refresh_from_db(model):
     def new_refresh_from_db(self, using=None, fields=None):
         if fields is not None:
             fields = append_translated(self.__class__, fields)
-        # print "ORIG", fields
         return old_refresh_from_db(self, using, fields)
     model.refresh_from_db = new_refresh_from_db
 
@@ -493,7 +485,7 @@ class Translator(object):
             # Patch __metaclass__ and other methods to allow deferring to work
             if not NEW_DEFERRED_API:
                 patch_metaclass(model)
-            patch_get_deferred_fields(model, opts.get_field_attnames())
+            patch_get_deferred_fields(model)
             patch_refresh_from_db(model)
 
             # Substitute original field with descriptor

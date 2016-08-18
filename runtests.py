@@ -50,7 +50,7 @@ def runtests():
     if django.VERSION >= (1, 7):
         django.setup()
     failures = call_command(
-        'test', 'modeltranslation.tests', interactive=False, failfast=False, verbosity=2)
+        'test', 'modeltranslation', interactive=False, failfast=False, verbosity=2)
 
     sys.exit(bool(failures))
 
