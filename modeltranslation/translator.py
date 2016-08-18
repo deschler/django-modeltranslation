@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django import VERSION
 from django.utils.six import with_metaclass
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, FieldDoesNotExist
 from django.db.models import Manager, ForeignKey, OneToOneField
 from django.db.models.base import ModelBase
 from django.db.models.signals import post_init
@@ -103,7 +103,7 @@ class TranslationOptions(with_metaclass(FieldsAggregationMetaClass, object)):
         """
         Update with options from a superclass.
         """
-        if other.model._meta.abstract and not NEW_ABSTRACT_API:
+        if other.model._meta.abstract:
             self.local_fields.update(other.local_fields)
         self.fields.update(other.fields)
 
@@ -149,7 +149,8 @@ def add_translation_fields(model, opts):
             # Construct the name for the localized field
             localized_field_name = build_localized_fieldname(field_name, l)
             # Check if the model already has a field by that name
-            if hasattr(model, localized_field_name):
+
+            if model.__dict__.get(localized_field_name):
                 raise ValueError(
                     "Error adding translation field. Model '%s' already contains a field named "
                     "'%s'." % (model._meta.object_name, localized_field_name))
@@ -210,7 +211,7 @@ def add_manager(model):
 
             manager.__class__ = NewMultilingualManager
 
-    managers = (model._meta.managers if NEW_MANAGER_API else
+    managers = (model._meta.local_managers if NEW_MANAGER_API else
                 (getattr(model, x[1]) for x in model._meta.concrete_managers + model._meta.abstract_managers))
     for current_manager in managers:
         prev_class = current_manager.__class__
@@ -223,6 +224,8 @@ def add_manager(model):
             # share the same class.
             model._default_manager.__class__ = current_manager.__class__
     patch_manager_class(model._base_manager)
+    if hasattr(model._meta, "_expire_cache"):
+        model._meta._expire_cache()
 
 
 def patch_constructor(model):
@@ -283,8 +286,8 @@ def patch_get_deferred_fields(model, field_names):
         sup = old_get_deferred_fields(self)
         if hasattr(self, '_fields_were_deferred'):
             sup.update(self._fields_were_deferred)
-        sup = sup.difference(field_names)
-        print "DEFER", sup, field_names
+        # sup = sup.difference(field_names)
+        # print "DEFER", sup, field_names
         return sup
     model.get_deferred_fields = new_get_deferred_fields
 
@@ -300,7 +303,7 @@ def patch_refresh_from_db(model):
     def new_refresh_from_db(self, using=None, fields=None):
         if fields is not None:
             fields = append_translated(self.__class__, fields)
-        print "ORIG", fields
+        # print "ORIG", fields
         return old_refresh_from_db(self, using, fields)
     model.refresh_from_db = new_refresh_from_db
 
