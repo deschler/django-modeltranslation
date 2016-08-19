@@ -47,7 +47,6 @@ from modeltranslation.utils import (build_css_class, build_localized_fieldname,
 
 MIGRATE_CMD = django.VERSION >= (1, 8)
 MIGRATIONS = MIGRATE_CMD and "django.contrib.auth" in TEST_SETTINGS['INSTALLED_APPS']
-MIGRATIONS = MIGRATE_CMD
 NEW_DEFERRED_API = django.VERSION >= (1, 10)
 
 models = translation = None
@@ -313,6 +312,21 @@ class ModeltranslationTest(ModeltranslationTestBase):
         # Or unregistered before it.
         self.assertRaises(translator.DescendantRegistered,
                           translator.translator.unregister, models.Slugged)
+
+    @skipUnless(NEW_DEFERRED_API, "Django 1.10 needed")
+    def test_registration_field_conflicts(self):
+        before = len(translator.translator.get_registered_models())
+
+        # Exception should be raised when conflicting field name detected
+        self.assertRaises(ValueError, translator.translator.register,
+                          models.ConflictModel, fields=('title',))
+        self.assertRaises(ValueError, translator.translator.register,
+                          models.AbstractConflictModelB, fields=('title',))
+        self.assertRaises(ValueError, translator.translator.register,
+                          models.MultitableConflictModelB, fields=('title',))
+
+        # Model should not be registered
+        self.assertEqual(len(translator.translator.get_registered_models()), before)
 
     def test_fields(self):
         field_names = dir(models.TestModel())

@@ -313,3 +313,29 @@ class RequiredModel(models.Model):
 
 class DecoratedModel(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
+
+
+# ######### Name collision registration testing
+
+class ConflictModel(models.Model):
+    title = models.CharField(ugettext_lazy('title'), max_length=255)
+    title_de = models.IntegerField()
+
+
+class AbstractConflictModelA(models.Model):
+    title_de = models.IntegerField()
+
+    class Meta:
+        abstract = True
+
+
+class AbstractConflictModelB(AbstractConflictModelA):
+    title = models.CharField(ugettext_lazy('title'), max_length=255)
+
+
+class MultitableConflictModelA(models.Model):
+    title_de = models.IntegerField()
+
+
+class MultitableConflictModelB(MultitableConflictModelA):
+    title = models.CharField(ugettext_lazy('title'), max_length=255)
