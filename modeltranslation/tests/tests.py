@@ -2958,6 +2958,13 @@ class TestManager(ModeltranslationTestBase):
         self.assertIn('text_en', dir(item1.__class__))
         self.assertIn('text_de', dir(item1.__class__))
 
+    def test_deferred_rule2(self):
+        models.TestModel.objects.create(title_de='title_de', title_en='title_en')
+        o = models.TestModel.objects.only('title')[0]
+        self.assertEqual(o.title, "title_en")
+        o.title = "bla"
+        self.assertEqual(o.title, "bla")
+
     def test_translation_fields_appending(self):
         from modeltranslation.manager import append_lookup_keys, append_lookup_key
         self.assertEqual(set(['untrans']), append_lookup_key(models.ForeignKeyModel, 'untrans'))

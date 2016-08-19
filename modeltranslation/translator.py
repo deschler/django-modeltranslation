@@ -490,7 +490,12 @@ class Translator(object):
         patch_constructor(model)
 
         # Connect signal for model
-        post_init.connect(delete_mt_init, sender=model)
+        if NEW_DEFERRED_API:
+            post_init.connect(delete_mt_init, sender=model)
+        else:
+            # deferred models have their own classes and the `sender` does not match.
+            # Connect signal for all models.
+            post_init.connect(delete_mt_init, dispatch_uid="modeltranslation")
 
         # Patch clean_fields to verify form field clearing
         patch_clean_fields(model)
