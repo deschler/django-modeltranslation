@@ -51,10 +51,9 @@ class Command(BaseCommand):
             ' sync database structure. Does not remove columns of removed'
             ' languages or undeclared fields.')
 
-    option_list = BaseCommand.option_list + (
-        make_option('--noinput', action='store_false', dest='interactive', default=True,
-                    help='Do NOT prompt the user for input of any kind.'),
-    )
+    def add_arguments(self, parser):
+        parser.add_argument('--noinput', action='store_false', dest='interactive', default=True,
+                            help='Do NOT prompt the user for input of any kind.'),
 
     def handle(self, *args, **options):
         """
