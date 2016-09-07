@@ -11,6 +11,7 @@ Credits: Heavily inspired by django-transmeta's sync_transmeta_db command.
 """
 from optparse import make_option
 import django
+from django import VERSION
 from django.core.management.base import BaseCommand
 from django.core.management.color import no_style
 from django.db import connection, transaction
@@ -51,9 +52,16 @@ class Command(BaseCommand):
             ' sync database structure. Does not remove columns of removed'
             ' languages or undeclared fields.')
 
-    def add_arguments(self, parser):
-        parser.add_argument('--noinput', action='store_false', dest='interactive', default=True,
-                            help='Do NOT prompt the user for input of any kind.'),
+    if VERSION < (1, 8):
+        from optparse import make_option
+        option_list = BaseCommand.option_list + (
+            make_option('--noinput', action='store_false', dest='interactive', default=True,
+                        help='Do NOT prompt the user for input of any kind.'),
+        )
+    else:
+        def add_arguments(self, parser):
+            parser.add_argument('--noinput', action='store_false', dest='interactive', default=True,
+                                help='Do NOT prompt the user for input of any kind.'),
 
     def handle(self, *args, **options):
         """
