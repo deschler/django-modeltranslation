@@ -172,20 +172,20 @@ matrix:
     - python: "3.5"
       env: DJANGO=1.10 DB=mysql
 before_install:
-  - pip install -q flake8 --use-mirrors
+  - pip install -q flake8
   - PYFLAKES_NODOCTEST=1 flake8 modeltranslation
 before_script:
   - mysql -e 'create database modeltranslation;'
   - psql -c 'create database modeltranslation;' -U postgres
 install:
-  - if [[ $DB == mysql ]]; then pip install -q mysql-python --use-mirrors; fi
-  - if [[ $DB == postgres ]]; then pip install -q psycopg2 --use-mirrors; fi
-  - pip install -q Pillow --use-mirrors
+  - if [[ $DB == mysql ]]; then pip install -q mysql-python; fi
+  - if [[ $DB == postgres ]]; then pip install -q psycopg2; fi
+  - pip install -q Pillow
   - IDJANGO=$(./travis.py $DJANGO)
   - pip install -q $IDJANGO
-  - pip install -e . --use-mirrors
+  - pip install -e .
   - if [[ $TRAVIS_PYTHON_VERSION == '3.2' ]]; then pip install 'coverage<4.0.0'; fi
-  - pip install -q coveralls --use-mirrors
+  - pip install -q coveralls
 script:
   - django-admin.py --version
   - coverage run --source=modeltranslation ./runtests.py
