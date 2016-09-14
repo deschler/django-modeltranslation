@@ -9,7 +9,6 @@ You will need to execute this command in two cases:
 
 Credits: Heavily inspired by django-transmeta's sync_transmeta_db command.
 """
-from optparse import make_option
 import django
 from django import VERSION
 from django.core.management.base import BaseCommand
