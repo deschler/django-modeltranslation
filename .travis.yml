@@ -172,7 +172,7 @@ matrix:
     - python: "3.5"
       env: DJANGO=1.10 DB=mysql
 before_install:
-  - pip install -q flake8
+  - pip install -q 'flake8<3'
   - PYFLAKES_NODOCTEST=1 flake8 modeltranslation
 before_script:
   - mysql -e 'create database modeltranslation;'
