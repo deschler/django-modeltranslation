@@ -347,6 +347,7 @@ The State of the Original Field
 -------------------------------
 
 .. versionchanged:: 0.5
+.. versionchanged:: 0.12
 
 As defined by the :ref:`rules`, accessing the original field is guaranteed to
 work on the associated translation field of the current language. This applies
@@ -358,6 +359,9 @@ The actual field value (which *can* still be accessed through
 Attempts to keep the value in sync with either the default or current
 language's field value has raised a boatload of unpredictable side effects in
 older versions of modeltranslation.
+
+Since version 0.12 the original field is expected to have even more undetermined value.
+It's because Django 1.10 changed the way deferred fields work.
 
 .. warning::
     Do not rely on the underlying value of the *original field* in any way!
