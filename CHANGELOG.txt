@@ -1,11 +1,23 @@
 v0.12
 =====
-Date: ???
+Date: 2016-09-20
 
-  ADDED: Support for Django 1.10
+  ADDED: Support for Django 1.10.
+         (resolves issue #360, thanks Jacek Tomaszewski and Primož Kerin)
+
 CHANGED: Original field value became more unreliable and undetermined;
          please make sure you're not using it anywhere. See
          http://django-modeltranslation.readthedocs.io/en/latest/usage.html#the-state-of-the-original-field
+CHANGED: Let register decorator return decorated class
+         (resolves issue #360, thanks spacediver)
+
+  FIXED: Deferred classes signal connection.
+         (resolves issue #379, thanks Jacek Tomaszewski)
+  FIXED: values_list + annotate combo bug.
+         (resolves issue #374, thanks Jacek Tomaszewski)
+  FIXED: Several flake8 and travis related issues.
+         (resolves issues #363, thanks Matthias K)
+
 
 v0.11
 =====
