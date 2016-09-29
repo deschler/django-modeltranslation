@@ -14,10 +14,10 @@ may they use translations or not, and you never have to touch the original
 model class.
 
 
-.. image:: http://img.shields.io/travis/deschler/django-modeltranslation/master.png?style=flat-square
+.. image:: http://img.shields.io/travis/deschler/django-modeltranslation/master.svg?style=flat-square
     :target: https://travis-ci.org/deschler/django-modeltranslation
 
-.. image:: http://img.shields.io/coveralls/deschler/django-modeltranslation.png?style=flat-square
+.. image:: http://img.shields.io/coveralls/deschler/django-modeltranslation.svg?style=flat-square
     :target: https://coveralls.io/r/deschler/django-modeltranslation
 
 .. image:: https://img.shields.io/pypi/v/django-modeltranslation.svg?style=flat-square
