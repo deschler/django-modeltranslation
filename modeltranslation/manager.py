@@ -351,7 +351,11 @@ class MultilingualQuerySet(models.query.QuerySet):
             return super(MultilingualQuerySet, self).order_by(*field_names)
         new_args = []
         for key in field_names:
-            new_args.append(rewrite_order_lookup_key(self.model, key))
+            try:
+                new_arg = rewrite_order_lookup_key(self.model, key)
+            except AttributeError:
+                new_arg = key
+            new_args.append(new_arg)
         return super(MultilingualQuerySet, self).order_by(*new_args)
 
     def update(self, **kwargs):
