@@ -48,25 +48,28 @@ def get_translatable_fields_for_model(model):
 
 
 def rewrite_lookup_key(model, lookup_key):
-    pieces = lookup_key.split('__', 1)
-    original_key = pieces[0]
+    try:
+        pieces = lookup_key.split('__', 1)
+        original_key = pieces[0]
 
-    translatable_fields = get_translatable_fields_for_model(model)
-    if translatable_fields is not None:
-        # If we are doing a lookup on a translatable field,
-        # we want to rewrite it to the actual field name
-        # For example, we want to rewrite "name__startswith" to "name_fr__startswith"
-        if pieces[0] in translatable_fields:
-            pieces[0] = build_localized_fieldname(pieces[0], get_language())
+        translatable_fields = get_translatable_fields_for_model(model)
+        if translatable_fields is not None:
+            # If we are doing a lookup on a translatable field,
+            # we want to rewrite it to the actual field name
+            # For example, we want to rewrite "name__startswith" to "name_fr__startswith"
+            if pieces[0] in translatable_fields:
+                pieces[0] = build_localized_fieldname(pieces[0], get_language())
 
-    if len(pieces) > 1:
-        # Check if we are doing a lookup to a related trans model
-        fields_to_trans_models = get_fields_to_translatable_models(model)
-        # Check ``original key``, as pieces[0] may have been already rewritten.
-        if original_key in fields_to_trans_models:
-            transmodel = fields_to_trans_models[original_key]
-            pieces[1] = rewrite_lookup_key(transmodel, pieces[1])
-    return '__'.join(pieces)
+        if len(pieces) > 1:
+            # Check if we are doing a lookup to a related trans model
+            fields_to_trans_models = get_fields_to_translatable_models(model)
+            # Check ``original key``, as pieces[0] may have been already rewritten.
+            if original_key in fields_to_trans_models:
+                transmodel = fields_to_trans_models[original_key]
+                pieces[1] = rewrite_lookup_key(transmodel, pieces[1])
+        return '__'.join(pieces)
+    except AttributeError:
+        return lookup_key
 
 
 def append_fallback(model, fields):
@@ -121,10 +124,13 @@ def append_lookup_keys(model, fields):
 
 
 def rewrite_order_lookup_key(model, lookup_key):
-    if lookup_key.startswith('-'):
-        return '-' + rewrite_lookup_key(model, lookup_key[1:])
-    else:
-        return rewrite_lookup_key(model, lookup_key)
+    try:
+        if lookup_key.startswith('-'):
+            return '-' + rewrite_lookup_key(model, lookup_key[1:])
+        else:
+            return rewrite_lookup_key(model, lookup_key)
+    except AttributeError:
+        return lookup_key
 
 _F2TM_CACHE = {}
 
@@ -351,11 +357,7 @@ class MultilingualQuerySet(models.query.QuerySet):
             return super(MultilingualQuerySet, self).order_by(*field_names)
         new_args = []
         for key in field_names:
-            try:
-                new_arg = rewrite_order_lookup_key(self.model, key)
-            except AttributeError:
-                new_arg = key
-            new_args.append(new_arg)
+            new_args.append(rewrite_order_lookup_key(self.model, key))
         return super(MultilingualQuerySet, self).order_by(*new_args)
 
     def update(self, **kwargs):
