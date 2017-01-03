@@ -120,7 +120,15 @@ def append_lookup_key(model, lookup_key):
 
 
 def append_lookup_keys(model, fields):
-    return moves.reduce(set.union, (append_lookup_key(model, field) for field in fields), set())
+    new_fields = []
+    for field in fields:
+        try:
+            new_field = append_lookup_key(model, field)
+        except AttributeError:
+            new_field = (field,)
+        new_fields.append(new_field)
+
+    return moves.reduce(set.union, new_fields, set())
 
 
 def rewrite_order_lookup_key(model, lookup_key):
