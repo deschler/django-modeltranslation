@@ -7,6 +7,7 @@ https://github.com/zmathew/django-linguo
 """
 import itertools
 
+from django.contrib.admin.utils import get_model_from_relation
 from django.db import models
 from django.db.models import FieldDoesNotExist
 try:
@@ -141,8 +142,9 @@ def get_fields_to_translatable_models(model):
                 # In that case the 'related_model' attribute is set to None
                 # so it is necessary to check for this value before trying to
                 # get translatable fields.
-                if get_translatable_fields_for_model(f.related_model) is not None:
-                    results.append((f.name, f.related_model))
+                related_model = get_model_from_relation(f)
+                if get_translatable_fields_for_model(related_model) is not None:
+                    results.append((f.name, related_model))
     else:
         for field_name in model._meta.get_all_field_names():
             field_object, modelclass, direct, m2m = model._meta.get_field_by_name(field_name)
