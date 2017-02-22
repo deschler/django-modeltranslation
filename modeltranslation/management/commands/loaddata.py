@@ -49,7 +49,7 @@ class Command(LoadDataCommand):
             self.locale = translation.get_language()
 
     def handle(self, *fixture_labels, **options):
-        if self.can_import_settings and hasattr(self, 'locale'):
+        if hasattr(self, 'locale'):
             from django.utils import translation
             translation.activate(self.locale)
 
