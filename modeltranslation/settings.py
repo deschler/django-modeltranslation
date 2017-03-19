@@ -36,7 +36,7 @@ AUTO_POPULATE = getattr(settings, 'MODELTRANSLATION_AUTO_POPULATE', False)
 # By default we fallback to the default language
 FALLBACK_LANGUAGES = getattr(settings, 'MODELTRANSLATION_FALLBACK_LANGUAGES', (DEFAULT_LANGUAGE,))
 if isinstance(FALLBACK_LANGUAGES, (tuple, list)):
-    FALLBACK_LANGUAGES = {'default': FALLBACK_LANGUAGES}
+    FALLBACK_LANGUAGES = {'default': tuple(FALLBACK_LANGUAGES)}
 if 'default' not in FALLBACK_LANGUAGES:
     raise ImproperlyConfigured(
         'MODELTRANSLATION_FALLBACK_LANGUAGES does not contain "default" key.')
