@@ -28,6 +28,9 @@ env:
   - DJANGO=1.10 DB=sqlite
   - DJANGO=1.10 DB=postgres
   - DJANGO=1.10 DB=mysql
+  - DJANGO=1.11 DB=sqlite
+  - DJANGO=1.11 DB=postgres
+  - DJANGO=1.11 DB=mysql
 matrix:
   exclude:
     - python: "3.2"
@@ -79,6 +82,12 @@ matrix:
       env: DJANGO=1.10 DB=postgres
     - python: "2.6"
       env: DJANGO=1.10 DB=mysql
+    - python: "2.6"
+      env: DJANGO=1.11 DB=sqlite
+    - python: "2.6"
+      env: DJANGO=1.11 DB=postgres
+    - python: "2.6"
+      env: DJANGO=1.11 DB=mysql
 
     - python: "3.2"
       env: DJANGO=1.9 DB=sqlite
@@ -104,6 +113,18 @@ matrix:
       env: DJANGO=1.10 DB=postgres
     - python: "3.3"
       env: DJANGO=1.10 DB=mysql
+    - python: "3.2"
+      env: DJANGO=1.11 DB=sqlite
+    - python: "3.2"
+      env: DJANGO=1.11 DB=postgres
+    - python: "3.2"
+      env: DJANGO=1.11 DB=mysql
+    - python: "3.3"
+      env: DJANGO=1.11 DB=sqlite
+    - python: "3.3"
+      env: DJANGO=1.11 DB=postgres
+    - python: "3.3"
+      env: DJANGO=1.11 DB=mysql
     - python: "3.5"
       env: DJANGO=1.5 DB=sqlite
     - python: "3.5"
@@ -171,6 +192,14 @@ matrix:
       env: DJANGO=1.10 DB=mysql
     - python: "3.5"
       env: DJANGO=1.10 DB=mysql
+    - python: "3.2"
+      env: DJANGO=1.11 DB=mysql
+    - python: "3.3"
+      env: DJANGO=1.11 DB=mysql
+    - python: "3.4"
+      env: DJANGO=1.11 DB=mysql
+    - python: "3.5"
+      env: DJANGO=1.11 DB=mysql
 before_install:
   - pip install -q 'flake8<3'
   - PYFLAKES_NODOCTEST=1 flake8 modeltranslation
