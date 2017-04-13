@@ -1,24 +1,11 @@
 language: python
 python:
-  - "2.6"
   - "2.7"
-  - "3.2"
   - "3.3"
   - "3.4"
   - "3.5"
+  - "3.6"
 env:
-  - DJANGO=1.4 DB=sqlite
-  - DJANGO=1.4 DB=postgres
-  - DJANGO=1.4 DB=mysql
-  - DJANGO=1.5 DB=sqlite
-  - DJANGO=1.5 DB=postgres
-  - DJANGO=1.5 DB=mysql
-  - DJANGO=1.6 DB=sqlite
-  - DJANGO=1.6 DB=postgres
-  - DJANGO=1.6 DB=mysql
-  - DJANGO=1.7 DB=sqlite
-  - DJANGO=1.7 DB=postgres
-  - DJANGO=1.7 DB=mysql
   - DJANGO=1.8 DB=sqlite
   - DJANGO=1.8 DB=postgres
   - DJANGO=1.8 DB=mysql
@@ -33,67 +20,6 @@ env:
   - DJANGO=1.11 DB=mysql
 matrix:
   exclude:
-    - python: "3.2"
-      env: DJANGO=1.4 DB=sqlite
-    - python: "3.2"
-      env: DJANGO=1.4 DB=postgres
-    - python: "3.2"
-      env: DJANGO=1.4 DB=mysql
-    - python: "3.3"
-      env: DJANGO=1.4 DB=sqlite
-    - python: "3.3"
-      env: DJANGO=1.4 DB=postgres
-    - python: "3.3"
-      env: DJANGO=1.4 DB=mysql
-    - python: "3.4"
-      env: DJANGO=1.4 DB=sqlite
-    - python: "3.4"
-      env: DJANGO=1.4 DB=postgres
-    - python: "3.4"
-      env: DJANGO=1.4 DB=mysql
-    - python: "3.5"
-      env: DJANGO=1.4 DB=sqlite
-    - python: "3.5"
-      env: DJANGO=1.4 DB=postgres
-    - python: "3.5"
-      env: DJANGO=1.4 DB=mysql
-
-    - python: "2.6"
-      env: DJANGO=1.7 DB=sqlite
-    - python: "2.6"
-      env: DJANGO=1.7 DB=postgres
-    - python: "2.6"
-      env: DJANGO=1.7 DB=mysql
-    - python: "2.6"
-      env: DJANGO=1.8 DB=sqlite
-    - python: "2.6"
-      env: DJANGO=1.8 DB=postgres
-    - python: "2.6"
-      env: DJANGO=1.8 DB=mysql
-    - python: "2.6"
-      env: DJANGO=1.9 DB=sqlite
-    - python: "2.6"
-      env: DJANGO=1.9 DB=postgres
-    - python: "2.6"
-      env: DJANGO=1.9 DB=mysql
-    - python: "2.6"
-      env: DJANGO=1.10 DB=sqlite
-    - python: "2.6"
-      env: DJANGO=1.10 DB=postgres
-    - python: "2.6"
-      env: DJANGO=1.10 DB=mysql
-    - python: "2.6"
-      env: DJANGO=1.11 DB=sqlite
-    - python: "2.6"
-      env: DJANGO=1.11 DB=postgres
-    - python: "2.6"
-      env: DJANGO=1.11 DB=mysql
-
-    - python: "3.2"
-      env: DJANGO=1.9 DB=sqlite
-    - python: "3.2"
-      env: DJANGO=1.9 DB=postgres
-    - python: "3.2"
       env: DJANGO=1.9 DB=mysql
     - python: "3.3"
       env: DJANGO=1.9 DB=sqlite
@@ -101,75 +27,19 @@ matrix:
       env: DJANGO=1.9 DB=postgres
     - python: "3.3"
       env: DJANGO=1.9 DB=mysql
-    - python: "3.2"
-      env: DJANGO=1.10 DB=sqlite
-    - python: "3.2"
-      env: DJANGO=1.10 DB=postgres
-    - python: "3.2"
-      env: DJANGO=1.10 DB=mysql
     - python: "3.3"
       env: DJANGO=1.10 DB=sqlite
     - python: "3.3"
       env: DJANGO=1.10 DB=postgres
     - python: "3.3"
       env: DJANGO=1.10 DB=mysql
-    - python: "3.2"
-      env: DJANGO=1.11 DB=sqlite
-    - python: "3.2"
-      env: DJANGO=1.11 DB=postgres
-    - python: "3.2"
-      env: DJANGO=1.11 DB=mysql
     - python: "3.3"
       env: DJANGO=1.11 DB=sqlite
     - python: "3.3"
       env: DJANGO=1.11 DB=postgres
     - python: "3.3"
       env: DJANGO=1.11 DB=mysql
-    - python: "3.5"
-      env: DJANGO=1.5 DB=sqlite
-    - python: "3.5"
-      env: DJANGO=1.5 DB=postgres
-    - python: "3.5"
-      env: DJANGO=1.5 DB=mysql
-    - python: "3.5"
-      env: DJANGO=1.6 DB=sqlite
-    - python: "3.5"
-      env: DJANGO=1.6 DB=postgres
-    - python: "3.5"
-      env: DJANGO=1.6 DB=mysql
-    - python: "3.5"
-      env: DJANGO=1.7 DB=sqlite
-    - python: "3.5"
-      env: DJANGO=1.7 DB=postgres
-    - python: "3.5"
-      env: DJANGO=1.7 DB=mysql
 
-    - python: "3.2"
-      env: DJANGO=1.5 DB=mysql
-    - python: "3.3"
-      env: DJANGO=1.5 DB=mysql
-    - python: "3.4"
-      env: DJANGO=1.5 DB=mysql
-    - python: "3.5"
-      env: DJANGO=1.5 DB=mysql
-    - python: "3.2"
-      env: DJANGO=1.6 DB=mysql
-    - python: "3.3"
-      env: DJANGO=1.6 DB=mysql
-    - python: "3.4"
-      env: DJANGO=1.6 DB=mysql
-    - python: "3.5"
-      env: DJANGO=1.6 DB=mysql
-    - python: "3.2"
-      env: DJANGO=1.7 DB=mysql
-    - python: "3.3"
-      env: DJANGO=1.7 DB=mysql
-    - python: "3.4"
-      env: DJANGO=1.7 DB=mysql
-    - python: "3.5"
-      env: DJANGO=1.7 DB=mysql
-    - python: "3.2"
-      env: DJANGO=1.8 DB=mysql
     - python: "3.3"
       env: DJANGO=1.8 DB=mysql
     - python: "3.4"
@@ -184,16 +54,16 @@ matrix:
       env: DJANGO=1.9 DB=mysql
     - python: "3.5"
       env: DJANGO=1.9 DB=mysql
-    - python: "3.2"
-      env: DJANGO=1.10 DB=mysql
+    - python: "3.6"
+      env: DJANGO=1.9 DB=mysql
     - python: "3.3"
       env: DJANGO=1.10 DB=mysql
     - python: "3.4"
       env: DJANGO=1.10 DB=mysql
     - python: "3.5"
       env: DJANGO=1.10 DB=mysql
-    - python: "3.2"
-      env: DJANGO=1.11 DB=mysql
+    - python: "3.6"
+      env: DJANGO=1.10 DB=mysql
     - python: "3.3"
       env: DJANGO=1.11 DB=mysql
     - python: "3.4"
@@ -213,7 +83,6 @@ install:
   - IDJANGO=$(./travis.py $DJANGO)
   - pip install -q $IDJANGO
   - pip install -e .
-  - if [[ $TRAVIS_PYTHON_VERSION == '3.2' ]]; then pip install 'coverage<4.0.0'; fi
   - pip install -q coveralls
 script:
   - django-admin.py --version
