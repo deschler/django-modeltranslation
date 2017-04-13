@@ -2,6 +2,7 @@
 """
 Settings overrided for test time
 """
+import django
 from django.conf import settings
 
 
@@ -23,4 +24,8 @@ MODELTRANSLATION_FALLBACK_LANGUAGES = ()
 
 ROOT_URLCONF = 'modeltranslation.tests.urls'
 
-MIGRATION_MODULES = {'auth': 'modeltranslation.tests.auth_migrations'}
+if django.VERSION < (1, 11):
+    # TODO: Check what this was about
+    MIGRATION_MODULES = {'auth': 'modeltranslation.tests.auth_migrations'}
+else:
+    MIGRATION_MODULES = {}
