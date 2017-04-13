@@ -66,7 +66,6 @@ before_script:
   - mysql -e 'create database modeltranslation;'
   - psql -c 'create database modeltranslation;' -U postgres
 install:
-  - if [[ $DB == mysql ]]; then pip install -q mysql-python; fi
   - if [[ $DB == mysql ]] && [[ ${PYTHON:0:1} == "2" ]]; then echo "mysql-python"; elif [[ $DB == mysql ]] && [[ ${PYTHON:0:1} == "3" ]]; then echo "mysqlclient"; fi
   - if [[ $DB == postgres ]]; then pip install -q psycopg2; fi
   - pip install -q Pillow
