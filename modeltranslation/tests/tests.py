@@ -149,9 +149,15 @@ class ModeltranslationTransactionTestBase(TransactionTestCase):
                     sys.modules.pop('modeltranslation.tests.translation', None)
                     if MIGRATIONS:
                         sys.modules.pop('django.contrib.auth.models', None)
-                    cls.cache.get_app_config('tests').import_models(cls.cache.all_models['tests'])
+                    tests_args = []
+                    if django.VERSION < (1, 11):
+                        tests_args = [cls.cache.all_models['tests']]
+                    cls.cache.get_app_config('tests').import_models(*tests_args)
                     if MIGRATIONS:
-                        cls.cache.get_app_config('auth').import_models(cls.cache.all_models['auth'])
+                        auth_args = []
+                        if django.VERSION < (1, 11):
+                            auth_args = [cls.cache.all_models['auth']]
+                        cls.cache.get_app_config('auth').import_models(*auth_args)
 
                 # 4. Autodiscover
                 from modeltranslation.models import handle_translation_registrations
