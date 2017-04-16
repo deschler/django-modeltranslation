@@ -46,6 +46,7 @@ backward compatibility:
 .ui-tabs .ui-tabs-nav li.required { font-weight: bold; }
 .ui-tabs .ui-tabs-nav li a {
     border: 1px solid #CCCCCC;
+    outline: none;
     background: #eeeeee repeat-x;
     border-bottom-width: 0;
     color: #666666;
@@ -79,7 +80,7 @@ backward compatibility:
     font-family: "Lucida Grande", "DejaVu Sans", "Bitstream Vera Sans", Verdana,Arial, sans-serif;
 }
 .inline-group .tabular tr td {
-    vertical-align: bottom;
+    vertical-align: middle;
 }
 .inline-group .tabular tr.has_original td.original,
 .inline-group .tabular tr td.delete {
