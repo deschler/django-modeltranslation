@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import shutil
 import sys
 
 import django
@@ -40,12 +41,25 @@ def runtests():
                 'django.contrib.auth',
                 'modeltranslation',
             ),
+            MIGRATION_MODULES={
+                'auth': 'modeltranslation.tests.auth_migrations',
+            },
             ROOT_URLCONF=None,  # tests override urlconf, but it still needs to be defined
             LANGUAGES=(
                 ('en', 'English'),
             ),
             MIDDLEWARE_CLASSES=(),
         )
+
+    # Copy django.contrib.auth.migrations to a writable path
+    dj_auth_migrations_dir = os.path.join(os.path.dirname(django.__file__),
+                                          'contrib', 'auth', 'migrations')
+    auth_migrations_dir = os.path.join('modeltranslation', 'tests',
+                                       'auth_migrations')
+    if os.path.exists(dj_auth_migrations_dir):
+        if os.path.isdir(auth_migrations_dir):
+            shutil.rmtree(auth_migrations_dir)
+        shutil.copytree(dj_auth_migrations_dir, auth_migrations_dir)
 
     if django.VERSION >= (1, 7):
         django.setup()
