@@ -1531,18 +1531,11 @@ class OtherFieldsTest(ModeltranslationTestBase):
 
         qs = Model.objects.dates('datetime', 'year', 'DESC')
 
-        if django.VERSION[:2] < (1, 6):
-            self.assertEqual(list(qs), [
-                datetime.datetime(2015, 1, 1, 0, 0),
-                datetime.datetime(2014, 1, 1, 0, 0),
-                datetime.datetime(2013, 1, 1, 0, 0)
-            ])
-        else:
-            self.assertEqual(list(qs), [
-                datetime.date(2015, 1, 1),
-                datetime.date(2014, 1, 1),
-                datetime.date(2013, 1, 1)
-            ])
+        self.assertEqual(list(qs), [
+            datetime.date(2015, 1, 1),
+            datetime.date(2014, 1, 1),
+            datetime.date(2013, 1, 1)
+        ])
 
     def test_descriptors(self):
         # Descriptor store ints in database and returns string of 'a' of that length
@@ -2430,8 +2423,7 @@ class ThirdPartyAppIntegrationTest(ModeltranslationTestBase):
         class CreationForm(forms.ModelForm):
             class Meta:
                 model = self.model
-                if django.VERSION >= (1, 6):
-                    fields = '__all__'
+                fields = '__all__'
 
         creation_form = CreationForm({'name': 'abc'})
         inst = creation_form.save()
@@ -3007,8 +2999,7 @@ class TranslationModelFormTest(ModeltranslationTestBase):
         class TestModelForm(TranslationModelForm):
             class Meta:
                 model = models.TestModel
-                if django.VERSION >= (1, 6):
-                    fields = '__all__'
+                fields = '__all__'
 
         form = TestModelForm()
         self.assertEqual(list(form.base_fields),

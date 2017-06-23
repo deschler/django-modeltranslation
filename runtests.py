@@ -30,8 +30,6 @@ def runtests():
                 'USER': 'postgres',
                 'NAME': 'modeltranslation',
             })
-            if django.VERSION < (1, 6):
-                DATABASES['default']['OPTIONS'] = {'autocommit': True}
 
         # Configure test environment
         settings.configure(
@@ -48,9 +46,8 @@ def runtests():
             MIDDLEWARE_CLASSES=(),
         )
 
+    django.setup()
     warnings.simplefilter('always', DeprecationWarning)
-    if django.VERSION >= (1, 7):
-        django.setup()
     failures = call_command(
         'test', 'modeltranslation', interactive=False, failfast=False, verbosity=2)
 
