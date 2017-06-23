@@ -989,9 +989,12 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         trans_real.activate("de")
         test_inst2 = models.TestModel(title_en='title_en', title_de='title_de')
         test_inst2.save()
-        test_inst2.test_fks = [fk_inst_de, fk_inst_both]
-        test_inst2.test_fks_en = (fk_inst_en, fk_inst_both)
-
+        if django.VERSION >= (1, 9):
+            test_inst2.test_fks.set((fk_inst_de, fk_inst_both))
+            test_inst2.test_fks_en.set((fk_inst_en, fk_inst_both))
+        else:
+            test_inst2.test_fks = [fk_inst_de, fk_inst_both]
+            test_inst2.test_fks_en = (fk_inst_en, fk_inst_both)
         self.assertEqual(fk_inst_both.test.pk, test_inst2.pk)
         self.assertEqual(fk_inst_both.test_id, test_inst2.pk)
         self.assertEqual(fk_inst_both.test_de, test_inst2)

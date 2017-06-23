@@ -182,8 +182,8 @@ class TranslationField(object):
                 self.related_query_name = lambda: loc_related_query_name
             self.remote_field.related_name = build_localized_fieldname(current, self.language)
             self.remote_field.field = self  # Django 1.6
-            if hasattr(self.remote_field.to._meta, '_related_objects_cache'):
-                del self.remote_field.to._meta._related_objects_cache
+            if hasattr(self.remote_field.model._meta, '_related_objects_cache'):
+                del self.remote_field.model._meta._related_objects_cache
 
     # Django 1.5 changed definition of __hash__ for fields to be fine with hash requirements.
     # It spoiled our machinery, since TranslationField has the same creation_counter as its

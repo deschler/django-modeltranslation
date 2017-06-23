@@ -529,11 +529,11 @@ class Translator(object):
 
                 # Set related field names on other model
                 if NEW_RELATED_API and not field.remote_field.is_hidden():
-                    other_opts = self._get_options_for_model(field.remote_field.to)
+                    other_opts = self._get_options_for_model(field.remote_field.model)
                     other_opts.related = True
                     other_opts.related_fields.append(field.related_query_name())
                     # Add manager in case of non-registered model
-                    add_manager(field.remote_field.to)
+                    add_manager(field.remote_field.model)
                 elif not NEW_RELATED_API and not field.rel.is_hidden():
                     other_opts = self._get_options_for_model(field.rel.to)
                     other_opts.related = True
@@ -543,7 +543,7 @@ class Translator(object):
             if isinstance(field, OneToOneField):
                 # Fix translated_field caching for SingleRelatedObjectDescriptor
                 sro_descriptor = (
-                    getattr(field.remote_field.to, field.remote_field.get_accessor_name())
+                    getattr(field.remote_field.model, field.remote_field.get_accessor_name())
                     if NEW_RELATED_API
                     else getattr(field.rel.to, field.related.get_accessor_name()))
                 patch_related_object_descriptor_caching(sro_descriptor)

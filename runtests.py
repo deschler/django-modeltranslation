@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 import sys
+import warnings
 
 import django
 from django.conf import settings
@@ -46,6 +47,7 @@ def runtests():
         )
 
     django.setup()
+    warnings.simplefilter('always', DeprecationWarning)
     failures = call_command(
         'test', 'modeltranslation', interactive=False, failfast=False, verbosity=2)
 
