@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from distutils.core import setup
+from setuptools import setup
 
 # Dynamically calculate the version based on modeltranslation.VERSION.
 version = __import__('modeltranslation').get_version()
@@ -25,7 +25,7 @@ setup(
               'modeltranslation.management.commands'],
     package_data={'modeltranslation': ['static/modeltranslation/css/*.css',
                                        'static/modeltranslation/js/*.js']},
-    requires=['Django(>=1.8)'],
+    install_requires=['Django>=1.8'],
     download_url='https://github.com/deschler/django-modeltranslation/archive/%s.tar.gz' % version,
     classifiers=[
         'Programming Language :: Python',
