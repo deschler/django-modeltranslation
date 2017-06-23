@@ -60,19 +60,31 @@ class NonTranslated(models.Model):
 
 class ForeignKeyModel(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
-    test = models.ForeignKey(TestModel, null=True, related_name="test_fks")
-    optional = models.ForeignKey(TestModel, blank=True, null=True)
-    hidden = models.ForeignKey(TestModel, blank=True, null=True, related_name="+")
-    non = models.ForeignKey(NonTranslated, blank=True, null=True, related_name="test_fks")
-    untrans = models.ForeignKey(TestModel, blank=True, null=True, related_name="test_fks_un")
+    test = models.ForeignKey(
+        TestModel, null=True, related_name="test_fks", on_delete=models.CASCADE,
+    )
+    optional = models.ForeignKey(TestModel, blank=True, null=True, on_delete=models.CASCADE)
+    hidden = models.ForeignKey(
+        TestModel, blank=True, null=True, related_name="+", on_delete=models.CASCADE,
+    )
+    non = models.ForeignKey(
+        NonTranslated, blank=True, null=True, related_name="test_fks", on_delete=models.CASCADE,
+    )
+    untrans = models.ForeignKey(
+        TestModel, blank=True, null=True, related_name="test_fks_un", on_delete=models.CASCADE,
+    )
 
 
 class OneToOneFieldModel(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
-    test = models.OneToOneField(TestModel, null=True, related_name="test_o2o")
-    optional = models.OneToOneField(TestModel, blank=True, null=True)
+    test = models.OneToOneField(
+        TestModel, null=True, related_name="test_o2o", on_delete=models.CASCADE,
+    )
+    optional = models.OneToOneField(TestModel, blank=True, null=True, on_delete=models.CASCADE)
     # No hidden option for OneToOne
-    non = models.OneToOneField(NonTranslated, blank=True, null=True, related_name="test_o2o")
+    non = models.OneToOneField(
+        NonTranslated, blank=True, null=True, related_name="test_o2o", on_delete=models.CASCADE,
+    )
 
 
 # ######### Custom fields testing

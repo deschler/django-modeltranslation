@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 import sys
+import warnings
 
 import django
 from django.conf import settings
@@ -47,6 +48,7 @@ def runtests():
             MIDDLEWARE_CLASSES=(),
         )
 
+    warnings.simplefilter('always', DeprecationWarning)
     if django.VERSION >= (1, 7):
         django.setup()
     failures = call_command(
