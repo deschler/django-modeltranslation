@@ -543,13 +543,6 @@ else:
             return clone
 
 
-def get_queryset(obj):
-    if hasattr(obj, 'get_queryset'):
-        return obj.get_queryset()
-    else:  # Django 1.4 / 1.5 compat
-        return obj.get_query_set()
-
-
 def multilingual_queryset_factory(old_cls, instantiate=True):
     if old_cls == models.query.QuerySet:
         NewClass = MultilingualQuerySet
@@ -566,7 +559,7 @@ class MultilingualQuerysetManager(models.Manager):
     get_queryset returns MultilingualQuerySet.
     """
     def get_queryset(self):
-        qs = get_queryset(super(MultilingualQuerysetManager, self))
+        qs = super(MultilingualQuerysetManager, self).get_queryset()
         return self._patch_queryset(qs)
 
     def _patch_queryset(self, qs):
@@ -574,8 +567,6 @@ class MultilingualQuerysetManager(models.Manager):
         qs._post_init()
         qs._rewrite_applied_operations()
         return qs
-
-    get_query_set = get_queryset
 
 
 class MultilingualManager(MultilingualQuerysetManager):
@@ -595,11 +586,9 @@ class MultilingualManager(MultilingualQuerysetManager):
         This method is repeated because some managers that don't use super() or alter queryset class
         may return queryset that is not subclass of MultilingualQuerySet.
         """
-        qs = get_queryset(super(MultilingualManager, self))
+        qs = super(MultilingualManager, self).get_queryset()
         if isinstance(qs, MultilingualQuerySet):
             # Is already patched by MultilingualQuerysetManager - in most of the cases
             # when custom managers use super() properly in get_queryset.
             return qs
         return self._patch_queryset(qs)
-
-    get_query_set = get_queryset
