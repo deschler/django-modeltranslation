@@ -7,6 +7,7 @@ https://github.com/zmathew/django-linguo
 """
 import itertools
 
+import django
 from django.db import models
 from django.db.models import FieldDoesNotExist
 try:
@@ -570,7 +571,8 @@ class MultilingualQuerysetManager(models.Manager):
 
 
 class MultilingualManager(MultilingualQuerysetManager):
-    use_for_related_fields = True
+    if django.VERSION < (1, 10):
+        use_for_related_fields = True
 
     def rewrite(self, *args, **kwargs):
         return self.get_queryset().rewrite(*args, **kwargs)

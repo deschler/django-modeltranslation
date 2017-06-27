@@ -194,8 +194,12 @@ def add_manager(model):
         else:
             class NewMultilingualManager(MultilingualManager, manager.__class__,
                                          MultilingualQuerysetManager):
-                use_for_related_fields = getattr(
-                    manager.__class__, "use_for_related_fields", not has_custom_queryset(manager))
+                if VERSION < (1, 10):
+                    use_for_related_fields = getattr(
+                        manager.__class__,
+                        "use_for_related_fields",
+                        not has_custom_queryset(manager),
+                    )
                 _old_module = manager.__module__
                 _old_class = manager.__class__.__name__
 
@@ -224,6 +228,8 @@ def add_manager(model):
             # share the same class.
             model._default_manager.__class__ = current_manager.__class__
     patch_manager_class(model._base_manager)
+    if VERSION >= (1, 10):
+        model._meta.base_manager_name = 'objects'
     if hasattr(model._meta, "_expire_cache"):
         model._meta._expire_cache()
 
