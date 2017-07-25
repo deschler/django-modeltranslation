@@ -255,7 +255,10 @@ class MultilingualQuerySet(models.query.QuerySet):
         # new_args = append_lookup_keys(self.model, fields)
         new_args = []
         for key in fields:
-            new_args.append(rewrite_lookup_key(self.model, key))
+            if key is None:
+                new_args.append(None)
+            else:
+                new_args.append(rewrite_lookup_key(self.model, key))
         return super(MultilingualQuerySet, self).select_related(*new_args, **kwargs)
 
     # This method was not present in django-linguo
