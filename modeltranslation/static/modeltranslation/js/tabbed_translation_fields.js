@@ -392,7 +392,7 @@ var google, django, gettext;
             // Group normal fields and fields in (existing) stacked inlines
             var grouper = new TranslationFieldGrouper({
                 $fields: $('.mt').filter(
-                    'input:visible, textarea:visible, select:visible, iframe, div').filter(':parents(.tabular)')
+                    'input, textarea, select, iframe, div').filter(':parents(.tabular)')
             });
             MainSwitch.init(grouper.groupedTranslations, createTabs(grouper.groupedTranslations));
 
