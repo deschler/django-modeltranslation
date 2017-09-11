@@ -187,7 +187,10 @@ var google, django, gettext;
             // TODO: Refactor
             $('.mt').parents('.inline-group').not('.tabular').find('.add-row a').click(function () {
                 var grouper = new TranslationFieldGrouper({
-                    $fields: $(this).parent().prev().prev().find('.mt')
+                    $fields: $(this).parent().prev().prev().find('.mt').add(
+                        // Support django-nested-admin stacked inlines
+                        $(this).parent().prev('.djn-items').children('.djn-item').last().find('.mt')
+                    )
                 });
                 var tabs = createTabs(grouper.groupedTranslations);
                 // Update the main switch as it is not aware of the newly created tabs
