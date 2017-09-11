@@ -29,3 +29,37 @@ which guarantees that the returned language is listed in the ``LANGUAGES`` setti
 
 The unittests use the ``django.utils.translation.trans_real`` functions to
 activate and deactive a specific language outside a view function.
+
+Using in combination with ``django-audit-log``
+----------------------------------------------
+
+``django-audit-log`` is a package that allows you to track changes to your
+model instances (`documentation`_). As ``django-audit-log`` behind the scenes
+automatically creates "shadow" models for your tracked models, you have to
+remember to register these shadow models for translation as well as your
+regular models. Here's an example:
+
+.. code:: python
+
+    from modeltranslation.translator import register, TranslationOptions
+
+    from my_app import models
+
+
+    @register(models.MyModel)
+    @register(models.MyModel.audit_log.model)
+    class MyModelTranslationOptions(TranslationOptions):
+        """Translation options for MyModel."""
+
+        fields = (
+            'text',
+            'title',
+        )
+
+If you forget to register the shadow models, you will get an error like:
+
+.. code::
+
+    TypeError: 'text_es' is an invalid keyword argument for this function
+
+.. _documentation: https://django-audit-log.readthedocs.io/
