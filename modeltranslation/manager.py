@@ -8,7 +8,11 @@ https://github.com/zmathew/django-linguo
 import itertools
 
 import django
-from django.contrib.admin.utils import get_model_from_relation
+try:
+    from django.contrib.admin.utils import get_model_from_relation
+except ImportError:
+    from django.contrib.admin.util import get_model_from_relation
+
 from django.db import models
 from django.db.models import FieldDoesNotExist
 try:
