@@ -61,5 +61,9 @@ If you forget to register the shadow models, you will get an error like:
 .. code::
 
     TypeError: 'text_es' is an invalid keyword argument for this function
+    
+Using in combination with ``django-rest-framework``
+-------------------------------------------------
+When creating a new viewset , make sure to override ``get_queryset`` method, using ``queryset`` as a property won't work because it is being evaluated once, before any language was set.
 
 .. _documentation: https://django-audit-log.readthedocs.io/
