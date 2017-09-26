@@ -56,7 +56,7 @@ models = translation = None
 request = None
 
 # How many models are registered for tests.
-TEST_MODELS = 29 + (1 if MIGRATIONS else 0)
+TEST_MODELS = 31 + (1 if MIGRATIONS else 0)
 
 
 class reload_override_settings(override_settings):
@@ -3090,3 +3090,31 @@ class TestRequired(ModeltranslationTestBase):
             self.assertEqual(set(('req_reg_en', 'req_en_reg', 'req_en_reg_en')), error_fields)
         else:
             self.fail('ValidationError not raised!')
+
+
+class M2MTest(ModeltranslationTestBase):
+    def test_m2m(self):
+        # Create 1 instance of Y, linked to 2 instance of X, with different
+        # English and German names.
+        x1 = models.ModelX.objects.create(name_en="foo", name_de="bar")
+        x2 = models.ModelX.objects.create(name_en="bar", name_de="baz")
+        y = models.ModelY.objects.create(title='y1')
+        models.ModelXY.objects.create(model_x=x1, model_y=y)
+        models.ModelXY.objects.create(model_x=x2, model_y=y)
+
+        with override("en"):
+            # There's 1 X named "foo" and it's x1
+            y_foo = models.ModelY.objects.filter(xs__name="foo")
+            self.assertEqual(1, y_foo.count())
+
+            # There's 1 X named "bar" and it's x2 (in English)
+            y_bar = models.ModelY.objects.filter(xs__name="bar")
+            self.assertEqual(1, y_bar.count())
+
+            # But in English, there's no X named "baz"
+            y_baz = models.ModelY.objects.filter(xs__name="baz")
+            self.assertEqual(0, y_baz.count())
+
+            # Again: 1 X named "bar" (but through the M2M field)
+            x_bar = y.xs.filter(name="bar")
+            self.assertIn(x2, x_bar)

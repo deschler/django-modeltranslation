@@ -10,7 +10,7 @@ from modeltranslation.tests.models import (
     RichText, RichTextPage, MultitableModelA, MultitableModelB, MultitableModelC, ManagerTestModel,
     CustomManagerTestModel, CustomManager2TestModel, GroupFieldsetsModel, NameModel,
     ThirdPartyRegisteredModel, ProxyTestModel, UniqueNullableModel, OneToOneFieldModel,
-    RequiredModel, DecoratedModel)
+    RequiredModel, DecoratedModel, ModelX, ModelY)
 
 
 class TestTranslationOptions(TranslationOptions):
@@ -205,6 +205,18 @@ translator.register(RequiredModel, RequiredTranslationOptions)
 @register(DecoratedModel)
 class DecoratedTranslationOptions(TranslationOptions):
     fields = ('title',)
+
+
+# ######### Complex M2M with abstract classes and custom managers
+
+class ModelXOptions(TranslationOptions):
+    fields = ('name',)
+translator.register(ModelX, ModelXOptions)
+
+
+class ModelYOptions(TranslationOptions):
+    fields = ('title',)
+translator.register(ModelY, ModelYOptions)
 
 
 # ######### 3-rd party with custom manager

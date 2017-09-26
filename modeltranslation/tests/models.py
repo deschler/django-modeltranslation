@@ -351,3 +351,61 @@ class MultitableConflictModelA(models.Model):
 
 class MultitableConflictModelB(MultitableConflictModelA):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
+
+
+# ######### Complex M2M with abstract classes and custom managers
+
+class CustomQuerySetX(models.query.QuerySet):
+    pass
+
+
+class CustomManagerX(models.Manager):
+    def get_queryset(self):
+        return CustomQuerySetX(self.model, using=self._db)
+    get_query_set = get_queryset
+
+
+class AbstractBaseModelX(models.Model):
+    name = models.CharField(max_length=255)
+    objects = CustomManagerX()
+
+    class Meta:
+        abstract = True
+
+
+class AbstractModelX(AbstractBaseModelX):
+    class Meta:
+        abstract = True
+
+
+class ModelX(AbstractModelX):
+    pass
+
+
+class AbstractModelXY(models.Model):
+    model_x = models.ForeignKey('ModelX')
+    model_y = models.ForeignKey('ModelY')
+
+    class Meta:
+        abstract = True
+
+
+class ModelXY(AbstractModelXY):
+    pass
+
+
+class CustomManagerY(models.Manager):
+    pass
+
+
+class AbstractModelY(models.Model):
+    title = models.CharField(max_length=255)
+    xs = models.ManyToManyField('ModelX', through='ModelXY')
+    objects = CustomManagerY()
+
+    class Meta:
+        abstract = True
+
+
+class ModelY(AbstractModelY):
+    pass
