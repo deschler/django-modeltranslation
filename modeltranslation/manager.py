@@ -75,8 +75,33 @@ def append_fallback(model, fields):
     If translated field is encountered, add also all its fallback fields.
     Returns tuple: (set_of_new_fields_to_use, set_of_translated_field_names)
     """
+    from django.db.models.constants import LOOKUP_SEP
+    from django.db.models.sql.constants import QUERY_TERMS
+    from modeltranslation.utils import (
+        get_language, resolution_order, build_localized_fieldname)
     fields = set(fields)
     trans = set()
+    for field in fields.copy():
+        part, *parts = field.split(LOOKUP_SEP)
+        rel_part = LOOKUP_SEP.join(parts)
+        if part in QUERY_TERMS:
+            break
+        rel_model = getattr(
+            getattr(
+                getattr(
+                    model, part, None
+                ), 'field', None),
+            'related_model', None
+        )
+        if rel_model:
+            rel_fields, rel_trans = append_fallback(
+                rel_model, [rel_part])
+            if rel_trans:
+                fields.remove(field)
+                trans.add(field)
+                for rel_field in rel_fields:
+                    fields.add(LOOKUP_SEP.join([part, rel_field]))
+
     from modeltranslation.translator import translator
     opts = translator.get_options_for_model(model)
     for key, _ in opts.fields.items():
@@ -467,11 +492,27 @@ if NEW_RELATED_API:
             pass
 
         def __iter__(self):
+            from django.db.models.constants import LOOKUP_SEP
             instance = self.X()
             for row in super(FallbackValuesIterable, self).__iter__():
                 instance.__dict__.update(row)
                 for key in self.queryset.translation_fields:
-                    row[key] = getattr(self.queryset.model, key).__get__(instance, None)
+                    if LOOKUP_SEP in key:
+                        field_part, *rel_parts = key.split(LOOKUP_SEP)
+                        model = self.queryset.model
+                        while rel_parts:
+                            model = getattr(
+                                model, field_part).field.related_model
+                            field_part, *rel_parts = rel_parts
+                        descriptor = getattr(model, field_part)
+                        old_name = descriptor.field.name
+                        # temporary change name of field
+                        descriptor.field.name = key
+                        row[key] = descriptor.__get__(instance, None)
+                        descriptor.field.name = old_name
+                    else:
+                        row[key] = getattr(
+                            self.queryset.model, key).__get__(instance, None)
                 for key in self.queryset.fields_to_del:
                     del row[key]
                 yield row
