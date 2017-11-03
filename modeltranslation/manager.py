@@ -78,6 +78,7 @@ def append_fallback(model, fields):
     from django.db.models.constants import LOOKUP_SEP
     from modeltranslation.translator import translator
     from django.db.models.sql.constants import QUERY_TERMS
+    from modeltranslation.translator import NotRegistered
     from modeltranslation.utils import (
         get_language, resolution_order, build_localized_fieldname)
     fields = set(fields)
@@ -111,8 +112,10 @@ def append_fallback(model, fields):
                 trans.add(field)
                 for rel_field in rel_fields:
                     fields.add(not_changed_field_part + rel_field)
-
-    opts = translator.get_options_for_model(model)
+    try:
+        opts = translator.get_options_for_model(model)
+    except NotRegistered:
+        return fields, trans
     for key, _ in opts.fields.items():
         if key in fields:
             langs = resolution_order(get_language(), getattr(model, key).fallback_languages)
