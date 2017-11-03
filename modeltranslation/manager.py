@@ -76,6 +76,7 @@ def append_fallback(model, fields):
     Returns tuple: (set_of_new_fields_to_use, set_of_translated_field_names)
     """
     from django.db.models.constants import LOOKUP_SEP
+    from modeltranslation.translator import translator
     from django.db.models.sql.constants import QUERY_TERMS
     from modeltranslation.utils import (
         get_language, resolution_order, build_localized_fieldname)
@@ -83,26 +84,34 @@ def append_fallback(model, fields):
     trans = set()
     for field in fields.copy():
         part, *parts = field.split(LOOKUP_SEP)
-        rel_part = LOOKUP_SEP.join(parts)
-        if part in QUERY_TERMS:
-            break
-        rel_model = getattr(
-            getattr(
-                getattr(
-                    model, part, None
-                ), 'field', None),
-            'related_model', None
-        )
-        if rel_model:
+        rel_part = field
+        rel_model = model
+        while parts:
+            if part in QUERY_TERMS:
+                break
+            try:
+                model_field = rel_model._meta.get_field(part)
+            except:
+                model_field = None
+            field_model = getattr(
+                model_field, 'related_model', None
+            )
+            if field_model:
+                rel_model = field_model
+                rel_part = LOOKUP_SEP.join(parts)
+                part, *parts = rel_part.split(LOOKUP_SEP)
+            else:
+                break
+        if rel_model and rel_model != model:
             rel_fields, rel_trans = append_fallback(
                 rel_model, [rel_part])
             if rel_trans:
+                not_changed_field_part = field[:-len(part)]
                 fields.remove(field)
                 trans.add(field)
                 for rel_field in rel_fields:
-                    fields.add(LOOKUP_SEP.join([part, rel_field]))
+                    fields.add(not_changed_field_part + rel_field)
 
-    from modeltranslation.translator import translator
     opts = translator.get_options_for_model(model)
     for key, _ in opts.fields.items():
         if key in fields:
@@ -501,8 +510,11 @@ if NEW_RELATED_API:
                         field_part, *rel_parts = key.split(LOOKUP_SEP)
                         model = self.queryset.model
                         while rel_parts:
-                            model = getattr(
-                                model, field_part).field.related_model
+                            try:
+                                model_field = model._meta.get_field(field_part)
+                            except:
+                                model_field = None
+                            model = model_field.related_model
                             field_part, *rel_parts = rel_parts
                         descriptor = getattr(model, field_part)
                         old_name = descriptor.field.name
