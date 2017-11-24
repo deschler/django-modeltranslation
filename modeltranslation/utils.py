@@ -96,9 +96,9 @@ def build_css_class(localized_fieldname, prefix=''):
 def unique(seq):
     """
     Returns a generator yielding unique sequence members in order
-    
+
     A set by itself will return unique values without any regard for order.
-    
+
     >>> list(unique([1, 2, 3, 2, 2, 4, 1]))
     [1, 2, 3, 4]
     """
