@@ -214,9 +214,24 @@ def add_manager(model):
 
             manager.__class__ = NewMultilingualManager
 
-    managers = (model._meta.local_managers if NEW_MANAGER_API else
-                (getattr(model, x[1]) for x in
-                 model._meta.concrete_managers + model._meta.abstract_managers))
+    if NEW_MANAGER_API:
+        # Inspired by django.db.models.options.Options.managers (find all
+        # managers by following the normal Python MRO rules), but keeps the
+        # original managers instead of making copies.
+        managers = []
+        seen = set()
+        bases = (b for b in model.mro() if hasattr(b, '_meta'))
+        for base in bases:
+            for manager in base._meta.local_managers:
+                if manager.name in seen:
+                    continue
+                managers.append(manager)
+                seen.add(manager.name)
+
+    else:
+        managers = ((getattr(model, x[1]) for x in
+                     model._meta.concrete_managers + model._meta.abstract_managers))
+
     for current_manager in managers:
         prev_class = current_manager.__class__
         patch_manager_class(current_manager)
