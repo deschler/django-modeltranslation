@@ -2540,6 +2540,25 @@ class TestManager(ModeltranslationTestBase):
         self.assertEqual(titles_asc, ('a', 'b', 'c'))
         self.assertEqual(titles_desc, ('c', 'b', 'a'))
 
+    def test_distinct(self):
+        """
+        Check that field names are rewritten in distinct fields.
+        This test works only on postgres.
+        """
+        db_engine = django_settings.DATABASES['default']['ENGINE']
+        if db_engine != 'django.db.backends.postgresql_psycopg2':
+            return
+
+        manager = models.ManagerTestModel.objects
+        manager.create(title='a')
+        manager.create(title='b')
+        manager.create(title='b')
+        manager.create(title='c')
+        manager.create(title='c')
+        manager.create(title='c')
+        titles = tuple(m.title for m in manager.order_by('title').distinct('title'))
+        self.assertEqual(titles, ('a', 'b', 'c'))
+
     def test_order_by_meta(self):
         """Check that meta ordering is rewritten."""
         manager = models.ManagerTestModel.objects

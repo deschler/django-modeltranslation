@@ -249,6 +249,7 @@ class MultilingualQuerySet(models.query.QuerySet):
         if not NEW_RELATED_API:
             self._rewrite_where(self.query.having)
         self._rewrite_order()
+        self._rewrite_distinct()
         self._rewrite_select_related()
 
     # This method was not present in django-linguo
@@ -303,6 +304,10 @@ class MultilingualQuerySet(models.query.QuerySet):
     def _rewrite_order(self):
         self.query.order_by = [rewrite_order_lookup_key(self.model, field_name)
                                for field_name in self.query.order_by]
+
+    def _rewrite_distinct(self):
+        self.query.distinct_fields = [rewrite_lookup_key(self.model, field_name)
+                                      for field_name in self.query.distinct_fields]
 
     def _rewrite_select_related(self):
         if isinstance(self.query.select_related, dict):
