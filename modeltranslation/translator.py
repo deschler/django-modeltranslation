@@ -466,9 +466,10 @@ class Translator(object):
                 else:
                     descendants = [d.__name__ for d in self._registry.keys()
                                    if issubclass(d, model) and d != model]
-                    raise DescendantRegistered(
-                        'Model "%s" cannot be registered after its subclass'
-                        ' "%s"' % (model.__name__, descendants[0]))
+                    if descendants:
+                        raise DescendantRegistered(
+                            'Model "%s" cannot be registered after its subclass'
+                            ' "%s"' % (model.__name__, descendants[0]))
 
             # Find inherited fields and create options instance for the model.
             opts = self._get_options_for_model(model, opts_class, **options)
