@@ -247,7 +247,8 @@ class MultilingualQuerySet(models.query.QuerySet):
             cloned.__dict__.update(kwargs)
             if klass is not None:
                 cloned.__class__ = klass
-                
+
+
             return cloned
 
     # This method was not present in django-linguo
