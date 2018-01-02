@@ -231,7 +231,9 @@ class MultilingualQuerySet(models.query.QuerySet):
                 kwargs.setdefault('fields_to_del', self.fields_to_del)
             if hasattr(self, 'original_fields'):
                 kwargs.setdefault('original_fields', self.original_fields)
-            return super(MultilingualQuerySet, self)._clone(**kwargs)
+            cloned = super(MultilingualQuerySet, self)._clone()
+            cloned.__dict__.update(kwargs)
+            return cloned
     else:
         def _clone(self, klass=None, *args, **kwargs):
             if klass is not None and not issubclass(klass, MultilingualQuerySet):
@@ -241,7 +243,10 @@ class MultilingualQuerySet(models.query.QuerySet):
                 klass = NewClass
             kwargs.setdefault('_rewrite', self._rewrite)
             kwargs.setdefault('_populate', self._populate)
-            return super(MultilingualQuerySet, self)._clone(klass, *args, **kwargs)
+            cloned = super(MultilingualQuerySet, self)._clone()
+            cloned.__dict__.update(kwargs)
+            cloned.__class__ = klass
+            return cloned
 
     # This method was not present in django-linguo
     def rewrite(self, mode=True):
