@@ -245,7 +245,9 @@ class MultilingualQuerySet(models.query.QuerySet):
             kwargs.setdefault('_populate', self._populate)
             cloned = super(MultilingualQuerySet, self)._clone()
             cloned.__dict__.update(kwargs)
-            cloned.__class__ = klass
+            if klass is not None:
+                cloned.__class__ = klass
+                
             return cloned
 
     # This method was not present in django-linguo
