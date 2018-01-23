@@ -28,10 +28,6 @@ model class.
     :target: https://pypi.python.org/pypi/django-modeltranslation/
     :alt: Supported Python versions
 
-.. image:: https://img.shields.io/pypi/dm/django-modeltranslation.svg?style=flat-square
-    :target: https://pypi.python.org/pypi/django-modeltranslation/
-    :alt: Number of PyPI downloads
-
 
 Features
 ========
