@@ -1,64 +1,24 @@
 language: python
 python:
   - "2.7"
-  - "3.3"
   - "3.4"
   - "3.5"
   - "3.6"
 env:
-  - DJANGO=1.8 DB=sqlite
-  - DJANGO=1.8 DB=postgres
-  - DJANGO=1.8 DB=mysql
-  - DJANGO=1.9 DB=sqlite
-  - DJANGO=1.9 DB=postgres
-  - DJANGO=1.9 DB=mysql
-  - DJANGO=1.10 DB=sqlite
-  - DJANGO=1.10 DB=postgres
-  - DJANGO=1.10 DB=mysql
   - DJANGO=1.11 DB=sqlite
   - DJANGO=1.11 DB=postgres
   - DJANGO=1.11 DB=mysql
+  - DJANGO=2.0 DB=sqlite
+  - DJANGO=2.0 DB=postgres
+  - DJANGO=2.0 DB=mysql
 matrix:
   exclude:
-    - python: "3.6"
-      env: DJANGO=1.8 DB=sqlite
-    - python: "3.6"
-      env: DJANGO=1.8 DB=mysql
-    - python: "3.6"
-      env: DJANGO=1.8 DB=postgres
-
-    - python: "3.3"
-      env: DJANGO=1.9 DB=sqlite
-    - python: "3.3"
-      env: DJANGO=1.9 DB=mysql
-    - python: "3.3"
-      env: DJANGO=1.9 DB=postgres
-    - python: "3.6"
-      env: DJANGO=1.9 DB=sqlite
-    - python: "3.6"
-      env: DJANGO=1.9 DB=mysql
-    - python: "3.6"
-      env: DJANGO=1.9 DB=postgres
-
-    - python: "3.3"
-      env: DJANGO=1.10 DB=sqlite
-    - python: "3.3"
-      env: DJANGO=1.10 DB=postgres
-    - python: "3.3"
-      env: DJANGO=1.10 DB=mysql
-    - python: "3.6"
-      env: DJANGO=1.10 DB=sqlite
-    - python: "3.6"
-      env: DJANGO=1.10 DB=postgres
-    - python: "3.6"
-      env: DJANGO=1.10 DB=mysql
-
-    - python: "3.3"
+    - python: "2.7"
       env: DJANGO=1.11 DB=sqlite
-    - python: "3.3"
-      env: DJANGO=1.11 DB=postgres
-    - python: "3.3"
+    - python: "2.7"
       env: DJANGO=1.11 DB=mysql
+    - python: "2.7"
+      env: DJANGO=1.11 DB=postgres
 before_install:
   - pip install -q 'flake8<3'
   - PYFLAKES_NODOCTEST=1 flake8 modeltranslation
