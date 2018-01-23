@@ -14,11 +14,11 @@ env:
 matrix:
   exclude:
     - python: "2.7"
-      env: DJANGO=1.11 DB=sqlite
+      env: DJANGO=2.0 DB=sqlite
     - python: "2.7"
-      env: DJANGO=1.11 DB=mysql
+      env: DJANGO=2.0 DB=mysql
     - python: "2.7"
-      env: DJANGO=1.11 DB=postgres
+      env: DJANGO=2.0 DB=postgres
 before_install:
   - pip install -q 'flake8<3'
   - PYFLAKES_NODOCTEST=1 flake8 modeltranslation
