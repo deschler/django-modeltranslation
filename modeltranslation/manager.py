@@ -385,6 +385,18 @@ class MultilingualQuerySet(models.query.QuerySet):
             new_args.append(rewrite_order_lookup_key(self.model, key))
         return super(MultilingualQuerySet, self).order_by(*new_args)
 
+    def distinct(self, *field_names):
+        """
+        Change translatable field names in an ``distinct`` argument
+        to translation fields for the current language.
+        """
+        if not self._rewrite:
+            return super(MultilingualQuerySet, self).distinct(*field_names)
+        new_args = []
+        for key in field_names:
+            new_args.append(rewrite_order_lookup_key(self.model, key))
+        return super(MultilingualQuerySet, self).distinct(*new_args)
+
     def update(self, **kwargs):
         if not self._rewrite:
             return super(MultilingualQuerySet, self).update(**kwargs)
