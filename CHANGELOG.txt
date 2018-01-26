@@ -1,3 +1,11 @@
+v0.12.2
+=======
+Date: 2017-01-26
+
+  FIXED: order_by with expression
+         (resolves issue #398, thanks Benjamin Toueg)
+
+
 v0.12.1
 =======
 Date: 2017-04-05
