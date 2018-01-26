@@ -1,6 +1,11 @@
+v0.13-beta1
+===========
+Date: xxxx-xx-xx
+
+
 v0.12.2
 =======
-Date: 2017-01-26
+Date: 2018-01-26
 
   FIXED: order_by with expression
          (resolves issue #398, thanks Benjamin Toueg)
