@@ -121,10 +121,8 @@ class ModeltranslationTransactionTestBase(TransactionTestCase):
                    else dummy_context_mgr())
             with mgr:
                 # 0. Render initial migration of auth
-                from django.db import connections, DEFAULT_DB_ALIAS
                 if MIGRATIONS:
-                    call_command('makemigrations', 'auth', verbosity=2, interactive=False,
-                                 database=connections[DEFAULT_DB_ALIAS].alias)
+                    call_command('makemigrations', 'auth', verbosity=2, interactive=False)
 
                 # 1. Reload translation in case USE_I18N was False
                 from django.utils import translation as dj_trans
@@ -165,13 +163,10 @@ class ModeltranslationTransactionTestBase(TransactionTestCase):
 
                 # 5. makemigrations (``migrate=False`` in case of south)
                 if MIGRATIONS:
-                    call_command('makemigrations', 'auth', verbosity=2, interactive=False,
-                                 database=connections[DEFAULT_DB_ALIAS].alias)
+                    call_command('makemigrations', 'auth', verbosity=2, interactive=False)
 
                 # 6. Syncdb (``migrate=False`` in case of south)
-                cmd = 'migrate' if MIGRATE_CMD else 'syncdb'
-                call_command(cmd, verbosity=0, migrate=False, interactive=False, run_syncdb=True,
-                             database=connections[DEFAULT_DB_ALIAS].alias, load_initial_data=False)
+                call_command('migrate', verbosity=0, interactive=False, run_syncdb=True)
 
                 # 7. clean migrations
                 if MIGRATIONS:
@@ -2846,7 +2841,7 @@ class TestManager(ModeltranslationTestBase):
         non-nullable fields.
         """
         with auto_populate('required'):
-            call_command('loaddata', 'fixture.json', verbosity=0, commit=False)
+            call_command('loaddata', 'fixture.json', verbosity=0)
             m = models.TestModel.objects.get()
             self.assertEqual(m.title_en, 'foo')
             self.assertEqual(m.title_de, 'foo')
@@ -2857,14 +2852,14 @@ class TestManager(ModeltranslationTestBase):
         """
         Test that the loaddata command takes new option.
         """
-        call_command('loaddata', 'fixture.json', verbosity=0, commit=False, populate='required')
+        call_command('loaddata', 'fixture.json', verbosity=0, populate='required')
         m = models.TestModel.objects.get()
         self.assertEqual(m.title_en, 'foo')
         self.assertEqual(m.title_de, 'foo')
         self.assertEqual(m.text_en, 'bar')
         self.assertEqual(m.text_de, None)
 
-        call_command('loaddata', 'fixture.json', verbosity=0, commit=False, populate='all')
+        call_command('loaddata', 'fixture.json', verbosity=0, populate='all')
         m = models.TestModel.objects.get()
         self.assertEqual(m.title_en, 'foo')
         self.assertEqual(m.title_de, 'foo')
@@ -2873,7 +2868,7 @@ class TestManager(ModeltranslationTestBase):
 
         # Test if option overrides current context
         with auto_populate('all'):
-            call_command('loaddata', 'fixture.json', verbosity=0, commit=False, populate=False)
+            call_command('loaddata', 'fixture.json', verbosity=0, populate=False)
             m = models.TestModel.objects.get()
             self.assertEqual(m.title_en, 'foo')
             self.assertEqual(m.title_de, None)

@@ -383,8 +383,8 @@ class ModelX(AbstractModelX):
 
 
 class AbstractModelXY(models.Model):
-    model_x = models.ForeignKey('ModelX')
-    model_y = models.ForeignKey('ModelY')
+    model_x = models.ForeignKey('ModelX', on_delete=models.CASCADE)
+    model_y = models.ForeignKey('ModelY', on_delete=models.CASCADE)
 
     class Meta:
         abstract = True
