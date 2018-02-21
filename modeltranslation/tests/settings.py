@@ -2,7 +2,6 @@
 """
 Settings overrided for test time
 """
-import django
 from django.conf import settings
 
 
@@ -24,8 +23,6 @@ MODELTRANSLATION_FALLBACK_LANGUAGES = ()
 
 ROOT_URLCONF = 'modeltranslation.tests.urls'
 
-if django.VERSION < (1, 11):
-    # TODO: Check what this was about
-    MIGRATION_MODULES = {'auth': 'modeltranslation.tests.auth_migrations'}
-else:
-    MIGRATION_MODULES = {}
+# Store auth migrations in our own tree so that tests do not fail
+# when the files of the django module are not writable for us
+MIGRATION_MODULES = {'auth': 'modeltranslation.tests.auth_migrations'}
