@@ -183,23 +183,6 @@ var google, django, gettext;
             return tabs;
         }
 
-        function handleAddAnotherInline() {
-            // TODO: Refactor
-            $('.mt').parents('.inline-group').not('.tabular').find('.add-row a').click(function () {
-                var grouper = new TranslationFieldGrouper({
-                    $fields: $(this).parent().prev().prev().find('.mt').add(
-                        // Support django-nested-admin stacked inlines
-                        $(this).parent().prev('.djn-items').children('.djn-item').last().find('.mt')
-                    )
-                });
-                var tabs = createTabs(grouper.groupedTranslations);
-                // Update the main switch as it is not aware of the newly created tabs
-                MainSwitch.update(tabs);
-                // Activate the language tab selected in the main switch
-                MainSwitch.activateTab(tabs);
-            });
-        }
-
         var TabularInlineGroup = function (options) {
             this.id = options.id;
             this.$id = null;
@@ -285,18 +268,6 @@ var google, django, gettext;
 
             this.init();
         };
-
-        function handleTabularAddAnotherInline(tabularInlineGroup) {
-            tabularInlineGroup.$table.find('.add-row a').click(function () {
-                var tabs = createTabularTabs(
-                    tabularInlineGroup.getGroupedTranslations(
-                        $(this).parent().parent().prev().prev().find('.mt')));
-                // Update the main switch as it is not aware of the newly created tabs
-                MainSwitch.update(tabs);
-                // Activate the language tab selected in the main switch
-                MainSwitch.activateTab(tabs);
-            });
-        }
 
         function createTabularTabs(groupedTranslations) {
             var tabs = [];
@@ -399,14 +370,6 @@ var google, django, gettext;
             });
             MainSwitch.init(grouper.groupedTranslations, createTabs(grouper.groupedTranslations));
 
-            // Note: The add another functionality in admin is injected through inline javascript,
-            // here we have to run after that (and after all other ready events just to be sure).
-            $(document).ready(function() {
-                $(window).load(function() {
-                    handleAddAnotherInline();
-                });
-            });
-
             // Group fields in (existing) tabular inlines
             $('div.inline-group > div.tabular').each(function () {
                 var tabularInlineGroup = new TabularInlineGroup({
@@ -415,11 +378,6 @@ var google, django, gettext;
                 MainSwitch.update(
                     createTabularTabs(tabularInlineGroup.getAllGroupedTranslations()));
 
-                $(document).ready(function() {
-                    $(window).load(function() {
-                        handleTabularAddAnotherInline(tabularInlineGroup);
-                    });
-                });
             });
         }
     });
