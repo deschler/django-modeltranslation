@@ -404,6 +404,15 @@ class LanguageCacheSingleObjectDescriptor(object):
 
     @property
     def cache_name(self):
+        """
+        Used in django 1.x
+        """
         lang = get_language()
         cache = build_localized_fieldname(self.accessor, lang)
         return "_%s_cache" % cache
+
+    def get_cache_name(self):
+        """
+        Used in django 2.x
+        """
+        return build_localized_fieldname(self.accessor, get_language())
