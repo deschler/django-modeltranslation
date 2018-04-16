@@ -1,6 +1,15 @@
 v0.13-beta1
 ===========
-Date: xxxx-xx-xx
+Date: 2018-04-16
+
+  FIXED: Reverse relations and select_related for Django 2.0.
+         (resolves issues #436 and #457, thanks dmarcelino)
+  FIXED: Multiple fixes for Django 2.0.
+         (resolves issues #436 and #451, thanks PetrDlouhy)
+  ADDED: Add primary support to DISTINCT statement
+         (resolves issue #368, thanks Virgílio N Santos)
+CHANGED: Check if 'descendants' list has values
+         (resolves issue #445, thanks Emilie Zawadzki)
 
 
 v0.12.2
