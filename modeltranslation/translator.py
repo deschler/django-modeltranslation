@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from functools import partial
+
 from django import VERSION
 from django.utils.six import with_metaclass
 from django.core.exceptions import ImproperlyConfigured
@@ -428,6 +430,13 @@ def patch_related_object_descriptor_caching(ro_descriptor):
     """
     class NewSingleObjectDescriptor(LanguageCacheSingleObjectDescriptor, ro_descriptor.__class__):
         pass
+
+    if VERSION[0] == 2:
+        ro_descriptor.related.get_cache_name = partial(
+            NewSingleObjectDescriptor.get_cache_name,
+            ro_descriptor,
+        )
+
     ro_descriptor.accessor = ro_descriptor.related.get_accessor_name()
     ro_descriptor.__class__ = NewSingleObjectDescriptor
 

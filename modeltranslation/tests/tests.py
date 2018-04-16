@@ -2960,7 +2960,8 @@ class TestManager(ModeltranslationTestBase):
         o.title = "bla"
         self.assertEqual(o.title, "bla")
 
-    def test_select_related(self):
+    @skipUnless(django.VERSION[0] == 1, 'Applicable only to django 1.x')
+    def test_select_related_django_1(self):
         test = models.TestModel.objects.create(title_de='title_de', title_en='title_en')
         with auto_populate('all'):
             models.ForeignKeyModel.objects.create(untrans=test)
@@ -2974,6 +2975,22 @@ class TestManager(ModeltranslationTestBase):
         )
         # untrans is nullable so not included when select_related=True
         self.assertNotIn('_untrans_cache', fk_qs.select_related()[0].__dict__)
+
+    @skipUnless(django.VERSION[0] == 2, 'Applicable only to django 2.x')
+    def test_select_related_django_2(self):
+        test = models.TestModel.objects.create(title_de='title_de', title_en='title_en')
+        with auto_populate('all'):
+            models.ForeignKeyModel.objects.create(untrans=test)
+
+        fk_qs = models.ForeignKeyModel.objects.all()
+        self.assertNotIn('untrans', fk_qs[0]._state.fields_cache)
+        self.assertIn('untrans', fk_qs.select_related('untrans')[0]._state.fields_cache)
+        self.assertNotIn(
+            'untrans',
+            fk_qs.select_related('untrans').select_related(None)[0]._state.fields_cache
+        )
+        # untrans is nullable so not included when select_related=True
+        self.assertNotIn('untrans', fk_qs.select_related()[0]._state.fields_cache)
 
     def test_translation_fields_appending(self):
         from modeltranslation.manager import append_lookup_keys, append_lookup_key
