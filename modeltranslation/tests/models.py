@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from django import VERSION
+from django.conf import settings
 from django.core import validators
 from django.db import models
 from django.utils import six
@@ -409,3 +411,12 @@ class AbstractModelY(models.Model):
 
 class ModelY(AbstractModelY):
     pass
+
+# Non-abstract base models whos Manager is not allowed to be overwritten
+
+
+if VERSION >= (1, 8) and "django.contrib.auth" in settings.INSTALLED_APPS:
+    from django.contrib.auth.models import Permission
+
+    class InheritedPermission(Permission):
+        translated_var = models.CharField(max_length=255)

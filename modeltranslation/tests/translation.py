@@ -223,7 +223,13 @@ translator.register(ModelY, ModelYOptions)
 
 if VERSION >= (1, 8) and "django.contrib.auth" in settings.INSTALLED_APPS:
     from django.contrib.auth.models import Group
+    from .models import InheritedPermission
 
     @register(Group)
     class GroupTranslationOptions(TranslationOptions):
         fields = ('name',)
+
+    @register(InheritedPermission)
+    class InheritedPermissionOptions(TranslationOptions):
+        fields = ('translated_var',)
+        required_languages = [x[0] for x in settings.LANGUAGES]

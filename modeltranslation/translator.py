@@ -227,9 +227,6 @@ def add_manager(model):
             for manager in base._meta.local_managers:
                 if manager.name in seen:
                     continue
-                if manager.model is not model and not manager.model._meta.abstract:
-                    # Don't add managers to non-abstract inherited base Models
-                    continue
                 managers.append(manager)
                 seen.add(manager.name)
 
