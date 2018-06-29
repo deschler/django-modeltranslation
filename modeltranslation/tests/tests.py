@@ -2204,7 +2204,7 @@ class TranslationAdminTest(ModeltranslationTestBase):
         class TestModelForm(forms.ModelForm):
             class Meta:
                 model = models.TestModel
-                fields = ['text',]
+                fields = ['text', ]
                 widgets = {
                     'text': forms.Textarea(attrs={'myprop': 'myval'}),
                 }
@@ -2219,12 +2219,13 @@ class TranslationAdminTest(ModeltranslationTestBase):
         self.assertEqual(
             tuple(ma.get_form(request, self.test_obj).base_fields.keys()), tuple(fields))
 
-        mf = TestModelForm(instance=self.test_obj)
         for field in fields:
-            self.assertIn('myprop',
+            self.assertIn(
+                'myprop',
                 ma.get_form(request).base_fields.get(field).widget.attrs.keys()
             )
-            self.assertIn('myval',
+            self.assertIn(
+                'myval',
                 ma.get_form(request, self.test_obj).base_fields.get(field).widget.attrs.values()
             )
 
