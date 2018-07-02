@@ -66,6 +66,12 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         else:
             orig_formfield = self.formfield_for_dbfield(orig_field, **kwargs)
             field.widget = deepcopy(orig_formfield.widget)
+            # if any widget attrs are defined on the form they should be copied
+            try:
+                field.widget = deepcopy(self.form._meta.widgets[orig_field.name])
+            except (AttributeError, TypeError, KeyError):
+                pass
+            # field.widget = deepcopy(orig_formfield.widget)
             if orig_field.name in self.both_empty_values_fields:
                 from modeltranslation.forms import NullableField, NullCharField
                 form_class = field.__class__

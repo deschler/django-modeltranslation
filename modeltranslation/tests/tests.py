@@ -2200,6 +2200,35 @@ class TranslationAdminTest(ModeltranslationTestBase):
         self.assertEqual(
             tuple(ma.get_form(request, self.test_obj).base_fields.keys()), tuple(fields))
 
+    def test_model_form_widgets(self):
+        class TestModelForm(forms.ModelForm):
+            class Meta:
+                model = models.TestModel
+                fields = ['text', ]
+                widgets = {
+                    'text': forms.Textarea(attrs={'myprop': 'myval'}),
+                }
+
+        class TestModelAdmin(admin.TranslationAdmin):
+            form = TestModelForm
+
+        ma = TestModelAdmin(models.TestModel, self.site)
+        fields = ['text_de', 'text_en']
+        self.assertEqual(
+            tuple(ma.get_form(request).base_fields.keys()), tuple(fields))
+        self.assertEqual(
+            tuple(ma.get_form(request, self.test_obj).base_fields.keys()), tuple(fields))
+
+        for field in fields:
+            self.assertIn(
+                'myprop',
+                ma.get_form(request).base_fields.get(field).widget.attrs.keys()
+            )
+            self.assertIn(
+                'myval',
+                ma.get_form(request, self.test_obj).base_fields.get(field).widget.attrs.values()
+            )
+
     def test_inline_fieldsets(self):
         class DataInline(admin.TranslationStackedInline):
             model = models.DataModel
