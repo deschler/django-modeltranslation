@@ -402,7 +402,7 @@ var google, django, gettext;
             // Note: The add another functionality in admin is injected through inline javascript,
             // here we have to run after that (and after all other ready events just to be sure).
             $(document).ready(function() {
-                $(window).load(function() {
+                $(window).on('load', function() {
                     handleAddAnotherInline();
                 });
             });
@@ -416,7 +416,7 @@ var google, django, gettext;
                     createTabularTabs(tabularInlineGroup.getAllGroupedTranslations()));
 
                 $(document).ready(function() {
-                    $(window).load(function() {
+                    $(window).on('load', function() {
                         handleTabularAddAnotherInline(tabularInlineGroup);
                     });
                 });
