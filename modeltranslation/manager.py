@@ -85,8 +85,13 @@ def append_fallback(model, fields):
     """
     fields = set(fields)
     trans = set()
-    from modeltranslation.translator import translator
-    opts = translator.get_options_for_model(model)
+    from modeltranslation.translator import translator, NotRegistered
+    
+    try:
+        opts = translator.get_options_for_model(model)
+    except NotRegistered:
+        return fields, trans
+
     for key, _ in opts.fields.items():
         if key in fields:
             langs = resolution_order(get_language(), getattr(model, key).fallback_languages)
@@ -99,8 +104,12 @@ def append_fallback(model, fields):
 def append_translated(model, fields):
     "If translated field is encountered, add also all its translation fields."
     fields = set(fields)
-    from modeltranslation.translator import translator
-    opts = translator.get_options_for_model(model)
+    from modeltranslation.translator import translator, NotRegistered
+    try:
+        opts = translator.get_options_for_model(model)
+    except NotRegistered:
+        return fields
+
     for key, translated in opts.fields.items():
         if key in fields:
             fields = fields.union(f.name for f in translated)
