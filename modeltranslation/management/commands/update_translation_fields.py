@@ -12,7 +12,7 @@ class Command(BaseCommand):
             ' values from original fields (in all translated models).')
 
     def handle(self, *args, **options):
-        verbosity = int(options['verbosity'])
+        verbosity = options['verbosity']
         if verbosity > 0:
             self.stdout.write("Using default language: %s" % DEFAULT_LANGUAGE)
         models = translator.get_registered_models(abstract=False)
