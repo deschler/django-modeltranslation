@@ -15,10 +15,12 @@ class Command(BaseCommand):
         verbosity = options['verbosity']
         if verbosity > 0:
             self.stdout.write("Using default language: %s" % DEFAULT_LANGUAGE)
+
         models = translator.get_registered_models(abstract=False)
         for model in models:
             if verbosity > 0:
                 self.stdout.write("Updating data of model '%s'" % model)
+
             opts = translator.get_options_for_model(model)
             for field_name in opts.fields.keys():
                 def_lang_fieldname = build_localized_fieldname(field_name, DEFAULT_LANGUAGE)
@@ -30,4 +32,5 @@ class Command(BaseCommand):
                     q |= Q(**{def_lang_fieldname: ""})
 
                 model._default_manager.filter(q).rewrite(False).update(
-                    **{def_lang_fieldname: F(field_name)})
+                    **{def_lang_fieldname: F(field_name)}
+                )
