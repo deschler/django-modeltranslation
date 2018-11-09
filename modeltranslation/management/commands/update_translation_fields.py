@@ -26,7 +26,9 @@ class Command(BaseCommand):
         if verbosity > 0:
             self.stdout.write("Using default language: %s" % DEFAULT_LANGUAGE)
 
+        # get all models excluding proxy- and not managed models
         models = translator.get_registered_models(abstract=False)
+        models = [m for m in models if not m._meta.proxy and m._meta.managed]
 
         # optionally filter by given app_label
         app_label = options['app_label']
