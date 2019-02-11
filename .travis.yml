@@ -1,9 +1,9 @@
 language: python
 python:
   - "2.7"
-  - "3.4"
   - "3.5"
   - "3.6"
+  - "3.7"
 env:
   - DJANGO=1.11 DB=sqlite
   - DJANGO=1.11 DB=postgres
@@ -11,6 +11,9 @@ env:
   - DJANGO=2.0 DB=sqlite
   - DJANGO=2.0 DB=postgres
   - DJANGO=2.0 DB=mysql
+  - DJANGO=2.1 DB=sqlite
+  - DJANGO=2.1 DB=postgres
+  - DJANGO=2.1 DB=mysql
 matrix:
   exclude:
     - python: "2.7"
@@ -19,6 +22,12 @@ matrix:
       env: DJANGO=2.0 DB=mysql
     - python: "2.7"
       env: DJANGO=2.0 DB=postgres
+    - python: "2.7"
+      env: DJANGO=2.1 DB=sqlite
+    - python: "2.7"
+      env: DJANGO=2.1 DB=mysql
+    - python: "2.7"
+      env: DJANGO=2.1 DB=postgres
 before_install:
   - pip install -q 'flake8<3'
   - PYFLAKES_NODOCTEST=1 flake8 modeltranslation
@@ -26,8 +35,7 @@ before_script:
   - mysql -e 'create database modeltranslation;'
   - psql -c 'create database modeltranslation;' -U postgres
 install:
-  - PYTHON=`python -c 'import sys; version=sys.version_info[:3]; print("{0}.{1}".format(*version))'`
-  - if [[ $DB == mysql ]] && [[ ${PYTHON:0:1} == "2" ]]; then pip install -q mysql-python; elif [[ $DB == mysql ]] && [[ ${PYTHON:0:1} == "3" ]]; then pip install -q mysqlclient; fi
+  - if [[ $DB == mysql ]]; then pip install -q mysqlclient; fi
   - if [[ $DB == postgres ]]; then pip install -q psycopg2; fi
   - pip install -q Pillow
   - IDJANGO=$(./travis.py $DJANGO)
