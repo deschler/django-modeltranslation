@@ -44,6 +44,9 @@ from modeltranslation.fields import TranslationField
 from modeltranslation.utils import (build_localized_fieldname, get_language,
                                     auto_populate, resolution_order)
 
+_C2F_CACHE = {}
+_F2TM_CACHE = {}
+
 
 def get_translatable_fields_for_model(model):
     from modeltranslation.translator import NotRegistered, translator
@@ -146,8 +149,6 @@ def rewrite_order_lookup_key(model, lookup_key):
     except AttributeError:
         return lookup_key
 
-_F2TM_CACHE = {}
-
 
 def get_fields_to_translatable_models(model):
     if model in _F2TM_CACHE:
@@ -177,8 +178,6 @@ def get_fields_to_translatable_models(model):
                     results.append((field_name, field_object.model))
     _F2TM_CACHE[model] = dict(results)
     return _F2TM_CACHE[model]
-
-_C2F_CACHE = {}
 
 
 def get_field_by_colum_name(model, col):
