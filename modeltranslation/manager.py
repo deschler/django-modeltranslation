@@ -12,12 +12,7 @@ from django.contrib.admin.utils import get_model_from_relation
 
 from django.db import models
 from django.db.models import FieldDoesNotExist
-try:
-    from django.db.models.fields.related import RelatedObject
-    from django.db.models.fields.related import RelatedField
-    NEW_META_API = False
-except ImportError:
-    NEW_META_API = True
+
 
 try:
     from django.db.models.query import ValuesQuerySet
@@ -152,27 +147,15 @@ def get_fields_to_translatable_models(model):
         return _F2TM_CACHE[model]
 
     results = []
-    if NEW_META_API:
-        for f in model._meta.get_fields():
-            if f.is_relation and f.related_model:
-                # The new get_field() will find GenericForeignKey relations.
-                # In that case the 'related_model' attribute is set to None
-                # so it is necessary to check for this value before trying to
-                # get translatable fields.
-                related_model = get_model_from_relation(f)
-                if get_translatable_fields_for_model(related_model) is not None:
-                    results.append((f.name, related_model))
-    else:
-        for field_name in model._meta.get_all_field_names():
-            field_object, modelclass, direct, m2m = model._meta.get_field_by_name(field_name)
-            # Direct relationship
-            if direct and isinstance(field_object, RelatedField):
-                if get_translatable_fields_for_model(field_object.related.parent_model) is not None:
-                    results.append((field_name, field_object.related.parent_model))
-            # Reverse relationship
-            if isinstance(field_object, RelatedObject):
-                if get_translatable_fields_for_model(field_object.model) is not None:
-                    results.append((field_name, field_object.model))
+    for f in model._meta.get_fields():
+        if f.is_relation and f.related_model:
+            # The new get_field() will find GenericForeignKey relations.
+            # In that case the 'related_model' attribute is set to None
+            # so it is necessary to check for this value before trying to
+            # get translatable fields.
+            related_model = get_model_from_relation(f)
+            if get_translatable_fields_for_model(related_model) is not None:
+                results.append((f.name, related_model))
     _F2TM_CACHE[model] = dict(results)
     return _F2TM_CACHE[model]
 
