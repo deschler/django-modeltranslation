@@ -12,24 +12,11 @@ from django.contrib.admin.utils import get_model_from_relation
 
 from django.db import models
 from django.db.models import FieldDoesNotExist
-
-
-try:
-    from django.db.models.query import ValuesQuerySet
-    from django.db.models.sql.where import Constraint
-    NEW_RELATED_API = False
-except ImportError:
-    from django.db.models.query import ValuesIterable
-    NEW_RELATED_API = True  # Django 1.9
-
+from django.db.models.query import ValuesIterable
 from django.utils.six import moves
 from django.utils.tree import Node
-try:
-    from django.db.models.lookups import Lookup
-    from django.db.models.sql.datastructures import Col
-    NEW_LOOKUPS = True  # Django 1.7, 1.8
-except ImportError:
-    NEW_LOOKUPS = False
+from django.db.models.lookups import Lookup
+from django.db.models.expressions import Col
 
 from modeltranslation import settings
 from modeltranslation.fields import TranslationField
@@ -200,34 +187,18 @@ class MultilingualQuerySet(models.query.QuerySet):
         return multilingual_queryset_factory, (self.__class__.__bases__[0],), self.__getstate__()
 
     # This method was not present in django-linguo
-    if NEW_RELATED_API:
-        def _clone(self, klass=None, **kwargs):
-            kwargs.setdefault('_rewrite', self._rewrite)
-            kwargs.setdefault('_populate', self._populate)
-            if hasattr(self, 'translation_fields'):
-                kwargs.setdefault('translation_fields', self.translation_fields)
-            if hasattr(self, 'fields_to_del'):
-                kwargs.setdefault('fields_to_del', self.fields_to_del)
-            if hasattr(self, 'original_fields'):
-                kwargs.setdefault('original_fields', self.original_fields)
-            cloned = super(MultilingualQuerySet, self)._clone()
-            cloned.__dict__.update(kwargs)
-            return cloned
-    else:
-        def _clone(self, klass=None, *args, **kwargs):
-            if klass is not None and not issubclass(klass, MultilingualQuerySet):
-                class NewClass(klass, MultilingualQuerySet):
-                    pass
-                NewClass.__name__ = 'Multilingual%s' % klass.__name__
-                klass = NewClass
-            kwargs.setdefault('_rewrite', self._rewrite)
-            kwargs.setdefault('_populate', self._populate)
-            cloned = super(MultilingualQuerySet, self)._clone()
-            cloned.__dict__.update(kwargs)
-            if klass is not None:
-                cloned.__class__ = klass
-
-            return cloned
+    def _clone(self, klass=None, **kwargs):
+        kwargs.setdefault('_rewrite', self._rewrite)
+        kwargs.setdefault('_populate', self._populate)
+        if hasattr(self, 'translation_fields'):
+            kwargs.setdefault('translation_fields', self.translation_fields)
+        if hasattr(self, 'fields_to_del'):
+            kwargs.setdefault('fields_to_del', self.fields_to_del)
+        if hasattr(self, 'original_fields'):
+            kwargs.setdefault('original_fields', self.original_fields)
+        cloned = super(MultilingualQuerySet, self)._clone()
+        cloned.__dict__.update(kwargs)
+        return cloned
 
     # This method was not present in django-linguo
     def rewrite(self, mode=True):
@@ -246,8 +217,6 @@ class MultilingualQuerySet(models.query.QuerySet):
         Useful when converting any QuerySet into MultilingualQuerySet.
         """
         self._rewrite_where(self.query.where)
-        if not NEW_RELATED_API:
-            self._rewrite_where(self.query.having)
         self._rewrite_order()
         self._rewrite_select_related()
 
@@ -286,15 +255,7 @@ class MultilingualQuerySet(models.query.QuerySet):
         """
         Rewrite field names inside WHERE tree.
         """
-        if not NEW_LOOKUPS and isinstance(q, tuple) and isinstance(q[0], Constraint):
-            c = q[0]
-            if c.field is None:
-                c.field = get_field_by_colum_name(self.model, c.col)
-            new_name = rewrite_lookup_key(self.model, c.field.name)
-            if c.field.name != new_name:
-                c.field = self.model._meta.get_field(new_name)
-                c.col = c.field.column
-        elif NEW_LOOKUPS and isinstance(q, Lookup):
+        if isinstance(q, Lookup):
             self._rewrite_col(q.lhs)
         if isinstance(q, Node):
             for child in q.children:
@@ -441,12 +402,9 @@ class MultilingualQuerySet(models.query.QuerySet):
         if not fields:
             # Emulate original queryset behaviour: get all fields that are not translation fields
             fields = self._get_original_fields()
-        if NEW_RELATED_API:
-            clone = self._values(*fields, prepare=True)
-            clone._iterable_class = FallbackValuesIterable
-            return clone
-        else:
-            return self._clone(klass=FallbackValuesQuerySet, setup=True, _fields=fields)
+        clone = self._values(*fields, prepare=True)
+        clone._iterable_class = FallbackValuesIterable
+        return clone
 
     # This method was not present in django-linguo
     def values_list(self, *fields, **kwargs):
@@ -461,14 +419,10 @@ class MultilingualQuerySet(models.query.QuerySet):
         if not fields:
             # Emulate original queryset behaviour: get all fields that are not translation fields
             fields = self._get_original_fields()
-        if NEW_RELATED_API:
-            clone = self._values(*fields, prepare=True)
-            clone._iterable_class = (FallbackFlatValuesListIterable if flat
-                                     else FallbackValuesListIterable)
-            return clone
-        else:
-            return self._clone(klass=FallbackValuesListQuerySet, setup=True, flat=flat,
-                               _fields=fields)
+        clone = self._values(*fields, prepare=True)
+        clone._iterable_class = (FallbackFlatValuesListIterable if flat
+                                 else FallbackValuesListIterable)
+        return clone
 
     # This method was not present in django-linguo
     def dates(self, field_name, *args, **kwargs):
@@ -478,91 +432,34 @@ class MultilingualQuerySet(models.query.QuerySet):
         return super(MultilingualQuerySet, self).dates(new_key, *args, **kwargs)
 
 
-if NEW_RELATED_API:
-    class FallbackValuesIterable(ValuesIterable):
-        class X(object):
-            # This stupid class is needed as object use __slots__ and has no __dict__.
-            pass
+class FallbackValuesIterable(ValuesIterable):
+    class X(object):
+        # This stupid class is needed as object use __slots__ and has no __dict__.
+        pass
 
-        def __iter__(self):
-            instance = self.X()
-            for row in super(FallbackValuesIterable, self).__iter__():
-                instance.__dict__.update(row)
-                for key in self.queryset.translation_fields:
-                    row[key] = getattr(self.queryset.model, key).__get__(instance, None)
-                for key in self.queryset.fields_to_del:
-                    del row[key]
-                yield row
+    def __iter__(self):
+        instance = self.X()
+        for row in super(FallbackValuesIterable, self).__iter__():
+            instance.__dict__.update(row)
+            for key in self.queryset.translation_fields:
+                row[key] = getattr(self.queryset.model, key).__get__(instance, None)
+            for key in self.queryset.fields_to_del:
+                del row[key]
+            yield row
 
-    class FallbackValuesListIterable(FallbackValuesIterable):
-        def __iter__(self):
-            fields = self.queryset.original_fields
-            fields += tuple(f for f in self.queryset.query.annotation_select if f not in fields)
-            for row in super(FallbackValuesListIterable, self).__iter__():
-                yield tuple(row[f] for f in fields)
 
-    class FallbackFlatValuesListIterable(FallbackValuesListIterable):
-        def __iter__(self):
-            for row in super(FallbackFlatValuesListIterable, self).__iter__():
-                yield row[0]
+class FallbackValuesListIterable(FallbackValuesIterable):
+    def __iter__(self):
+        fields = self.queryset.original_fields
+        fields += tuple(f for f in self.queryset.query.annotation_select if f not in fields)
+        for row in super(FallbackValuesListIterable, self).__iter__():
+            yield tuple(row[f] for f in fields)
 
-else:
-    class FallbackValuesQuerySet(ValuesQuerySet, MultilingualQuerySet):
-        def _setup_query(self):
-            original = self._fields
-            new_fields, self.translation_fields = append_fallback(self.model, original)
-            self._fields = list(new_fields)
-            self.fields_to_del = new_fields - set(original)
-            super(FallbackValuesQuerySet, self)._setup_query()
 
-        class X(object):
-            # This stupid class is needed as object use __slots__ and has no __dict__.
-            pass
-
-        def iterator(self):
-            instance = self.X()
-            for row in super(FallbackValuesQuerySet, self).iterator():
-                instance.__dict__.update(row)
-                for key in self.translation_fields:
-                    row[key] = getattr(self.model, key).__get__(instance, None)
-                for key in self.fields_to_del:
-                    del row[key]
-                yield row
-
-        def _clone(self, klass=None, setup=False, **kwargs):
-            c = super(FallbackValuesQuerySet, self)._clone(klass, **kwargs)
-            c.fields_to_del = self.fields_to_del
-            c.translation_fields = self.translation_fields
-            if setup and hasattr(c, '_setup_query'):
-                c._setup_query()
-            return c
-
-    class FallbackValuesListQuerySet(FallbackValuesQuerySet):
-        def iterator(self):
-            fields = self.original_fields
-            if hasattr(self, 'aggregate_names'):
-                # Django <1.8
-                fields += tuple(f for f in self.aggregate_names if f not in fields)
-            if hasattr(self, 'annotation_names'):
-                # Django >=1.8
-                fields += tuple(f for f in self.annotation_names if f not in fields)
-            for row in super(FallbackValuesListQuerySet, self).iterator():
-                if self.flat and len(self.original_fields) == 1:
-                    yield row[fields[0]]
-                else:
-                    yield tuple(row[f] for f in fields)
-
-        def _setup_query(self):
-            self.original_fields = tuple(self._fields)
-            super(FallbackValuesListQuerySet, self)._setup_query()
-
-        def _clone(self, *args, **kwargs):
-            clone = super(FallbackValuesListQuerySet, self)._clone(*args, **kwargs)
-            clone.original_fields = self.original_fields
-            if not hasattr(clone, "flat"):
-                # Only assign flat if the clone didn't already get it from kwargs
-                clone.flat = self.flat
-            return clone
+class FallbackFlatValuesListIterable(FallbackValuesListIterable):
+    def __iter__(self):
+        for row in super(FallbackFlatValuesListIterable, self).__iter__():
+            yield row[0]
 
 
 def multilingual_queryset_factory(old_cls, instantiate=True):
