@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-import datetime
 from decimal import Decimal
+from unittest import skipUnless
+import datetime
 import imp
 import os
 import shutil
@@ -20,23 +21,7 @@ from django.test.utils import override_settings
 from django.utils import six
 from django.utils.translation import get_language, override, trans_real
 
-try:
-    from django.apps import apps as django_apps
-    NEW_APP_CACHE = True
-except ImportError:
-    from django.db.models.loading import AppCache
-    NEW_APP_CACHE = False
-
-try:
-    from unittest import skipUnless
-except ImportError:
-    # Dummy replacement for Python 2.6
-    def skipUnless(condition, reason):
-        if not condition:
-            def decorator(test_item):
-                return lambda s: 42
-            return decorator
-        return lambda x: x  # identity
+from django.apps import apps as django_apps
 
 from modeltranslation import admin, settings as mt_settings, translator
 from modeltranslation.forms import TranslationModelForm
@@ -103,7 +88,7 @@ def get_field_names(model):
 
 @override_settings(**TEST_SETTINGS)
 class ModeltranslationTransactionTestBase(TransactionTestCase):
-    cache = django_apps if NEW_APP_CACHE else AppCache()
+    cache = django_apps
     synced = False
 
     @classmethod
@@ -136,26 +121,23 @@ class ModeltranslationTransactionTestBase(TransactionTestCase):
                 # 3. Reset test models (because autodiscover have already run, those models
                 #    have translation fields, but for languages previously defined. We want
                 #    to be sure that 'de' and 'en' are available)
-                if not NEW_APP_CACHE:
-                    cls.cache.load_app('modeltranslation.tests')
-                else:
-                    del cls.cache.all_models['tests']
-                    if MIGRATIONS:
-                        del cls.cache.all_models['auth']
-                    import sys
-                    sys.modules.pop('modeltranslation.tests.models', None)
-                    sys.modules.pop('modeltranslation.tests.translation', None)
-                    if MIGRATIONS:
-                        sys.modules.pop('django.contrib.auth.models', None)
-                    tests_args = []
+                del cls.cache.all_models['tests']
+                if MIGRATIONS:
+                    del cls.cache.all_models['auth']
+                import sys
+                sys.modules.pop('modeltranslation.tests.models', None)
+                sys.modules.pop('modeltranslation.tests.translation', None)
+                if MIGRATIONS:
+                    sys.modules.pop('django.contrib.auth.models', None)
+                tests_args = []
+                if django.VERSION < (1, 11):
+                    tests_args = [cls.cache.all_models['tests']]
+                cls.cache.get_app_config('tests').import_models(*tests_args)
+                if MIGRATIONS:
+                    auth_args = []
                     if django.VERSION < (1, 11):
-                        tests_args = [cls.cache.all_models['tests']]
-                    cls.cache.get_app_config('tests').import_models(*tests_args)
-                    if MIGRATIONS:
-                        auth_args = []
-                        if django.VERSION < (1, 11):
-                            auth_args = [cls.cache.all_models['auth']]
-                        cls.cache.get_app_config('auth').import_models(*auth_args)
+                        auth_args = [cls.cache.all_models['auth']]
+                    cls.cache.get_app_config('auth').import_models(*auth_args)
 
                 # 4. Autodiscover
                 from modeltranslation.models import handle_translation_registrations
@@ -229,10 +211,7 @@ class TestAutodiscover(ModeltranslationTestBase):
     def tearDown(self):
         import sys
         # Rollback model classes
-        if NEW_APP_CACHE:
-            del self.cache.all_models['test_app']
-        else:
-            del self.cache.app_models['test_app']
+        del self.cache.all_models['test_app']
         from .test_app import models
         imp.reload(models)
         # Delete translation modules from import cache
