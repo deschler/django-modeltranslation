@@ -7,9 +7,7 @@ https://github.com/zmathew/django-linguo
 """
 import itertools
 
-import django
 from django.contrib.admin.utils import get_model_from_relation
-
 from django.db import models
 from django.db.models import FieldDoesNotExist
 from django.db.models.query import ValuesIterable
@@ -489,8 +487,6 @@ class MultilingualQuerysetManager(models.Manager):
 
 
 class MultilingualManager(MultilingualQuerysetManager):
-    if django.VERSION < (1, 10):
-        use_for_related_fields = True
 
     def rewrite(self, *args, **kwargs):
         return self.get_queryset().rewrite(*args, **kwargs)
