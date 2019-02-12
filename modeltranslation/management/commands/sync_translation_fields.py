@@ -9,11 +9,10 @@ You will need to execute this command in two cases:
 
 Credits: Heavily inspired by django-transmeta's sync_transmeta_db command.
 """
-import django
 from django import VERSION
 from django.core.management.base import BaseCommand
 from django.core.management.color import no_style
-from django.db import connection, transaction
+from django.db import connection
 from django.utils.six import moves
 
 from modeltranslation.settings import AVAILABLE_LANGUAGES
@@ -74,10 +73,7 @@ class Command(BaseCommand):
         models = translator.get_registered_models(abstract=False)
         for model in models:
             db_table = model._meta.db_table
-            if django.VERSION < (1, 8):
-                model_name = model._meta.module_name
-            else:
-                model_name = model._meta.model_name
+            model_name = model._meta.model_name
             model_full_name = '%s.%s' % (model._meta.app_label, model_name)
             opts = translator.get_options_for_model(model)
             for field_name, fields in opts.local_fields.items():
@@ -98,9 +94,6 @@ class Command(BaseCommand):
                         print('Done')
                     else:
                         print('SQL not executed')
-
-        if django.VERSION < (1, 6):
-            transaction.commit_unless_managed()
 
         if not found_missing_fields:
             print('No new translatable fields detected')
