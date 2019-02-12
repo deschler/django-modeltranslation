@@ -30,9 +30,7 @@ from modeltranslation.tests.test_settings import TEST_SETTINGS
 from modeltranslation.utils import (build_css_class, build_localized_fieldname,
                                     auto_populate, fallbacks)
 
-MIGRATE_CMD = django.VERSION >= (1, 8)
-MIGRATIONS = MIGRATE_CMD and "django.contrib.auth" in TEST_SETTINGS['INSTALLED_APPS']
-NEW_DEFERRED_API = django.VERSION >= (1, 10)
+MIGRATIONS = "django.contrib.auth" in TEST_SETTINGS['INSTALLED_APPS']
 
 models = translation = None
 
@@ -293,7 +291,6 @@ class ModeltranslationTest(ModeltranslationTestBase):
         self.assertRaises(translator.DescendantRegistered,
                           translator.translator.unregister, models.Slugged)
 
-    @skipUnless(NEW_DEFERRED_API, "Django 1.10 needed")
     def test_registration_field_conflicts(self):
         before = len(translator.translator.get_registered_models())
 
@@ -2895,10 +2892,7 @@ class TestManager(ModeltranslationTestBase):
             self.assertEqual('title_de', inst2.title)
 
     def assertDeferredClass(self, item):
-        if NEW_DEFERRED_API:
-            self.assertTrue(len(item.get_deferred_fields()) > 0)
-        else:
-            self.assertTrue(item.__class__._deferred)
+        self.assertTrue(len(item.get_deferred_fields()) > 0)
 
     def test_deferred(self):
         """
@@ -2906,8 +2900,6 @@ class TestManager(ModeltranslationTestBase):
         """
         models.TestModel.objects.create(title_de='title_de', title_en='title_en')
         inst = models.TestModel.objects.only('title_en')[0]
-        if not NEW_DEFERRED_API:
-            self.assertNotEqual(inst.__class__, models.TestModel)
         self.assertTrue(isinstance(inst, models.TestModel))
         self.assertDeferred(False, 'title_en')
 
