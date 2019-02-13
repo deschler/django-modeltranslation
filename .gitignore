@@ -22,6 +22,10 @@ MANIFEST
 # Installer logs
 pip-log.txt
 
+# Development pipfiles
+Pipfile
+Pipfile.lock
+
 # Unit test / coverage reports
 .coverage
 .tox
