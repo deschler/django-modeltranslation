@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from django import VERSION
 from django.conf import settings
 from django.utils.translation import ugettext_lazy
 
@@ -221,7 +220,7 @@ translator.register(ModelY, ModelYOptions)
 
 # ######### 3-rd party with custom manager
 
-if VERSION >= (1, 8) and "django.contrib.auth" in settings.INSTALLED_APPS:
+if "django.contrib.auth" in settings.INSTALLED_APPS:
     from django.contrib.auth.models import Group
     from .models import InheritedPermission
 
