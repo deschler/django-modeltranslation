@@ -39,7 +39,7 @@ models = translation = None
 request = None
 
 # How many models are registered for tests.
-TEST_MODELS = 31 + (1 if MIGRATIONS else 0)
+TEST_MODELS = 32 + (1 if MIGRATIONS else 0)
 
 
 class reload_override_settings(override_settings):
@@ -3151,3 +3151,17 @@ class M2MTest(ModeltranslationTestBase):
             # Again: 1 X named "bar" (but through the M2M field)
             x_bar = y.xs.filter(name="bar")
             self.assertIn(x2, x_bar)
+
+
+class InheritedPermissionTestCase(ModeltranslationTestBase):
+    def test_managers_failure(self):
+        """This fails with 0.13b."""
+        if "django.contrib.auth" not in django_settings.INSTALLED_APPS:
+            return
+        from django.contrib.auth.models import Permission, User
+        # This happens at initialization time, depending on the models
+        # initialized.
+        Permission._meta._expire_cache()
+        User.objects.create(username='123', is_active=True)
+        x = User.objects.first()
+        x.has_perm('test_perm')
