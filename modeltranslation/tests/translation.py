@@ -3,147 +3,140 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy
 
 from modeltranslation.translator import translator, register, TranslationOptions
-from modeltranslation.tests.models import (
-    TestModel, FallbackModel, FallbackModel2, FileFieldsModel, ForeignKeyModel, OtherFieldsModel,
-    DescriptorModel, AbstractModelA, AbstractModelB, Slugged, MetaData, Displayable, Page,
-    RichText, RichTextPage, MultitableModelA, MultitableModelB, MultitableModelC, ManagerTestModel,
-    CustomManagerTestModel, CustomManager2TestModel, GroupFieldsetsModel, NameModel,
-    ThirdPartyRegisteredModel, ProxyTestModel, UniqueNullableModel, OneToOneFieldModel,
-    RequiredModel, DecoratedModel, ModelX, ModelY)
+from modeltranslation.tests import models
 
 
+@register(models.TestModel)
 class TestTranslationOptions(TranslationOptions):
     fields = ('title', 'text', 'url', 'email',)
     empty_values = ''
-translator.register(TestModel, TestTranslationOptions)
 
 
+@register(models.UniqueNullableModel)
 class UniqueNullableTranslationOptions(TranslationOptions):
     fields = ('title',)
-translator.register(UniqueNullableModel, UniqueNullableTranslationOptions)
 
 
 # ######### Proxy model testing
 
+@register(models.ProxyTestModel)
 class ProxyTestTranslationOptions(TranslationOptions):
     fields = ('title', 'text', 'url', 'email',)
-translator.register(ProxyTestModel, ProxyTestTranslationOptions)
 
 
 # ######### Fallback values testing
 
+@register(models.FallbackModel)
 class FallbackModelTranslationOptions(TranslationOptions):
     fields = ('title', 'text', 'url', 'email', 'description')
     fallback_values = "fallback"
-translator.register(FallbackModel, FallbackModelTranslationOptions)
 
 
+@register(models.FallbackModel2)
 class FallbackModel2TranslationOptions(TranslationOptions):
     fields = ('title', 'text', 'url', 'email',)
     fallback_values = {'text': ugettext_lazy('Sorry, translation is not available.')}
     fallback_undefined = {'title': 'no title'}
-translator.register(FallbackModel2, FallbackModel2TranslationOptions)
 
 
 # ######### File fields testing
 
+@register(models.FileFieldsModel)
 class FileFieldsModelTranslationOptions(TranslationOptions):
     fields = ('title', 'file', 'file2', 'image',)
-translator.register(FileFieldsModel, FileFieldsModelTranslationOptions)
 
 
 # ######### Foreign Key / OneToOneField testing
 
+@register(models.ForeignKeyModel)
 class ForeignKeyModelTranslationOptions(TranslationOptions):
     fields = ('title', 'test', 'optional', 'hidden', 'non',)
-translator.register(ForeignKeyModel, ForeignKeyModelTranslationOptions)
 
 
+@register(models.OneToOneFieldModel)
 class OneToOneFieldModelTranslationOptions(TranslationOptions):
     fields = ('title', 'test', 'optional', 'non',)
-translator.register(OneToOneFieldModel, OneToOneFieldModelTranslationOptions)
 
 
 # ######### Custom fields testing
 
+@register(models.OtherFieldsModel)
 class OtherFieldsModelTranslationOptions(TranslationOptions):
     fields = ('int', 'boolean', 'nullboolean', 'csi', 'float', 'decimal',
               'ip', 'genericip', 'date', 'datetime', 'time',)
-translator.register(OtherFieldsModel, OtherFieldsModelTranslationOptions)
 
 
+@register(models.DescriptorModel)
 class DescriptorModelTranslationOptions(TranslationOptions):
     fields = ('trans',)
-translator.register(DescriptorModel, DescriptorModelTranslationOptions)
 
 
 # ######### Multitable inheritance testing
 
+@register(models.MultitableModelA)
 class MultitableModelATranslationOptions(TranslationOptions):
     fields = ('titlea',)
-translator.register(MultitableModelA, MultitableModelATranslationOptions)
 
 
+@register(models.MultitableModelB)
 class MultitableModelBTranslationOptions(TranslationOptions):
     fields = ('titleb',)
-translator.register(MultitableModelB, MultitableModelBTranslationOptions)
 
 
+@register(models.MultitableModelC)
 class MultitableModelCTranslationOptions(TranslationOptions):
     fields = ('titlec',)
-translator.register(MultitableModelC, MultitableModelCTranslationOptions)
 
 
 # ######### Abstract inheritance testing
 
+@register(models.AbstractModelA)
 class AbstractModelATranslationOptions(TranslationOptions):
     fields = ('titlea',)
-translator.register(AbstractModelA, AbstractModelATranslationOptions)
 
 
+@register(models.AbstractModelB)
 class AbstractModelBTranslationOptions(TranslationOptions):
     fields = ('titleb',)
-translator.register(AbstractModelB, AbstractModelBTranslationOptions)
 
 
 # ######### Fields inheritance testing
 
+@register(models.Slugged)
 class SluggedTranslationOptions(TranslationOptions):
     fields = ('slug',)
 
 
+@register(models.MetaData)
 class MetaDataTranslationOptions(TranslationOptions):
     fields = ('keywords',)
 
 
+@register(models.RichText)
 class RichTextTranslationOptions(TranslationOptions):
     fields = ('content',)
 
 
+@register(models.Page)
 class PageTranslationOptions(TranslationOptions):
     fields = ('title',)
 
 
 # BasePage left unregistered intentionally.
-translator.register(Slugged, SluggedTranslationOptions)
-translator.register(MetaData, MetaDataTranslationOptions)
-translator.register(RichText, RichTextTranslationOptions)
-translator.register(Displayable)
-translator.register(Page, PageTranslationOptions)
-translator.register(RichTextPage)
+translator.register(models.Displayable)
+translator.register(models.RichTextPage)
 
 
 # ######### Manager testing
 
+@register(models.ManagerTestModel)
 class ManagerTestModelTranslationOptions(TranslationOptions):
     fields = ('title', 'visits', 'description')
-translator.register(ManagerTestModel, ManagerTestModelTranslationOptions)
 
 
+@register([models.CustomManagerTestModel, models.CustomManager2TestModel])
 class CustomManagerTestModelTranslationOptions(TranslationOptions):
     fields = ('title',)
-translator.register([CustomManagerTestModel, CustomManager2TestModel],
-                    CustomManagerTestModelTranslationOptions)
 
 
 # ######### TranslationOptions field inheritance testing
@@ -171,51 +164,44 @@ class FieldInheritanceETranslationOptions(FieldInheritanceCTranslationOptions,
 
 # ######### Integration testing
 
+@register(models.ThirdPartyRegisteredModel)
 class ThirdPartyTranslationOptions(TranslationOptions):
     fields = ('name',)
-translator.register(ThirdPartyRegisteredModel, ThirdPartyTranslationOptions)
 
 
 # ######### Admin testing
 
+@register(models.GroupFieldsetsModel)
 class GroupFieldsetsTranslationOptions(TranslationOptions):
     fields = ('title', 'text',)
-translator.register(GroupFieldsetsModel, GroupFieldsetsTranslationOptions)
 
 
+@register(models.NameModel)
 class NameTranslationOptions(TranslationOptions):
     fields = ('firstname', 'lastname', 'slug2')
-translator.register(NameModel, NameTranslationOptions)
 
 
 # ######### Required fields testing
 
+@register(models.RequiredModel)
 class RequiredTranslationOptions(TranslationOptions):
     fields = ('non_req', 'req', 'req_reg', 'req_en_reg')
     required_languages = {
         'en': ('req_reg', 'req_en_reg',),
         'default': ('req_reg',),  # for all other languages
     }
-translator.register(RequiredModel, RequiredTranslationOptions)
-
-
-# ######### Decorated registration testing
-
-@register(DecoratedModel)
-class DecoratedTranslationOptions(TranslationOptions):
-    fields = ('title',)
 
 
 # ######### Complex M2M with abstract classes and custom managers
 
+@register(models.ModelX)
 class ModelXOptions(TranslationOptions):
     fields = ('name',)
-translator.register(ModelX, ModelXOptions)
 
 
+@register(models.ModelY)
 class ModelYOptions(TranslationOptions):
     fields = ('title',)
-translator.register(ModelY, ModelYOptions)
 
 
 # ######### 3-rd party with custom manager
