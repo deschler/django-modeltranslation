@@ -403,3 +403,17 @@ class AbstractModelY(models.Model):
 
 class ModelY(AbstractModelY):
     pass
+
+
+class HideHiddenManager(models.Manager):
+
+    def get_queryset(self):
+        return super(HideHiddenManager, self).get_queryset().filter(hidden=False)
+
+
+class SoftDeleteModel(models.Model):
+    title = models.CharField(max_length=255)
+    hidden = models.BooleanField(default=False)
+
+    objects_including_hidden = models.Manager()
+    objects = HideHiddenManager()

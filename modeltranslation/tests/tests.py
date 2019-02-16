@@ -2731,6 +2731,13 @@ class TestManager(ModeltranslationTestBase):
         self.assertEqual(None, n.title_de)
         self.assertEqual('foo', n.title)
 
+    def test_creation_hidden(self):
+        obj = models.SoftDeleteModel(title="test", hidden=True)
+        obj.save()
+        self.assertEqual(
+            models.SoftDeleteModel.objects_including_hidden.count(), 1
+        )
+
     def test_creation_population(self):
         """Test if language fields are populated with default value on creation."""
         n = models.ManagerTestModel.objects.populate(True).create(title='foo')
