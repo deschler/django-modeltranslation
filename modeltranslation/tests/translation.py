@@ -102,28 +102,28 @@ class AbstractModelBTranslationOptions(TranslationOptions):
 
 # ######### Fields inheritance testing
 
-@register(models.Slugged)
 class SluggedTranslationOptions(TranslationOptions):
     fields = ('slug',)
 
 
-@register(models.MetaData)
 class MetaDataTranslationOptions(TranslationOptions):
     fields = ('keywords',)
 
 
-@register(models.RichText)
 class RichTextTranslationOptions(TranslationOptions):
     fields = ('content',)
 
 
-@register(models.Page)
 class PageTranslationOptions(TranslationOptions):
     fields = ('title',)
 
 
 # BasePage left unregistered intentionally.
+translator.register(models.Slugged, SluggedTranslationOptions)
+translator.register(models.MetaData, MetaDataTranslationOptions)
+translator.register(models.RichText, RichTextTranslationOptions)
 translator.register(models.Displayable)
+translator.register(models.Page, PageTranslationOptions)
 translator.register(models.RichTextPage)
 
 
@@ -134,7 +134,10 @@ class ManagerTestModelTranslationOptions(TranslationOptions):
     fields = ('title', 'visits', 'description')
 
 
-@register([models.CustomManagerTestModel, models.CustomManager2TestModel])
+@register([
+    models.CustomManagerTestModel,
+    models.CustomManager2TestModel,
+])
 class CustomManagerTestModelTranslationOptions(TranslationOptions):
     fields = ('title',)
 
