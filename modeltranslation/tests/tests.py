@@ -3160,12 +3160,20 @@ class InheritedPermissionTestCase(ModeltranslationTestBase):
         """This fails with 0.13b."""
         from modeltranslation.manager import MultilingualManager
         from django.contrib.auth.models import Permission, User
-        self.assertFalse(isinstance(Permission.objects, MultilingualManager))
+        from .models import InheritedPermission
+        self.assertFalse(
+            isinstance(Permission.objects, MultilingualManager),
+            "Permission is using MultilingualManager")
+        self.assertTrue(
+            isinstance(InheritedPermission.objects, MultilingualManager),
+            "InheritedPermission is not using MultilingualManager")
 
         # This happens at initialization time, depending on the models
         # initialized.
         Permission._meta._expire_cache()
 
-        self.assertFalse(isinstance(Permission.objects, MultilingualManager))
+        self.assertFalse(
+            isinstance(Permission.objects, MultilingualManager),
+            "Permission is using MultilingualManager")
         user = User.objects.create(username='123', is_active=True)
         user.has_perm('test_perm')
