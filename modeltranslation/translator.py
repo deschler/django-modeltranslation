@@ -209,6 +209,7 @@ def add_manager(model):
     managers = []
     seen = set()
     bases = [b for b in model.mro() if hasattr(b, '_meta')]
+    print("add_manager %s\n %s" % (model._meta.label, bases))
     for base in bases:
         for manager in base._meta.local_managers:
             if manager.name in seen:
@@ -219,6 +220,7 @@ def add_manager(model):
     for current_manager in managers:
         prev_class = current_manager.__class__
         patch_manager_class(current_manager)
+        print("  1 patch_manager_class", current_manager)
         if model._default_manager.__class__ is prev_class:
             # Normally model._default_manager is a reference to one of model's managers
             # (and would be patched by the way).
@@ -227,6 +229,7 @@ def add_manager(model):
             # share the same class.
             model._default_manager.__class__ = current_manager.__class__
     patch_manager_class(model._base_manager)
+    print("  2 patch_manager_class", model._base_manager)
     model._meta.base_manager_name = 'objects'
     model._meta._expire_cache()
 
