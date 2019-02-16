@@ -209,7 +209,7 @@ def add_manager(model):
     managers = []
     seen = set()
     bases = [b for b in model.mro() if hasattr(b, '_meta')]
-    print("add_manager %s\n %s" % (model._meta.label, bases))
+    print("add_manager %s\n bases: %s" % (model._meta.label, bases))
     for base in bases:
         for manager in base._meta.local_managers:
             if manager.name in seen:
