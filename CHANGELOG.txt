@@ -1,3 +1,9 @@
+v0.13-beta3
+===========
+Date: 2019-02-17
+  FIXED: Patching parent model managers on multi-table inheritance (#467)
+
+
 v0.13-beta2
 ===========
 Date: 2019-02-13
