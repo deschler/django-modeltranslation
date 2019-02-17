@@ -322,12 +322,6 @@ class RequiredModel(models.Model):
     req_en_reg = models.CharField(max_length=10)
 
 
-# ######### Decorated registration testing
-
-class DecoratedModel(models.Model):
-    title = models.CharField(ugettext_lazy('title'), max_length=255)
-
-
 # ######### Name collision registration testing
 
 class ConflictModel(models.Model):

@@ -39,7 +39,7 @@ models = translation = None
 request = None
 
 # How many models are registered for tests.
-TEST_MODELS = 32 + (1 if MIGRATIONS else 0)
+TEST_MODELS = 31 + (1 if MIGRATIONS else 0)
 
 
 class reload_override_settings(override_settings):
