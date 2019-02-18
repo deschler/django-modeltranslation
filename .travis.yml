@@ -40,7 +40,7 @@ before_script:
   - psql -c 'create database modeltranslation;' -U postgres
 install:
   - if [[ $DB == mysql ]]; then pip install -q mysqlclient; fi
-  - if [[ $DB == postgres ]]; then pip install -q psycopg2; fi
+  - if [[ $DB == postgres ]]; then pip install -q psycopg2-binary; fi
   - pip install -q Pillow
   - IDJANGO=$(./travis.py $DJANGO)
   - pip install -q $IDJANGO
