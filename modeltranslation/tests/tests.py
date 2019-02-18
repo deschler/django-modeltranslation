@@ -3026,8 +3026,7 @@ class TestManager(ModeltranslationTestBase):
         # the distinct applies to (this generates a DISTINCT ON (*fields) sql expression).
         # NB: DISTINCT ON expressions must be accompanied by an order_by() that starts with the
         # same fields in the same order
-        if (django_settings.DATABASES['default']['ENGINE'] ==
-                'django.db.backends.postgresql_psycopg2'):
+        if django_settings.DATABASES['default']['ENGINE'] == 'django.db.backends.postgresql':
             titles_for_en = tuple(
                 (m.title, m.description) for m in manager.order_by(
                     'title', 'description').distinct('title'))

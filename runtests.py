@@ -27,7 +27,7 @@ def runtests(test_path='modeltranslation'):
             })
         elif test_db == 'postgres':
             DATABASES['default'].update({
-                'ENGINE': 'django.db.backends.postgresql_psycopg2',
+                'ENGINE': 'django.db.backends.postgresql',
                 'USER': 'postgres',
                 'NAME': 'modeltranslation',
             })
