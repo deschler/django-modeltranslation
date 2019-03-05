@@ -3033,8 +3033,7 @@ class TestManager(ModeltranslationTestBase):
         # the distinct applies to (this generates a DISTINCT ON (*fields) sql expression).
         # NB: DISTINCT ON expressions must be accompanied by an order_by() that starts with the
         # same fields in the same order
-        if (django_settings.DATABASES['default']['ENGINE'] ==
-                'django.db.backends.postgresql_psycopg2'):
+        if django_settings.DATABASES['default']['ENGINE'] == 'django.db.backends.postgresql':
             titles_for_en = tuple(
                 (m.title, m.description) for m in manager.order_by(
                     'title', 'description').distinct('title'))
@@ -3158,3 +3157,29 @@ class M2MTest(ModeltranslationTestBase):
             # Again: 1 X named "bar" (but through the M2M field)
             x_bar = y.xs.filter(name="bar")
             self.assertIn(x2, x_bar)
+
+
+class InheritedPermissionTestCase(ModeltranslationTestBase):
+
+    @skipUnless(MIGRATIONS, 'migrations/auth not available')
+    def test_managers_failure(self):
+        """This fails with 0.13b."""
+        from modeltranslation.manager import MultilingualManager
+        from django.contrib.auth.models import Permission, User
+        from .models import InheritedPermission
+        self.assertFalse(
+            isinstance(Permission.objects, MultilingualManager),
+            "Permission is using MultilingualManager")
+        self.assertTrue(
+            isinstance(InheritedPermission.objects, MultilingualManager),
+            "InheritedPermission is not using MultilingualManager")
+
+        # This happens at initialization time, depending on the models
+        # initialized.
+        Permission._meta._expire_cache()
+
+        self.assertFalse(
+            isinstance(Permission.objects, MultilingualManager),
+            "Permission is using MultilingualManager")
+        user = User.objects.create(username='123', is_active=True)
+        user.has_perm('test_perm')

@@ -202,21 +202,10 @@ def add_manager(model):
     """
     if model._meta.abstract:
         return
+    # Make all managers local for this model to fix patching parent model managers
+    model._meta.local_managers = model._meta.managers
 
-    # Inspired by django.db.models.options.Options.managers (find all
-    # managers by following the normal Python MRO rules), but keeps the
-    # original managers instead of making copies.
-    managers = []
-    seen = set()
-    bases = [b for b in model.mro() if hasattr(b, '_meta')]
-    for base in bases:
-        for manager in base._meta.local_managers:
-            if manager.name in seen:
-                continue
-            managers.append(manager)
-            seen.add(manager.name)
-
-    for current_manager in managers:
+    for current_manager in model._meta.local_managers:
         prev_class = current_manager.__class__
         patch_manager_class(current_manager)
         if model._default_manager.__class__ is prev_class:
