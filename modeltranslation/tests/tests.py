@@ -2732,7 +2732,8 @@ class TestManager(ModeltranslationTestBase):
         self.assertEqual('foo', n.title)
 
     def test_creation_hidden(self):
-        obj = models.SoftDeleteModel(title="test", hidden=True)
+        obj = models.SoftDeleteModel.objects.create(title="test", hidden=True)
+        obj.hidden = False
         obj.save()
         self.assertEqual(
             models.SoftDeleteModel.objects_including_hidden.count(), 1
