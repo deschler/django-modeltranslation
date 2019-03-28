@@ -270,8 +270,9 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
             flattened_fieldsets = flatten_fieldsets(fieldsets)
 
             # Create a fieldset to group each translated field's localized fields
+            fields = sorted((f for f in self.opts.get_fields() if f.concrete))
             untranslated_fields = [
-                f.name for f in self.opts.fields if (
+                f.name for f in fields if (
                     # Exclude the primary key field
                     f is not self.opts.auto_field and
                     # Exclude non-editable fields
