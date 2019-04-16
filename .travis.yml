@@ -5,27 +5,26 @@ services:
   - postgresql
 python:
   - "2.7"
-  - "3.5"
   - "3.6"
   - "3.7"
 env:
   - DJANGO=1.11 DB=sqlite
   - DJANGO=1.11 DB=postgres
   - DJANGO=1.11 DB=mysql
-  - DJANGO=2.0 DB=sqlite
-  - DJANGO=2.0 DB=postgres
-  - DJANGO=2.0 DB=mysql
   - DJANGO=2.1 DB=sqlite
   - DJANGO=2.1 DB=postgres
   - DJANGO=2.1 DB=mysql
+  - DJANGO=2.2 DB=sqlite
+  - DJANGO=2.2 DB=postgres
+  - DJANGO=2.2 DB=mysql
 matrix:
   exclude:
     - python: "2.7"
-      env: DJANGO=2.0 DB=sqlite
+      env: DJANGO=2.2 DB=sqlite
     - python: "2.7"
-      env: DJANGO=2.0 DB=mysql
+      env: DJANGO=2.2 DB=mysql
     - python: "2.7"
-      env: DJANGO=2.0 DB=postgres
+      env: DJANGO=2.2 DB=postgres
     - python: "2.7"
       env: DJANGO=2.1 DB=sqlite
     - python: "2.7"
