@@ -22,9 +22,10 @@ MANIFEST
 # Installer logs
 pip-log.txt
 
-# Development pipfiles
+# Development pipfiles and venv
 Pipfile
 Pipfile.lock
+.venv
 
 # Unit test / coverage reports
 .coverage
