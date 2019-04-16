@@ -706,9 +706,9 @@ class FileFieldsTest(ModeltranslationTestBase):
         self.assertEqual(inst.image.read(), b'image in english')
 
         # Check if file was actually created in the global storage.
-        self.assertTrue(default_storage.exists(inst.file))
+        self.assertTrue(default_storage.exists(inst.file.path))
         self.assertTrue(inst.file.size > 0)
-        self.assertTrue(default_storage.exists(inst.image))
+        self.assertTrue(default_storage.exists(inst.image.path))
         self.assertTrue(inst.image.size > 0)
 
         trans_real.activate("de")
