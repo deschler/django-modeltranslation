@@ -1,6 +1,6 @@
 Metadata-Version: 1.0
 Name: django-modeltranslation
-Version: 0.13-0
+Version: 0.13-1
 Summary: Translates Django models using a registration approach.
 Home-page: https://github.com/deschler/django-modeltranslation
 Author: Peter Eschler,
