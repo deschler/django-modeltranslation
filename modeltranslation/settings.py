@@ -54,3 +54,10 @@ for key, value in FALLBACK_LANGUAGES.items():
 ENABLE_FALLBACKS = getattr(settings, 'MODELTRANSLATION_ENABLE_FALLBACKS', True)
 
 LOADDATA_RETAIN_LOCALE = getattr(settings, 'MODELTRANSLATION_LOADDATA_RETAIN_LOCALE', True)
+
+JQUERY_URL = getattr(settings, 'JQUERY_URL',
+                     '//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js')
+JQUERY_UI_URL = getattr(settings, 'JQUERY_UI_URL',
+                        '//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js')
+JQUERY_MB_BROWSER_URL = getattr(settings, 'JQUERY_MB_BROWSER_URL',
+                                '//cdn.jsdelivr.net/jquery.mb.browser/0.1/jquery.mb.browser.min.js')
