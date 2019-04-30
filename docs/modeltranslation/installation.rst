@@ -70,7 +70,7 @@ in detail in the following sections:
 4. Create a ``translation.py`` in your app directory and register
    ``TranslationOptions`` for every model you want to translate.
 
-5. Sync the database using ``python manage.py syncdb``.
+5. Sync the database using ``python manage.py makemigrations`` and ``python manage.py migrate``.
 
    .. note:: This only applies if the models registered in ``translation.py`` haven't been
              synced to the database before. If they have, please read :ref:`db-fields`.
