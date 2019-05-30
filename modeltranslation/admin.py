@@ -25,16 +25,15 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         self.trans_opts = translator.get_options_for_model(self.model)
         self._patch_prepopulated_fields()
 
-    def _declared_fieldsets(self):
+    def _get_declared_fieldsets(self, request, obj=None):
         # Take custom modelform fields option into account
         if not self.fields and hasattr(self.form, '_meta') and self.form._meta.fields:
             self.fields = self.form._meta.fields
         if self.fieldsets:
             return self._patch_fieldsets(self.fieldsets)
         elif self.fields:
-            return [(None, {'fields': self.replace_orig_field(self.fields)})]
+            return [(None, {'fields': self.replace_orig_field(self.get_fields(request, obj))})]
         return None
-    declared_fieldsets = property(_declared_fieldsets)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         field = super(TranslationBaseModelAdmin, self).formfield_for_dbfield(db_field, **kwargs)
@@ -198,12 +197,12 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
 
         return kwargs
 
-    def _get_fieldsets_pre_form_or_formset(self):
+    def _get_fieldsets_pre_form_or_formset(self, request, obj=None):
         """
         Generic get_fieldsets code, shared by
         TranslationAdmin and TranslationInlineModelAdmin.
         """
-        return self._declared_fieldsets()
+        return self._get_declared_fieldsets(request, obj)
 
     def _get_fieldsets_post_form_or_formset(self, request, form, obj=None):
         """
@@ -266,7 +265,7 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
         # setting TranslationAdmin.group_fieldsets to True. If the admin class
         # already defines a fieldset, we leave it alone and assume the author
         # has done whatever grouping for translated fields they desire.
-        if not self.declared_fieldsets and self.group_fieldsets is True:
+        if self.group_fieldsets is True:
             flattened_fieldsets = flatten_fieldsets(fieldsets)
 
             # Create a fieldset to group each translated field's localized fields
@@ -314,9 +313,7 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
         return super(TranslationAdmin, self).get_form(request, obj, **kwargs)
 
     def get_fieldsets(self, request, obj=None):
-        if self.declared_fieldsets:
-            return self._get_fieldsets_pre_form_or_formset()
-        return self._group_fieldsets(
+        return self._get_fieldsets_pre_form_or_formset(request, obj) or self._group_fieldsets(
             self._get_fieldsets_post_form_or_formset(
                 request, self.get_form(request, obj, fields=None), obj))
 
@@ -330,8 +327,9 @@ class TranslationInlineModelAdmin(TranslationBaseModelAdmin, InlineModelAdmin):
         # FIXME: If fieldsets are declared on an inline some kind of ghost
         # fieldset line with just the original model verbose_name of the model
         # is displayed above the new fieldsets.
-        if self.declared_fieldsets:
-            return self._get_fieldsets_pre_form_or_formset()
+        declared_fieldsets = self._get_fieldsets_pre_form_or_formset(request, obj)
+        if declared_fieldsets:
+            return declared_fieldsets
         form = self.get_formset(request, obj, fields=None).form
         return self._get_fieldsets_post_form_or_formset(request, form, obj)
 
