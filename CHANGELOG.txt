@@ -1,3 +1,9 @@
+v0.13-2
+===========
+Date: 2019-07-01
+  FIXED: Outdated formfield_for_dbfield signature (#510)
+
+
 v0.13-1
 ===========
 Date: 2019-04-18
