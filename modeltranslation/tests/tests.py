@@ -2185,6 +2185,7 @@ class TranslationAdminTest(ModeltranslationTestBase):
     def test_widget_ordering_via_formfield_for_dbfield(self):
         class TestModelAdmin(admin.TranslationAdmin):
             fields = ['text']
+
             def formfield_for_dbfield(self, db_field, request, **kwargs):
                 if isinstance(db_field, TextField):
                     kwargs["widget"] = forms.Textarea(attrs={'myprop': 'myval'})
