@@ -15,7 +15,7 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.core.management import call_command
 from django.db import IntegrityError
-from django.db.models import Q, F, Count
+from django.db.models import Q, F, Count, TextField
 from django.test import TestCase, TransactionTestCase
 from django.test.utils import override_settings
 from django.utils import six
@@ -2164,6 +2164,35 @@ class TranslationAdminTest(ModeltranslationTestBase):
 
         class TestModelAdmin(admin.TranslationAdmin):
             form = TestModelForm
+
+        ma = TestModelAdmin(models.TestModel, self.site)
+        fields = ['text_de', 'text_en']
+        self.assertEqual(
+            tuple(ma.get_form(request).base_fields.keys()), tuple(fields))
+        self.assertEqual(
+            tuple(ma.get_form(request, self.test_obj).base_fields.keys()), tuple(fields))
+
+        for field in fields:
+            self.assertIn(
+                'myprop',
+                ma.get_form(request).base_fields.get(field).widget.attrs.keys()
+            )
+            self.assertIn(
+                'myval',
+                ma.get_form(request, self.test_obj).base_fields.get(field).widget.attrs.values()
+            )
+
+    def test_widget_ordering_via_formfield_for_dbfield(self):
+        class TestModelAdmin(admin.TranslationAdmin):
+            fields = ['text']
+
+            def formfield_for_dbfield(self, db_field, request, **kwargs):
+                if isinstance(db_field, TextField):
+                    kwargs["widget"] = forms.Textarea(attrs={'myprop': 'myval'})
+                    return db_field.formfield(**kwargs)
+                return super(TestModelAdmin, self).formfield_for_dbfield(
+                    db_field, request, **kwargs
+                )
 
         ma = TestModelAdmin(models.TestModel, self.site)
         fields = ['text_de', 'text_en']
