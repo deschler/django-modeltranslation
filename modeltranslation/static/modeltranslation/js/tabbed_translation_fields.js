@@ -302,6 +302,8 @@ var google, django, gettext;
             var tabs = [];
 
             $.each(groupedTranslations, function (groupId, lang) {
+                if (groupId.includes("__prefix__"))
+                    return;
                 var tabsContainer = $('<td></td>'),
                     tabsList = $('<ul></ul>'),
                     insertionPoint;
@@ -326,6 +328,7 @@ var google, django, gettext;
                     $.each($container[0].attributes, function(idx, attr) {
                         attrs[attr.nodeName] = attr.nodeValue;
                     });
+
                     $container.replaceWith(function () {
                         return $('<div />', attrs).append($(this).contents());
                     });
