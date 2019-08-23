@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from copy import deepcopy
 
-import django
 from django.contrib import admin
 from django.contrib.admin.options import BaseModelAdmin, flatten_fieldsets, InlineModelAdmin
 from django import forms
@@ -13,16 +12,8 @@ from modeltranslation.utils import (
     get_language_bidi, unique)
 from modeltranslation.widgets import ClearableWidgetWrapper
 
-# Ensure that models are registered for translation before TranslationAdmin
-# runs. The import is supposed to resolve a race condition between model import
-# and translation registration in production (see issue #19).
-if django.VERSION < (1, 7):
-    from django.contrib.contenttypes.generic import GenericTabularInline
-    from django.contrib.contenttypes.generic import GenericStackedInline
-    import modeltranslation.models  # NOQA
-else:
-    from django.contrib.contenttypes.admin import GenericTabularInline
-    from django.contrib.contenttypes.admin import GenericStackedInline
+from django.contrib.contenttypes.admin import GenericTabularInline
+from django.contrib.contenttypes.admin import GenericStackedInline
 
 
 class TranslationBaseModelAdmin(BaseModelAdmin):
@@ -34,23 +25,24 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         self.trans_opts = translator.get_options_for_model(self.model)
         self._patch_prepopulated_fields()
 
-    def _declared_fieldsets(self):
+    def _get_declared_fieldsets(self, request, obj=None):
         # Take custom modelform fields option into account
         if not self.fields and hasattr(self.form, '_meta') and self.form._meta.fields:
             self.fields = self.form._meta.fields
         if self.fieldsets:
             return self._patch_fieldsets(self.fieldsets)
         elif self.fields:
-            return [(None, {'fields': self.replace_orig_field(self.fields)})]
+            return [(None, {'fields': self.replace_orig_field(self.get_fields(request, obj))})]
         return None
-    declared_fieldsets = property(_declared_fieldsets)
 
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        field = super(TranslationBaseModelAdmin, self).formfield_for_dbfield(db_field, **kwargs)
-        self.patch_translation_field(db_field, field, **kwargs)
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        field = super(TranslationBaseModelAdmin, self).formfield_for_dbfield(
+            db_field, request, **kwargs
+        )
+        self.patch_translation_field(db_field, field, request, **kwargs)
         return field
 
-    def patch_translation_field(self, db_field, field, **kwargs):
+    def patch_translation_field(self, db_field, field, request, **kwargs):
         if db_field.name in self.trans_opts.fields:
             if field.required:
                 field.required = False
@@ -64,8 +56,16 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         except AttributeError:
             pass
         else:
-            orig_formfield = self.formfield_for_dbfield(orig_field, **kwargs)
+            orig_formfield = self.formfield_for_dbfield(
+                orig_field, request, **kwargs
+            )
             field.widget = deepcopy(orig_formfield.widget)
+            # if any widget attrs are defined on the form they should be copied
+            try:
+                field.widget = deepcopy(self.form._meta.widgets[orig_field.name])
+            except (AttributeError, TypeError, KeyError):
+                pass
+            # field.widget = deepcopy(orig_formfield.widget)
             if orig_field.name in self.both_empty_values_fields:
                 from modeltranslation.forms import NullableField, NullCharField
                 form_class = field.__class__
@@ -201,12 +201,12 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
 
         return kwargs
 
-    def _get_fieldsets_pre_form_or_formset(self):
+    def _get_fieldsets_pre_form_or_formset(self, request, obj=None):
         """
         Generic get_fieldsets code, shared by
         TranslationAdmin and TranslationInlineModelAdmin.
         """
-        return self._declared_fieldsets()
+        return self._get_declared_fieldsets(request, obj)
 
     def _get_fieldsets_post_form_or_formset(self, request, form, obj=None):
         """
@@ -269,12 +269,13 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
         # setting TranslationAdmin.group_fieldsets to True. If the admin class
         # already defines a fieldset, we leave it alone and assume the author
         # has done whatever grouping for translated fields they desire.
-        if not self.declared_fieldsets and self.group_fieldsets is True:
+        if self.group_fieldsets is True:
             flattened_fieldsets = flatten_fieldsets(fieldsets)
 
             # Create a fieldset to group each translated field's localized fields
+            fields = sorted((f for f in self.opts.get_fields() if f.concrete))
             untranslated_fields = [
-                f.name for f in self.opts.fields if (
+                f.name for f in fields if (
                     # Exclude the primary key field
                     f is not self.opts.auto_field and
                     # Exclude non-editable fields
@@ -316,9 +317,7 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
         return super(TranslationAdmin, self).get_form(request, obj, **kwargs)
 
     def get_fieldsets(self, request, obj=None):
-        if self.declared_fieldsets:
-            return self._get_fieldsets_pre_form_or_formset()
-        return self._group_fieldsets(
+        return self._get_fieldsets_pre_form_or_formset(request, obj) or self._group_fieldsets(
             self._get_fieldsets_post_form_or_formset(
                 request, self.get_form(request, obj, fields=None), obj))
 
@@ -332,8 +331,9 @@ class TranslationInlineModelAdmin(TranslationBaseModelAdmin, InlineModelAdmin):
         # FIXME: If fieldsets are declared on an inline some kind of ghost
         # fieldset line with just the original model verbose_name of the model
         # is displayed above the new fieldsets.
-        if self.declared_fieldsets:
-            return self._get_fieldsets_pre_form_or_formset()
+        declared_fieldsets = self._get_fieldsets_pre_form_or_formset(request, obj)
+        if declared_fieldsets:
+            return declared_fieldsets
         form = self.get_formset(request, obj, fields=None).form
         return self._get_fieldsets_post_form_or_formset(request, form, obj)
 
@@ -354,24 +354,6 @@ class TranslationGenericStackedInline(TranslationInlineModelAdmin, GenericStacke
     pass
 
 
-class TabbedDjango15JqueryTranslationAdmin(TranslationAdmin):
-    """
-    Convenience class which includes the necessary static files for tabbed
-    translation fields. Reuses Django's internal jquery version. Django 1.5
-    included jquery 1.4.2 which is known to work well with jquery-ui 1.8.2.
-    """
-    class Media:
-        js = (
-            'modeltranslation/js/force_jquery.js',
-            '//ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/jquery-ui.min.js',
-            '//cdn.jsdelivr.net/jquery.mb.browser/0.1/jquery.mb.browser.min.js',
-            'modeltranslation/js/tabbed_translation_fields.js',
-        )
-        css = {
-            'all': ('modeltranslation/css/tabbed_translation_fields.css',),
-        }
-
-
 class TabbedDjangoJqueryTranslationAdmin(TranslationAdmin):
     """
     Convenience class which includes the necessary media files for tabbed
@@ -379,9 +361,10 @@ class TabbedDjangoJqueryTranslationAdmin(TranslationAdmin):
     """
     class Media:
         js = (
+            'admin/js/jquery.init.js',
             'modeltranslation/js/force_jquery.js',
-            '//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js',
-            '//cdn.jsdelivr.net/jquery.mb.browser/0.1/jquery.mb.browser.min.js',
+            mt_settings.JQUERY_UI_URL,
+            mt_settings.JQUERY_MB_BROWSER_URL,
             'modeltranslation/js/tabbed_translation_fields.js',
         )
         css = {
@@ -396,9 +379,9 @@ class TabbedExternalJqueryTranslationAdmin(TranslationAdmin):
     """
     class Media:
         js = (
-            '//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js',
-            '//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js',
-            '//cdn.jsdelivr.net/jquery.mb.browser/0.1/jquery.mb.browser.min.js',
+            mt_settings.JQUERY_URL,
+            mt_settings.JQUERY_UI_URL,
+            mt_settings.JQUERY_MB_BROWSER_URL,
             'modeltranslation/js/tabbed_translation_fields.js',
         )
         css = {
@@ -406,7 +389,4 @@ class TabbedExternalJqueryTranslationAdmin(TranslationAdmin):
         }
 
 
-if django.VERSION < (1, 6):
-    TabbedTranslationAdmin = TabbedDjango15JqueryTranslationAdmin
-else:
-    TabbedTranslationAdmin = TabbedDjangoJqueryTranslationAdmin
+TabbedTranslationAdmin = TabbedDjangoJqueryTranslationAdmin

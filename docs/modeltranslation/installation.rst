@@ -8,30 +8,22 @@ Requirements
 
 Which Modeltranslation version is required for given Django-Python combination to work?
 
-======= ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ====
+======= ==== ==== ==== ==== ====
 Python  Django
-------- -----------------------------------------------------------
-version 1.0  1.1  1.2  1.3  1.4  1.5  1.6  1.7  1.8  1.9  1.10 1.11
-======= ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ====
-2.4     |u3| |u3| |u3| |u3|
-2.5     |u3| |u3| |u3| |36| |36|
-2.6     |u3| |u3| |u3| |36| |3|  |5|  |7|
-2.7     |u3| |u3| |u3| |36| |3|  |5|  |7|  |8|  |9|  |11| |12| |13|
-3.2                              |7|  |7|  |8|  |9|
-3.3                              |7|  |7|  |8|  |9|
-3.4                                        |8|  |9|  |11| |12| |13|
-3.5                                             |9|  |11| |12| |13|
-3.6                                                            |13|
-======= ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ====
+------- -----------------------------
+version 1.8  1.9  1.10 1.11 2.0  2.1
+======= ==== ==== ==== ==== ==== ====
+2.7     |9|  |11| |12| |13|
+3.2     |9|
+3.3     |9|
+3.4     |9|  |11| |12| |13| |13|
+3.5     |9|  |11| |12| |13| |13| |13|
+3.6                    |13| |13| |13|
+3.7                         |13| |13|
+======= ==== ==== ==== ==== ==== ====
 
 (``-X`` denotes "up to version X", whereas ``X+`` means "from version X upwards")
 
-.. |u3| replace:: -0.3
-.. |3|  replace:: 0.3+
-.. |36| replace:: 0.3-0.6
-.. |5|  replace:: 0.5+
-.. |7|  replace:: 0.7+
-.. |8|  replace:: 0.8+
 .. |9|  replace:: 0.9+
 .. |11| replace:: 0.11+
 .. |12| replace:: 0.12+
@@ -78,7 +70,7 @@ in detail in the following sections:
 4. Create a ``translation.py`` in your app directory and register
    ``TranslationOptions`` for every model you want to translate.
 
-5. Sync the database using ``python manage.py syncdb``.
+5. Sync the database using ``python manage.py makemigrations`` and ``python manage.py migrate``.
 
    .. note:: This only applies if the models registered in ``translation.py`` haven't been
              synced to the database before. If they have, please read :ref:`db-fields`.
