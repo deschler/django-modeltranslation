@@ -82,7 +82,6 @@ def append_fallback(model, fields):
                 model_field = rel_model._meta.get_field(part)
             except Exception:
                 break
-                model_field = None
             field_model = getattr(
                 model_field, 'related_model', None
             )
@@ -109,7 +108,6 @@ def append_fallback(model, fields):
                 build_localized_fieldname(key, lang) for lang in langs)
             fields.remove(key)
             trans.add(key)
-    print(fields, trans)
     return fields, trans
 
 
@@ -491,7 +489,6 @@ class FallbackValuesIterable(ValuesIterable):
                     descriptor = getattr(model, field_part)
                     old_name = descriptor.field.name
                     # temporary change name of field
-                    print(descriptor.field.name, 'change to', key)
                     descriptor.field.name = key
                     row[key] = descriptor.__get__(instance, None)
                     descriptor.field.name = old_name
