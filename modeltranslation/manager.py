@@ -11,10 +11,10 @@ from django.contrib.admin.utils import get_model_from_relation
 from django.db import models
 from django.db.models import FieldDoesNotExist
 from django.db.models.query import ValuesIterable
-from django.utils.six import moves
 from django.utils.tree import Node
 from django.db.models.lookups import Lookup
 from django.db.models.expressions import Col
+from six import moves
 
 from modeltranslation import settings
 from modeltranslation.fields import TranslationField

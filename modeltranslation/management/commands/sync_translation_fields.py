@@ -13,7 +13,7 @@ from django import VERSION
 from django.core.management.base import BaseCommand
 from django.core.management.color import no_style
 from django.db import connection
-from django.utils.six import moves
+from six import moves
 
 from modeltranslation.settings import AVAILABLE_LANGUAGES
 from modeltranslation.translator import translator
