@@ -2730,6 +2730,10 @@ class TestManager(ModeltranslationTestBase):
         manager = models.CustomManagerTestModel.another_mgr_name
         self.assertTrue(isinstance(manager, MultilingualManager))
 
+    def test_default_manager_for_inherited_models(self):
+        manager = models.CustomAbstractManagerTestModel()._meta.default_manager
+        self.assertEqual('objects', manager.name)
+
     def test_custom_manager2(self):
         """Test if user-defined queryset is still working"""
         from modeltranslation.manager import MultilingualManager, MultilingualQuerySet

@@ -313,6 +313,27 @@ class CustomManager2TestModel(models.Model):
     objects = CustomManager2()
 
 
+class CustomManagerAbstract(models.Manager):
+    def to_translate(self):
+        return self.get_queryset().filter(needs_translation=True)
+
+
+class CustomManagerBaseModel(models.Model):
+    needs_translation = models.BooleanField(default=False)
+
+    objects = models.Manager()
+    translations = CustomManagerAbstract()
+
+    class Meta:
+        abstract = True
+
+
+class CustomAbstractManagerTestModel(CustomManagerBaseModel):
+    title = models.CharField(ugettext_lazy('title'), max_length=255)
+
+    objects = CustomManager2()
+
+
 # ######### Required fields testing
 
 class RequiredModel(models.Model):

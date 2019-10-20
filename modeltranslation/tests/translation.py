@@ -137,9 +137,12 @@ class ManagerTestModelTranslationOptions(TranslationOptions):
 @register([
     models.CustomManagerTestModel,
     models.CustomManager2TestModel,
+    models.CustomAbstractManagerTestModel
 ])
 class CustomManagerTestModelTranslationOptions(TranslationOptions):
     fields = ('title',)
+
+
 
 
 # ######### TranslationOptions field inheritance testing
