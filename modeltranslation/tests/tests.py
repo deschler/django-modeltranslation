@@ -40,7 +40,7 @@ models = translation = None
 request = None
 
 # How many models are registered for tests.
-TEST_MODELS = 32 + (1 if MIGRATIONS else 0)
+TEST_MODELS = 33 + (1 if MIGRATIONS else 0)
 
 
 class reload_override_settings(override_settings):
@@ -2731,12 +2731,17 @@ class TestManager(ModeltranslationTestBase):
         manager = models.CustomManagerTestModel.another_mgr_name
         self.assertTrue(isinstance(manager, MultilingualManager))
 
-    def test_default_manager_for_inherited_models(self):
+    def test_default_manager_for_inherited_models_with_custom_manager(self):
         """Test if default manager is still set from local managers"""
-        manager = models.CustomAbstractManagerTestModel._meta.default_manager
+        manager = models.CustomManagerChildTestModel._meta.default_manager
         self.assertEqual('objects', manager.name)
         self.assertTrue(isinstance(manager, MultilingualManager))
-        self.assertTrue(isinstance(models.CustomAbstractManagerTestModel.translations, MultilingualManager))
+        self.assertTrue(isinstance(models.CustomManagerChildTestModel.translations, MultilingualManager))
+
+    def test_default_manager_for_inherited_models(self):
+        manager = models.PlainChildTestModel._meta.default_manager
+        self.assertEqual('objects', manager.name)
+        self.assertTrue(isinstance(models.PlainChildTestModel.translations, MultilingualManager))
 
     def test_custom_manager2(self):
         """Test if user-defined queryset is still working"""

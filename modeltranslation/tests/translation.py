@@ -137,7 +137,8 @@ class ManagerTestModelTranslationOptions(TranslationOptions):
 @register([
     models.CustomManagerTestModel,
     models.CustomManager2TestModel,
-    models.CustomAbstractManagerTestModel
+    models.CustomManagerChildTestModel,
+    models.PlainChildTestModel
 ])
 class CustomManagerTestModelTranslationOptions(TranslationOptions):
     fields = ('title',)
