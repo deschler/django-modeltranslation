@@ -25,6 +25,7 @@ from django.apps import apps as django_apps
 
 from modeltranslation import admin, settings as mt_settings, translator
 from modeltranslation.forms import TranslationModelForm
+from modeltranslation.manager import MultilingualManager
 from modeltranslation.models import autodiscover
 from modeltranslation.tests.test_settings import TEST_SETTINGS
 from modeltranslation.utils import (build_css_class, build_localized_fieldname,
@@ -39,7 +40,7 @@ models = translation = None
 request = None
 
 # How many models are registered for tests.
-TEST_MODELS = 31 + (1 if MIGRATIONS else 0)
+TEST_MODELS = 32 + (1 if MIGRATIONS else 0)
 
 
 class reload_override_settings(override_settings):
@@ -2731,8 +2732,11 @@ class TestManager(ModeltranslationTestBase):
         self.assertTrue(isinstance(manager, MultilingualManager))
 
     def test_default_manager_for_inherited_models(self):
-        manager = models.CustomAbstractManagerTestModel()._meta.default_manager
+        """Test if default manager is still set from local managers"""
+        manager = models.CustomAbstractManagerTestModel._meta.default_manager
         self.assertEqual('objects', manager.name)
+        self.assertTrue(isinstance(manager, MultilingualManager))
+        self.assertTrue(isinstance(models.CustomAbstractManagerTestModel.translations, MultilingualManager))
 
     def test_custom_manager2(self):
         """Test if user-defined queryset is still working"""
