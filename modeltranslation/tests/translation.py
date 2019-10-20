@@ -144,8 +144,6 @@ class CustomManagerTestModelTranslationOptions(TranslationOptions):
     fields = ('title',)
 
 
-
-
 # ######### TranslationOptions field inheritance testing
 
 class FieldInheritanceATranslationOptions(TranslationOptions):

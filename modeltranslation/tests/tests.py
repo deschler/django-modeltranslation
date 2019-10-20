@@ -2736,7 +2736,9 @@ class TestManager(ModeltranslationTestBase):
         manager = models.CustomManagerChildTestModel._meta.default_manager
         self.assertEqual('objects', manager.name)
         self.assertTrue(isinstance(manager, MultilingualManager))
-        self.assertTrue(isinstance(models.CustomManagerChildTestModel.translations, MultilingualManager))
+        self.assertTrue(isinstance(
+            models.CustomManagerChildTestModel.translations,
+            MultilingualManager))
 
     def test_default_manager_for_inherited_models(self):
         manager = models.PlainChildTestModel._meta.default_manager
