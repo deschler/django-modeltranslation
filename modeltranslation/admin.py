@@ -184,12 +184,13 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         """
         Generic code shared by get_form and get_formset.
         """
-        if self.exclude is None:
+        exclude = self.get_exclude(request, obj)
+        if exclude is None:
             exclude = []
         else:
-            exclude = list(self.exclude)
+            exclude = list(exclude)
         exclude.extend(self.get_readonly_fields(request, obj))
-        if not self.exclude and hasattr(self.form, '_meta') and self.form._meta.exclude:
+        if not exclude and hasattr(self.form, '_meta') and self.form._meta.exclude:
             # Take the custom ModelForm's Meta.exclude into account only if the
             # ModelAdmin doesn't define its own.
             exclude.extend(self.form._meta.exclude)
