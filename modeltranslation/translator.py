@@ -203,11 +203,17 @@ def add_manager(model):
     if model._meta.abstract:
         return
     # Make all managers local for this model to fix patching parent model managers
+    added = set(model._meta.managers) - set(model._meta.local_managers)
     model._meta.local_managers = model._meta.managers
 
     for current_manager in model._meta.local_managers:
         prev_class = current_manager.__class__
         patch_manager_class(current_manager)
+        if current_manager in added:
+            # Since default_manager is fetched by order of creation, any manager
+            # moved from parent class to child class needs to receive a new creation_counter
+            # in order to be ordered after the original local managers
+            current_manager._set_creation_counter()
         if model._default_manager.__class__ is prev_class:
             # Normally model._default_manager is a reference to one of model's managers
             # (and would be patched by the way).
