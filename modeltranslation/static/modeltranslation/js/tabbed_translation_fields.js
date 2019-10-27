@@ -146,6 +146,8 @@ var google, django, gettext;
         function createTabs(groupedTranslations) {
             var tabs = [];
             $.each(groupedTranslations, function (groupId, lang) {
+                if (groupId.includes("__prefix__"))
+                    return;
                 var tabsContainer = $('<div></div>'),
                     tabsList = $('<ul></ul>'),
                     insertionPoint;
