@@ -7,6 +7,7 @@ import os
 import shutil
 
 import django
+import six
 from django import forms
 from django.conf import settings as django_settings
 from django.contrib.admin.sites import AdminSite
@@ -18,7 +19,6 @@ from django.db import IntegrityError
 from django.db.models import Q, F, Count, TextField
 from django.test import TestCase, TransactionTestCase
 from django.test.utils import override_settings
-from django.utils import six
 from django.utils.translation import get_language, override, trans_real
 
 from django.apps import apps as django_apps

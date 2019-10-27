@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from contextlib import contextmanager
 
-from django.utils import six
+import six
 from django.utils.encoding import force_text
 from django.utils.translation import get_language as _get_language
 from django.utils.translation import get_language_info

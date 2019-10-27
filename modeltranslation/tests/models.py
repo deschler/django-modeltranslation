@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
+import six
 from django.conf import settings
 from django.core import validators
 from django.db import models
-from django.utils import six
 from django.utils.translation import ugettext_lazy
 
 
