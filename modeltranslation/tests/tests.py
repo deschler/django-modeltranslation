@@ -2997,7 +2997,7 @@ class TestManager(ModeltranslationTestBase):
         # untrans is nullable so not included when select_related=True
         self.assertNotIn('_untrans_cache', fk_qs.select_related()[0].__dict__)
 
-    @skipUnless(django.VERSION[0] == 2, 'Applicable only to django 2.x')
+    @skipUnless(django.VERSION[0] >= 2, 'Applicable only to django > 2.x')
     def test_select_related_django_2(self):
         test = models.TestModel.objects.create(title_de='title_de', title_en='title_en')
         with auto_populate('all'):
