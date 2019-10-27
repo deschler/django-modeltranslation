@@ -1,3 +1,8 @@
+v0.13-4
+===========
+Date: 2019-10-27
+  FIXED: Broken "Add another stacked inline" (#522)
+
 v0.13-3
 ===========
 Date: 2019-07-22
