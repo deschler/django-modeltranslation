@@ -2,6 +2,7 @@
 from decimal import Decimal
 from unittest import skipUnless
 import datetime
+import fnmatch
 import imp
 import os
 import shutil
@@ -81,6 +82,40 @@ class ModeltranslationTransactionTestBase(TransactionTestCase):
     synced = False
 
     @classmethod
+    def _get_migrations_path(cls):
+        return os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            "auth_migrations"
+        )
+
+    @classmethod
+    def _copy_migrations(cls):
+        # Locate the original contrib.auth migrations files
+        import django.contrib.auth.migrations as auth_migrations
+        source_dir_path = os.path.dirname(auth_migrations.__file__)
+
+        # Copy them to the local auth_migrations directory
+        target_dir_path = cls._get_migrations_path()
+        for f in os.listdir(source_dir_path):
+            source_path = os.path.join(source_dir_path, f)
+            target_path = os.path.join(target_dir_path, f)
+
+            # Only migration files get copied
+            if os.path.isfile(source_path) and not fnmatch.fnmatch(
+                    f, "__init__.py"
+            ):
+                shutil.copyfile(source_path, target_path)
+
+    @classmethod
+    def _clean_migrations(cls):
+        target_dir_path = cls._get_migrations_path()
+        for f in os.listdir(target_dir_path):
+            target_path = os.path.join(target_dir_path, f)
+            if os.path.isfile(target_path) and not fnmatch.fnmatch(
+                    f, "__init__.py"):
+                os.remove(target_path)
+
+    @classmethod
     def setUpClass(cls):
         """
         Prepare database:
@@ -93,6 +128,9 @@ class ModeltranslationTransactionTestBase(TransactionTestCase):
             ModeltranslationTransactionTestBase.synced = True
             # 0. Render initial migration of auth
             if MIGRATIONS:
+                # Make copies of auth migrations in the (local) auth_migrations
+                # module to setup test database
+                cls._copy_migrations()
                 call_command('makemigrations', 'auth', verbosity=2, interactive=False)
 
             # 1. Reload translation in case USE_I18N was False
@@ -132,11 +170,7 @@ class ModeltranslationTransactionTestBase(TransactionTestCase):
 
             # 7. clean migrations
             if MIGRATIONS:
-                import glob
-                dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                   "auth_migrations")
-                for f in glob.glob(dir + "/000?_*.py*"):
-                    os.unlink(f)
+                cls._clean_migrations()
 
             # A rather dirty trick to import models into module namespace, but not before
             # tests app has been added into INSTALLED_APPS and loaded
