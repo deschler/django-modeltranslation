@@ -2,11 +2,11 @@
 from functools import partial
 
 import django
-from django.utils.six import with_metaclass
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Manager, ForeignKey, OneToOneField
 from django.db.models.base import ModelBase
 from django.db.models.signals import post_init
+from six import with_metaclass
 
 from modeltranslation import settings as mt_settings
 from modeltranslation.fields import (NONE, create_translation_field, TranslationFieldDescriptor,
@@ -203,11 +203,17 @@ def add_manager(model):
     if model._meta.abstract:
         return
     # Make all managers local for this model to fix patching parent model managers
+    added = set(model._meta.managers) - set(model._meta.local_managers)
     model._meta.local_managers = model._meta.managers
 
     for current_manager in model._meta.local_managers:
         prev_class = current_manager.__class__
         patch_manager_class(current_manager)
+        if current_manager in added:
+            # Since default_manager is fetched by order of creation, any manager
+            # moved from parent class to child class needs to receive a new creation_counter
+            # in order to be ordered after the original local managers
+            current_manager._set_creation_counter()
         if model._default_manager.__class__ is prev_class:
             # Normally model._default_manager is a reference to one of model's managers
             # (and would be patched by the way).
@@ -368,7 +374,7 @@ def patch_related_object_descriptor_caching(ro_descriptor):
     class NewSingleObjectDescriptor(LanguageCacheSingleObjectDescriptor, ro_descriptor.__class__):
         pass
 
-    if django.VERSION[0] == 2:
+    if django.VERSION[0] >= 2:
         ro_descriptor.related.get_cache_name = partial(
             NewSingleObjectDescriptor.get_cache_name,
             ro_descriptor,

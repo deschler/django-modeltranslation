@@ -2,11 +2,13 @@
 from decimal import Decimal
 from unittest import skipUnless
 import datetime
+import fnmatch
 import imp
 import os
 import shutil
 
 import django
+import six
 from django import forms
 from django.conf import settings as django_settings
 from django.contrib.admin.sites import AdminSite
@@ -18,13 +20,13 @@ from django.db import IntegrityError
 from django.db.models import Q, F, Count, TextField
 from django.test import TestCase, TransactionTestCase
 from django.test.utils import override_settings
-from django.utils import six
 from django.utils.translation import get_language, override, trans_real
 
 from django.apps import apps as django_apps
 
 from modeltranslation import admin, settings as mt_settings, translator
 from modeltranslation.forms import TranslationModelForm
+from modeltranslation.manager import MultilingualManager
 from modeltranslation.models import autodiscover
 from modeltranslation.tests.test_settings import TEST_SETTINGS
 from modeltranslation.utils import (build_css_class, build_localized_fieldname,
@@ -39,7 +41,7 @@ models = translation = None
 request = None
 
 # How many models are registered for tests.
-TEST_MODELS = 31 + (1 if MIGRATIONS else 0)
+TEST_MODELS = 33 + (1 if MIGRATIONS else 0)
 
 
 class reload_override_settings(override_settings):
@@ -80,6 +82,40 @@ class ModeltranslationTransactionTestBase(TransactionTestCase):
     synced = False
 
     @classmethod
+    def _get_migrations_path(cls):
+        return os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            "auth_migrations"
+        )
+
+    @classmethod
+    def _copy_migrations(cls):
+        # Locate the original contrib.auth migrations files
+        import django.contrib.auth.migrations as auth_migrations
+        source_dir_path = os.path.dirname(auth_migrations.__file__)
+
+        # Copy them to the local auth_migrations directory
+        target_dir_path = cls._get_migrations_path()
+        for f in os.listdir(source_dir_path):
+            source_path = os.path.join(source_dir_path, f)
+            target_path = os.path.join(target_dir_path, f)
+
+            # Only migration files get copied
+            if os.path.isfile(source_path) and not fnmatch.fnmatch(
+                    f, "__init__.py"
+            ):
+                shutil.copyfile(source_path, target_path)
+
+    @classmethod
+    def _clean_migrations(cls):
+        target_dir_path = cls._get_migrations_path()
+        for f in os.listdir(target_dir_path):
+            target_path = os.path.join(target_dir_path, f)
+            if os.path.isfile(target_path) and not fnmatch.fnmatch(
+                    f, "__init__.py"):
+                os.remove(target_path)
+
+    @classmethod
     def setUpClass(cls):
         """
         Prepare database:
@@ -92,6 +128,9 @@ class ModeltranslationTransactionTestBase(TransactionTestCase):
             ModeltranslationTransactionTestBase.synced = True
             # 0. Render initial migration of auth
             if MIGRATIONS:
+                # Make copies of auth migrations in the (local) auth_migrations
+                # module to setup test database
+                cls._copy_migrations()
                 call_command('makemigrations', 'auth', verbosity=2, interactive=False)
 
             # 1. Reload translation in case USE_I18N was False
@@ -131,11 +170,7 @@ class ModeltranslationTransactionTestBase(TransactionTestCase):
 
             # 7. clean migrations
             if MIGRATIONS:
-                import glob
-                dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                   "auth_migrations")
-                for f in glob.glob(dir + "/000?_*.py*"):
-                    os.unlink(f)
+                cls._clean_migrations()
 
             # A rather dirty trick to import models into module namespace, but not before
             # tests app has been added into INSTALLED_APPS and loaded
@@ -2730,6 +2765,20 @@ class TestManager(ModeltranslationTestBase):
         manager = models.CustomManagerTestModel.another_mgr_name
         self.assertTrue(isinstance(manager, MultilingualManager))
 
+    def test_default_manager_for_inherited_models_with_custom_manager(self):
+        """Test if default manager is still set from local managers"""
+        manager = models.CustomManagerChildTestModel._meta.default_manager
+        self.assertEqual('objects', manager.name)
+        self.assertTrue(isinstance(manager, MultilingualManager))
+        self.assertTrue(isinstance(
+            models.CustomManagerChildTestModel.translations,
+            MultilingualManager))
+
+    def test_default_manager_for_inherited_models(self):
+        manager = models.PlainChildTestModel._meta.default_manager
+        self.assertEqual('objects', manager.name)
+        self.assertTrue(isinstance(models.PlainChildTestModel.translations, MultilingualManager))
+
     def test_custom_manager2(self):
         """Test if user-defined queryset is still working"""
         from modeltranslation.manager import MultilingualManager, MultilingualQuerySet
@@ -2982,7 +3031,7 @@ class TestManager(ModeltranslationTestBase):
         # untrans is nullable so not included when select_related=True
         self.assertNotIn('_untrans_cache', fk_qs.select_related()[0].__dict__)
 
-    @skipUnless(django.VERSION[0] == 2, 'Applicable only to django 2.x')
+    @skipUnless(django.VERSION[0] >= 2, 'Applicable only to django > 2.x')
     def test_select_related_django_2(self):
         test = models.TestModel.objects.create(title_de='title_de', title_en='title_en')
         with auto_populate('all'):
