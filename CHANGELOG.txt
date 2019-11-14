@@ -1,3 +1,9 @@
+v0.14-0
+===========
+Date: 2019-11-14
+  FIXED: Django 3.0 support (#521)
+  FIXED: Tests when django files not writable (#527)
+
 v0.13-3
 ===========
 Date: 2019-07-22
