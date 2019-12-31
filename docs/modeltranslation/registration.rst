@@ -4,7 +4,7 @@ Registering Models for Translation
 ==================================
 
 Modeltranslation can translate model fields of any model class. For each model
-to translate a translation option class containing the fields to translate is
+to translate, a translation option class containing the fields to translate is
 registered with a special object called the ``translator``.
 
 Registering models and their fields for translation requires the following
@@ -16,7 +16,7 @@ steps:
    ``modeltranslation.translator.translator``.
 
 The modeltranslation application reads the ``translation.py`` file in your
-app directory thereby triggering the registration of the translation
+app directory, thereby triggering the registration of the translation
 options found in the file.
 
 A translation option is a class that declares which fields of a model to
@@ -25,7 +25,7 @@ translate. The class must derive from
 ``fields`` attribute storing the list of fieldnames. The option class must be
 registered with the ``modeltranslation.translator.translator`` instance.
 
-To illustrate this let's have a look at a simple example using a ``News``
+To illustrate this, let's have a look at a simple example using a ``News``
 model. The news in this example only contains a ``title`` and a ``text`` field.
 Instead of a news, this could be any Django model class::
 
@@ -38,10 +38,10 @@ create a ``translation.py`` file in your news app directory and add the
 following::
 
     from modeltranslation.translator import translator, TranslationOptions
-    from news.models import News
+    from .models import News
 
     class NewsTranslationOptions(TranslationOptions):
-        fields = ('title', 'text',)
+        fields = ('title', 'text')
 
     translator.register(News, NewsTranslationOptions)
 
