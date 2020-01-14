@@ -8,7 +8,7 @@ Requirements
 
 Which Modeltranslation version is required for given Django-Python combination to work?
 
-======= ==== ==== ==== ==== ====
+======= ==== ==== ==== ==== ==== ====
 Python  Django
 ------- -----------------------------
 version 1.8  1.9  1.10 1.11 2.0  2.1
