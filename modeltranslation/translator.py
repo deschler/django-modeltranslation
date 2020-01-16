@@ -267,7 +267,11 @@ def patch_clean_fields(model):
                 if orig_field_name in exclude:
                     field.save_form_data(self, value, check=False)
             delattr(self, '_mt_form_pending_clear')
-        old_clean_fields(self, exclude)
+        try:
+            setattr(self, '_mt_disable', True)
+            old_clean_fields(self, exclude)
+        finally:
+            setattr(self, '_mt_disable', False)
     model.clean_fields = new_clean_fields
 
 
