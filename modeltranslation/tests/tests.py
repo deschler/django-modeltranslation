@@ -945,6 +945,7 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         self.assertIn(fk_option_en, test_inst.foreignkeymodel_set.all())
 
         # Check filtering in reverse way + lookup spanning:
+
         manager = models.TestModel.objects
         trans_real.activate("de")
         self.assertEqual(manager.filter(test_fks=fk_inst_both).count(), 1)
@@ -977,6 +978,7 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         test_inst2.save()
         test_inst2.test_fks.set((fk_inst_de, fk_inst_both))
         test_inst2.test_fks_en.set((fk_inst_en, fk_inst_both))
+
         self.assertEqual(fk_inst_both.test.pk, test_inst2.pk)
         self.assertEqual(fk_inst_both.test_id, test_inst2.pk)
         self.assertEqual(fk_inst_both.test_de, test_inst2)
@@ -989,6 +991,38 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         self.assertIn(fk_inst_both, test_inst2.test_fks.all())
         self.assertIn(fk_inst_en, test_inst2.test_fks.all())
         self.assertNotIn(fk_inst_de, test_inst2.test_fks.all())
+
+    def test_reverse_lookup_with_filtered_queryset_manager(self):
+        """
+        Make sure base_manager does not get same queryset filter as TestModel in reverse lookup
+        https://docs.djangoproject.com/en/3.0/topics/db/managers/#base-managers
+        """
+
+        class FilteredManager(MultilingualManager):
+            def get_queryset(self):
+                # always return empty queryset
+                return super(FilteredManager, self).get_queryset().filter(pk=None)
+
+        # save old to set back, not used to these tests
+        objects = models.TestModel.objects
+        filter_manager = FilteredManager()
+        filter_manager.model = models.TestModel
+        filter_manager.name = 'objects'
+        filter_manager.auto_created = True
+
+        models.TestModel.objects = filter_manager
+        test_inst = models.TestModel(title_en='title_en', title_de='title_de')
+        test_inst.save()
+
+        # create objects with relations to test_inst
+        fk_inst = self.model(test=test_inst, title_en='f_title_en', title_de='f_title_de')
+
+        manager = test_inst.objects    # for good measure
+        self.assertFalse(manager.all().exists())
+        self.assertEqual(fk_inst.test, test_inst)
+
+        # set objects back for further tests
+        models.TestModel.objects = objects
 
     def test_non_translated_relation(self):
         non_de = models.NonTranslated.objects.create(title='title_de')

@@ -3,9 +3,10 @@ from functools import partial
 
 import django
 from django.core.exceptions import ImproperlyConfigured
-from django.db.models import Manager, ForeignKey, OneToOneField
+from django.db.models import Manager, ForeignKey, OneToOneField, options
 from django.db.models.base import ModelBase
 from django.db.models.signals import post_init
+from django.utils.functional import cached_property
 from six import with_metaclass
 
 from modeltranslation import settings as mt_settings
@@ -124,6 +125,43 @@ class TranslationOptions(with_metaclass(FieldsAggregationMetaClass, object)):
         return '%s: %s + %s' % (self.__class__.__name__, local, inherited)
 
 
+class MultilingualOptions(options.Options):
+    """ Far from a MetaClass expert, maybe this could mbe combined with TranslationOptions"""
+
+    @cached_property
+    def base_manager(self):
+        """
+        Because base_manager get cached and initialised when no base_manager_name is set.
+        This will overwrites the class used as default manager
+        """
+
+        base_manager_name = self.base_manager_name
+        if not base_manager_name:
+            # Get the first parent's base_manager_name if there's one.
+            for parent in self.model.mro()[1:]:
+                if hasattr(parent, '_meta'):
+                    if parent._base_manager.name != '_base_manager':
+                        base_manager_name = parent._base_manager.name
+                    break
+
+        if base_manager_name:
+            try:
+                return self.managers_map[base_manager_name]
+            except KeyError:
+                raise ValueError(
+                    "%s has no manager named %r" % (
+                        self.object_name,
+                        base_manager_name,
+                    )
+                )
+
+        manager = MultilingualManager()  # this bad boy
+        manager.name = '_base_manager'
+        manager.model = self.model
+        manager.auto_created = True
+        return manager
+
+
 def add_translation_fields(model, opts):
     """
     Monkey patches the original model class to provide additional fields for
@@ -221,8 +259,8 @@ def add_manager(model):
             # model._default_manager is not the same instance as one of managers, but it
             # share the same class.
             model._default_manager.__class__ = current_manager.__class__
-    patch_manager_class(model._base_manager)
-    model._meta.base_manager_name = 'objects'
+
+    model._meta.__class__ = MultilingualOptions
     model._meta._expire_cache()
 
 
@@ -555,6 +593,7 @@ class Translator(object):
         """
         if model not in self._registry:
             # Create a new type for backwards compatibility.
+
             opts = type("%sTranslationOptions" % model.__name__,
                         (opts_class or TranslationOptions,), options)(model)
 
