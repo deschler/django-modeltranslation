@@ -130,35 +130,8 @@ class MultilingualOptions(options.Options):
 
     @cached_property
     def base_manager(self):
-        """
-        Because base_manager get cached and initialised when no base_manager_name is set.
-        This will overwrites the class used as default manager
-        """
-
-        base_manager_name = self.base_manager_name
-        if not base_manager_name:
-            # Get the first parent's base_manager_name if there's one.
-            for parent in self.model.mro()[1:]:
-                if hasattr(parent, '_meta'):
-                    if parent._base_manager.name != '_base_manager':
-                        base_manager_name = parent._base_manager.name
-                    break
-
-        if base_manager_name:
-            try:
-                return self.managers_map[base_manager_name]
-            except KeyError:
-                raise ValueError(
-                    "%s has no manager named %r" % (
-                        self.object_name,
-                        base_manager_name,
-                    )
-                )
-
-        manager = MultilingualManager()  # this bad boy
-        manager.name = '_base_manager'
-        manager.model = self.model
-        manager.auto_created = True
+        manager = super(MultilingualOptions, self).base_manager
+        manager.__class__ = MultilingualManager
         return manager
 
 
