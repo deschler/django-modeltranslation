@@ -126,7 +126,6 @@ class TranslationOptions(with_metaclass(FieldsAggregationMetaClass, object)):
 
 
 class MultilingualOptions(options.Options):
-    """ Far from a MetaClass expert, maybe this could mbe combined with TranslationOptions"""
 
     @cached_property
     def base_manager(self):

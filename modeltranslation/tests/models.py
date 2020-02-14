@@ -5,7 +5,6 @@ from django.core import validators
 from django.db import models
 from django.utils.translation import ugettext_lazy
 
-# from modeltranslation.manager import MultilingualManager
 from modeltranslation.manager import MultilingualManager
 
 
