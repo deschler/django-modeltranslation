@@ -3,9 +3,10 @@ from functools import partial
 
 import django
 from django.core.exceptions import ImproperlyConfigured
-from django.db.models import Manager, ForeignKey, OneToOneField
+from django.db.models import Manager, ForeignKey, OneToOneField, options
 from django.db.models.base import ModelBase
 from django.db.models.signals import post_init
+from django.utils.functional import cached_property
 from six import with_metaclass
 
 from modeltranslation import settings as mt_settings
@@ -124,6 +125,16 @@ class TranslationOptions(with_metaclass(FieldsAggregationMetaClass, object)):
         return '%s: %s + %s' % (self.__class__.__name__, local, inherited)
 
 
+class MultilingualOptions(options.Options):
+    """ Far from a MetaClass expert, maybe this could mbe combined with TranslationOptions"""
+
+    @cached_property
+    def base_manager(self):
+        manager = super(MultilingualOptions, self).base_manager
+        manager.__class__ = MultilingualManager
+        return manager
+
+
 def add_translation_fields(model, opts):
     """
     Monkey patches the original model class to provide additional fields for
@@ -221,8 +232,8 @@ def add_manager(model):
             # model._default_manager is not the same instance as one of managers, but it
             # share the same class.
             model._default_manager.__class__ = current_manager.__class__
-    patch_manager_class(model._base_manager)
-    model._meta.base_manager_name = 'objects'
+
+    model._meta.__class__ = MultilingualOptions
     model._meta._expire_cache()
 
 
@@ -555,6 +566,7 @@ class Translator(object):
         """
         if model not in self._registry:
             # Create a new type for backwards compatibility.
+
             opts = type("%sTranslationOptions" % model.__name__,
                         (opts_class or TranslationOptions,), options)(model)
 

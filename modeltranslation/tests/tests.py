@@ -41,7 +41,7 @@ models = translation = None
 request = None
 
 # How many models are registered for tests.
-TEST_MODELS = 33 + (1 if MIGRATIONS else 0)
+TEST_MODELS = 35 + (1 if MIGRATIONS else 0)
 
 
 class reload_override_settings(override_settings):
@@ -945,6 +945,7 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         self.assertIn(fk_option_en, test_inst.foreignkeymodel_set.all())
 
         # Check filtering in reverse way + lookup spanning:
+
         manager = models.TestModel.objects
         trans_real.activate("de")
         self.assertEqual(manager.filter(test_fks=fk_inst_both).count(), 1)
@@ -977,6 +978,7 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         test_inst2.save()
         test_inst2.test_fks.set((fk_inst_de, fk_inst_both))
         test_inst2.test_fks_en.set((fk_inst_en, fk_inst_both))
+
         self.assertEqual(fk_inst_both.test.pk, test_inst2.pk)
         self.assertEqual(fk_inst_both.test_id, test_inst2.pk)
         self.assertEqual(fk_inst_both.test_de, test_inst2)
@@ -989,6 +991,29 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         self.assertIn(fk_inst_both, test_inst2.test_fks.all())
         self.assertIn(fk_inst_en, test_inst2.test_fks.all())
         self.assertNotIn(fk_inst_de, test_inst2.test_fks.all())
+
+    def test_reverse_lookup_with_filtered_queryset_manager(self):
+        """
+        Make sure base_manager does not get same queryset filter as TestModel in reverse lookup
+        https://docs.djangoproject.com/en/3.0/topics/db/managers/#base-managers
+        """
+        from modeltranslation.tests.models import FilteredManager
+
+        test_inst = models.FilteredTestModel(title_en='title_en', title_de='title_de')
+        test_inst.save()
+
+        self.assertFalse(models.FilteredTestModel.objects.all().exists())
+        self.assertEqual(models.FilteredTestModel.objects.__class__, FilteredManager)
+        self.assertEqual(models.FilteredTestModel._meta.base_manager.__class__, MultilingualManager)
+
+        # # create objects with relations to test_inst
+        fk_inst = models.ForeignKeyFilteredModel(test=test_inst, title_en='f_title_en', title_de='f_title_de')
+        fk_inst.save()
+        fk_inst.refresh_from_db()   # force to reset cached values
+
+        self.assertEqual(models.ForeignKeyFilteredModel.objects.__class__, MultilingualManager)
+        self.assertEqual(models.ForeignKeyFilteredModel._meta.base_manager.__class__, MultilingualManager)
+        self.assertEqual(fk_inst.test, test_inst)
 
     def test_non_translated_relation(self):
         non_de = models.NonTranslated.objects.create(title='title_de')

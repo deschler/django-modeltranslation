@@ -5,6 +5,9 @@ from django.core import validators
 from django.db import models
 from django.utils.translation import ugettext_lazy
 
+# from modeltranslation.manager import MultilingualManager
+from modeltranslation.manager import MultilingualManager
+
 
 class TestModel(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)
@@ -100,9 +103,9 @@ class OtherFieldsModel(models.Model):
     boolean = models.BooleanField(default=False)
     nullboolean = models.NullBooleanField()
     csi = models.CommaSeparatedIntegerField(max_length=255)
+    ip = models.IPAddressField(blank=True, null=True)
     float = models.FloatField(blank=True, null=True)
     decimal = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
-    ip = models.IPAddressField(blank=True, null=True)
     date = models.DateField(blank=True, null=True)
     datetime = models.DateTimeField(blank=True, null=True)
     time = models.TimeField(blank=True, null=True)
@@ -264,6 +267,23 @@ class ThirdPartyRegisteredModel(models.Model):
 
 
 # ######### Manager testing
+class FilteredManager(MultilingualManager):
+    def get_queryset(self):
+        # always return empty queryset
+        return super(FilteredManager, self).get_queryset().filter(pk=None)
+
+
+class FilteredTestModel(models.Model):
+    title = models.CharField(ugettext_lazy('title'), max_length=255)
+    objects = FilteredManager()
+
+
+class ForeignKeyFilteredModel(models.Model):
+    title = models.CharField(ugettext_lazy('title'), max_length=255)
+    test = models.ForeignKey(
+        FilteredTestModel, null=True, related_name="test_fks", on_delete=models.CASCADE,
+    )
+
 
 class ManagerTestModel(models.Model):
     title = models.CharField(ugettext_lazy('title'), max_length=255)

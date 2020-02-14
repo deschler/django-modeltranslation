@@ -58,6 +58,15 @@ class OneToOneFieldModelTranslationOptions(TranslationOptions):
     fields = ('title', 'test', 'optional', 'non',)
 
 
+@register(models.FilteredTestModel)
+class FilteredTestModelTranslationOptions(TranslationOptions):
+    fields = ('title', )
+
+
+@register(models.ForeignKeyFilteredModel)
+class ForeignKeyFilteredModelTranslationOptions(TranslationOptions):
+    fields = ('title', )
+
 # ######### Custom fields testing
 
 @register(models.OtherFieldsModel)
