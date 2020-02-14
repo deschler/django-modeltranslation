@@ -1007,12 +1007,14 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         self.assertEqual(models.FilteredTestModel._meta.base_manager.__class__, MultilingualManager)
 
         # # create objects with relations to test_inst
-        fk_inst = models.ForeignKeyFilteredModel(test=test_inst, title_en='f_title_en', title_de='f_title_de')
+        fk_inst = models.ForeignKeyFilteredModel(test=test_inst,
+                                                 title_en='f_title_en', title_de='f_title_de')
         fk_inst.save()
         fk_inst.refresh_from_db()   # force to reset cached values
 
         self.assertEqual(models.ForeignKeyFilteredModel.objects.__class__, MultilingualManager)
-        self.assertEqual(models.ForeignKeyFilteredModel._meta.base_manager.__class__, MultilingualManager)
+        self.assertEqual(models.ForeignKeyFilteredModel._meta.base_manager.__class__,
+                         MultilingualManager)
         self.assertEqual(fk_inst.test, test_inst)
 
     def test_non_translated_relation(self):

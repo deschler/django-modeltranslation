@@ -69,6 +69,7 @@ class ForeignKeyFilteredModelTranslationOptions(TranslationOptions):
 
 # ######### Custom fields testing
 
+
 @register(models.OtherFieldsModel)
 class OtherFieldsModelTranslationOptions(TranslationOptions):
     fields = ('int', 'boolean', 'nullboolean', 'csi', 'float', 'decimal',

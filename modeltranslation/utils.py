@@ -52,6 +52,8 @@ def _build_localized_verbose_name(verbose_name, lang):
     if lang == 'id':
         lang = 'ind'
     return force_str('%s [%s]') % (force_str(verbose_name), lang)
+
+
 build_localized_verbose_name = lazy(_build_localized_verbose_name, six.text_type)
 
 
