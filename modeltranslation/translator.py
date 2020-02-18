@@ -130,7 +130,7 @@ class MultilingualOptions(options.Options):
     @cached_property
     def base_manager(self):
         manager = super(MultilingualOptions, self).base_manager
-        manager.__class__ = MultilingualManager
+        patch_manager_class(manager)
         return manager
 
 
