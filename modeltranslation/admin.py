@@ -215,7 +215,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         TranslationAdmin and TranslationInlineModelAdmin.
         """
         base_fields = self.replace_orig_field(form.base_fields.keys())
-        fields = base_fields + list(self.get_readonly_fields(request, obj))
+        fields = list(base_fields) + list(self.get_readonly_fields(request, obj))
         return [(None, {'fields': self.replace_orig_field(fields)})]
 
     def get_translation_field_excludes(self, exclude_languages=None):
