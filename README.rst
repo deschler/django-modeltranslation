@@ -28,6 +28,10 @@ model class.
     :target: https://pypi.python.org/pypi/django-modeltranslation/
     :alt: Supported Python versions
 
+.. image:: https://badges.gitter.im/django-modeltranslation/community.svg
+    :alt: Join the chat at https://gitter.im/django-modeltranslation/community
+    :target: https://gitter.im/django-modeltranslation/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+
 
 Features
 ========
@@ -51,8 +55,3 @@ https://django-modeltranslation.readthedocs.org/en/latest
 Mailing List
 ------------
 http://groups.google.com/group/django-modeltranslation
-
-
-.. image:: https://badges.gitter.im/django-modeltranslation/community.svg
-   :alt: Join the chat at https://gitter.im/django-modeltranslation/community
-   :target: https://gitter.im/django-modeltranslation/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
