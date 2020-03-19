@@ -15,7 +15,7 @@ env:
   - DJANGO=3.0 DB=postgres
   - DJANGO=3.0 DB=mysql
 before_install:
-  - pip install -q 'flake8<3'
+  - pip install -q flake8
   - PYFLAKES_NODOCTEST=1 flake8 modeltranslation
 before_script:
   - mysql -e 'create database modeltranslation;'
@@ -26,7 +26,6 @@ install:
   - pip install -q Pillow
   - IDJANGO=$(./travis.py $DJANGO)
   - pip install -q $IDJANGO
-  - pip install -e .
   - pip install -q coveralls
 script:
   - django-admin.py --version
