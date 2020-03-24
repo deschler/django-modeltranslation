@@ -58,7 +58,7 @@ var google, django, gettext;
                  *      id_news-data2-content_type-object_id-0-1-name'
                  */
                 // TODO: We should be able to simplify this, the modeltranslation specific
-                // field classes are already build to be easily splitable, so we could use them
+                // field classes are already build to be easily splittable, so we could use them
                 // to slice off the language code.
                 var idBits = this.id.split('-'),
                     idPrefix = 'id_' + this.origFieldname;

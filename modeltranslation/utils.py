@@ -66,7 +66,7 @@ def _join_css_class(bits, offset):
 def build_css_class(localized_fieldname, prefix=''):
     """
     Returns a css class based on ``localized_fieldname`` which is easily
-    splitable and capable of regionalized language codes.
+    splittable and capable of regionalized language codes.
 
     Takes an optional ``prefix`` which is prepended to the returned string.
     """
