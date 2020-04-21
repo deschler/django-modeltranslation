@@ -4,6 +4,7 @@ from unittest import skipUnless
 import datetime
 import fnmatch
 import imp
+import io
 import os
 import shutil
 
@@ -164,6 +165,12 @@ class ModeltranslationTransactionTestBase(TransactionTestCase):
             # 5. makemigrations (``migrate=False`` in case of south)
             if MIGRATIONS:
                 call_command('makemigrations', 'auth', verbosity=2, interactive=False)
+                # At this point there should not be any migrations to generate
+                out = io.StringIO()
+                call_command('makemigrations', 'auth', verbosity=3,
+                             dry_run=True, interactive=False, stdout=out)
+                assert "No changes detected in app 'auth'\n" == out.getvalue(), \
+                    "Unexpected auth migration:\n %s" % out.getvalue()
 
             # 6. Syncdb (``migrate=False`` in case of south)
             call_command('migrate', verbosity=0, interactive=False, run_syncdb=True)

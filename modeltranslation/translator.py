@@ -200,6 +200,18 @@ def patch_manager_class(manager):
                     self._constructor_args[1],  # kwargs
                 )
 
+            def __hash__(self):
+                return id(self)
+
+            def __eq__(self, other):
+                if isinstance(other, NewMultilingualManager):
+                    return self._old_module == other._old_module and \
+                        self._old_class == other._old_class
+                if hasattr(other, "__module__") and hasattr(other, "__class__"):
+                    return self._old_module == other.__module__ and \
+                        self._old_class == other.__class__.__name__
+                return False
+
         manager.__class__ = NewMultilingualManager
 
 
