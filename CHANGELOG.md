@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file. See [standa
 
 * Use poetry as venv manager ([a5b402c](https://github.com/deschler/django-modeltranslation/commit/a5b402c51673a78a1aa160247746695070e08a2f))
 * Drop old python versions (<3.6)
+* Drop old django versions (<2.2)
 
 ### Bug Fixes
 
