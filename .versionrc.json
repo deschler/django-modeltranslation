@@ -1,0 +1,15 @@
+{
+  "host": "github.com",
+  "owner": "deschler",
+  "repository": "django-modeltranslation",
+  "bumpFiles": [
+    {
+      "filename": "PKG-INFO",
+      "updater": "pkg-info-updater.js"
+    },
+    {
+      "filename": "modeltranslation/__init__.py",
+      "updater": "modeltranslation-version-updater.js"
+    }
+  ]
+}

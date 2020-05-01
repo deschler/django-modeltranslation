@@ -2,7 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-## 0.14-0 (2019-11-14)
+## [0.15.0](https://github.com/deschler/django-modeltranslation/compare/0.14.4...0.15.0) (2020-04-22)
+
+
+### Features
+
+* Use poetry as venv manager ([a5b402c](https://github.com/deschler/django-modeltranslation/commit/a5b402c51673a78a1aa160247746695070e08a2f))
+* Drop old python versions (<3.6)
+
+### Bug Fixes
+
+* add NewMultilingualManager __eq__() ([205a8f6](https://github.com/deschler/django-modeltranslation/commit/205a8f6c2f411b8b20235bbf89b88d3781919cbd))
+
+## 0.14.0 (2019-11-14)
 
 
 ### Bug Fixes
