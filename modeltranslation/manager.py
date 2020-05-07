@@ -72,6 +72,7 @@ def append_fallback(model, fields):
     fields_append = fields.append
     fields_remove = fields.remove
     fields_insert = fields.insert
+    fields_index = fields.index
     trans_append = trans.append
     try:
         opts = translator.get_options_for_model(model)
@@ -108,7 +109,7 @@ def append_fallback(model, fields):
         if key in fields:
             langs = resolution_order(
                 get_language(), getattr(model, key).fallback_languages)
-            index = fields.index(key)
+            index = fields_index(key)
             for lang in langs:
                 d = build_localized_fieldname(key, lang)
                 if d not in fields:
