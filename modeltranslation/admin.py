@@ -60,9 +60,12 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
                 orig_field, request, **kwargs
             )
             field.widget = deepcopy(orig_formfield.widget)
+            attrs = field.widget.attrs
             # if any widget attrs are defined on the form they should be copied
             try:
-                field.widget = deepcopy(self.form._meta.widgets[orig_field.name])
+                field.widget = deepcopy(self.form._meta.widgets[orig_field.name])  # this is a class
+                if isinstance(field.widget, type):  # if not initialized
+                    field.widget = field.widget(attrs)  # initialize form widget with attrs
             except (AttributeError, TypeError, KeyError):
                 pass
             # field.widget = deepcopy(orig_formfield.widget)
