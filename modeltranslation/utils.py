@@ -37,7 +37,7 @@ def get_translation_fields(field):
     """
     Returns a list of localized fieldnames for a given field.
     """
-    return [build_localized_fieldname(field, l) for l in settings.AVAILABLE_LANGUAGES]
+    return [build_localized_fieldname(field, lang) for lang in settings.AVAILABLE_LANGUAGES]
 
 
 def build_localized_fieldname(field_name, lang):

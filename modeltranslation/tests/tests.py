@@ -288,7 +288,7 @@ class TestAutodiscover(ModeltranslationTestBase):
 class ModeltranslationTest(ModeltranslationTestBase):
     """Basic tests for the modeltranslation application."""
     def test_registration(self):
-        langs = tuple(l[0] for l in django_settings.LANGUAGES)
+        langs = tuple(val for val, label in django_settings.LANGUAGES)
         self.assertEqual(langs, tuple(mt_settings.AVAILABLE_LANGUAGES))
         self.assertEqual(2, len(langs))
         self.assertTrue('de' in langs)

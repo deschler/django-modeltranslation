@@ -94,7 +94,7 @@ class TranslationOptions(with_metaclass(FieldsAggregationMetaClass, object)):
 
     def _check_languages(self, languages, extra=()):
         correct = list(mt_settings.AVAILABLE_LANGUAGES) + list(extra)
-        if any(l not in correct for l in languages):
+        if any(lang not in correct for lang in languages):
             raise ImproperlyConfigured(
                 'Language in required_languages which is not in AVAILABLE_LANGUAGES.')
 
@@ -144,12 +144,12 @@ def add_translation_fields(model, opts):
     model_empty_values = getattr(opts, 'empty_values', NONE)
     for field_name in opts.local_fields.keys():
         field_empty_value = parse_field(model_empty_values, field_name, NONE)
-        for l in mt_settings.AVAILABLE_LANGUAGES:
+        for lang in mt_settings.AVAILABLE_LANGUAGES:
             # Create a dynamic translation field
             translation_field = create_translation_field(
-                model=model, field_name=field_name, lang=l, empty_value=field_empty_value)
+                model=model, field_name=field_name, lang=lang, empty_value=field_empty_value)
             # Construct the name for the localized field
-            localized_field_name = build_localized_fieldname(field_name, l)
+            localized_field_name = build_localized_fieldname(field_name, lang)
             # Check if the model already has a field by that name
 
             if hasattr(model, localized_field_name):
