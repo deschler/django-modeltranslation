@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.15.1](https://github.com/deschler/django-modeltranslation/compare/v0.15.0...v0.15.1) (2020-07-10)
+
+
+### Bug Fixes
+
+* **admin:** Fix custom widget initialization problem ([48e7f59](https://github.com/deschler/django-modeltranslation/commit/48e7f598955a09dc4130a0074cb953ecd05d1a01))
+
 ## [0.15.0](https://github.com/deschler/django-modeltranslation/compare/0.14.4...0.15.0) (2020-04-22)
 
 
