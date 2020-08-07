@@ -17,6 +17,7 @@ from django.core.exceptions import ValidationError, ImproperlyConfigured
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.core.management import call_command
+from django.core.management.base import CommandError
 from django.db import IntegrityError
 from django.db.models import Q, F, Count, TextField
 from django.test import TestCase, TransactionTestCase
@@ -2023,6 +2024,24 @@ class UpdateCommandTest(ModeltranslationTestBase):
         obj2 = models.TestModel.objects.get(pk=pk2)
         self.assertEqual('initial', obj1.title_de)
         self.assertEqual('already', obj2.title_de)
+
+    def test_update_command_language_param(self):
+        trans_real.activate('en')
+        pk1 = models.TestModel.objects.create(title_en='').pk
+        pk2 = models.TestModel.objects.create(title_en='already').pk
+        # Due to ``rewrite(False)`` here, original field will be affected.
+        models.TestModel.objects.all().rewrite(False).update(title='initial')
+
+        call_command('update_translation_fields', language='en', verbosity=0)
+
+        obj1 = models.TestModel.objects.get(pk=pk1)
+        obj2 = models.TestModel.objects.get(pk=pk2)
+        self.assertEqual('initial', obj1.title_en)
+        self.assertEqual('already', obj2.title_en)
+
+    def test_update_command_invalid_language_param(self):
+        with self.assertRaises(CommandError):
+            call_command('update_translation_fields', language='xx', verbosity=0)
 
 
 class TranslationAdminTest(ModeltranslationTestBase):
