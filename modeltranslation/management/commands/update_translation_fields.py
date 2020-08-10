@@ -55,7 +55,7 @@ class Command(BaseCommand):
         if lang not in AVAILABLE_LANGUAGES:
             raise CommandError(
                 "Cannot find language '%s'. Options are %s." % (
-                    lang, ", ".join(AVAILABLE_LANGUAGES)
+                    lang, COMMASPACE.join(AVAILABLE_LANGUAGES)
                 )
             )
         else:
