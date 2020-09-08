@@ -3,7 +3,7 @@
 Version code adopted from Django development version.
 https://github.com/django/django
 """
-VERSION = (0, 15, 1, 'final', 0)
+VERSION = (0, 15, 2, 'final', 0)
 default_app_config = 'modeltranslation.apps.ModeltranslationConfig'
 
 
