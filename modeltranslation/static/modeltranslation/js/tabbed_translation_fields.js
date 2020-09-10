@@ -287,7 +287,7 @@ var google, django, gettext;
         };
 
         function handleTabularAddAnotherInline(tabularInlineGroup) {
-            tabularInlineGroup.$table.find('.add-row a').click(function () {
+            tabularInlineGroup.$table.on('click', '.add-row a', function () {
                 var tabs = createTabularTabs(
                     tabularInlineGroup.getGroupedTranslations(
                         $(this).parent().parent().prev().prev().find('.mt')));
