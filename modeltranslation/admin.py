@@ -368,7 +368,6 @@ class TabbedDjangoJqueryTranslationAdmin(TranslationAdmin):
             'admin/js/jquery.init.js',
             'modeltranslation/js/force_jquery.js',
             mt_settings.JQUERY_UI_URL,
-            mt_settings.JQUERY_MB_BROWSER_URL,
             'modeltranslation/js/tabbed_translation_fields.js',
         )
         css = {
@@ -385,7 +384,6 @@ class TabbedExternalJqueryTranslationAdmin(TranslationAdmin):
         js = (
             mt_settings.JQUERY_URL,
             mt_settings.JQUERY_UI_URL,
-            mt_settings.JQUERY_MB_BROWSER_URL,
             'modeltranslation/js/tabbed_translation_fields.js',
         )
         css = {

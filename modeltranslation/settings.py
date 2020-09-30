@@ -85,8 +85,3 @@ JQUERY_UI_URL = getattr(
     "JQUERY_UI_URL",
     "//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js",
 )
-JQUERY_MB_BROWSER_URL = getattr(
-    settings,
-    "JQUERY_MB_BROWSER_URL",
-    "//cdn.jsdelivr.net/jquery.mb.browser/0.1/jquery.mb.browser.min.js",
-)
