@@ -178,12 +178,14 @@ var google, django, gettext;
                             '><a href="#' + tabId + '">' + lang.replace('_', '-') + '</a></li>');
                     tabsList.append(tab);
                     tabsContainer.append(panel);
-                    if (container.hasClass("errors"))
-                        activeTab = tabsList.length;
+                    if (container.hasClass("errors")) {
+                        activeTab = tabsList.find("li").length - 1;
+                        tab.addClass("ui-tab-has-errors");
+                    }
                 });
                 insertionPoint.el[insertionPoint.insert](tabsContainer);
                 tabsContainer.tabs({
-                  active: activeTab,
+                    active: activeTab,
                 });
                 tabs.push(tabsContainer);
             });
@@ -348,8 +350,10 @@ var google, django, gettext;
                              '><a href="#' + tabId + '">' + lang.replace('_', '-') + '</a></li>');
                     tabsList.append($tab);
                     tabsContainer.append($panel);
-                    if (container.hasClass("errors"))
-                        activeTab = tabsList.length;
+                    if (container.hasClass("errors")) {
+                        activeTab = tabsList.find("li").length - 1;
+                        tab.addClass("ui-tab-has-errors");
+                    }
                 });
                 insertionPoint.el[insertionPoint.insert](tabsContainer);
                 tabsContainer.tabs({
