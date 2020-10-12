@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.16.0](https://github.com/deschler/django-modeltranslation/compare/v0.15.2...v0.16.0) (2020-10-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* **js:** It's 2020 already, drop backward compatibility with jquery-ui 1.10.
+
+### Features
+
+* **tabbed-translation-fields:** Make tab with errors visible by default. ([4c2e284](https://github.com/deschler/django-modeltranslation/commit/4c2e284d871044a443817aabfbe3c956799ffe06))
+
+
+### Bug Fixes
+
+* Fix error detection; add red dot for tab with errors. ([9a93cf6](https://github.com/deschler/django-modeltranslation/commit/9a93cf6b4d4ec24e754159f71cf9d9eda811673e))
+* **dev:** Fix install in editable mode. ([aaa2dcf](https://github.com/deschler/django-modeltranslation/commit/aaa2dcf5987e19c2da8460bc73a0681a291f0dc5))
+
+
+* **js:** It's 2020 already, drop backward compatibility with jquery-ui 1.10. ([d8f432a](https://github.com/deschler/django-modeltranslation/commit/d8f432a5cadd60871101081c87569e3d390474e6))
+
 ### [0.15.2](https://github.com/deschler/django-modeltranslation/compare/v0.15.1...v0.15.2) (2020-09-08)
 
 
