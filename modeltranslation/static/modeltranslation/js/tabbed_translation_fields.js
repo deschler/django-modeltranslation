@@ -350,7 +350,7 @@ var google, django, gettext;
                              '><a href="#' + tabId + '">' + lang.replace('_', '-') + '</a></li>');
                     tabsList.append($tab);
                     tabsContainer.append($panel);
-                    if (container.hasClass("errors")) {
+                    if ($container.hasClass("errors")) {
                         activeTab = tabsList.find("li").length - 1;
                         tab.addClass("ui-tab-has-errors");
                     }
