@@ -7,6 +7,9 @@ python:
   - "3.6"
   - "3.7"
   - "3.8"
+arch:
+  - amd64
+  - ppc64le
 env:
   - DJANGO=2.2 DB=sqlite
   - DJANGO=2.2 DB=postgres
