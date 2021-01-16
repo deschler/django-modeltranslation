@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from distutils.core import setup
+from setuptools import setup
 
 # Dynamically calculate the version based on modeltranslation.VERSION.
 version = __import__('modeltranslation').get_version()
