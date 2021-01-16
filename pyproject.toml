@@ -1,9 +1,12 @@
 [tool.poetry]
 name = "django-modeltranslation"
-version = "0.14.4"
+version = "0.16.1"
 description = "Translates Django models using a registration approach."
 authors = ["Peter Eschler <peschler@gmail.com>"]
 maintainers = ["Serhii Tereshchenko <serg.partizan@gmail.com>"]
+packages = [
+    { include = "modeltranslation" },
+]
 
 [tool.poetry.dependencies]
 python = ">=3.6"
