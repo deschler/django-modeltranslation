@@ -15,18 +15,29 @@ setup(
         'without having to change the original model classes. It uses a '
         'registration approach (comparable to Django\'s admin app) to be able '
         'to add translations to existing or new projects and is fully '
-        'integrated into the Django admin backend.'),
+        'integrated into the Django admin backend.'
+    ),
     author='Peter Eschler',
     author_email='peschler@gmail.com',
     maintainer='Dirk Eschler',
     maintainer_email='eschler@gmail.com',
     url='https://github.com/deschler/django-modeltranslation',
-    packages=['modeltranslation', 'modeltranslation.management',
-              'modeltranslation.management.commands'],
-    package_data={'modeltranslation': ['static/modeltranslation/css/*.css',
-                                       'static/modeltranslation/js/*.js']},
+    packages=[
+        'modeltranslation',
+        'modeltranslation.management',
+        'modeltranslation.management.commands',
+    ],
+    package_data={
+        'modeltranslation': [
+            'static/modeltranslation/css/*.css',
+            'static/modeltranslation/js/*.js',
+        ]
+    },
     install_requires=['Django>=2.2', 'six'],
-    download_url='https://github.com/deschler/django-modeltranslation/archive/%s.tar.gz' % version,
+    download_url=(
+        'https://github.com/deschler/django-modeltranslation/archive/%s.tar.gz'
+        % version
+    ),
     classifiers=[
         'Programming Language :: Python',
         'Programming Language :: Python :: 3.6',
@@ -36,5 +47,7 @@ setup(
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
         'Framework :: Django',
-        'License :: OSI Approved :: BSD License'],
-    license='New BSD')
+        'License :: OSI Approved :: BSD License',
+    ],
+    license='New BSD',
+)
