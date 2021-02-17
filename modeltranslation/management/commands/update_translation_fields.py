@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
 from django.db.models import F, Q
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
-from modeltranslation.settings import DEFAULT_LANGUAGE
+from modeltranslation.settings import AVAILABLE_LANGUAGES, DEFAULT_LANGUAGE
 from modeltranslation.translator import translator
 from modeltranslation.utils import build_localized_fieldname
 
 
+COMMASPACE = ", "
+
+
 class Command(BaseCommand):
-    help = ('Updates empty values of default translation fields using'
+    help = ('Updates empty values of translation fields using'
             ' values from original fields (in all translated models).')
 
     def add_arguments(self, parser):
@@ -19,6 +22,12 @@ class Command(BaseCommand):
         parser.add_argument(
             'model_name', nargs='?',
             help='Model name to update empty values of only this model.',
+        )
+        parser.add_argument(
+            '--language',
+            action='store',
+            help=('Language translation field the be updated.'
+                  ' Default language field if not provided')
         )
 
     def handle(self, *args, **options):
@@ -41,6 +50,17 @@ class Command(BaseCommand):
             model_name = model_name.lower()
             models = [m for m in models if m._meta.model_name == model_name]
 
+        # optionally defining the translation field language
+        lang = options.get('language') or DEFAULT_LANGUAGE
+        if lang not in AVAILABLE_LANGUAGES:
+            raise CommandError(
+                "Cannot find language '%s'. Options are %s." % (
+                    lang, COMMASPACE.join(AVAILABLE_LANGUAGES)
+                )
+            )
+        else:
+            lang = lang.replace('-', '_')
+
         if verbosity > 0:
             self.stdout.write("Working on models: %s" % ', '.join([
                 "{app_label}.{object_name}".format(**m._meta.__dict__)
@@ -53,7 +73,7 @@ class Command(BaseCommand):
 
             opts = translator.get_options_for_model(model)
             for field_name in opts.fields.keys():
-                def_lang_fieldname = build_localized_fieldname(field_name, DEFAULT_LANGUAGE)
+                def_lang_fieldname = build_localized_fieldname(field_name, lang)
 
                 # We'll only update fields which do not have an existing value
                 q = Q(**{def_lang_fieldname: None})

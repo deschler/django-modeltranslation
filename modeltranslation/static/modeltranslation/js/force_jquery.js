@@ -1,3 +1,3 @@
 if (!jQuery) {
-    jQuery = django.jQuery;
+  jQuery = django.jQuery;
 }

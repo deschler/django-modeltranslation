@@ -8,8 +8,8 @@ https://github.com/zmathew/django-linguo
 import itertools
 
 from django.contrib.admin.utils import get_model_from_relation
+from django.core.exceptions import FieldDoesNotExist
 from django.db import models
-from django.db.models import FieldDoesNotExist
 from django.db.models.query import ValuesIterable
 from django.utils.tree import Node
 from django.db.models.lookups import Lookup

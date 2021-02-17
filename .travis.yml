@@ -4,44 +4,21 @@ services:
   - mysql
   - postgresql
 python:
-  - "2.7"
   - "3.6"
   - "3.7"
+  - "3.8"
+arch:
+  - amd64
+  - ppc64le
 env:
-  - DJANGO=1.11 DB=sqlite
-  - DJANGO=1.11 DB=postgres
-  - DJANGO=1.11 DB=mysql
-  - DJANGO=2.1 DB=sqlite
-  - DJANGO=2.1 DB=postgres
-  - DJANGO=2.1 DB=mysql
   - DJANGO=2.2 DB=sqlite
   - DJANGO=2.2 DB=postgres
   - DJANGO=2.2 DB=mysql
-  - DJANGO=3.0a1 DB=sqlite
-  - DJANGO=3.0a1 DB=postgres
-  - DJANGO=3.0a1 DB=mysql
-matrix:
-  exclude:
-    - python: "2.7"
-      env: DJANGO=3.0a1 DB=sqlite
-    - python: "2.7"
-      env: DJANGO=3.0a1 DB=mysql
-    - python: "2.7"
-      env: DJANGO=3.0a1 DB=postgres
-    - python: "2.7"
-      env: DJANGO=2.2 DB=sqlite
-    - python: "2.7"
-      env: DJANGO=2.2 DB=mysql
-    - python: "2.7"
-      env: DJANGO=2.2 DB=postgres
-    - python: "2.7"
-      env: DJANGO=2.1 DB=sqlite
-    - python: "2.7"
-      env: DJANGO=2.1 DB=mysql
-    - python: "2.7"
-      env: DJANGO=2.1 DB=postgres
+  - DJANGO=3.0 DB=sqlite
+  - DJANGO=3.0 DB=postgres
+  - DJANGO=3.0 DB=mysql
 before_install:
-  - pip install -q 'flake8<3'
+  - pip install -q flake8
   - PYFLAKES_NODOCTEST=1 flake8 modeltranslation
 before_script:
   - mysql -e 'create database modeltranslation;'
@@ -52,7 +29,6 @@ install:
   - pip install -q Pillow
   - IDJANGO=$(./travis.py $DJANGO)
   - pip install -q $IDJANGO
-  - pip install -e .
   - pip install -q coveralls
 script:
   - django-admin.py --version

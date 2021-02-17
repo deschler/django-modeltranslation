@@ -4,6 +4,7 @@ from unittest import skipUnless
 import datetime
 import fnmatch
 import imp
+import io
 import os
 import shutil
 
@@ -16,6 +17,7 @@ from django.core.exceptions import ValidationError, ImproperlyConfigured
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.core.management import call_command
+from django.core.management.base import CommandError
 from django.db import IntegrityError
 from django.db.models import Q, F, Count, TextField
 from django.test import TestCase, TransactionTestCase
@@ -41,7 +43,7 @@ models = translation = None
 request = None
 
 # How many models are registered for tests.
-TEST_MODELS = 33 + (1 if MIGRATIONS else 0)
+TEST_MODELS = 35 + (1 if MIGRATIONS else 0)
 
 
 class reload_override_settings(override_settings):
@@ -164,6 +166,12 @@ class ModeltranslationTransactionTestBase(TransactionTestCase):
             # 5. makemigrations (``migrate=False`` in case of south)
             if MIGRATIONS:
                 call_command('makemigrations', 'auth', verbosity=2, interactive=False)
+                # At this point there should not be any migrations to generate
+                out = io.StringIO()
+                call_command('makemigrations', 'auth', verbosity=3,
+                             dry_run=True, interactive=False, stdout=out)
+                assert "No changes detected in app 'auth'\n" == out.getvalue(), \
+                    "Unexpected auth migration:\n %s" % out.getvalue()
 
             # 6. Syncdb (``migrate=False`` in case of south)
             call_command('migrate', verbosity=0, interactive=False, run_syncdb=True)
@@ -281,7 +289,7 @@ class TestAutodiscover(ModeltranslationTestBase):
 class ModeltranslationTest(ModeltranslationTestBase):
     """Basic tests for the modeltranslation application."""
     def test_registration(self):
-        langs = tuple(l[0] for l in django_settings.LANGUAGES)
+        langs = tuple(val for val, label in django_settings.LANGUAGES)
         self.assertEqual(langs, tuple(mt_settings.AVAILABLE_LANGUAGES))
         self.assertEqual(2, len(langs))
         self.assertTrue('de' in langs)
@@ -945,6 +953,7 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         self.assertIn(fk_option_en, test_inst.foreignkeymodel_set.all())
 
         # Check filtering in reverse way + lookup spanning:
+
         manager = models.TestModel.objects
         trans_real.activate("de")
         self.assertEqual(manager.filter(test_fks=fk_inst_both).count(), 1)
@@ -977,6 +986,7 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         test_inst2.save()
         test_inst2.test_fks.set((fk_inst_de, fk_inst_both))
         test_inst2.test_fks_en.set((fk_inst_en, fk_inst_both))
+
         self.assertEqual(fk_inst_both.test.pk, test_inst2.pk)
         self.assertEqual(fk_inst_both.test_id, test_inst2.pk)
         self.assertEqual(fk_inst_both.test_de, test_inst2)
@@ -989,6 +999,31 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         self.assertIn(fk_inst_both, test_inst2.test_fks.all())
         self.assertIn(fk_inst_en, test_inst2.test_fks.all())
         self.assertNotIn(fk_inst_de, test_inst2.test_fks.all())
+
+    def test_reverse_lookup_with_filtered_queryset_manager(self):
+        """
+        Make sure base_manager does not get same queryset filter as TestModel in reverse lookup
+        https://docs.djangoproject.com/en/3.0/topics/db/managers/#base-managers
+        """
+        from modeltranslation.tests.models import FilteredManager
+
+        test_inst = models.FilteredTestModel(title_en='title_en', title_de='title_de')
+        test_inst.save()
+
+        self.assertFalse(models.FilteredTestModel.objects.all().exists())
+        self.assertEqual(models.FilteredTestModel.objects.__class__, FilteredManager)
+        self.assertEqual(models.FilteredTestModel._meta.base_manager.__class__, MultilingualManager)
+
+        # # create objects with relations to test_inst
+        fk_inst = models.ForeignKeyFilteredModel(test=test_inst,
+                                                 title_en='f_title_en', title_de='f_title_de')
+        fk_inst.save()
+        fk_inst.refresh_from_db()   # force to reset cached values
+
+        self.assertEqual(models.ForeignKeyFilteredModel.objects.__class__, MultilingualManager)
+        self.assertEqual(models.ForeignKeyFilteredModel._meta.base_manager.__class__,
+                         MultilingualManager)
+        self.assertEqual(fk_inst.test, test_inst)
 
     def test_non_translated_relation(self):
         non_de = models.NonTranslated.objects.create(title='title_de')
@@ -1989,6 +2024,24 @@ class UpdateCommandTest(ModeltranslationTestBase):
         obj2 = models.TestModel.objects.get(pk=pk2)
         self.assertEqual('initial', obj1.title_de)
         self.assertEqual('already', obj2.title_de)
+
+    def test_update_command_language_param(self):
+        trans_real.activate('en')
+        pk1 = models.TestModel.objects.create(title_en='').pk
+        pk2 = models.TestModel.objects.create(title_en='already').pk
+        # Due to ``rewrite(False)`` here, original field will be affected.
+        models.TestModel.objects.all().rewrite(False).update(title='initial')
+
+        call_command('update_translation_fields', language='en', verbosity=0)
+
+        obj1 = models.TestModel.objects.get(pk=pk1)
+        obj2 = models.TestModel.objects.get(pk=pk2)
+        self.assertEqual('initial', obj1.title_en)
+        self.assertEqual('already', obj2.title_en)
+
+    def test_update_command_invalid_language_param(self):
+        with self.assertRaises(CommandError):
+            call_command('update_translation_fields', language='xx', verbosity=0)
 
 
 class TranslationAdminTest(ModeltranslationTestBase):

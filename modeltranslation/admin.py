@@ -60,9 +60,12 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
                 orig_field, request, **kwargs
             )
             field.widget = deepcopy(orig_formfield.widget)
+            attrs = field.widget.attrs
             # if any widget attrs are defined on the form they should be copied
             try:
-                field.widget = deepcopy(self.form._meta.widgets[orig_field.name])
+                field.widget = deepcopy(self.form._meta.widgets[orig_field.name])  # this is a class
+                if isinstance(field.widget, type):  # if not initialized
+                    field.widget = field.widget(attrs)  # initialize form widget with attrs
             except (AttributeError, TypeError, KeyError):
                 pass
             # field.widget = deepcopy(orig_formfield.widget)
@@ -215,7 +218,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         TranslationAdmin and TranslationInlineModelAdmin.
         """
         base_fields = self.replace_orig_field(form.base_fields.keys())
-        fields = base_fields + list(self.get_readonly_fields(request, obj))
+        fields = list(base_fields) + list(self.get_readonly_fields(request, obj))
         return [(None, {'fields': self.replace_orig_field(fields)})]
 
     def get_translation_field_excludes(self, exclude_languages=None):
@@ -297,7 +300,7 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
                 trans_fieldnames = [f.name for f in sorted(trans_fields, key=lambda x: x.name)]
                 if any(f in trans_fieldnames for f in flattened_fieldsets):
                     # Extract the original field's verbose_name for use as this
-                    # fieldset's label - using ugettext_lazy in your model
+                    # fieldset's label - using gettext_lazy in your model
                     # declaration can make that translatable.
                     label = self.model._meta.get_field(orig_field).verbose_name.capitalize()
                     temp_fieldsets[orig_field] = (label, {
@@ -365,7 +368,6 @@ class TabbedDjangoJqueryTranslationAdmin(TranslationAdmin):
             'admin/js/jquery.init.js',
             'modeltranslation/js/force_jquery.js',
             mt_settings.JQUERY_UI_URL,
-            mt_settings.JQUERY_MB_BROWSER_URL,
             'modeltranslation/js/tabbed_translation_fields.js',
         )
         css = {
@@ -382,7 +384,6 @@ class TabbedExternalJqueryTranslationAdmin(TranslationAdmin):
         js = (
             mt_settings.JQUERY_URL,
             mt_settings.JQUERY_UI_URL,
-            mt_settings.JQUERY_MB_BROWSER_URL,
             'modeltranslation/js/tabbed_translation_fields.js',
         )
         css = {

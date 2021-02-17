@@ -3,9 +3,10 @@ from functools import partial
 
 import django
 from django.core.exceptions import ImproperlyConfigured
-from django.db.models import Manager, ForeignKey, OneToOneField
+from django.db.models import Manager, ForeignKey, OneToOneField, options
 from django.db.models.base import ModelBase
 from django.db.models.signals import post_init
+from django.utils.functional import cached_property
 from six import with_metaclass
 
 from modeltranslation import settings as mt_settings
@@ -93,7 +94,7 @@ class TranslationOptions(with_metaclass(FieldsAggregationMetaClass, object)):
 
     def _check_languages(self, languages, extra=()):
         correct = list(mt_settings.AVAILABLE_LANGUAGES) + list(extra)
-        if any(l not in correct for l in languages):
+        if any(lang not in correct for lang in languages):
             raise ImproperlyConfigured(
                 'Language in required_languages which is not in AVAILABLE_LANGUAGES.')
 
@@ -124,6 +125,15 @@ class TranslationOptions(with_metaclass(FieldsAggregationMetaClass, object)):
         return '%s: %s + %s' % (self.__class__.__name__, local, inherited)
 
 
+class MultilingualOptions(options.Options):
+
+    @cached_property
+    def base_manager(self):
+        manager = super(MultilingualOptions, self).base_manager
+        patch_manager_class(manager)
+        return manager
+
+
 def add_translation_fields(model, opts):
     """
     Monkey patches the original model class to provide additional fields for
@@ -134,12 +144,12 @@ def add_translation_fields(model, opts):
     model_empty_values = getattr(opts, 'empty_values', NONE)
     for field_name in opts.local_fields.keys():
         field_empty_value = parse_field(model_empty_values, field_name, NONE)
-        for l in mt_settings.AVAILABLE_LANGUAGES:
+        for lang in mt_settings.AVAILABLE_LANGUAGES:
             # Create a dynamic translation field
             translation_field = create_translation_field(
-                model=model, field_name=field_name, lang=l, empty_value=field_empty_value)
+                model=model, field_name=field_name, lang=lang, empty_value=field_empty_value)
             # Construct the name for the localized field
-            localized_field_name = build_localized_fieldname(field_name, l)
+            localized_field_name = build_localized_fieldname(field_name, lang)
             # Check if the model already has a field by that name
 
             if hasattr(model, localized_field_name):
@@ -190,6 +200,18 @@ def patch_manager_class(manager):
                     self._constructor_args[1],  # kwargs
                 )
 
+            def __hash__(self):
+                return id(self)
+
+            def __eq__(self, other):
+                if isinstance(other, NewMultilingualManager):
+                    return self._old_module == other._old_module and \
+                        self._old_class == other._old_class
+                if hasattr(other, "__module__") and hasattr(other, "__class__"):
+                    return self._old_module == other.__module__ and \
+                        self._old_class == other.__class__.__name__
+                return False
+
         manager.__class__ = NewMultilingualManager
 
 
@@ -221,8 +243,8 @@ def add_manager(model):
             # model._default_manager is not the same instance as one of managers, but it
             # share the same class.
             model._default_manager.__class__ = current_manager.__class__
-    patch_manager_class(model._base_manager)
-    model._meta.base_manager_name = 'objects'
+
+    model._meta.__class__ = MultilingualOptions
     model._meta._expire_cache()
 
 
@@ -267,7 +289,11 @@ def patch_clean_fields(model):
                 if orig_field_name in exclude:
                     field.save_form_data(self, value, check=False)
             delattr(self, '_mt_form_pending_clear')
-        old_clean_fields(self, exclude)
+        try:
+            setattr(self, '_mt_disable', True)
+            old_clean_fields(self, exclude)
+        finally:
+            setattr(self, '_mt_disable', False)
     model.clean_fields = new_clean_fields
 
 
@@ -551,6 +577,7 @@ class Translator(object):
         """
         if model not in self._registry:
             # Create a new type for backwards compatibility.
+
             opts = type("%sTranslationOptions" % model.__name__,
                         (opts_class or TranslationOptions,), options)(model)
 
