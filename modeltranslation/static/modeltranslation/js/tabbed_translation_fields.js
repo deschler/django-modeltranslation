@@ -499,9 +499,7 @@ var google, django, gettext;
       // Note: The add another functionality in admin is injected through inline javascript,
       // here we have to run after that (and after all other ready events just to be sure).
       $(document).ready(function () {
-        $(window).on("load", function () {
-          handleAddAnotherInline();
-        });
+        handleAddAnotherInline();
       });
 
       // Group fields in (existing) tabular inlines
