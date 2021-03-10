@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### Bug Fixes
 
-* remove on windwos load from add another ([c8ea228](https://github.com/deschler/django-modeltranslation/commit/c8ea22877b3f4070ffb4d3d4e602d7ef09ab0860))
+* Fix loading for Inline Admin ([c8ea228](https://github.com/deschler/django-modeltranslation/commit/c8ea22877b3f4070ffb4d3d4e602d7ef09ab0860))
 
 ### [0.16.1](https://github.com/deschler/django-modeltranslation/compare/v0.16.0...v0.16.1) (2020-11-23)
 
