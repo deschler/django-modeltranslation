@@ -41,6 +41,16 @@ in ``settings.py``.
 All translated models (as specified in the translation files) from all apps will be
 populated with initial data.
 
+Optionally, an app label and model name may be passed to populate only a subset
+of translated models.
+
+.. code-block:: console
+
+    $ python manage.py update_translation_fields myapp
+
+.. code-block:: console
+
+    $ python manage.py update_translation_fields myapp mymodel
 
 .. _commands-sync_translation_fields:
 
