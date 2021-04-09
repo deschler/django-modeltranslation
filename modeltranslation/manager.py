@@ -7,6 +7,7 @@ https://github.com/zmathew/django-linguo
 """
 import itertools
 
+from django import VERSION
 from django.contrib.admin.utils import get_model_from_relation
 from django.core.exceptions import FieldDoesNotExist
 from django.db import models
@@ -296,15 +297,24 @@ class MultilingualQuerySet(models.query.QuerySet):
             q.rhs = self._rewrite_f(q.rhs)
         return q
 
-    def _filter_or_exclude(self, negate, *args, **kwargs):
+    def _rewrite_filter_or_exclude(self, args, kwargs):
         if not self._rewrite:
-            return super(MultilingualQuerySet, self)._filter_or_exclude(negate, *args, **kwargs)
+            return args, kwargs
         args = map(self._rewrite_q, args)
         for key, val in list(kwargs.items()):
             new_key = rewrite_lookup_key(self.model, key)
             del kwargs[key]
             kwargs[new_key] = self._rewrite_f(val)
-        return super(MultilingualQuerySet, self)._filter_or_exclude(negate, *args, **kwargs)
+        return args, kwargs
+
+    if VERSION >= (3, 2):
+        def _filter_or_exclude(self, negate, args, kwargs):
+            args, kwargs = self._rewrite_filter_or_exclude(args, kwargs)
+            return super(MultilingualQuerySet, self)._filter_or_exclude(negate, args, kwargs)
+    else:
+        def _filter_or_exclude(self, negate, *args, **kwargs):
+            args, kwargs = self._rewrite_filter_or_exclude(args, kwargs)
+            return super(MultilingualQuerySet, self)._filter_or_exclude(negate, *args, **kwargs)
 
     def _get_original_fields(self):
         source = (self.model._meta.concrete_fields if hasattr(self.model._meta, 'concrete_fields')
@@ -362,12 +372,12 @@ class MultilingualQuerySet(models.query.QuerySet):
             return super(MultilingualQuerySet, self).create(**kwargs)
 
     # This method was not present in django-linguo
-    def get_or_create(self, **kwargs):
+    def get_or_create(self, *args, **kwargs):
         """
         Allows to override population mode with a ``populate`` method.
         """
         with auto_populate(self._populate_mode):
-            return super(MultilingualQuerySet, self).get_or_create(**kwargs)
+            return super(MultilingualQuerySet, self).get_or_create(*args, **kwargs)
 
     # This method was not present in django-linguo
     def defer(self, *fields):
@@ -384,23 +394,23 @@ class MultilingualQuerySet(models.query.QuerySet):
         return super(MultilingualQuerySet, self).values(*fields)
 
     def _values(self, *original, **kwargs):
-        if not kwargs.get('prepare', False):
-            return super(MultilingualQuerySet, self)._values(*original)
+        if not kwargs.pop('prepare', False):
+            return super(MultilingualQuerySet, self)._values(*original, **kwargs)
         new_fields, translation_fields = append_fallback(self.model, original)
-        clone = super(MultilingualQuerySet, self)._values(*list(new_fields))
+        clone = super(MultilingualQuerySet, self)._values(*list(new_fields), **kwargs)
         clone.original_fields = tuple(original)
         clone.translation_fields = translation_fields
         clone.fields_to_del = new_fields - set(original)
         return clone
 
     # This method was not present in django-linguo
-    def values(self, *fields):
+    def values(self, *fields, **expressions):
         if not self._rewrite:
-            return super(MultilingualQuerySet, self).values(*fields)
+            return super(MultilingualQuerySet, self).values(*fields, **expressions)
         if not fields:
             # Emulate original queryset behaviour: get all fields that are not translation fields
             fields = self._get_original_fields()
-        clone = self._values(*fields, prepare=True)
+        clone = self._values(*fields, prepare=True, **expressions)
         clone._iterable_class = FallbackValuesIterable
         return clone
 
