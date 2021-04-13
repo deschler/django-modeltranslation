@@ -17,6 +17,8 @@ env:
   - DJANGO=3.0 DB=sqlite
   - DJANGO=3.0 DB=postgres
   - DJANGO=3.0 DB=mysql
+  - DJANGO=3.2 DB=postgres
+  - DJANGO=3.2 DB=mysql
 before_install:
   - pip install -q flake8
   - PYFLAKES_NODOCTEST=1 flake8 modeltranslation
