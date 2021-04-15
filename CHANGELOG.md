@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.17.1](https://github.com/deschler/django-modeltranslation/compare/v0.16.2...v0.17.1) (2021-04-15)
+
+
+### Bug Fixes
+
+* Fixed .latest() ORM method with django 3.2 ([eaf613b](https://github.com/deschler/django-modeltranslation/commit/eaf613be1733314ad3b639e1702b0f7423af7899)), closes [#591](https://github.com/deschler/django-modeltranslation/issues/591)
+
 ## [0.17.0](https://github.com/deschler/django-modeltranslation/compare/v0.16.2...v0.17.0) (2021-04-15)
 
 ### Features
