@@ -81,6 +81,6 @@ class Command(BaseCommand):
                 if field.empty_strings_allowed:
                     q |= Q(**{def_lang_fieldname: ""})
 
-                model._default_manager.filter(q).rewrite(False).update(
+                model._default_manager.filter(q).rewrite(False).order_by().update(
                     **{def_lang_fieldname: F(field_name)}
                 )
