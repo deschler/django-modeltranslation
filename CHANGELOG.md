@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.17.0](https://github.com/deschler/django-modeltranslation/compare/v0.16.2...v0.17.0) (2021-04-15)
+
+### Features
+
+* Add Django 3.2 support
+
 ### [0.16.2](https://github.com/deschler/django-modeltranslation/compare/v0.16.1...v0.16.2) (2021-02-18)
 
 
