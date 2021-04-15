@@ -2650,6 +2650,13 @@ class TestManager(ModeltranslationTestBase):
         self.assertEqual(titles_for_en, ('most', 'more_en', 'more_de', 'least'))
         self.assertEqual(titles_for_de, ('most', 'more_de', 'more_en', 'least'))
 
+    def test_latest(self):
+        manager = models.ManagerTestModel.objects
+        instance_1 = manager.create(title='more_de', visits_en=1, visits_de=2)
+        instance_2 = manager.create(title='more_en', visits_en=2, visits_de=1)
+        latest_instance = manager.latest("id")
+        self.assertEqual(latest_instance, instance_2)
+
     def assert_fallback(self, method, expected1, *args, **kwargs):
         transform = kwargs.pop('transform', lambda x: x)
         expected2 = kwargs.pop('expected_de', expected1)

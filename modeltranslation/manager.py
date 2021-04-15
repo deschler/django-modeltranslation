@@ -300,7 +300,7 @@ class MultilingualQuerySet(models.query.QuerySet):
     def _rewrite_filter_or_exclude(self, args, kwargs):
         if not self._rewrite:
             return args, kwargs
-        args = map(self._rewrite_q, args)
+        args = tuple(map(self._rewrite_q, args))
         for key, val in list(kwargs.items()):
             new_key = rewrite_lookup_key(self.model, key)
             del kwargs[key]
