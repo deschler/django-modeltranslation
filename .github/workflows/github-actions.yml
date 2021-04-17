@@ -40,10 +40,10 @@ jobs:
       DJANGO: ${{ matrix.django }}
       DB: ${{ matrix.database }}
       DB_HOST: 127.0.0.1
-      MYSQL_DATABASE: "modeltranslation"
+      MYSQL_DATABASE: "test_modeltranslation"
       MYSQL_USER: "modeltranslation"
       MYSQL_PASSWORD: "modeltranslation"
-      POSTGRES_DB: "modeltranslation"
+      POSTGRES_DB: "test_modeltranslation"
       POSTGRES_USER: "modeltranslation"
       POSTGRES_PASSWORD: "modeltranslation"
     services:
@@ -52,7 +52,7 @@ jobs:
         ports:
           - 3306:3306
         env:
-          MYSQL_DATABASE: "modeltranslation"
+          MYSQL_DATABASE: "test_modeltranslation"
           MYSQL_USER: "modeltranslation"
           MYSQL_PASSWORD: "modeltranslation"
           MYSQL_ROOT_PASSWORD: "rootpassword"
@@ -63,7 +63,7 @@ jobs:
           - 5432:5432
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
         env:
-          POSTGRES_DB: "modeltranslation"
+          POSTGRES_DB: "test_modeltranslation"
           POSTGRES_USER: "modeltranslation"
           POSTGRES_PASSWORD: "modeltranslation"
     steps:
