@@ -25,7 +25,7 @@ def runtests(test_path='modeltranslation'):
                 'ENGINE': 'django.db.backends.mysql',
                 'NAME': os.getenv('MYSQL_DATABASE', 'modeltranslation'),
                 'USER': os.getenv('MYSQL_USER', 'root'),
-                'PASSWORD': os.getenv('MYSQL_PASSWORD', ''),
+                'PASSWORD': os.getenv('MYSQL_PASSWORD', 'password'),
                 'HOST': test_db_host,
             })
         elif test_db == 'postgres':
