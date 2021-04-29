@@ -175,7 +175,7 @@ non-translated fixtures. Just remember to use the context manager::
         call_command('loaddata', 'fixture.json')  # Some fixture loading
 
         z = News(title='bar')
-        print z.title_en, z.title_de  # prints 'bar bar'
+        print(z.title_en, z.title_de)  # prints 'bar bar'
 
 There is a more convenient way than calling ``populate`` manager method or entering
 ``auto_populate`` manager context all the time:
@@ -223,13 +223,13 @@ him English title/content of the news than display empty strings. This is called
 
     news.title_en = 'English title'
     news.title_de = ''
-    print news.title
+    print(news.title)
     # If current active language is German, it should display the title_de field value ('').
     # But if fallback is enabled, it would display 'English title' instead.
 
     # Similarly for manager
     news.save()
-    print News.objects.filter(pk=news.pk).values_list('title', flat=True)[0]
+    print(News.objects.filter(pk=news.pk).values_list('title', flat=True)[0])
     # As above: if current active language is German and fallback to English is enabled,
     # it would display 'English title'.
 
