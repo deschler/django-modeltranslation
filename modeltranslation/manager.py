@@ -185,8 +185,13 @@ class MultilingualQuerySet(models.query.QuerySet):
     def __reduce__(self):
         return multilingual_queryset_factory, (self.__class__.__bases__[0],), self.__getstate__()
 
-    # This method was not present in django-linguo
-    def _clone(self, klass=None, **kwargs):
+    def _clone(self):
+        return self.__clone()
+
+    def __clone(self, **kwargs):
+        # This method is private, so outside code can use default _clone without `kwargs`,
+        # and we're here can use private version with `kwargs`.
+        # Refs: https://github.com/deschler/django-modeltranslation/issues/483
         kwargs.setdefault('_rewrite', self._rewrite)
         kwargs.setdefault('_populate', self._populate)
         if hasattr(self, 'translation_fields'):
@@ -199,16 +204,14 @@ class MultilingualQuerySet(models.query.QuerySet):
         cloned.__dict__.update(kwargs)
         return cloned
 
-    # This method was not present in django-linguo
     def rewrite(self, mode=True):
-        return self._clone(_rewrite=mode)
+        return self.__clone(_rewrite=mode)
 
-    # This method was not present in django-linguo
     def populate(self, mode='all'):
         """
         Overrides the translation fields population mode for this query set.
         """
-        return self._clone(_populate=mode)
+        return self.__clone(_populate=mode)
 
     def _rewrite_applied_operations(self):
         """
