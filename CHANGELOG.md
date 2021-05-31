@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.17.2](https://github.com/deschler/django-modeltranslation/compare/v0.17.1...v0.17.2) (2021-05-31)
+
+
+### Bug Fixes
+
+* **docs:** Fixed legacy python 2 print statements ([10ec4ed](https://github.com/deschler/django-modeltranslation/commit/10ec4ed8694d949815ccf4ada679a1cb72f24675))
+* **MultilingualQuerySet:** Make _clone signature match default django _clone ([c65adb0](https://github.com/deschler/django-modeltranslation/commit/c65adb058d6c60c077138e5099342f31aac1690b)), closes [#483](https://github.com/deschler/django-modeltranslation/issues/483)
+
 ### [0.17.1](https://github.com/deschler/django-modeltranslation/compare/v0.16.2...v0.17.1) (2021-04-15)
 
 
