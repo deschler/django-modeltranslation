@@ -440,7 +440,7 @@ var google, django, gettext;
 
     var MainSwitch = {
       languages: [],
-      $select: $("<select class='modeltranslation-main-switch'>"),
+      $select: $("<select id='modeltranslation-main-switch' class='modeltranslation-switch'>"),
 
       init: function (groupedTranslations, tabs) {
         var self = this;
