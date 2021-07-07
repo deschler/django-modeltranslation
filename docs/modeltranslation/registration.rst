@@ -134,7 +134,7 @@ are not declared in the original ``News`` model class but rather have been
 added by the modeltranslation app. These are called *translation fields*. There
 will be one for every language in your project's ``settings.py``.
 
-The name of these additional fields is build using the original name of the
+The names of these additional fields are built using the original name of the
 translated field and appending one of the language identifiers found in the
 ``settings.LANGUAGES``.
 
