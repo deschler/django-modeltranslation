@@ -11,6 +11,34 @@ var google, django, gettext;
   };
 
   jQuery(function ($) {
+    var detectTemplate = function() {
+      if (document.querySelector("#jazzmin-theme, #jazzy-navbar, #jazzy-tabs, #jazzy-actions")) {
+        return "jazzmin";
+      }
+      return "default";
+    }
+
+    var selectorMapping = {
+      "default": {
+        "mainHeader": () => $("#content").find("h1"),
+        "tabContainer": (el) => $(el).closest(".form-row"),
+        "tabUlClass": "",
+        "tabLiClass": "",
+        "tabAClass": "",
+        "tabErrorClass": "ui-tab-has-errors"
+      },
+      "jazzmin": {
+        "mainHeader": () => $("#content-main").find(".card-title:first"),
+        "tabContainer": (el) => $(el).closest(".form-group"),
+        "tabUlClass": "nav nav-tabs",
+        "tabLiClass": "nav-item",
+        "tabAClass": "nav-link",
+        "tabErrorClass": "ui-tab-has-errors"
+      }
+    }
+
+    const selectors = selectorMapping[detectTemplate()];
+
     var TranslationField = function (options) {
       this.el = options.el;
       this.cls = options.cls;
@@ -181,12 +209,12 @@ var google, django, gettext;
       $.each(groupedTranslations, function (groupId, lang) {
         if (groupId.includes("__prefix__")) return;
         var tabsContainer = $("<div></div>"),
-          tabsList = $("<ul></ul>"),
+          tabsList = $(`<ul class='${selectors["tabUlClass"]}'></ul>`),
           insertionPoint,
           activeTab = 0;
         tabsContainer.append(tabsList);
         $.each(lang, function (lang, el) {
-          var container = $(el).closest(".form-row"),
+          var container = selectors["tabContainer"](el),
             label = $("label", container),
             fieldLabel = container.find("label"),
             tabId = "tab_" + $(el).attr("id"),
@@ -212,9 +240,9 @@ var google, django, gettext;
           container.find("script").remove();
           panel = $('<div id="' + tabId + '"></div>').append(container);
           tab = $(
-            "<li" +
-              (label.hasClass("required") ? ' class="required"' : "") +
-              '><a href="#' +
+            `<li class='${selectors["tabLiClass"]} ` +
+              (label.hasClass("required") ? "required" : "") + "'" +
+              `><a class="${selectors["tabAClass"]}" href="#` +
               tabId +
               '">' +
               lang.replace("_", "-") +
@@ -224,7 +252,7 @@ var google, django, gettext;
           tabsContainer.append(panel);
           if (container.hasClass("errors")) {
             activeTab = tabsList.find("li").length - 1;
-            tab.addClass("ui-tab-has-errors");
+            tab.addClass(selectors["tabErrorClass"]);
           }
         });
         insertionPoint.el[insertionPoint.insert](tabsContainer);
@@ -426,7 +454,7 @@ var google, django, gettext;
           tabsContainer.append($panel);
           if ($container.hasClass("errors")) {
             activeTab = tabsList.find("li").length - 1;
-            tab.addClass("ui-tab-has-errors");
+            tab.addClass(selectors["tabErrorClass"]);
           }
         });
         insertionPoint.el[insertionPoint.insert](tabsContainer);
@@ -463,7 +491,8 @@ var google, django, gettext;
           );
         });
         this.update(tabs);
-        $("#content").find("h1").append("&nbsp;").append(self.$select);
+        selectors["mainHeader"]().append("&nbsp;").append(self.$select);
+
       },
 
       update: function (tabs) {
