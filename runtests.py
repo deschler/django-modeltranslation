@@ -12,24 +12,29 @@ from django.core.management import call_command
 def runtests(test_path='modeltranslation'):
     if not settings.configured:
         # Choose database for settings
+        test_db = os.getenv('DB', 'sqlite')
+        test_db_host = os.getenv('DB_HOST', 'localhost')
         DATABASES = {
             'default': {
                 'ENGINE': 'django.db.backends.sqlite3',
                 'NAME': ':memory:'
             }
         }
-        test_db = os.environ.get('DB', 'sqlite')
         if test_db == 'mysql':
             DATABASES['default'].update({
                 'ENGINE': 'django.db.backends.mysql',
-                'NAME': 'modeltranslation',
-                'USER': 'root',
+                'NAME': os.getenv('MYSQL_DATABASE', 'modeltranslation'),
+                'USER': os.getenv('MYSQL_USER', 'root'),
+                'PASSWORD': os.getenv('MYSQL_PASSWORD', 'password'),
+                'HOST': test_db_host,
             })
         elif test_db == 'postgres':
             DATABASES['default'].update({
                 'ENGINE': 'django.db.backends.postgresql',
-                'USER': 'postgres',
-                'NAME': 'modeltranslation',
+                'USER': os.getenv('POSTGRES_USER', 'postgres'),
+                'PASSWORD': os.getenv('POSTGRES_DB', 'postgres'),
+                'NAME': os.getenv('POSTGRES_DB', 'modeltranslation'),
+                'HOST': test_db_host,
             })
 
         # Configure test environment
