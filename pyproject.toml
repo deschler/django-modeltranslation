@@ -9,13 +9,14 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.6"
+python = ">=3.6.2"
 django = ">=2.2"
 six = "^1.15.0"
 
 [tool.poetry.dev-dependencies]
 pdbpp = "^0.10.2"
 flake8 = "^3.7.9"
+black = "^21.9b0"
 
 [tool.black]
 line-length = 100
