@@ -11,23 +11,29 @@ COMMASPACE = ", "
 
 
 class Command(BaseCommand):
-    help = ('Updates empty values of translation fields using'
-            ' values from original fields (in all translated models).')
+    help = (
+        'Updates empty values of translation fields using'
+        ' values from original fields (in all translated models).'
+    )
 
     def add_arguments(self, parser):
         parser.add_argument(
-            'app_label', nargs='?',
+            'app_label',
+            nargs='?',
             help='App label of an application to update empty values.',
         )
         parser.add_argument(
-            'model_name', nargs='?',
+            'model_name',
+            nargs='?',
             help='Model name to update empty values of only this model.',
         )
         parser.add_argument(
             '--language',
             action='store',
-            help=('Language translation field the be updated.'
-                  ' Default language field if not provided')
+            help=(
+                'Language translation field the be updated.'
+                ' Default language field if not provided'
+            ),
         )
 
     def handle(self, *args, **options):
@@ -54,18 +60,19 @@ class Command(BaseCommand):
         lang = options.get('language') or DEFAULT_LANGUAGE
         if lang not in AVAILABLE_LANGUAGES:
             raise CommandError(
-                "Cannot find language '%s'. Options are %s." % (
-                    lang, COMMASPACE.join(AVAILABLE_LANGUAGES)
-                )
+                "Cannot find language '%s'. Options are %s."
+                % (lang, COMMASPACE.join(AVAILABLE_LANGUAGES))
             )
         else:
             lang = lang.replace('-', '_')
 
         if verbosity > 0:
-            self.stdout.write("Working on models: %s" % ', '.join([
-                "{app_label}.{object_name}".format(**m._meta.__dict__)
-                for m in models
-            ]))
+            self.stdout.write(
+                "Working on models: %s"
+                % ', '.join(
+                    ["{app_label}.{object_name}".format(**m._meta.__dict__) for m in models]
+                )
+            )
 
         for model in models:
             if verbosity > 0:

@@ -21,6 +21,7 @@ class UniqueNullableModel(models.Model):
 
 # ######### Proxy model testing
 
+
 class ProxyTestModel(TestModel):
     class Meta:
         proxy = True
@@ -30,6 +31,7 @@ class ProxyTestModel(TestModel):
 
 
 # ######### Fallback values testing
+
 
 class FallbackModel(models.Model):
     title = models.CharField(gettext_lazy('title'), max_length=255)
@@ -48,6 +50,7 @@ class FallbackModel2(models.Model):
 
 # ######### File fields testing
 
+
 class FileFieldsModel(models.Model):
     title = models.CharField(gettext_lazy('title'), max_length=255)
     file = models.FileField(upload_to='modeltranslation_tests', null=True, blank=True)
@@ -57,6 +60,7 @@ class FileFieldsModel(models.Model):
 
 # ######### Foreign Key / OneToOneField testing
 
+
 class NonTranslated(models.Model):
     title = models.CharField(gettext_lazy('title'), max_length=255)
 
@@ -64,39 +68,63 @@ class NonTranslated(models.Model):
 class ForeignKeyModel(models.Model):
     title = models.CharField(gettext_lazy('title'), max_length=255)
     test = models.ForeignKey(
-        TestModel, null=True, related_name="test_fks", on_delete=models.CASCADE,
+        TestModel,
+        null=True,
+        related_name="test_fks",
+        on_delete=models.CASCADE,
     )
     optional = models.ForeignKey(TestModel, blank=True, null=True, on_delete=models.CASCADE)
     hidden = models.ForeignKey(
-        TestModel, blank=True, null=True, related_name="+", on_delete=models.CASCADE,
+        TestModel,
+        blank=True,
+        null=True,
+        related_name="+",
+        on_delete=models.CASCADE,
     )
     non = models.ForeignKey(
-        NonTranslated, blank=True, null=True, related_name="test_fks", on_delete=models.CASCADE,
+        NonTranslated,
+        blank=True,
+        null=True,
+        related_name="test_fks",
+        on_delete=models.CASCADE,
     )
     untrans = models.ForeignKey(
-        TestModel, blank=True, null=True, related_name="test_fks_un", on_delete=models.CASCADE,
+        TestModel,
+        blank=True,
+        null=True,
+        related_name="test_fks_un",
+        on_delete=models.CASCADE,
     )
 
 
 class OneToOneFieldModel(models.Model):
     title = models.CharField(gettext_lazy('title'), max_length=255)
     test = models.OneToOneField(
-        TestModel, null=True, related_name="test_o2o", on_delete=models.CASCADE,
+        TestModel,
+        null=True,
+        related_name="test_o2o",
+        on_delete=models.CASCADE,
     )
     optional = models.OneToOneField(TestModel, blank=True, null=True, on_delete=models.CASCADE)
     # No hidden option for OneToOne
     non = models.OneToOneField(
-        NonTranslated, blank=True, null=True, related_name="test_o2o", on_delete=models.CASCADE,
+        NonTranslated,
+        blank=True,
+        null=True,
+        related_name="test_o2o",
+        on_delete=models.CASCADE,
     )
 
 
 # ######### Custom fields testing
+
 
 class OtherFieldsModel(models.Model):
     """
     This class is supposed to include other newly added fields types, so that
     adding new supported field doesn't end in adding new test model.
     """
+
     # That's rich! PositiveIntegerField is only validated in forms, not in models.
     int = models.PositiveIntegerField(default=42, validators=[validators.MinValueValidator(0)])
     boolean = models.BooleanField(default=False)
@@ -115,6 +143,7 @@ class FancyDescriptor(object):
     """
     Stupid demo descriptor, that store int in database and return string of that length on get.
     """
+
     def __init__(self, field):
         self.field = field
 
@@ -157,6 +186,7 @@ class DescriptorModel(models.Model):
 
 # ######### Multitable inheritance testing
 
+
 class MultitableModelA(models.Model):
     titlea = models.CharField(gettext_lazy('title a'), max_length=255)
 
@@ -174,6 +204,7 @@ class MultitableModelD(MultitableModelB):
 
 
 # ######### Abstract inheritance testing
+
 
 class AbstractModelA(models.Model):
     titlea = models.CharField(gettext_lazy('title a'), max_length=255)
@@ -195,6 +226,7 @@ class AbstractModelB(AbstractModelA):
 
 
 # ######### Fields inheritance testing
+
 
 class Slugged(models.Model):
     slug = models.CharField(max_length=255)
@@ -237,6 +269,7 @@ class RichTextPage(Page, RichText):
 
 # ######### Admin testing
 
+
 class DataModel(models.Model):
     data = models.TextField(blank=True, null=True)
 
@@ -256,6 +289,7 @@ class NameModel(models.Model):
 
 
 # ######### Integration testing
+
 
 class ThirdPartyModel(models.Model):
     name = models.CharField(max_length=20)
@@ -280,7 +314,10 @@ class FilteredTestModel(models.Model):
 class ForeignKeyFilteredModel(models.Model):
     title = models.CharField(gettext_lazy('title'), max_length=255)
     test = models.ForeignKey(
-        FilteredTestModel, null=True, related_name="test_fks", on_delete=models.CASCADE,
+        FilteredTestModel,
+        null=True,
+        related_name="test_fks",
+        on_delete=models.CASCADE,
     )
 
 
@@ -298,6 +335,7 @@ class CustomManager(models.Manager):
         sup = super(CustomManager, self)
         queryset = sup.get_queryset() if hasattr(sup, 'get_queryset') else sup.get_query_set()
         return queryset.filter(title__contains='a').exclude(description__contains='x')
+
     get_query_set = get_queryset
 
     def custom_qs(self):
@@ -324,6 +362,7 @@ class CustomQuerySet(models.query.QuerySet):
 class CustomManager2(models.Manager):
     def get_queryset(self):
         return CustomQuerySet(self.model, using=self._db)
+
     get_query_set = get_queryset
 
 
@@ -358,6 +397,7 @@ class PlainChildTestModel(CustomManagerBaseModel):
 
 # ######### Required fields testing
 
+
 class RequiredModel(models.Model):
     non_req = models.CharField(max_length=10, blank=True)
     req = models.CharField(max_length=10)
@@ -366,6 +406,7 @@ class RequiredModel(models.Model):
 
 
 # ######### Name collision registration testing
+
 
 class ConflictModel(models.Model):
     title = models.CharField(gettext_lazy('title'), max_length=255)
@@ -393,6 +434,7 @@ class MultitableConflictModelB(MultitableConflictModelA):
 
 # ######### Complex M2M with abstract classes and custom managers
 
+
 class CustomQuerySetX(models.query.QuerySet):
     pass
 
@@ -400,6 +442,7 @@ class CustomQuerySetX(models.query.QuerySet):
 class CustomManagerX(models.Manager):
     def get_queryset(self):
         return CustomQuerySetX(self.model, using=self._db)
+
     get_query_set = get_queryset
 
 
@@ -447,6 +490,7 @@ class AbstractModelY(models.Model):
 
 class ModelY(AbstractModelY):
     pass
+
 
 # Non-abstract base models whos Manager is not allowed to be overwritten
 

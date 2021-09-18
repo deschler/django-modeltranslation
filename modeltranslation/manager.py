@@ -19,8 +19,12 @@ from six import moves
 
 from modeltranslation import settings
 from modeltranslation.fields import TranslationField
-from modeltranslation.utils import (build_localized_fieldname, get_language,
-                                    auto_populate, resolution_order)
+from modeltranslation.utils import (
+    build_localized_fieldname,
+    get_language,
+    auto_populate,
+    resolution_order,
+)
 
 _C2F_CACHE = {}
 _F2TM_CACHE = {}
@@ -28,6 +32,7 @@ _F2TM_CACHE = {}
 
 def get_translatable_fields_for_model(model):
     from modeltranslation.translator import NotRegistered, translator
+
     try:
         return translator.get_options_for_model(model).get_field_names()
     except NotRegistered:
@@ -67,6 +72,7 @@ def append_fallback(model, fields):
     fields = set(fields)
     trans = set()
     from modeltranslation.translator import translator
+
     opts = translator.get_options_for_model(model)
     for key, _ in opts.fields.items():
         if key in fields:
@@ -81,6 +87,7 @@ def append_translated(model, fields):
     "If translated field is encountered, add also all its translation fields."
     fields = set(fields)
     from modeltranslation.translator import translator
+
     opts = translator.get_options_for_model(model)
     for key, translated in opts.fields.items():
         if key in fields:
@@ -264,8 +271,9 @@ class MultilingualQuerySet(models.query.QuerySet):
                 self._rewrite_where(child)
 
     def _rewrite_order(self):
-        self.query.order_by = [rewrite_order_lookup_key(self.model, field_name)
-                               for field_name in self.query.order_by]
+        self.query.order_by = [
+            rewrite_order_lookup_key(self.model, field_name) for field_name in self.query.order_by
+        ]
 
     def _rewrite_select_related(self):
         if isinstance(self.query.select_related, dict):
@@ -311,17 +319,23 @@ class MultilingualQuerySet(models.query.QuerySet):
         return args, kwargs
 
     if VERSION >= (3, 2):
+
         def _filter_or_exclude(self, negate, args, kwargs):
             args, kwargs = self._rewrite_filter_or_exclude(args, kwargs)
             return super(MultilingualQuerySet, self)._filter_or_exclude(negate, args, kwargs)
+
     else:
+
         def _filter_or_exclude(self, negate, *args, **kwargs):
             args, kwargs = self._rewrite_filter_or_exclude(args, kwargs)
             return super(MultilingualQuerySet, self)._filter_or_exclude(negate, *args, **kwargs)
 
     def _get_original_fields(self):
-        source = (self.model._meta.concrete_fields if hasattr(self.model._meta, 'concrete_fields')
-                  else self.model._meta.fields)
+        source = (
+            self.model._meta.concrete_fields
+            if hasattr(self.model._meta, 'concrete_fields')
+            else self.model._meta.fields
+        )
         return [f.attname for f in source if not isinstance(f, TranslationField)]
 
     def order_by(self, *field_names):
@@ -356,6 +370,7 @@ class MultilingualQuerySet(models.query.QuerySet):
             del kwargs[key]
             kwargs[new_key] = self._rewrite_f(val)
         return super(MultilingualQuerySet, self).update(**kwargs)
+
     update.alters_data = True
 
     # This method was not present in django-linguo
@@ -425,14 +440,16 @@ class MultilingualQuerySet(models.query.QuerySet):
         if kwargs:
             raise TypeError('Unexpected keyword arguments to values_list: %s' % (list(kwargs),))
         if flat and len(fields) > 1:
-            raise TypeError("'flat' is not valid when values_list is "
-                            "called with more than one field.")
+            raise TypeError(
+                "'flat' is not valid when values_list is " "called with more than one field."
+            )
         if not fields:
             # Emulate original queryset behaviour: get all fields that are not translation fields
             fields = self._get_original_fields()
         clone = self._values(*fields, prepare=True)
-        clone._iterable_class = (FallbackFlatValuesListIterable if flat
-                                 else FallbackValuesListIterable)
+        clone._iterable_class = (
+            FallbackFlatValuesListIterable if flat else FallbackValuesListIterable
+        )
         return clone
 
     # This method was not present in django-linguo
@@ -477,8 +494,10 @@ def multilingual_queryset_factory(old_cls, instantiate=True):
     if old_cls == models.query.QuerySet:
         NewClass = MultilingualQuerySet
     else:
+
         class NewClass(old_cls, MultilingualQuerySet):
             pass
+
         NewClass.__name__ = 'Multilingual%s' % old_cls.__name__
     return NewClass() if instantiate else NewClass
 
@@ -488,6 +507,7 @@ class MultilingualQuerysetManager(models.Manager):
     This class gets hooked in MRO just before plain Manager, so that every call to
     get_queryset returns MultilingualQuerySet.
     """
+
     def get_queryset(self):
         qs = super(MultilingualQuerysetManager, self).get_queryset()
         return self._patch_queryset(qs)
@@ -500,7 +520,6 @@ class MultilingualQuerysetManager(models.Manager):
 
 
 class MultilingualManager(MultilingualQuerysetManager):
-
     def rewrite(self, *args, **kwargs):
         return self.get_queryset().rewrite(*args, **kwargs)
 
