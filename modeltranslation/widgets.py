@@ -22,6 +22,7 @@ class ClearableWidgetWrapper(Widget):
     ``None`` is assumed to be a proper choice for the empty value, but you may
     pass another one to the constructor.
     """
+
     clear_checkbox_label = _("None")
     template = '<span class="clearable-input">{0} <span>{2}</span> {3}</span>'
     # TODO: Label would be proper, but admin applies some hardly undoable
@@ -67,15 +68,16 @@ class ClearableWidgetWrapper(Widget):
         checkbox_id = self.clear_checkbox_id(checkbox_name)
         checkbox_label = self.clear_checkbox_label
         checkbox = self.checkbox.render(
-            checkbox_name,
-            value == self.empty_value,
-            attrs={'id': checkbox_id},
-            renderer=renderer)
-        return mark_safe(self.template.format(
-            conditional_escape(wrapped),
-            conditional_escape(checkbox_id),
-            conditional_escape(checkbox_label),
-            conditional_escape(checkbox)))
+            checkbox_name, value == self.empty_value, attrs={'id': checkbox_id}, renderer=renderer
+        )
+        return mark_safe(
+            self.template.format(
+                conditional_escape(wrapped),
+                conditional_escape(checkbox_id),
+                conditional_escape(checkbox_label),
+                conditional_escape(checkbox),
+            )
+        )
 
     def value_from_datadict(self, data, files, name):
         """

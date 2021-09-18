@@ -8,7 +8,12 @@ from modeltranslation.tests import models
 
 @register(models.TestModel)
 class TestTranslationOptions(TranslationOptions):
-    fields = ('title', 'text', 'url', 'email',)
+    fields = (
+        'title',
+        'text',
+        'url',
+        'email',
+    )
     empty_values = ''
 
 
@@ -19,12 +24,19 @@ class UniqueNullableTranslationOptions(TranslationOptions):
 
 # ######### Proxy model testing
 
+
 @register(models.ProxyTestModel)
 class ProxyTestTranslationOptions(TranslationOptions):
-    fields = ('title', 'text', 'url', 'email',)
+    fields = (
+        'title',
+        'text',
+        'url',
+        'email',
+    )
 
 
 # ######### Fallback values testing
+
 
 @register(models.FallbackModel)
 class FallbackModelTranslationOptions(TranslationOptions):
@@ -34,46 +46,81 @@ class FallbackModelTranslationOptions(TranslationOptions):
 
 @register(models.FallbackModel2)
 class FallbackModel2TranslationOptions(TranslationOptions):
-    fields = ('title', 'text', 'url', 'email',)
+    fields = (
+        'title',
+        'text',
+        'url',
+        'email',
+    )
     fallback_values = {'text': gettext_lazy('Sorry, translation is not available.')}
     fallback_undefined = {'title': 'no title'}
 
 
 # ######### File fields testing
 
+
 @register(models.FileFieldsModel)
 class FileFieldsModelTranslationOptions(TranslationOptions):
-    fields = ('title', 'file', 'file2', 'image',)
+    fields = (
+        'title',
+        'file',
+        'file2',
+        'image',
+    )
 
 
 # ######### Foreign Key / OneToOneField testing
 
+
 @register(models.ForeignKeyModel)
 class ForeignKeyModelTranslationOptions(TranslationOptions):
-    fields = ('title', 'test', 'optional', 'hidden', 'non',)
+    fields = (
+        'title',
+        'test',
+        'optional',
+        'hidden',
+        'non',
+    )
 
 
 @register(models.OneToOneFieldModel)
 class OneToOneFieldModelTranslationOptions(TranslationOptions):
-    fields = ('title', 'test', 'optional', 'non',)
+    fields = (
+        'title',
+        'test',
+        'optional',
+        'non',
+    )
 
 
 @register(models.FilteredTestModel)
 class FilteredTestModelTranslationOptions(TranslationOptions):
-    fields = ('title', )
+    fields = ('title',)
 
 
 @register(models.ForeignKeyFilteredModel)
 class ForeignKeyFilteredModelTranslationOptions(TranslationOptions):
-    fields = ('title', )
+    fields = ('title',)
+
 
 # ######### Custom fields testing
 
 
 @register(models.OtherFieldsModel)
 class OtherFieldsModelTranslationOptions(TranslationOptions):
-    fields = ('int', 'boolean', 'nullboolean', 'csi', 'float', 'decimal',
-              'ip', 'genericip', 'date', 'datetime', 'time',)
+    fields = (
+        'int',
+        'boolean',
+        'nullboolean',
+        'csi',
+        'float',
+        'decimal',
+        'ip',
+        'genericip',
+        'date',
+        'datetime',
+        'time',
+    )
 
 
 @register(models.DescriptorModel)
@@ -82,6 +129,7 @@ class DescriptorModelTranslationOptions(TranslationOptions):
 
 
 # ######### Multitable inheritance testing
+
 
 @register(models.MultitableModelA)
 class MultitableModelATranslationOptions(TranslationOptions):
@@ -100,6 +148,7 @@ class MultitableModelCTranslationOptions(TranslationOptions):
 
 # ######### Abstract inheritance testing
 
+
 @register(models.AbstractModelA)
 class AbstractModelATranslationOptions(TranslationOptions):
     fields = ('titlea',)
@@ -111,6 +160,7 @@ class AbstractModelBTranslationOptions(TranslationOptions):
 
 
 # ######### Fields inheritance testing
+
 
 class SluggedTranslationOptions(TranslationOptions):
     fields = ('slug',)
@@ -139,22 +189,26 @@ translator.register(models.RichTextPage)
 
 # ######### Manager testing
 
+
 @register(models.ManagerTestModel)
 class ManagerTestModelTranslationOptions(TranslationOptions):
     fields = ('title', 'visits', 'description')
 
 
-@register([
-    models.CustomManagerTestModel,
-    models.CustomManager2TestModel,
-    models.CustomManagerChildTestModel,
-    models.PlainChildTestModel
-])
+@register(
+    [
+        models.CustomManagerTestModel,
+        models.CustomManager2TestModel,
+        models.CustomManagerChildTestModel,
+        models.PlainChildTestModel,
+    ]
+)
 class CustomManagerTestModelTranslationOptions(TranslationOptions):
     fields = ('title',)
 
 
 # ######### TranslationOptions field inheritance testing
+
 
 class FieldInheritanceATranslationOptions(TranslationOptions):
     fields = ['titlea']
@@ -172,12 +226,14 @@ class FieldInheritanceDTranslationOptions(FieldInheritanceBTranslationOptions):
     fields = ('titled',)
 
 
-class FieldInheritanceETranslationOptions(FieldInheritanceCTranslationOptions,
-                                          FieldInheritanceDTranslationOptions):
+class FieldInheritanceETranslationOptions(
+    FieldInheritanceCTranslationOptions, FieldInheritanceDTranslationOptions
+):
     fields = ('titlee',)
 
 
 # ######### Integration testing
+
 
 @register(models.ThirdPartyRegisteredModel)
 class ThirdPartyTranslationOptions(TranslationOptions):
@@ -186,9 +242,13 @@ class ThirdPartyTranslationOptions(TranslationOptions):
 
 # ######### Admin testing
 
+
 @register(models.GroupFieldsetsModel)
 class GroupFieldsetsTranslationOptions(TranslationOptions):
-    fields = ('title', 'text',)
+    fields = (
+        'title',
+        'text',
+    )
 
 
 @register(models.NameModel)
@@ -198,16 +258,21 @@ class NameTranslationOptions(TranslationOptions):
 
 # ######### Required fields testing
 
+
 @register(models.RequiredModel)
 class RequiredTranslationOptions(TranslationOptions):
     fields = ('non_req', 'req', 'req_reg', 'req_en_reg')
     required_languages = {
-        'en': ('req_reg', 'req_en_reg',),
+        'en': (
+            'req_reg',
+            'req_en_reg',
+        ),
         'default': ('req_reg',),  # for all other languages
     }
 
 
 # ######### Complex M2M with abstract classes and custom managers
+
 
 @register(models.ModelX)
 class ModelXOptions(TranslationOptions):

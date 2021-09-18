@@ -35,8 +35,7 @@ setup(
     },
     install_requires=['Django>=2.2', 'six'],
     download_url=(
-        'https://github.com/deschler/django-modeltranslation/archive/%s.tar.gz'
-        % version
+        'https://github.com/deschler/django-modeltranslation/archive/%s.tar.gz' % version
     ),
     classifiers=[
         'Programming Language :: Python',

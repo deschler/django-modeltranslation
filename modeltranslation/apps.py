@@ -8,4 +8,5 @@ class ModeltranslationConfig(AppConfig):
 
     def ready(self):
         from modeltranslation.models import handle_translation_registrations
+
         handle_translation_registrations()

@@ -41,25 +41,41 @@ def ask_for_confirmation(sql_sentences, model_full_name, interactive):
 
 
 def print_missing_langs(missing_langs, field_name, model_name):
-    print('Missing languages in "%s" field from "%s" model: %s' % (
-        field_name, model_name, ", ".join(missing_langs)))
+    print(
+        'Missing languages in "%s" field from "%s" model: %s'
+        % (field_name, model_name, ", ".join(missing_langs))
+    )
 
 
 class Command(BaseCommand):
-    help = ('Detect new translatable fields or new available languages and'
-            ' sync database structure. Does not remove columns of removed'
-            ' languages or undeclared fields.')
+    help = (
+        'Detect new translatable fields or new available languages and'
+        ' sync database structure. Does not remove columns of removed'
+        ' languages or undeclared fields.'
+    )
 
     if VERSION < (1, 8):
         from optparse import make_option
+
         option_list = BaseCommand.option_list + (
-            make_option('--noinput', action='store_false', dest='interactive', default=True,
-                        help='Do NOT prompt the user for input of any kind.'),
+            make_option(
+                '--noinput',
+                action='store_false',
+                dest='interactive',
+                default=True,
+                help='Do NOT prompt the user for input of any kind.',
+            ),
         )
     else:
+
         def add_arguments(self, parser):
-            parser.add_argument('--noinput', action='store_false', dest='interactive', default=True,
-                                help='Do NOT prompt the user for input of any kind.'),
+            parser.add_argument(
+                '--noinput',
+                action='store_false',
+                dest='interactive',
+                default=True,
+                help='Do NOT prompt the user for input of any kind.',
+            ),
 
     def handle(self, *args, **options):
         """
@@ -91,7 +107,8 @@ class Command(BaseCommand):
                     print_missing_langs(missing_langs, field_name, model_full_name)
                     sql_sentences = self.get_sync_sql(field_name, missing_langs, model)
                     execute_sql = ask_for_confirmation(
-                        sql_sentences, model_full_name, self.interactive)
+                        sql_sentences, model_full_name, self.interactive
+                    )
                     if execute_sql:
                         print('Executing SQL...')
                         for sentence in sql_sentences:

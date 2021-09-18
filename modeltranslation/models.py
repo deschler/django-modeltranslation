@@ -16,6 +16,7 @@ def autodiscover():
 
     from importlib import import_module
     from django.apps import apps
+
     mods = [(app_config.name, app_config.module) for app_config in apps.get_app_configs()]
 
     for (app, mod) in mods:
@@ -47,8 +48,10 @@ def autodiscover():
             if sys.argv[1] in ('runserver', 'runserver_plus'):
                 models = translator.get_registered_models()
                 names = ', '.join(m.__name__ for m in models)
-                print('modeltranslation: Registered %d models for translation'
-                      ' (%s) [pid: %d].' % (len(models), names, os.getpid()))
+                print(
+                    'modeltranslation: Registered %d models for translation'
+                    ' (%s) [pid: %d].' % (len(models), names, os.getpid())
+                )
         except IndexError:
             pass
 
