@@ -11,7 +11,7 @@ from django import VERSION
 from django.contrib.admin.utils import get_model_from_relation
 from django.core.exceptions import FieldDoesNotExist
 from django.db import models
-from django.db.models.query import ValuesIterable
+from django.db.models.query import ValuesIterable, ValuesListIterable,NamedValuesListIterable,FlatValuesListIterable
 from django.utils.tree import Node
 from django.db.models.lookups import Lookup
 from django.db.models.expressions import Col
@@ -441,6 +441,7 @@ class MultilingualQuerySet(models.query.QuerySet):
         if not self._rewrite:
             return super(MultilingualQuerySet, self).values_list(*fields, **kwargs)
         flat = kwargs.pop('flat', False)
+        named = kwargs.pop('named', False)
         if kwargs:
             raise TypeError('Unexpected keyword arguments to values_list: %s' % (list(kwargs),))
         if flat and len(fields) > 1:
@@ -453,7 +454,9 @@ class MultilingualQuerySet(models.query.QuerySet):
             fields = self._get_original_fields()
         clone = self._values(*fields, prepare=True, selects_all=selects_all)
         clone._iterable_class = (
-            FallbackFlatValuesListIterable if flat else FallbackValuesListIterable
+            NamedValuesListIterable if named
+            else FlatValuesListIterable if flat
+            else ValuesListIterable
         )
         return clone
 
