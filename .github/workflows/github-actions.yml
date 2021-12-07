@@ -3,7 +3,7 @@
 # Example
 #  - https://github.com/actions/example-services/blob/main/.github/workflows/postgres-service.yml
 name: CI
-on: [push]
+on: [push, pull_request]
 jobs:
   Lint:
     runs-on: ubuntu-latest
