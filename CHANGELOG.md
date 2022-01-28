@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.17.4](https://github.com/deschler/django-modeltranslation/compare/v0.17.3...v0.17.4) (2022-01-28)
+
+
+### Features
+
+* semi-configurable selection of elements to generate tabs in admin ([#607](https://github.com/deschler/django-modeltranslation/issues/607)) ([eb05201](https://github.com/deschler/django-modeltranslation/commit/eb052018bf930146d667be3e47f26d69afb3c2c3))
+
 ### [0.17.3](https://github.com/deschler/django-modeltranslation/compare/v0.17.2...v0.17.3) (2021-06-28)
 
 ### [0.17.2](https://github.com/deschler/django-modeltranslation/compare/v0.17.1...v0.17.2) (2021-05-31)
