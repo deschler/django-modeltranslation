@@ -30,9 +30,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python: [3.6, 3.7, 3.8, 3.9]
-        django: [2.2, 3.0, 3.2]
+        python: [3.7, 3.8, 3.9]
+        django: [2.2, 3.2]
         database: ["sqlite", "postgres", "mysql"]
+        include:
+          - python-version: "3.9"
+            django: "4.0"
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       DJANGO: ${{ matrix.django }}
