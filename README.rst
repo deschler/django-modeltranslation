@@ -1,3 +1,20 @@
+==============
+War in Ukraine
+==============
+
+On February 24th, 2022, Russia invaded Ukraine. I'm sole maintainer of this project
+staying in safe place, but i don't know how long it would be safe.
+
+Russian military shelling our cities, targeting civilian population.
+
+Help Ukraine:
+
+- https://supportukrainenow.org/
+
+Talk to your politics, talk to your friends. Help us close the sky over Ukraine.
+
+----------------
+
 ================
 Modeltranslation
 ================
