@@ -3,10 +3,12 @@
 Version code adopted from Django development version.
 https://github.com/django/django
 """
+import django
 
 VERSION = (0, 17, 5, 'final', 0)
 
-default_app_config = 'modeltranslation.apps.ModeltranslationConfig'
+if django.VERSION < (3, 2):
+    default_app_config = 'modeltranslation.apps.ModeltranslationConfig'
 
 
 def get_version(version=None):
