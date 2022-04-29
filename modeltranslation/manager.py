@@ -415,10 +415,12 @@ class MultilingualQuerySet(models.query.QuerySet):
         if not kwargs.pop('prepare', False):
             return super(MultilingualQuerySet, self)._values(*original, **kwargs)
         new_fields, translation_fields = append_fallback(self.model, original)
+        annotation_keys = set(self.query.annotation_select.keys())
+        new_fields.update(annotation_keys)
         clone = super(MultilingualQuerySet, self)._values(*list(new_fields), **kwargs)
         clone.original_fields = tuple(original)
         clone.translation_fields = translation_fields
-        clone.fields_to_del = new_fields - set(original)
+        clone.fields_to_del = new_fields - annotation_keys - set(original)
         return clone
 
     # This method was not present in django-linguo
