@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.17.6](https://github.com/deschler/django-modeltranslation/compare/v0.17.5...v0.17.6) (2022-04-29)
+
+
+### Bug Fixes
+
+* Preserve annotate() fields in queryset ([#633](https://github.com/deschler/django-modeltranslation/issues/633)) ([6f2688f](https://github.com/deschler/django-modeltranslation/commit/6f2688f52c56107da361c7c6197bcf38d8b99f42))
+
 ### [0.17.5](https://github.com/deschler/django-modeltranslation/compare/v0.17.4...v0.17.5) (2022-01-30)
 
 ### [0.17.4](https://github.com/deschler/django-modeltranslation/compare/v0.17.3...v0.17.4) (2022-01-28)
