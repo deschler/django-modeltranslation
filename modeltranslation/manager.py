@@ -412,9 +412,9 @@ class MultilingualQuerySet(models.query.QuerySet):
         return super(MultilingualQuerySet, self).values(*fields)
 
     def _values(self, *original, **kwargs):
+        selects_all = kwargs.pop('selects_all', False)
         if not kwargs.pop('prepare', False):
             return super(MultilingualQuerySet, self)._values(*original, **kwargs)
-        selects_all = kwargs.pop('selects_all', False)
         new_fields, translation_fields = append_fallback(self.model, original)
         annotation_keys = set(self.query.annotation_select.keys()) if selects_all else set()
         new_fields.update(annotation_keys)
