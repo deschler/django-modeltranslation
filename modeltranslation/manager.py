@@ -414,8 +414,9 @@ class MultilingualQuerySet(models.query.QuerySet):
     def _values(self, *original, **kwargs):
         if not kwargs.pop('prepare', False):
             return super(MultilingualQuerySet, self)._values(*original, **kwargs)
+        selects_all = kwargs.pop('selects_all', False)
         new_fields, translation_fields = append_fallback(self.model, original)
-        annotation_keys = set(self.query.annotation_select.keys())
+        annotation_keys = set(self.query.annotation_select.keys()) if selects_all else set()
         new_fields.update(annotation_keys)
         clone = super(MultilingualQuerySet, self)._values(*list(new_fields), **kwargs)
         clone.original_fields = tuple(original)
@@ -427,10 +428,11 @@ class MultilingualQuerySet(models.query.QuerySet):
     def values(self, *fields, **expressions):
         if not self._rewrite:
             return super(MultilingualQuerySet, self).values(*fields, **expressions)
+        selects_all = not fields
         if not fields:
             # Emulate original queryset behaviour: get all fields that are not translation fields
             fields = self._get_original_fields()
-        clone = self._values(*fields, prepare=True, **expressions)
+        clone = self._values(*fields, prepare=True, selects_all=selects_all, **expressions)
         clone._iterable_class = FallbackValuesIterable
         return clone
 
@@ -445,10 +447,11 @@ class MultilingualQuerySet(models.query.QuerySet):
             raise TypeError(
                 "'flat' is not valid when values_list is " "called with more than one field."
             )
+        selects_all = not fields
         if not fields:
             # Emulate original queryset behaviour: get all fields that are not translation fields
             fields = self._get_original_fields()
-        clone = self._values(*fields, prepare=True)
+        clone = self._values(*fields, prepare=True, selects_all=selects_all)
         clone._iterable_class = (
             FallbackFlatValuesListIterable if flat else FallbackValuesListIterable
         )

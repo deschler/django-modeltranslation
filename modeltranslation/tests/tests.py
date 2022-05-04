@@ -2919,6 +2919,17 @@ class TestManager(ModeltranslationTestBase):
             id1,
         )
 
+        # custom annotation with fields specified
+        self.assertEqual(
+            list(manager.filter(id=id1).annotate(custom_id=F('id')).values_list('id'))[0],
+            (id1,),
+        )
+        self.assertIsNone(
+            list(manager.filter(id=id1).annotate(custom_id=F('id')).values('id'))[0].get(
+                'custom_id'
+            ),
+        )
+
     def test_values_list_annotation(self):
         models.TestModel(title='foo').save()
         models.TestModel(title='foo').save()
