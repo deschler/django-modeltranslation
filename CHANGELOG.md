@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.17.7](https://github.com/deschler/django-modeltranslation/compare/v0.17.6...v0.17.7) (2022-05-04)
+
+
+### Bug Fixes
+
+* Do not include annotation fields when selecting specific fields ([#634](https://github.com/deschler/django-modeltranslation/issues/634)) ([defc37c](https://github.com/deschler/django-modeltranslation/commit/defc37c7a539dff1e4af96e7d13856519befe585))
+
 ### [0.17.6](https://github.com/deschler/django-modeltranslation/compare/v0.17.5...v0.17.6) (2022-04-29)
 
 
