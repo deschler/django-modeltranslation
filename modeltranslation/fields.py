@@ -3,7 +3,7 @@ from django import VERSION
 from django import forms
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import fields
-from django.utils import six
+import six
 
 from modeltranslation import settings as mt_settings
 from modeltranslation.utils import (
