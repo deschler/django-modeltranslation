@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.18.0](https://github.com/deschler/django-modeltranslation/compare/v0.17.7...v0.18.0) (2022-05-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* Replaced `VERSION` in tuple format by `__version__` as a string
+
+### Bug Fixes
+
+* Add django version check for default_app_config ([79d2e08](https://github.com/deschler/django-modeltranslation/commit/79d2e089eff2f6bcfd150d3ac6e165bfefa475cb))
+* Fix django version detect during install ([876f2e7](https://github.com/deschler/django-modeltranslation/commit/876f2e715804e5cba9f8dde0b8a75ff3179e908c))
+* Store version as plain text file to simplify bumping ([#636](https://github.com/deschler/django-modeltranslation/issues/636)) ([6b4bb73](https://github.com/deschler/django-modeltranslation/commit/6b4bb733d971363c223d9d4ff307a0f9be131315))
+
 ### [0.17.7](https://github.com/deschler/django-modeltranslation/compare/v0.17.6...v0.17.7) (2022-05-04)
 
 
