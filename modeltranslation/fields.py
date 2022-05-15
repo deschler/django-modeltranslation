@@ -289,25 +289,6 @@ class TranslationField(object):
         cls = import_string(path)
         return cls(*args, **kwargs)
 
-    def south_field_triple(self):
-        """
-        Returns a suitable description of this field for South.
-        """
-        # We'll just introspect the _actual_ field.
-        from south.modelsinspector import introspector
-
-        try:
-            # Check if the field provides its own 'field_class':
-            field_class = self.translated_field.south_field_triple()[0]
-        except AttributeError:
-            field_class = '%s.%s' % (
-                self.translated_field.__class__.__module__,
-                self.translated_field.__class__.__name__,
-            )
-        args, kwargs = introspector(self)
-        # That's our definition!
-        return (field_class, args, kwargs)
-
 
 class TranslationFieldDescriptor(object):
     """

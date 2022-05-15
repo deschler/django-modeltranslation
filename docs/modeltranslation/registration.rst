@@ -183,13 +183,12 @@ fields) and apply it. If not, you can use a little helper:
 :ref:`commands-sync_translation_fields` which can execute schema-ALTERing SQL
 to add new fields. Use either of these two solutions, not both.
 
-If you are adding translation fields to a third-party app that is using South,
+If you are adding translation fields to a third-party app,
 things get more complicated. In order to be able to update the app in the future,
 and to feel comfortable, you should use the ``sync_translation_fields`` command.
 Although it's possible to introduce new fields in a migration, it's nasty and
-involves copying migration files, using ``SOUTH_MIGRATION_MODULES`` setting,
-and passing ``--delete-ghost-migrations`` flag, so we don't recommend it.
-Invoking ``sync_translation_fields`` is plain easier.
+involves copying migration files, using ``MIGRATION_MODULES`` setting,
+so we don't recommend it. Invoking ``sync_translation_fields`` is plain easier.
 
 Note that all added fields are by default declared ``blank=True`` and
 ``null=True`` no matter if the original field is required or not. In other
