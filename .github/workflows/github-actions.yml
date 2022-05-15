@@ -9,13 +9,13 @@ on:
       - master
   pull_request:
 jobs:
-  Lint:
+  Check:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     strategy:
       matrix:
-        python: [3.9]
+        python: ["3.10"]
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
@@ -30,20 +30,7 @@ jobs:
         run: |
           flake8 modeltranslation
           black --check modeltranslation *.py
-  Install:
-    runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    strategy:
-      matrix:
-        python: [3.9]
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python }}
-      - name: Install package
+      - name: Test package install
         run: |
           python -m pip install --upgrade pip
           python setup.py sdist
