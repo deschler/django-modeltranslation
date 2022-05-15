@@ -19,17 +19,6 @@ Talk to your politics, talk to your friends. Help us close the sky over Ukraine.
 Modeltranslation
 ================
 
-The modeltranslation application is used to translate dynamic content of
-existing Django models to an arbitrary number of languages without having to
-change the original model classes. It uses a registration approach (comparable
-to Django's admin app) to be able to add translations to existing or new
-projects and is fully integrated into the Django admin backend.
-
-The advantage of a registration approach is the ability to add translations to
-models on a per-app basis. You can use the same app in different projects,
-may they use translations or not, and you never have to touch the original
-model class.
-
 
 .. image:: http://img.shields.io/coveralls/deschler/django-modeltranslation.svg?style=flat-square
     :target: https://coveralls.io/r/deschler/django-modeltranslation
@@ -46,6 +35,18 @@ model class.
     :alt: Join the chat at https://gitter.im/django-modeltranslation/community
     :target: https://gitter.im/django-modeltranslation/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
+
+
+The modeltranslation application is used to translate dynamic content of
+existing Django models to an arbitrary number of languages without having to
+change the original model classes. It uses a registration approach (comparable
+to Django's admin app) to be able to add translations to existing or new
+projects and is fully integrated into the Django admin backend.
+
+The advantage of a registration approach is the ability to add translations to
+models on a per-app basis. You can use the same app in different projects,
+may they use translations or not, and you never have to touch the original
+model class.
 
 Features
 ========
