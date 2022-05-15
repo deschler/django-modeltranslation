@@ -40,8 +40,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python: [3.7, 3.8, 3.9]
-        django: [3.2]
+        python: ["3.7", "3.8", "3.9"]
+        django: ["3.2"]
         database: ["sqlite", "postgres", "mysql"]
         include:
           - python-version: "3.9"
