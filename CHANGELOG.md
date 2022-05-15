@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.18.2](https://github.com/deschler/django-modeltranslation/compare/v0.18.1...v0.18.2) (2022-05-15)
+
+
+### Features
+
+* Update test matrix; Drop python 3.6, add Python 3.10 ([#638](https://github.com/deschler/django-modeltranslation/issues/638)) ([29deb95](https://github.com/deschler/django-modeltranslation/commit/29deb95bf30c0e31c6a031f754677182cdd461a2))
+
 ### [0.18.1](https://github.com/deschler/django-modeltranslation/compare/v0.18.0...v0.18.1) (2022-05-15)
 
 
