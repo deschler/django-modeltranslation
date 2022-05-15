@@ -4,7 +4,7 @@
   "repository": "django-modeltranslation",
   "bumpFiles": [
     {
-      "filename": "modeltranslation/VERSION",
+      "filename": "VERSION",
       "type": "plain-text"
     }
   ]

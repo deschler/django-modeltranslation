@@ -8,4 +8,4 @@ try:
 except ImportError:
     pass
 
-__version__ = (Path(__file__).parent / "VERSION").open().read().strip()
+__version__ = (Path(__file__).parent.parent / "VERSION").read_text().strip()
