@@ -44,10 +44,7 @@ jobs:
         django: ["3.2"]
         database: ["sqlite", "postgres", "mysql"]
         include:
-          - python: "3.9"
-            django: "4.0"
-        include:
-          - python: "3.10"
+          - python: ["3.9", "3.10"]
             django: "4.0"
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
