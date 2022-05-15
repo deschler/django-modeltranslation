@@ -16,14 +16,14 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 try:
-    import modeltranslation
+    from importlib.metadata import version
     # The version info for the project you're documenting, acts as replacement
     # for |version| and |release|, also used in various other places throughout
     # the built documents.
-
+    #
     # The full PEP386-compliant version number version, including
     # normalized alpha/beta/rc/dev tags (e.g. '0.5a1').
-    release = modeltranslation.__version__
+    release = version("django-modeltranslation")
 
     # The short X.Y version (e.g.'0.5').
     version = '.'.join(i for i in release.split('.')[:2])
