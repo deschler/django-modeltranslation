@@ -406,12 +406,12 @@ class MultilingualQuerySet(models.query.QuerySet):
             return super(MultilingualQuerySet, self).create(**kwargs)
 
     # This method was not present in django-linguo
-    def get_or_create(self, **kwargs):
+    def get_or_create(self, defaults=None, **kwargs):
         """
         Allows to override population mode with a ``populate`` method.
         """
         with auto_populate(self._populate_mode):
-            return super(MultilingualQuerySet, self).get_or_create(**kwargs)
+            return super(MultilingualQuerySet, self).get_or_create(defaults=defaults, **kwargs)
 
     # This method was not present in django-linguo
     def defer(self, *fields):
