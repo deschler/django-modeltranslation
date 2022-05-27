@@ -2,7 +2,7 @@ release:
 	standard-version
 
 publish: clean
-	python setup.py sdist
+	python setup.py sdist bdist_wheel
 	twine upload dist/*
 	git push --follow-tags
 
