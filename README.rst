@@ -11,7 +11,7 @@ Help Ukraine:
 
 - https://supportukrainenow.org/
 
-Talk to your politics, talk to your friends. Help us close the sky over Ukraine.
+Talk to your politics, talk to your friends. Send heavy weapons to Ukraine. Close the sky.
 
 ----------------
 
