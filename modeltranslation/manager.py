@@ -9,9 +9,9 @@ import itertools
 
 from django.contrib.admin.utils import get_model_from_relation
 from django.db import models
-from django.db.models import FieldDoesNotExist
+from django.core.exceptions import FieldDoesNotExist
 from django.db.models.query import ValuesIterable
-from django.utils.six import moves
+from six import moves
 from django.utils.tree import Node
 from django.db.models.lookups import Lookup
 from django.db.models.expressions import Col
@@ -67,8 +67,13 @@ def append_fallback(model, fields):
     from modeltranslation.translator import translator
     from modeltranslation.translator import NotRegistered
     from modeltranslation.utils import get_language, build_localized_fieldname
-    fields = set(fields)
-    trans = set()
+    fields = list(fields)
+    trans = list()
+    fields_append = fields.append
+    fields_remove = fields.remove
+    fields_insert = fields.insert
+    fields_index = fields.index
+    trans_append = trans.append
     try:
         opts = translator.get_options_for_model(model)
     except NotRegistered:
@@ -96,18 +101,22 @@ def append_fallback(model, fields):
                 rel_model, [rel_part])
             if rel_trans:
                 not_changed_field_part = field[:-len(part)]
-                fields.remove(field)
-                trans.add(field)
+                fields_remove(field)
+                trans_append(field)
                 for rel_field in rel_fields:
-                    fields.add(not_changed_field_part + rel_field)
+                    fields_append(not_changed_field_part + rel_field)
     for key, _ in opts.fields.items():
         if key in fields:
             langs = resolution_order(
                 get_language(), getattr(model, key).fallback_languages)
-            fields = fields.union(
-                build_localized_fieldname(key, lang) for lang in langs)
-            fields.remove(key)
-            trans.add(key)
+            index = fields_index(key)
+            for lang in langs:
+                d = build_localized_fieldname(key, lang)
+                if d not in fields:
+                    fields_insert(index + 1, d)
+                    index += 1
+            fields_remove(key)
+            trans_append(key)
     return fields, trans
 
 
@@ -397,12 +406,12 @@ class MultilingualQuerySet(models.query.QuerySet):
             return super(MultilingualQuerySet, self).create(**kwargs)
 
     # This method was not present in django-linguo
-    def get_or_create(self, **kwargs):
+    def get_or_create(self, defaults=None, **kwargs):
         """
         Allows to override population mode with a ``populate`` method.
         """
         with auto_populate(self._populate_mode):
-            return super(MultilingualQuerySet, self).get_or_create(**kwargs)
+            return super(MultilingualQuerySet, self).get_or_create(defaults=defaults, **kwargs)
 
     # This method was not present in django-linguo
     def defer(self, *fields):
@@ -425,7 +434,7 @@ class MultilingualQuerySet(models.query.QuerySet):
         clone = super(MultilingualQuerySet, self)._values(*list(new_fields))
         clone.original_fields = tuple(original)
         clone.translation_fields = translation_fields
-        clone.fields_to_del = new_fields - set(original)
+        clone.fields_to_del = set(new_fields) - set(original)
         return clone
 
     # This method was not present in django-linguo

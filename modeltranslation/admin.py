@@ -35,14 +35,14 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
             return [(None, {'fields': self.replace_orig_field(self.get_fields(request, obj))})]
         return None
 
-    def formfield_for_dbfield(self, db_field, request, **kwargs):
+    def formfield_for_dbfield(self, db_field, **kwargs):
         field = super(TranslationBaseModelAdmin, self).formfield_for_dbfield(
-            db_field, request, **kwargs
+            db_field, **kwargs
         )
-        self.patch_translation_field(db_field, field, request, **kwargs)
+        self.patch_translation_field(db_field, field, **kwargs)
         return field
 
-    def patch_translation_field(self, db_field, field, request, **kwargs):
+    def patch_translation_field(self, db_field, field, **kwargs):
         if db_field.name in self.trans_opts.fields:
             if field.required:
                 field.required = False
@@ -57,7 +57,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
             pass
         else:
             orig_formfield = self.formfield_for_dbfield(
-                orig_field, request, **kwargs
+                orig_field, **kwargs
             )
             field.widget = deepcopy(orig_formfield.widget)
             # if any widget attrs are defined on the form they should be copied
@@ -296,7 +296,7 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
                 trans_fieldnames = [f.name for f in sorted(trans_fields, key=lambda x: x.name)]
                 if any(f in trans_fieldnames for f in flattened_fieldsets):
                     # Extract the original field's verbose_name for use as this
-                    # fieldset's label - using ugettext_lazy in your model
+                    # fieldset's label - using gettext_lazy in your model
                     # declaration can make that translatable.
                     label = self.model._meta.get_field(orig_field).verbose_name.capitalize()
                     temp_fieldsets[orig_field] = (label, {
