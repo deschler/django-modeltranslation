@@ -2,7 +2,7 @@
 from functools import partial
 
 import django
-from django.utils.six import with_metaclass
+from six import with_metaclass
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Manager, ForeignKey, OneToOneField
 from django.db.models.base import ModelBase

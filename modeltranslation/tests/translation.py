@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.conf import settings
-from django.utils.translation import ugettext_lazy
+from django.utils.translation import gettext_lazy
 
 from modeltranslation.translator import translator, register, TranslationOptions
 from modeltranslation.tests import models
@@ -35,7 +35,7 @@ class FallbackModelTranslationOptions(TranslationOptions):
 @register(models.FallbackModel2)
 class FallbackModel2TranslationOptions(TranslationOptions):
     fields = ('title', 'text', 'url', 'email',)
-    fallback_values = {'text': ugettext_lazy('Sorry, translation is not available.')}
+    fallback_values = {'text': gettext_lazy('Sorry, translation is not available.')}
     fallback_undefined = {'title': 'no title'}
 
 

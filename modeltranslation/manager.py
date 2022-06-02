@@ -9,9 +9,9 @@ import itertools
 
 from django.contrib.admin.utils import get_model_from_relation
 from django.db import models
-from django.db.models import FieldDoesNotExist
+from django.core.exceptions import FieldDoesNotExist
 from django.db.models.query import ValuesIterable
-from django.utils.six import moves
+from six import moves
 from django.utils.tree import Node
 from django.db.models.lookups import Lookup
 from django.db.models.expressions import Col
@@ -406,12 +406,12 @@ class MultilingualQuerySet(models.query.QuerySet):
             return super(MultilingualQuerySet, self).create(**kwargs)
 
     # This method was not present in django-linguo
-    def get_or_create(self, **kwargs):
+    def get_or_create(self, defaults=None, **kwargs):
         """
         Allows to override population mode with a ``populate`` method.
         """
         with auto_populate(self._populate_mode):
-            return super(MultilingualQuerySet, self).get_or_create(**kwargs)
+            return super(MultilingualQuerySet, self).get_or_create(defaults=defaults, **kwargs)
 
     # This method was not present in django-linguo
     def defer(self, *fields):

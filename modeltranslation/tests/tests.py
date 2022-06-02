@@ -18,7 +18,7 @@ from django.db import IntegrityError
 from django.db.models import Q, F, Count, TextField
 from django.test import TestCase, TransactionTestCase
 from django.test.utils import override_settings
-from django.utils import six
+import six
 from django.utils.translation import get_language, override, trans_real
 
 from django.apps import apps as django_apps
