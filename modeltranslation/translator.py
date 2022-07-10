@@ -639,7 +639,7 @@ class Translator(object):
 
         return self._registry[model]
 
-    def get_options_for_model(self, model):
+    def get_options_for_model(self, model) -> TranslationOptions:
         """
         Thin wrapper around ``_get_options_for_model`` to preserve the
         semantic of throwing exception for models not directly registered.
