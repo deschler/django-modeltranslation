@@ -19,7 +19,7 @@ from django.core.files.storage import default_storage
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.db import IntegrityError
-from django.db.models import Q, F, Count, TextField
+from django.db.models import Q, F, Value, Count, TextField
 from django.test import TestCase, TransactionTestCase
 from django.test.utils import override_settings
 from django.utils.translation import get_language, override, trans_real
@@ -2853,6 +2853,17 @@ class TestManager(ModeltranslationTestBase):
         with override('de'):
             self.assertEqual(list(manager.values_list('title', flat=True)), ['de'])
 
+        # Values_list with named fields behave similarly.
+        # Also, it should preserve requested ordering.
+        (actual,) = manager.annotate(annotated=Value(True)).values_list(
+            'title', 'annotated', 'visits', named=True
+        )
+        expected = ('en', True, 0)
+        self.assertEqual(actual, expected)
+        self.assertEqual((actual.title, actual.annotated, actual.visits), expected)
+        with override('de'):
+            self.assertEqual(list(manager.values_list('title', 'visits', named=True)), [('de', 0)])
+
         # One can always turn rewrite off
         a = list(manager.rewrite(False).values_list('title', flat=True))
         with override('de'):
@@ -2869,11 +2880,12 @@ class TestManager(ModeltranslationTestBase):
             self.assertEqual(list(manager.values('title')), [{'title': 'de'}, {'title': 'de2'}])
 
         # When no fields are passed, list all fields in current language.
+        actual = list(manager.annotate(annotated=Value(True)).values())
         self.assertEqual(
-            list(manager.values()),
+            actual,
             [
-                {'id': id1, 'title': 'en', 'visits': 0, 'description': None},
-                {'id': id2, 'title': 'en2', 'visits': 0, 'description': None},
+                {'id': id1, 'title': 'en', 'visits': 0, 'description': None, 'annotated': True},
+                {'id': id2, 'title': 'en2', 'visits': 0, 'description': None, 'annotated': True},
             ],
         )
         # Similar for values_list
