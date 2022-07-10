@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.18.3-beta.0](https://github.com/deschler/django-modeltranslation/compare/v0.18.2...v0.18.3-beta.0) (2022-07-10)
+
+
+### Features
+
+* Support `named` argument for `values_list`  ([#644](https://github.com/deschler/django-modeltranslation/issues/644)) ([39bbe82](https://github.com/deschler/django-modeltranslation/commit/39bbe821b31278b21e0bf3528d036343338bb0f7))
+
 ### [0.18.2](https://github.com/deschler/django-modeltranslation/compare/v0.18.1...v0.18.2) (2022-05-15)
 
 
