@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
+# pyright: reportGeneralTypeIssues=warning, reportOptionalMemberAccess=warning, reportOptionalOperand=warning
 from decimal import Decimal
 from unittest import skipUnless
 import datetime
-import fnmatch
-import imp
-import io
+import importlib
+import sys
 import os
 import shutil
 
@@ -30,7 +29,6 @@ from modeltranslation import admin, settings as mt_settings, translator
 from modeltranslation.forms import TranslationModelForm
 from modeltranslation.manager import MultilingualManager
 from modeltranslation.models import autodiscover
-from modeltranslation.tests.test_settings import TEST_SETTINGS
 from modeltranslation.utils import (
     build_css_class,
     build_localized_fieldname,
@@ -38,16 +36,14 @@ from modeltranslation.utils import (
     fallbacks,
 )
 
-MIGRATIONS = "django.contrib.auth" in TEST_SETTINGS['INSTALLED_APPS']
-
-models = translation = None
+from modeltranslation.tests import models, translation
 
 # None of the following tests really depend on the content of the request,
 # so we'll just pass in None.
 request = None
 
 # How many models are registered for tests.
-TEST_MODELS = 35 + (1 if MIGRATIONS else 0)
+TEST_MODELS = 36
 
 
 class reload_override_settings(override_settings):
@@ -55,11 +51,11 @@ class reload_override_settings(override_settings):
 
     def __enter__(self):
         super(reload_override_settings, self).__enter__()
-        imp.reload(mt_settings)
+        importlib.reload(mt_settings)
 
     def __exit__(self, exc_type, exc_value, traceback):
         super(reload_override_settings, self).__exit__(exc_type, exc_value, traceback)
-        imp.reload(mt_settings)
+        importlib.reload(mt_settings)
 
 
 # In this test suite fallback language is turned off. This context manager temporarily turns it on.
@@ -84,124 +80,32 @@ def get_field_names(model):
     return names
 
 
-@override_settings(**TEST_SETTINGS)
 class ModeltranslationTransactionTestBase(TransactionTestCase):
     cache = django_apps
-    synced = False
-
-    @classmethod
-    def _get_migrations_path(cls):
-        return os.path.join(os.path.dirname(os.path.abspath(__file__)), "auth_migrations")
-
-    @classmethod
-    def _copy_migrations(cls):
-        # Locate the original contrib.auth migrations files
-        import django.contrib.auth.migrations as auth_migrations
-
-        source_dir_path = os.path.dirname(auth_migrations.__file__)
-
-        # Copy them to the local auth_migrations directory
-        target_dir_path = cls._get_migrations_path()
-        for f in os.listdir(source_dir_path):
-            source_path = os.path.join(source_dir_path, f)
-            target_path = os.path.join(target_dir_path, f)
-
-            # Only migration files get copied
-            if os.path.isfile(source_path) and not fnmatch.fnmatch(f, "__init__.py"):
-                shutil.copyfile(source_path, target_path)
-
-    @classmethod
-    def _clean_migrations(cls):
-        target_dir_path = cls._get_migrations_path()
-        for f in os.listdir(target_dir_path):
-            target_path = os.path.join(target_dir_path, f)
-            if os.path.isfile(target_path) and not fnmatch.fnmatch(f, "__init__.py"):
-                os.remove(target_path)
 
     @classmethod
     def setUpClass(cls):
-        """
-        Prepare database:
-        * Call syncdb to create tables for tests.models (since during
-        default testrunner's db creation modeltranslation.tests was not in INSTALLED_APPS
-        """
-        super(ModeltranslationTransactionTestBase, cls).setUpClass()
-        if not ModeltranslationTransactionTestBase.synced:
-            # In order to perform only one syncdb
-            ModeltranslationTransactionTestBase.synced = True
-            # 0. Render initial migration of auth
-            if MIGRATIONS:
-                # Make copies of auth migrations in the (local) auth_migrations
-                # module to setup test database
-                cls._copy_migrations()
-                call_command('makemigrations', 'auth', verbosity=2, interactive=False)
+        """Save registry (and restore it after tests)."""
+        super().setUpClass()
+        from copy import copy
+        from modeltranslation.translator import translator
 
-            # 1. Reload translation in case USE_I18N was False
-            from django.utils import translation as dj_trans
+        cls.registry_cpy = copy(translator._registry)
 
-            imp.reload(dj_trans)
+    @classmethod
+    def tearDownClass(cls):
+        from modeltranslation.translator import translator
 
-            # 2. Reload MT because LANGUAGES likely changed.
-            imp.reload(mt_settings)
-            imp.reload(translator)
-            imp.reload(admin)
-
-            # 3. Reset test models (because autodiscover have already run, those models
-            #    have translation fields, but for languages previously defined. We want
-            #    to be sure that 'de' and 'en' are available)
-            del cls.cache.all_models['tests']
-            if MIGRATIONS:
-                del cls.cache.all_models['auth']
-            import sys
-
-            sys.modules.pop('modeltranslation.tests.models', None)
-            sys.modules.pop('modeltranslation.tests.translation', None)
-            if MIGRATIONS:
-                sys.modules.pop('django.contrib.auth.models', None)
-            cls.cache.get_app_config('tests').import_models()
-            if MIGRATIONS:
-                cls.cache.get_app_config('auth').import_models()
-
-            # 4. Autodiscover
-            from modeltranslation.models import handle_translation_registrations
-
-            handle_translation_registrations()
-
-            # 5. makemigrations (``migrate=False`` in case of south)
-            if MIGRATIONS:
-                call_command('makemigrations', 'auth', verbosity=2, interactive=False)
-                # At this point there should not be any migrations to generate
-                out = io.StringIO()
-                call_command(
-                    'makemigrations',
-                    'auth',
-                    verbosity=3,
-                    dry_run=True,
-                    interactive=False,
-                    stdout=out,
-                )
-                assert "No changes detected in app 'auth'\n" == out.getvalue(), (
-                    "Unexpected auth migration:\n %s" % out.getvalue()
-                )
-
-            # 6. Syncdb (``migrate=False`` in case of south)
-            call_command('migrate', verbosity=0, interactive=False, run_syncdb=True)
-
-            # 7. clean migrations
-            if MIGRATIONS:
-                cls._clean_migrations()
-
-            # A rather dirty trick to import models into module namespace, but not before
-            # tests app has been added into INSTALLED_APPS and loaded
-            # (that's why this is not imported in normal import section)
-            global models, translation
-            from modeltranslation.tests import models, translation  # NOQA
+        translator._registry = cls.registry_cpy
+        super().tearDownClass()
 
     def setUp(self):
+        super().setUp()
         self._old_language = get_language()
         trans_real.activate('de')
 
     def tearDown(self):
+        super().tearDown()
         trans_real.activate(self._old_language)
 
 
@@ -224,33 +128,15 @@ class TestAutodiscover(ModeltranslationTestBase):
 
     def _post_teardown(self):
         self.__override.disable()
-        imp.reload(mt_settings)  # restore mt_settings.FALLBACK_LANGUAGES
+        importlib.reload(mt_settings)  # restore mt_settings.FALLBACK_LANGUAGES
         super(TestAutodiscover, self)._post_teardown()
 
-    @classmethod
-    def setUpClass(cls):
-        """Save registry (and restore it after tests)."""
-        super(TestAutodiscover, cls).setUpClass()
-        from copy import copy
-        from modeltranslation.translator import translator
-
-        cls.registry_cpy = copy(translator._registry)
-
-    @classmethod
-    def tearDownClass(cls):
-        from modeltranslation.translator import translator
-
-        translator._registry = cls.registry_cpy
-        super(TestAutodiscover, cls).tearDownClass()
-
     def tearDown(self):
-        import sys
-
         # Rollback model classes
         del self.cache.all_models['test_app']
         from .test_app import models
 
-        imp.reload(models)
+        importlib.reload(models)
         # Delete translation modules from import cache
         sys.modules.pop('modeltranslation.tests.test_app.translation', None)
         sys.modules.pop('modeltranslation.tests.project_translation', None)
@@ -622,8 +508,8 @@ class FallbackTests(ModeltranslationTestBase):
         # Improper language raises error
         config = {'default': (), 'fr': ('en',)}
         with override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=config):
-            self.assertRaises(ImproperlyConfigured, lambda: imp.reload(mt_settings))
-        imp.reload(mt_settings)
+            self.assertRaises(ImproperlyConfigured, lambda: importlib.reload(mt_settings))
+        importlib.reload(mt_settings)
 
     def test_resolution_order(self):
         from modeltranslation.utils import resolution_order
@@ -1299,15 +1185,6 @@ class OtherFieldsTest(ModeltranslationTestBase):
         self.assertTrue('boolean' in field_names)
         self.assertTrue('boolean_de' in field_names)
         self.assertTrue('boolean_en' in field_names)
-        self.assertTrue('nullboolean' in field_names)
-        self.assertTrue('nullboolean_de' in field_names)
-        self.assertTrue('nullboolean_en' in field_names)
-        self.assertTrue('csi' in field_names)
-        self.assertTrue('csi_de' in field_names)
-        self.assertTrue('csi_en' in field_names)
-        self.assertTrue('ip' in field_names)
-        self.assertTrue('ip_de' in field_names)
-        self.assertTrue('ip_en' in field_names)
         self.assertTrue('genericip' in field_names)
         self.assertTrue('genericip_de' in field_names)
         self.assertTrue('genericip_en' in field_names)
@@ -1362,82 +1239,6 @@ class OtherFieldsTest(ModeltranslationTestBase):
         self.assertEqual(True, inst.boolean)
         self.assertEqual(False, inst.boolean_de)
         self.assertEqual(True, inst.boolean_en)
-
-    def test_translated_models_nullboolean_instance(self):
-        inst = models.OtherFieldsModel()
-        inst.nullboolean = True
-        self.assertEqual('de', get_language())
-        self.assertEqual(True, inst.nullboolean)
-        self.assertEqual(True, inst.nullboolean_de)
-        self.assertEqual(None, inst.nullboolean_en)
-
-        inst.nullboolean = False
-        inst.save()
-        self.assertEqual(False, inst.nullboolean)
-        self.assertEqual(False, inst.nullboolean_de)
-        self.assertEqual(None, inst.nullboolean_en)
-
-        trans_real.activate('en')
-        inst.nullboolean = True
-        self.assertEqual(True, inst.nullboolean)
-        self.assertEqual(False, inst.nullboolean_de)
-        self.assertEqual(True, inst.nullboolean_en)
-
-        inst.nullboolean = None
-        self.assertEqual(None, inst.nullboolean)
-        self.assertEqual(False, inst.nullboolean_de)
-        self.assertEqual(None, inst.nullboolean_en)
-
-    def test_translated_models_commaseparatedinteger_instance(self):
-        inst = models.OtherFieldsModel()
-        inst.csi = '4,8,15,16,23,42'
-        self.assertEqual('de', get_language())
-        self.assertEqual('4,8,15,16,23,42', inst.csi)
-        self.assertEqual('4,8,15,16,23,42', inst.csi_de)
-        self.assertEqual(None, inst.csi_en)
-
-        inst.csi = '23,42'
-        inst.save()
-        self.assertEqual('23,42', inst.csi)
-        self.assertEqual('23,42', inst.csi_de)
-        self.assertEqual(None, inst.csi_en)
-
-        trans_real.activate('en')
-        inst.csi = '4,8,15,16,23,42'
-        self.assertEqual('4,8,15,16,23,42', inst.csi)
-        self.assertEqual('23,42', inst.csi_de)
-        self.assertEqual('4,8,15,16,23,42', inst.csi_en)
-
-        # Now that we have covered csi, lost, illuminati and hitchhiker
-        # compliance in a single test, do something useful...
-
-        # Check if validation is preserved
-        inst.csi = '1;2'
-        self.assertRaises(ValidationError, inst.full_clean)
-
-    def test_translated_models_ipaddress_instance(self):
-        inst = models.OtherFieldsModel()
-        inst.ip = '192.0.1.42'
-        self.assertEqual('de', get_language())
-        self.assertEqual('192.0.1.42', inst.ip)
-        self.assertEqual('192.0.1.42', inst.ip_de)
-        self.assertEqual(None, inst.ip_en)
-
-        inst.ip = '192.0.23.1'
-        inst.save()
-        self.assertEqual('192.0.23.1', inst.ip)
-        self.assertEqual('192.0.23.1', inst.ip_de)
-        self.assertEqual(None, inst.ip_en)
-
-        trans_real.activate('en')
-        inst.ip = '192.0.1.42'
-        self.assertEqual('192.0.1.42', inst.ip)
-        self.assertEqual('192.0.23.1', inst.ip_de)
-        self.assertEqual('192.0.1.42', inst.ip_en)
-
-        # Check if validation is preserved
-        inst.ip = '1;2'
-        self.assertRaises(ValidationError, inst.full_clean)
 
     def test_translated_models_genericipaddress_instance(self):
         inst = models.OtherFieldsModel()
@@ -2105,7 +1906,7 @@ class UpdateCommandTest(ModeltranslationTestBase):
         self.assertEqual('already', obj2['title_de'])
         self.assertEqual('initial', obj2['title'])
 
-        call_command('update_translation_fields', verbosity=0)
+        call_command('update_translation_fields', 'tests', verbosity=0)
 
         obj1 = models.TestModel.objects.get(pk=pk1)
         obj2 = models.TestModel.objects.get(pk=pk2)
@@ -2119,7 +1920,7 @@ class UpdateCommandTest(ModeltranslationTestBase):
         # Due to ``rewrite(False)`` here, original field will be affected.
         models.TestModel.objects.all().rewrite(False).update(title='initial')
 
-        call_command('update_translation_fields', language='en', verbosity=0)
+        call_command('update_translation_fields', 'tests', language='en', verbosity=0)
 
         obj1 = models.TestModel.objects.get(pk=pk1)
         obj2 = models.TestModel.objects.get(pk=pk2)
@@ -2978,9 +2779,9 @@ class TestManager(ModeltranslationTestBase):
         qs = models.CustomManagerTestModel.objects.custom_qs()
         self.assertIsInstance(qs, MultilingualQuerySet)
 
-    @skipUnless(MIGRATIONS, 'migrations/auth not available')
     def test_3rd_party_custom_manager(self):
         from django.contrib.auth.models import Group, GroupManager
+
         from modeltranslation.manager import MultilingualManager
 
         testmodel_fields = get_field_names(Group)
@@ -2995,6 +2796,7 @@ class TestManager(ModeltranslationTestBase):
 
     def test_multilingual_queryset_pickling(self):
         import pickle
+
         from modeltranslation.manager import MultilingualQuerySet
 
         # typical
@@ -3272,21 +3074,6 @@ class TestManager(ModeltranslationTestBase):
         o.title = "bla"
         self.assertEqual(o.title, "bla")
 
-    @skipUnless(django.VERSION[0] == 1, 'Applicable only to django 1.x')
-    def test_select_related_django_1(self):
-        test = models.TestModel.objects.create(title_de='title_de', title_en='title_en')
-        with auto_populate('all'):
-            models.ForeignKeyModel.objects.create(untrans=test)
-
-        fk_qs = models.ForeignKeyModel.objects.all()
-        self.assertNotIn('_untrans_cache', fk_qs[0].__dict__)
-        self.assertIn('_untrans_cache', fk_qs.select_related('untrans')[0].__dict__)
-        self.assertNotIn(
-            '_untrans_cache', fk_qs.select_related('untrans').select_related(None)[0].__dict__
-        )
-        # untrans is nullable so not included when select_related=True
-        self.assertNotIn('_untrans_cache', fk_qs.select_related()[0].__dict__)
-
     @skipUnless(django.VERSION[0] >= 2, 'Applicable only to django > 2.x')
     def test_select_related_django_2(self):
         test = models.TestModel.objects.create(title_de='title_de', title_en='title_en')
@@ -3303,7 +3090,7 @@ class TestManager(ModeltranslationTestBase):
         self.assertNotIn('untrans', fk_qs.select_related()[0]._state.fields_cache)
 
     def test_translation_fields_appending(self):
-        from modeltranslation.manager import append_lookup_keys, append_lookup_key
+        from modeltranslation.manager import append_lookup_key, append_lookup_keys
 
         self.assertEqual(set(['untrans']), append_lookup_key(models.ForeignKeyModel, 'untrans'))
         self.assertEqual(
@@ -3540,11 +3327,12 @@ class M2MTest(ModeltranslationTestBase):
 
 
 class InheritedPermissionTestCase(ModeltranslationTestBase):
-    @skipUnless(MIGRATIONS, 'migrations/auth not available')
     def test_managers_failure(self):
         """This fails with 0.13b."""
-        from modeltranslation.manager import MultilingualManager
         from django.contrib.auth.models import Permission, User
+
+        from modeltranslation.manager import MultilingualManager
+
         from .models import InheritedPermission
 
         self.assertFalse(

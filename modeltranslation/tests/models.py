@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
 import six
-from django.conf import settings
+from django.contrib.auth.models import Permission
 from django.core import validators
 from django.db import models
 from django.utils.translation import gettext_lazy
-
 from modeltranslation.manager import MultilingualManager
 
 
@@ -128,9 +126,6 @@ class OtherFieldsModel(models.Model):
     # That's rich! PositiveIntegerField is only validated in forms, not in models.
     int = models.PositiveIntegerField(default=42, validators=[validators.MinValueValidator(0)])
     boolean = models.BooleanField(default=False)
-    nullboolean = models.NullBooleanField()
-    csi = models.CommaSeparatedIntegerField(max_length=255)
-    ip = models.IPAddressField(blank=True, null=True)
     float = models.FloatField(blank=True, null=True)
     decimal = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
     date = models.DateField(blank=True, null=True)
@@ -495,8 +490,5 @@ class ModelY(AbstractModelY):
 # Non-abstract base models whos Manager is not allowed to be overwritten
 
 
-if "django.contrib.auth" in settings.INSTALLED_APPS:
-    from django.contrib.auth.models import Permission
-
-    class InheritedPermission(Permission):
-        translated_var = models.CharField(max_length=255)
+class InheritedPermission(Permission):
+    translated_var = models.CharField(max_length=255)

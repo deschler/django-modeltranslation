@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
 from django.conf import settings
+from django.contrib.auth.models import Group
 from django.utils.translation import gettext_lazy
-
-from modeltranslation.translator import translator, register, TranslationOptions
 from modeltranslation.tests import models
+from modeltranslation.tests.models import InheritedPermission
+from modeltranslation.translator import TranslationOptions, register, translator
 
 
 @register(models.TestModel)
@@ -111,11 +111,8 @@ class OtherFieldsModelTranslationOptions(TranslationOptions):
     fields = (
         'int',
         'boolean',
-        'nullboolean',
-        'csi',
         'float',
         'decimal',
-        'ip',
         'genericip',
         'date',
         'datetime',
@@ -286,15 +283,13 @@ class ModelYOptions(TranslationOptions):
 
 # ######### 3-rd party with custom manager
 
-if "django.contrib.auth" in settings.INSTALLED_APPS:
-    from django.contrib.auth.models import Group
-    from .models import InheritedPermission
 
-    @register(Group)
-    class GroupTranslationOptions(TranslationOptions):
-        fields = ('name',)
+@register(Group)
+class GroupTranslationOptions(TranslationOptions):
+    fields = ('name',)
 
-    @register(InheritedPermission)
-    class InheritedPermissionOptions(TranslationOptions):
-        fields = ('translated_var',)
-        required_languages = [x[0] for x in settings.LANGUAGES]
+
+@register(InheritedPermission)
+class InheritedPermissionOptions(TranslationOptions):
+    fields = ('translated_var',)
+    required_languages = [x[0] for x in settings.LANGUAGES]
