@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-import six
-from django.conf import settings
+from django.contrib.auth.models import Permission
 from django.core import validators
 from django.db import models
 from django.utils.translation import gettext_lazy
@@ -128,9 +126,6 @@ class OtherFieldsModel(models.Model):
     # That's rich! PositiveIntegerField is only validated in forms, not in models.
     int = models.PositiveIntegerField(default=42, validators=[validators.MinValueValidator(0)])
     boolean = models.BooleanField(default=False)
-    nullboolean = models.NullBooleanField()
-    csi = models.CommaSeparatedIntegerField(max_length=255)
-    ip = models.IPAddressField(blank=True, null=True)
     float = models.FloatField(blank=True, null=True)
     decimal = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
     date = models.DateField(blank=True, null=True)
@@ -154,9 +149,9 @@ class FancyDescriptor(object):
         return 'a' * length
 
     def __set__(self, obj, value):
-        if isinstance(value, six.integer_types):
+        if isinstance(value, int):
             obj.__dict__[self.field.name] = value
-        elif isinstance(value, six.string_types):
+        elif isinstance(value, str):
             obj.__dict__[self.field.name] = len(value)
         else:
             obj.__dict__[self.field.name] = 0
@@ -174,7 +169,7 @@ class FancyField(models.PositiveIntegerField):
     def pre_save(self, model_instance, add):
         value = super(FancyField, self).pre_save(model_instance, add)
         # In this part value should be retrieved using descriptor and be a string
-        assert isinstance(value, six.string_types)
+        assert isinstance(value, str)
         # We put an int to database
         return len(value)
 
@@ -332,16 +327,15 @@ class ManagerTestModel(models.Model):
 
 class CustomManager(models.Manager):
     def get_queryset(self):
-        sup = super(CustomManager, self)
-        queryset = sup.get_queryset() if hasattr(sup, 'get_queryset') else sup.get_query_set()
-        return queryset.filter(title__contains='a').exclude(description__contains='x')
-
-    get_query_set = get_queryset
+        return (
+            super(CustomManager, self)
+            .get_queryset()
+            .filter(title__contains='a')
+            .exclude(description__contains='x')
+        )
 
     def custom_qs(self):
-        sup = super(CustomManager, self)
-        queryset = sup.get_queryset() if hasattr(sup, 'get_queryset') else sup.get_query_set()
-        return queryset
+        return super(CustomManager, self).get_queryset()
 
     def foo(self):
         return 'bar'
@@ -362,8 +356,6 @@ class CustomQuerySet(models.query.QuerySet):
 class CustomManager2(models.Manager):
     def get_queryset(self):
         return CustomQuerySet(self.model, using=self._db)
-
-    get_query_set = get_queryset
 
 
 class CustomManager2TestModel(models.Model):
@@ -443,8 +435,6 @@ class CustomManagerX(models.Manager):
     def get_queryset(self):
         return CustomQuerySetX(self.model, using=self._db)
 
-    get_query_set = get_queryset
-
 
 class AbstractBaseModelX(models.Model):
     name = models.CharField(max_length=255)
@@ -495,8 +485,5 @@ class ModelY(AbstractModelY):
 # Non-abstract base models whos Manager is not allowed to be overwritten
 
 
-if "django.contrib.auth" in settings.INSTALLED_APPS:
-    from django.contrib.auth.models import Permission
-
-    class InheritedPermission(Permission):
-        translated_var = models.CharField(max_length=255)
+class InheritedPermission(Permission):
+    translated_var = models.CharField(max_length=255)

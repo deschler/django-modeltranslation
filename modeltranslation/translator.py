@@ -187,13 +187,6 @@ def add_translation_fields(model, opts):
         model._meta.get_fields()
 
 
-def has_custom_queryset(manager):
-    "Check whether manager (or its parents) has declared some custom get_queryset method."
-    old_diff = getattr(manager, 'get_query_set', None) != getattr(Manager, 'get_query_set', None)
-    new_diff = getattr(manager, 'get_queryset', None) != getattr(Manager, 'get_queryset', None)
-    return old_diff or new_diff
-
-
 def patch_manager_class(manager):
     if isinstance(manager, MultilingualManager):
         return
