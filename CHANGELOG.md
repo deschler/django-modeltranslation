@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.18.3-beta.1](https://github.com/deschler/django-modeltranslation/compare/v0.18.3-beta.0...v0.18.3-beta.1) (2022-07-13)
+
+
+### Features
+
+* **dev:** Migrate to pytest ([d3e2396](https://github.com/deschler/django-modeltranslation/commit/d3e2396be6757f0d0b3ee4e06777c37f17d3834b))
+
 ### [0.18.3-beta.0](https://github.com/deschler/django-modeltranslation/compare/v0.18.2...v0.18.3-beta.0) (2022-07-10)
 
 
