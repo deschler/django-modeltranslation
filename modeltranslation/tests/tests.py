@@ -7,7 +7,6 @@ import sys
 from decimal import Decimal
 
 import pytest
-import six
 from django import forms
 from django.apps import apps as django_apps
 from django.conf import settings as django_settings
@@ -259,7 +258,7 @@ class ModeltranslationTest(ModeltranslationTestBase):
 
     def test_verbose_name(self):
         verbose_name = models.TestModel._meta.get_field('title_de').verbose_name
-        assert six.text_type(verbose_name) == 'title [de]'
+        assert verbose_name == 'title [de]'
 
     def test_descriptor_introspection(self):
         # See Django #8248
@@ -2706,7 +2705,7 @@ class TestManager(ModeltranslationTestBase):
         # Custom method
         assert 'bar' == models.CustomManagerTestModel.objects.foo()
 
-        # Ensure that get_query_set is working - filter objects to those with 'a' in title
+        # Ensure that get_queryset is working - filter objects to those with 'a' in title
         assert 'en' == get_language()
         assert 2 == models.CustomManagerTestModel.objects.count()
         with override('de'):

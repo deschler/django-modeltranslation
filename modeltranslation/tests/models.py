@@ -1,8 +1,8 @@
-import six
 from django.contrib.auth.models import Permission
 from django.core import validators
 from django.db import models
 from django.utils.translation import gettext_lazy
+
 from modeltranslation.manager import MultilingualManager
 
 
@@ -149,9 +149,9 @@ class FancyDescriptor(object):
         return 'a' * length
 
     def __set__(self, obj, value):
-        if isinstance(value, six.integer_types):
+        if isinstance(value, int):
             obj.__dict__[self.field.name] = value
-        elif isinstance(value, six.string_types):
+        elif isinstance(value, str):
             obj.__dict__[self.field.name] = len(value)
         else:
             obj.__dict__[self.field.name] = 0
@@ -169,7 +169,7 @@ class FancyField(models.PositiveIntegerField):
     def pre_save(self, model_instance, add):
         value = super(FancyField, self).pre_save(model_instance, add)
         # In this part value should be retrieved using descriptor and be a string
-        assert isinstance(value, six.string_types)
+        assert isinstance(value, str)
         # We put an int to database
         return len(value)
 
@@ -327,16 +327,15 @@ class ManagerTestModel(models.Model):
 
 class CustomManager(models.Manager):
     def get_queryset(self):
-        sup = super(CustomManager, self)
-        queryset = sup.get_queryset() if hasattr(sup, 'get_queryset') else sup.get_query_set()
-        return queryset.filter(title__contains='a').exclude(description__contains='x')
-
-    get_query_set = get_queryset
+        return (
+            super(CustomManager, self)
+            .get_queryset()
+            .filter(title__contains='a')
+            .exclude(description__contains='x')
+        )
 
     def custom_qs(self):
-        sup = super(CustomManager, self)
-        queryset = sup.get_queryset() if hasattr(sup, 'get_queryset') else sup.get_query_set()
-        return queryset
+        return super(CustomManager, self).get_queryset()
 
     def foo(self):
         return 'bar'
@@ -357,8 +356,6 @@ class CustomQuerySet(models.query.QuerySet):
 class CustomManager2(models.Manager):
     def get_queryset(self):
         return CustomQuerySet(self.model, using=self._db)
-
-    get_query_set = get_queryset
 
 
 class CustomManager2TestModel(models.Model):
@@ -437,8 +434,6 @@ class CustomQuerySetX(models.query.QuerySet):
 class CustomManagerX(models.Manager):
     def get_queryset(self):
         return CustomQuerySetX(self.model, using=self._db)
-
-    get_query_set = get_queryset
 
 
 class AbstractBaseModelX(models.Model):
