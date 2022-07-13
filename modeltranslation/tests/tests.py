@@ -5,9 +5,7 @@ import os
 import shutil
 import sys
 from decimal import Decimal
-from unittest import skipUnless
 
-import django
 import pytest
 import six
 from django import forms
@@ -3014,8 +3012,7 @@ class TestManager(ModeltranslationTestBase):
         o.title = "bla"
         assert o.title == "bla"
 
-    @skipUnless(django.VERSION[0] >= 2, 'Applicable only to django > 2.x')
-    def test_select_related_django_2(self):
+    def test_select_related(self):
         test = models.TestModel.objects.create(title_de='title_de', title_en='title_en')
         with auto_populate('all'):
             models.ForeignKeyModel.objects.create(untrans=test)
