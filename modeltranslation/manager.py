@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 The idea of MultilingualManager is taken from
 django-linguo by Zach Mathew
@@ -6,6 +5,7 @@ django-linguo by Zach Mathew
 https://github.com/zmathew/django-linguo
 """
 import itertools
+from functools import reduce
 
 from django import VERSION
 from django.contrib.admin.utils import get_model_from_relation
@@ -13,13 +13,9 @@ from django.core.exceptions import FieldDoesNotExist
 from django.db import models
 from django.db.models.expressions import Col
 from django.db.models.lookups import Lookup
-from django.db.models.query import (
-    QuerySet,
-    ValuesIterable,
-    create_namedtuple_class,
-)
+from django.db.models.query import QuerySet, ValuesIterable
+from django.db.models.utils import create_namedtuple_class
 from django.utils.tree import Node
-from six import moves
 
 from modeltranslation import settings
 from modeltranslation.fields import TranslationField
@@ -126,7 +122,7 @@ def append_lookup_keys(model, fields):
             new_field = (field,)
         new_fields.append(new_field)
 
-    return moves.reduce(set.union, new_fields, set())
+    return reduce(set.union, new_fields, set())
 
 
 def rewrite_order_lookup_key(model, lookup_key):

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-import six
 from django import VERSION
 from django import forms
 from django.core.exceptions import ImproperlyConfigured
@@ -280,7 +278,7 @@ class TranslationField(object):
             kwargs.update({'null': True})
         if 'db_column' in kwargs:
             kwargs['db_column'] = self.db_column
-        return six.text_type(self.name), path, args, kwargs
+        return self.name, path, args, kwargs
 
     def clone(self):
         from django.utils.module_loading import import_string
