@@ -7,7 +7,6 @@ from django.db.models import Manager, ForeignKey, OneToOneField, options
 from django.db.models.base import ModelBase
 from django.db.models.signals import post_init
 from django.utils.functional import cached_property
-from six import with_metaclass
 
 from modeltranslation import settings as mt_settings
 from modeltranslation.fields import (
@@ -52,7 +51,7 @@ class FieldsAggregationMetaClass(type):
         return super(FieldsAggregationMetaClass, cls).__new__(cls, name, bases, attrs)
 
 
-class TranslationOptions(with_metaclass(FieldsAggregationMetaClass, object)):
+class TranslationOptions(metaclass=FieldsAggregationMetaClass):
     """
     Translatable fields are declared by registering a model using
     ``TranslationOptions`` class with appropriate ``fields`` attribute.

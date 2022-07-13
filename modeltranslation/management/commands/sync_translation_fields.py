@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Detect new translatable fields in all models and sync database structure.
 
@@ -13,7 +12,6 @@ from django import VERSION
 from django.core.management.base import BaseCommand
 from django.core.management.color import no_style
 from django.db import connection
-from six import moves
 
 from modeltranslation.settings import AVAILABLE_LANGUAGES
 from modeltranslation.translator import translator
@@ -27,7 +25,7 @@ def ask_for_confirmation(sql_sentences, model_full_name, interactive):
     while True:
         prompt = '\nAre you sure that you want to execute the previous SQL: (y/n) [n]: '
         if interactive:
-            answer = moves.input(prompt).strip()
+            answer = input(prompt).strip()
         else:
             answer = 'y'
         if answer == '':

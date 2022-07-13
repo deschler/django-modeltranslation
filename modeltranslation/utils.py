@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
 from contextlib import contextmanager
 
-import six
 from django.utils.encoding import force_str
 from django.utils.translation import get_language as _get_language
 from django.utils.translation import get_language_info
@@ -54,7 +52,7 @@ def _build_localized_verbose_name(verbose_name, lang):
     return force_str('%s [%s]') % (force_str(verbose_name), lang)
 
 
-build_localized_verbose_name = lazy(_build_localized_verbose_name, six.text_type)
+build_localized_verbose_name = lazy(_build_localized_verbose_name, str)
 
 
 def _join_css_class(bits, offset):

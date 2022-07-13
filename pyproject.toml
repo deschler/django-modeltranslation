@@ -11,7 +11,6 @@ packages = [
 [tool.poetry.dependencies]
 python = ">=3.7,<4"
 django = ">=2.2"
-six = "^1.15.0"
 
 [tool.poetry.dev-dependencies]
 pdbpp = "^0.10.2"
@@ -26,3 +25,9 @@ django-types = "^0.15.0"
 [tool.black]
 line-length = 100
 skip-string-normalization = true
+
+[tool.isort]
+line_length = 100
+multi_line_output = 3
+skip_gitignore = true
+include_trailing_comma = true
