@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.18.4](https://github.com/deschler/django-modeltranslation/compare/v0.18.3...v0.18.4) (2022-07-22)
+
+
+### Bug Fixes
+
+* Update django compatibility ([582b612](https://github.com/deschler/django-modeltranslation/commit/582b612ab5d422bf2cd1f45a28748db60819e85c))
+
 ### [0.18.3](https://github.com/deschler/django-modeltranslation/compare/v0.18.3-beta.1...v0.18.3) (2022-07-19)
 
 
