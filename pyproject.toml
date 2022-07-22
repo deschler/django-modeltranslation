@@ -10,7 +10,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.7,<4"
-django = ">=2.2"
+django = ">=3.2"
 
 [tool.poetry.dev-dependencies]
 pdbpp = "^0.10.2"
