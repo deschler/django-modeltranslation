@@ -272,7 +272,7 @@ Example::
 
 Default: ``()`` (empty tuple)
 
-Modeltranslation uses an autoregister feature similiar to the one in Django's
+Modeltranslation uses an autoregister feature similar to the one in Django's
 admin. The autoregistration process will look for a ``translation.py``
 file in the root directory of each application that is in ``INSTALLED_APPS``.
 
@@ -298,7 +298,7 @@ Example::
     file which was defined through
     ``MODELTRANSLATION_TRANSLATION_REGISTRY = '<PROJECT_MODULE>.translation'``.
 
-    In version 0.4 and 0.5, for backwards compatibiliy, the module defined through this setting was
+    In version 0.4 and 0.5, for backwards compatibility, the module defined through this setting was
     automatically added to ``MODELTRANSLATION_TRANSLATION_FILES``. A
     ``DeprecationWarning`` was issued in this case.
 

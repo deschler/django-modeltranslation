@@ -127,7 +127,7 @@ class Command(BaseCommand):
 
     def get_missing_languages(self, field_name, db_table):
         """
-        Gets only missings fields.
+        Gets only missing fields.
         """
         db_table_fields = self.get_table_fields(db_table)
         for lang_code in AVAILABLE_LANGUAGES:
