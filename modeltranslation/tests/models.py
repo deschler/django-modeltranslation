@@ -482,7 +482,7 @@ class ModelY(AbstractModelY):
     pass
 
 
-# Non-abstract base models whos Manager is not allowed to be overwritten
+# Non-abstract base models whose Manager is not allowed to be overwritten
 
 
 class InheritedPermission(Permission):
