@@ -11,6 +11,7 @@ packages = [
 [tool.poetry.dependencies]
 python = ">=3.7,<4"
 django = ">=3.2"
+djangorestframework = "^3.14.0"
 
 [tool.poetry.dev-dependencies]
 pdbpp = "^0.10.2"
