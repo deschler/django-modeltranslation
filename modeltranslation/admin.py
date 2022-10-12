@@ -34,8 +34,14 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         # Take custom modelform fields option into account
         if not self.fields and hasattr(self.form, '_meta') and self.form._meta.fields:
             self.fields = self.form._meta.fields
-        if self.fieldsets:
-            return self._patch_fieldsets(self.fieldsets)
+        # takes into account non-standard add_fieldsets attribute used by UserAdmin
+        fieldsets = (
+            self.add_fieldsets
+            if getattr(self, 'add_fieldsets', None) and obj is None
+            else self.fieldsets
+        )
+        if fieldsets:
+            return self._patch_fieldsets(fieldsets)
         elif self.fields:
             return [(None, {'fields': self.replace_orig_field(self.get_fields(request, obj))})]
         return None
