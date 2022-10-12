@@ -34,6 +34,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         # Take custom modelform fields option into account
         if not self.fields and hasattr(self.form, '_meta') and self.form._meta.fields:
             self.fields = self.form._meta.fields
+        # takes into account non-standard add_fieldsets attribute used by UserAdmin
         fieldsets = (
             self.add_fieldsets
             if getattr(self, 'add_fieldsets', None) and obj is None
