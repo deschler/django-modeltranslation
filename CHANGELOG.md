@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.18.5](https://github.com/deschler/django-modeltranslation/compare/v0.18.4...v0.18.5) (2022-10-12)
+
+
+### Features
+
+* Support UserAdmin add_fieldsets ([d414cd3](https://github.com/deschler/django-modeltranslation/commit/d414cd3e0709622a66260088d2da0ade94a01be1)), closes [#654](https://github.com/deschler/django-modeltranslation/issues/654)
+
+
+### Bug Fixes
+
+* Fix working in strict mode. ([#649](https://github.com/deschler/django-modeltranslation/issues/649)) ([8ef8afd](https://github.com/deschler/django-modeltranslation/commit/8ef8afd2d7aad71ba185f17c0db95494616f3730))
+
 ### [0.18.4](https://github.com/deschler/django-modeltranslation/compare/v0.18.3...v0.18.4) (2022-07-22)
 
 
