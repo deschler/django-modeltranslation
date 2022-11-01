@@ -2550,7 +2550,8 @@ class TestManager(ModeltranslationTestBase):
         qs = models.ManagerTestModel.objects.all()
         assert qs.ordered
         assert not qs.order_by().ordered
-        assert not qs.order_by().values('title').ordered
+        assert not qs.values('title').order_by().ordered
+        assert not qs.order_by().values('title').ordered, "queryset is unexpectedly ordered"
 
     def test_latest(self):
         manager = models.ManagerTestModel.objects
