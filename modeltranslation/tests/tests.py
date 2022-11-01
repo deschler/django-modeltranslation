@@ -2546,6 +2546,12 @@ class TestManager(ModeltranslationTestBase):
         assert titles_for_en == ('most', 'more_en', 'more_de', 'least')
         assert titles_for_de == ('most', 'more_de', 'more_en', 'least')
 
+    def test_order_by_reset(self):
+        qs = models.ManagerTestModel.objects.all()
+        assert qs.ordered
+        assert not qs.order_by().ordered
+        assert not qs.order_by().values('title').ordered
+
     def test_latest(self):
         manager = models.ManagerTestModel.objects
         manager.create(title='more_de', visits_en=1, visits_de=2)
