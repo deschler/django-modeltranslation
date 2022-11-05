@@ -180,7 +180,7 @@ class MultilingualQuerySet(QuerySet):
     def _post_init(self):
         self._rewrite = True
         self._populate = None
-        if self.model and (not self.query.order_by) and self.query.default_ordering:
+        if self.model and self.query.default_ordering and (not self.query.order_by):
             if self.model._meta.ordering:
                 # If we have default ordering specified on the model, set it now so that
                 # it can be rewritten. Otherwise sql.compiler will grab it directly from _meta
