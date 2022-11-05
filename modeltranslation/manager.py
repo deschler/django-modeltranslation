@@ -180,14 +180,6 @@ class MultilingualQuerySet(QuerySet):
     def _post_init(self):
         self._rewrite = True
         self._populate = None
-        if self.model and (not self.query.order_by):
-            if self.model._meta.ordering:
-                # If we have default ordering specified on the model, set it now so that
-                # it can be rewritten. Otherwise sql.compiler will grab it directly from _meta
-                ordering = []
-                for key in self.model._meta.ordering:
-                    ordering.append(rewrite_order_lookup_key(self.model, key))
-                self.query.add_ordering(*ordering)
 
     def __reduce__(self):
         return multilingual_queryset_factory, (self.__class__.__bases__[0],), self.__getstate__()
