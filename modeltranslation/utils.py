@@ -6,6 +6,11 @@ from django.utils.translation import get_language_info
 from django.utils.functional import lazy
 
 from modeltranslation import settings
+from modeltranslation.thread_context import (
+    set_auto_populate,
+    set_enable_fallbacks,
+    fallbacks_enabled,
+)
 
 
 def get_language():
@@ -112,8 +117,9 @@ def resolution_order(lang, override=None):
     First is always the parameter language, later are fallback languages.
     Override parameter has priority over FALLBACK_LANGUAGES.
     """
-    if not settings.ENABLE_FALLBACKS:
+    if not fallbacks_enabled():
         return (lang,)
+
     if override is None:
         override = {}
     fallback_for_lang = override.get(lang, settings.FALLBACK_LANGUAGES.get(lang, ()))
@@ -141,12 +147,11 @@ def auto_populate(mode='all'):
         with auto_populate('required'):
             call_command('loaddata', 'fixture.json')
     """
-    current_population_mode = settings.AUTO_POPULATE
-    settings.AUTO_POPULATE = mode
+    set_auto_populate(mode)
     try:
         yield
     finally:
-        settings.AUTO_POPULATE = current_population_mode
+        set_auto_populate(None)
 
 
 @contextmanager
@@ -163,12 +168,11 @@ def fallbacks(enable=True):
     processing or check if there is a value for the current language (not
     knowing the language)
     """
-    current_enable_fallbacks = settings.ENABLE_FALLBACKS
-    settings.ENABLE_FALLBACKS = enable
+    set_enable_fallbacks(enable)
     try:
         yield
     finally:
-        settings.ENABLE_FALLBACKS = current_enable_fallbacks
+        set_enable_fallbacks(None)
 
 
 def parse_field(setting, field_name, default):

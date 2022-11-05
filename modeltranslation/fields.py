@@ -4,6 +4,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.db.models import fields
 
 from modeltranslation import settings as mt_settings
+from modeltranslation.thread_context import fallbacks_enabled
 from modeltranslation.utils import (
     get_language,
     build_localized_fieldname,
@@ -350,7 +351,7 @@ class TranslationFieldDescriptor(object):
             val = getattr(instance, loc_field_name, None)
             if self.meaningful_value(val, undefined):
                 return val
-        if mt_settings.ENABLE_FALLBACKS and self.fallback_value is not NONE:
+        if fallbacks_enabled() and self.fallback_value is not NONE:
             return self.fallback_value
         else:
             if default is NONE:
