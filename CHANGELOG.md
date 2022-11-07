@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.18.6](https://github.com/deschler/django-modeltranslation/compare/v0.18.5...v0.18.6) (2022-11-07)
+
+
+### Bug Fixes
+
+* Fix unexpected ordering after `values()`/`values_list()` followed by `order_by()`. ([09ce0e0](https://github.com/deschler/django-modeltranslation/commit/09ce0e076ba323432275e28eb16fdb19f37df3e0)), closes [#655](https://github.com/deschler/django-modeltranslation/issues/655) [#656](https://github.com/deschler/django-modeltranslation/issues/656)
+
 ### [0.18.5](https://github.com/deschler/django-modeltranslation/compare/v0.18.4...v0.18.5) (2022-10-12)
 
 
