@@ -95,7 +95,7 @@ jobs:
           if [[ $DB == postgres ]]; then
             pip install -q psycopg2-binary
           fi
-          pip install coverage pytest pytest-django pytest-cov $(./get-django-version.py ${{ matrix.django }})
+          pip install typing-extensions coverage pytest pytest-django pytest-cov $(./get-django-version.py ${{ matrix.django }})
       - name: Run tests
         run: |
           pytest --cov-report term
