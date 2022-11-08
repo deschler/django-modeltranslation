@@ -1,5 +1,6 @@
 import threading
-from typing import Literal, Union
+from typing import Union
+from typing_extensions import Literal
 
 from modeltranslation import settings
 
