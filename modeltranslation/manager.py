@@ -17,8 +17,8 @@ from django.db.models.query import QuerySet, ValuesIterable
 from django.db.models.utils import create_namedtuple_class
 from django.utils.tree import Node
 
-from modeltranslation import settings
 from modeltranslation.fields import TranslationField
+from modeltranslation.thread_context import auto_populate_mode
 from modeltranslation.utils import (
     auto_populate,
     build_localized_fieldname,
@@ -376,7 +376,7 @@ class MultilingualQuerySet(QuerySet):
     def _populate_mode(self):
         # Populate can be set using a global setting or a manager method.
         if self._populate is None:
-            return settings.AUTO_POPULATE
+            return auto_populate_mode()
         return self._populate
 
     # This method was not present in django-linguo

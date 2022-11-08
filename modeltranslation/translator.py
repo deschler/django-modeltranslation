@@ -22,6 +22,7 @@ from modeltranslation.manager import (
     rewrite_lookup_key,
     append_translated,
 )
+from modeltranslation.thread_context import auto_populate_mode
 from modeltranslation.utils import build_localized_fieldname, parse_field
 
 
@@ -389,7 +390,7 @@ def populate_translation_fields(sender, kwargs):
     defined (for example to make lookups / filtering without resorting to
     query fallbacks).
     """
-    populate = mt_settings.AUTO_POPULATE
+    populate = auto_populate_mode()
     if not populate:
         return
     if populate is True:
