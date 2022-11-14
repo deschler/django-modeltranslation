@@ -119,7 +119,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
             self._get_widget_from_field(field).attrs['class'] = ' '.join(css_classes)
 
     def _get_widget_from_field(self, field):
-        # retrieve "nested" widget in case of related field 
+        # retrieve "nested" widget in case of related field
         if isinstance(field.widget, admin.widgets.RelatedFieldWidgetWrapper):
             return field.widget.widget
         else:
