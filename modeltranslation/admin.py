@@ -95,11 +95,8 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
             ) and isinstance(field.widget, (forms.TextInput, forms.Textarea)):
                 field.widget = ClearableWidgetWrapper(field.widget)
             
-            if isinstance(field.widget, admin.widgets.RelatedFieldWidgetWrapper):
-                css_classes = field.widget.widget.attrs.get('class', '').split(' ')
-            else:
-                css_classes = field.widget.attrs.get('class', '').split(' ')
-            
+
+            css_classes = self._get_widget_from_field(field).attrs.get('class', '').split(' ')
             css_classes.append('mt')
             # Add localized fieldname css class
             css_classes.append(build_css_class(db_field.name, 'mt-field'))
@@ -122,10 +119,14 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
                     if isinstance(field.widget, ClearableWidgetWrapper):
                         field.widget = field.widget.widget
             
-            if isinstance(field.widget, admin.widgets.RelatedFieldWidgetWrapper):
-                field.widget.widget.attrs['class'] = ' '.join(css_classes)
-            else:
-                field.widget.attrs['class'] = ' '.join(css_classes)
+            self._get_widget_from_field(field).attrs['class'] = ' '.join(css_classes)
+
+    def _get_widget_from_field(self, field):
+        # retrieve "nested" widget in case of related field 
+        if isinstance(field.widget, admin.widgets.RelatedFieldWidgetWrapper):
+            return field.widget.widget
+        else:
+            return field.widget
 
     def _exclude_original_fields(self, exclude=None):
         if exclude is None:
