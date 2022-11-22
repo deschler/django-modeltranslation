@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.18.8-beta.0](https://github.com/deschler/django-modeltranslation/compare/v0.18.7...v0.18.8-beta.0) (2022-11-22)
+
+
+### Bug Fixes
+
+* Fix admin widget for fk fields ([#662](https://github.com/deschler/django-modeltranslation/issues/662)) ([fcfbd5c](https://github.com/deschler/django-modeltranslation/commit/fcfbd5ce059e4858a2c8d4803d094285282ad2c9)), closes [#660](https://github.com/deschler/django-modeltranslation/issues/660)
+
 ### [0.18.7](https://github.com/deschler/django-modeltranslation/compare/v0.18.6...v0.18.7) (2022-11-08)
 
 ### [0.18.6](https://github.com/deschler/django-modeltranslation/compare/v0.18.5...v0.18.6) (2022-11-07)
