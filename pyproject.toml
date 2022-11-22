@@ -11,16 +11,16 @@ packages = [
 [tool.poetry.dependencies]
 python = ">=3.7,<4"
 django = ">=3.2"
-typing-extensions = "^4.4.0"
+typing-extensions = "*"
 
 [tool.poetry.dev-dependencies]
-pdbpp = "^0.10.2"
-flake8 = "^3.7.9"
-black = "^21.9b0"
-pytest-cov = "^3.0.0"
-pytest = "^7.1.2"
-pytest-sugar = "^0.9.5"
-pytest-django = "^4.5.2"
+pdbpp = "*"
+flake8 = "*"
+black = "*"
+pytest-cov = "*"
+pytest = "*"
+pytest-sugar = "*"
+pytest-django = "*"
 django-types = "*"
 
 [tool.black]
