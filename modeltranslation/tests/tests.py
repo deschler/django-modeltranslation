@@ -2173,9 +2173,10 @@ class TranslationAdminTest(ModeltranslationTestBase):
             )
 
     def test_widget_classes_appended_by_formfield_for_dbfield(self):
-        '''
-        regression test for #660 (https://github.com/deschler/django-modeltranslation/issues/660)
-        '''
+        """
+        Regression test for #660 (https://github.com/deschler/django-modeltranslation/issues/660)
+        """
+
         class ForeignKeyModelModelAdmin(admin.TranslationAdmin):
             fields = ['test']
 
