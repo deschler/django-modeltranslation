@@ -2172,6 +2172,23 @@ class TranslationAdminTest(ModeltranslationTestBase):
                 in ma.get_form(request, self.test_obj).base_fields.get(field).widget.attrs.values()
             )
 
+    def test_widget_classes_appended_by_formfield_for_dbfield(self):
+        '''
+        regression test for #660 (https://github.com/deschler/django-modeltranslation/issues/660)
+        '''
+        class ForeignKeyModelModelAdmin(admin.TranslationAdmin):
+            fields = ['test']
+
+        class OneToOneFieldModelAdmin(admin.TranslationAdmin):
+            fields = ['test']
+
+        ma = ForeignKeyModelModelAdmin(models.ForeignKeyModel, self.site)
+        fields = ['test_de', 'test_en']
+        for field in fields:
+            assert {} == ma.get_form(request).base_fields.get(field).widget.attrs
+            assert 'class' in ma.get_form(request).base_fields.get(field).widget.widget.attrs.keys()
+            assert 'mt' in ma.get_form(request).base_fields.get(field).widget.widget.attrs['class']
+
     def test_inline_fieldsets(self):
         class DataInline(admin.TranslationStackedInline):
             model = models.DataModel

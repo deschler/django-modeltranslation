@@ -94,7 +94,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
                 db_field.empty_value == 'both' or orig_field.name in self.both_empty_values_fields
             ) and isinstance(field.widget, (forms.TextInput, forms.Textarea)):
                 field.widget = ClearableWidgetWrapper(field.widget)
-            css_classes = field.widget.attrs.get('class', '').split(' ')
+            css_classes = self._get_widget_from_field(field).attrs.get('class', '').split(' ')
             css_classes.append('mt')
             # Add localized fieldname css class
             css_classes.append(build_css_class(db_field.name, 'mt-field'))
@@ -116,7 +116,14 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
                     # Hide clearable widget for required fields
                     if isinstance(field.widget, ClearableWidgetWrapper):
                         field.widget = field.widget.widget
-            field.widget.attrs['class'] = ' '.join(css_classes)
+            self._get_widget_from_field(field).attrs['class'] = ' '.join(css_classes)
+
+    def _get_widget_from_field(self, field):
+        # retrieve "nested" widget in case of related field
+        if isinstance(field.widget, admin.widgets.RelatedFieldWidgetWrapper):
+            return field.widget.widget
+        else:
+            return field.widget
 
     def _exclude_original_fields(self, exclude=None):
         if exclude is None:
