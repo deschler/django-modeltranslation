@@ -77,7 +77,34 @@ explains how things are working under the hood.
 .. versionadded:: 0.5
 
 A subclass of any ``TranslationOptions`` will inherit fields from its bases
-(similar to the way Django models inherit fields, but with a different syntax). ::
+(similar to the way Django models inherit fields, but with a different syntax).
+When dealing with abstract base classes, this can be handy::
+
+    from modeltranslation.translator import translator, TranslationOptions
+    from news.models import News, NewsWithImage
+
+    class AbstractNewsTranslationOptions(TranslationOptions):
+        fields = ('title', 'text',)
+
+    class NewsWithImageTranslationOptions(AbstractNewsTranslationOptions):
+        fields = ('image',)
+
+    translator.register(News, NewsTranslationOptions)
+    translator.register(NewsWithImage, NewsWithImageTranslationOptions)
+
+The above example adds the fields ``title`` and ``text`` from the
+``AbstractNewsTranslationOptions`` class to ``NewsWithImageTranslationOptions``, or to
+say it in code::
+
+    assert NewsWithImageTranslationOptions.fields == ('title', 'text', 'image')
+
+Of course multiple inheritance and inheritance chains (A > B > C) also work as
+expected.
+
+However, if the base class is not abstract, inheriting the ``TranslationOptions`` will 
+cause errors, because the base ``TranslationOptions`` already took care of adding 
+fields to the model. The example below illustrates how to add translation fields to a 
+child model with a non-abstract base::
 
     from modeltranslation.translator import translator, TranslationOptions
     from news.models import News, NewsWithImage
@@ -85,20 +112,15 @@ A subclass of any ``TranslationOptions`` will inherit fields from its bases
     class NewsTranslationOptions(TranslationOptions):
         fields = ('title', 'text',)
 
-    class NewsWithImageTranslationOptions(NewsTranslationOptions):
+    class NewsWithImageTranslationOptions(TranslationOptions):
         fields = ('image',)
 
     translator.register(News, NewsTranslationOptions)
     translator.register(NewsWithImage, NewsWithImageTranslationOptions)
 
-The above example adds the fields ``title`` and ``text`` from the
-``NewsTranslationOptions`` class to ``NewsWithImageTranslationOptions``, or to
-say it in code::
 
-    assert NewsWithImageTranslationOptions.fields == ('title', 'text', 'image')
-
-Of course multiple inheritance and inheritance chains (A > B > C) also work as
-expected.
+This will add the translated fields ``title`` and ``text`` to the ``News`` model and further add 
+the translated field ``image`` to the ``NewsWithImage`` model.
 
 .. note:: When upgrading from a previous modeltranslation version (<0.5), please
     review your ``TranslationOptions`` classes and see if introducing `fields
