@@ -57,3 +57,5 @@ Features
 - Handle more than just text fields
 - Django admin integration
 - Flexible fallbacks, auto-population and more!
+
+For the latest documentation, visit https://django-modeltranslation.readthedocs.io/en/latest/.
