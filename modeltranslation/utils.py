@@ -4,7 +4,6 @@ from django.utils.encoding import force_str
 from django.utils.translation import get_language as _get_language
 from django.utils.translation import get_language_info
 from django.utils.functional import lazy
-
 from modeltranslation import settings
 from modeltranslation.thread_context import (
     set_auto_populate,
@@ -183,3 +182,46 @@ def parse_field(setting, field_name, default):
         return setting.get(field_name, default)
     else:
         return setting
+
+
+def patch_intermediary_model(field, lang, translator):
+    from django.db import models
+
+    intermediary_model = field.remote_field.through
+    meta = type(
+        "Meta",
+        (),
+        {
+            "db_table": build_localized_fieldname(intermediary_model._meta.db_table, lang),
+            "auto_created": intermediary_model._meta.auto_created,
+            "app_label": intermediary_model._meta.app_label,
+            "db_tablespace": intermediary_model._meta.db_tablespace,
+            "unique_together": intermediary_model._meta.unique_together,
+            "verbose_name": build_localized_verbose_name(
+                intermediary_model._meta.verbose_name, lang
+            ),
+            "verbose_name_plural": build_localized_verbose_name(
+                intermediary_model._meta.verbose_name_plural, lang
+            ),
+            "apps": intermediary_model._meta.apps,
+        },
+    )
+    klass = type(
+        build_localized_fieldname(intermediary_model.__name__, lang),
+        (models.Model,),
+        {
+            **{k: v for k, v in dict(intermediary_model.__dict__).items() if k != "_meta"},
+            **{f.name: f.clone() for f in intermediary_model._meta.fields},
+            "Meta": meta,
+        },
+    )
+
+    def lazy_register_model(old_model, new_model, translator):
+        cls_opts = translator._get_options_for_model(old_model)
+        if cls_opts.registered and not new_model in translator._registry:
+            name = "%sTranslationOptions" % new_model.__name__
+            translator.register(new_model, type(name, (cls_opts.__class__,), {}))
+
+    translator.lazy_operation(lazy_register_model, intermediary_model, klass)
+
+    return klass

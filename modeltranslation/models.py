@@ -40,6 +40,9 @@ def autodiscover():
     for module in TRANSLATION_FILES:
         import_module(module)
 
+    # This executes 'after imports' scheduled operations
+    translator.execute_lazy_operations()
+
     # In debug mode, print a list of registered models and pid to stdout.
     # Note: Differing model order is fine, we don't rely on a particular
     # order, as far as base classes are registered before subclasses.
