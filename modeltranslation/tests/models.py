@@ -56,7 +56,7 @@ class FileFieldsModel(models.Model):
     image = models.ImageField(upload_to='modeltranslation_tests', null=True, blank=True)
 
 
-# ######### Foreign Key / OneToOneField testing
+# ######### Foreign Key / OneToOneField / ManytoManyField testing
 
 
 class NonTranslated(models.Model):
@@ -112,6 +112,43 @@ class OneToOneFieldModel(models.Model):
         related_name="test_o2o",
         on_delete=models.CASCADE,
     )
+
+
+class ManyToManyFieldModel(models.Model):
+    title = models.CharField(gettext_lazy('title'), max_length=255)
+    test = models.ManyToManyField(
+        TestModel,
+        related_name="m2m_test_ref",
+    )
+    self_call_1 = models.ManyToManyField("self")
+    # test multiple self m2m
+    self_call_2 = models.ManyToManyField("self")
+    through_model = models.ManyToManyField(TestModel, through="CustomThroughModel")
+    trans_through_model = models.ManyToManyField(
+        TestModel, related_name="m2m_trans_through_model_ref", through="RegisteredThroughModel"
+    )
+    untrans = models.ManyToManyField(
+        NonTranslated,
+        related_name="m2m_untrans_ref",
+    )
+
+
+class CustomThroughModel(models.Model):
+    rel_1 = models.ForeignKey(ManyToManyFieldModel, on_delete=models.CASCADE)
+    rel_2 = models.ForeignKey(TestModel, on_delete=models.CASCADE)
+
+    @property
+    def test_property(self):
+        return "%s_%s" % (self.__class__.__name__, self.rel_1_id)
+
+    def test_method(self):
+        return self.rel_1_id + 1
+
+
+class RegisteredThroughModel(models.Model):
+    rel_1 = models.ForeignKey(ManyToManyFieldModel, on_delete=models.CASCADE)
+    rel_2 = models.ForeignKey(TestModel, on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)
 
 
 # ######### Custom fields testing

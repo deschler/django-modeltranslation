@@ -938,6 +938,335 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
+            name='CustomThroughModel',
+            fields=[
+                (
+                    'id',
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                    ),
+                ),
+            ],
+        ),
+        migrations.CreateModel(
+            name='ManyToManyFieldModel',
+            fields=[
+                (
+                    'id',
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                    ),
+                ),
+                ('title', models.CharField(max_length=255, verbose_name='title')),
+                ('title_de', models.CharField(max_length=255, null=True, verbose_name='title')),
+                ('title_en', models.CharField(max_length=255, null=True, verbose_name='title')),
+                ('self_call_1', models.ManyToManyField(to='tests.manytomanyfieldmodel')),
+                ('self_call_2', models.ManyToManyField(to='tests.manytomanyfieldmodel')),
+                (
+                    'self_call_1_en',
+                    models.ManyToManyField(null=True, to='tests.manytomanyfieldmodel'),
+                ),
+                (
+                    'self_call_1_de',
+                    models.ManyToManyField(null=True, to='tests.manytomanyfieldmodel'),
+                ),
+                (
+                    'self_call_2_en',
+                    models.ManyToManyField(null=True, to='tests.manytomanyfieldmodel'),
+                ),
+                (
+                    'self_call_2_de',
+                    models.ManyToManyField(null=True, to='tests.manytomanyfieldmodel'),
+                ),
+            ],
+        ),
+        migrations.CreateModel(
+            name='RegisteredThroughModel_de',
+            fields=[
+                (
+                    'id',
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                    ),
+                ),
+                (
+                    'rel_1',
+                    models.ForeignKey(
+                        db_tablespace='',
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name='RegisteredThroughModel_de+',
+                        to='tests.manytomanyfieldmodel',
+                    ),
+                ),
+                (
+                    'rel_2',
+                    models.ForeignKey(
+                        db_tablespace='',
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name='RegisteredThroughModel_de+',
+                        to='tests.testmodel',
+                    ),
+                ),
+                ('title', models.CharField(max_length=255, verbose_name='title')),
+                ('title_de', models.CharField(max_length=255, null=True, verbose_name='title')),
+                ('title_en', models.CharField(max_length=255, null=True, verbose_name='title')),
+            ],
+            options={
+                'verbose_name': 'registered through model [de]',
+                'verbose_name_plural': 'registered through models [de]',
+                'db_table': 'tests_registeredthroughmodel_de',
+                'db_tablespace': '',
+                'auto_created': False,
+            },
+        ),
+        migrations.CreateModel(
+            name='RegisteredThroughModel_en',
+            fields=[
+                (
+                    'id',
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                    ),
+                ),
+                (
+                    'rel_1',
+                    models.ForeignKey(
+                        db_tablespace='',
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name='RegisteredThroughModel_en+',
+                        to='tests.manytomanyfieldmodel',
+                    ),
+                ),
+                (
+                    'rel_2',
+                    models.ForeignKey(
+                        db_tablespace='',
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name='RegisteredThroughModel_en+',
+                        to='tests.testmodel',
+                    ),
+                ),
+                ('title', models.CharField(max_length=255, verbose_name='title')),
+                ('title_de', models.CharField(max_length=255, null=True, verbose_name='title')),
+                ('title_en', models.CharField(max_length=255, null=True, verbose_name='title')),
+            ],
+            options={
+                'verbose_name': 'registered through model [en]',
+                'verbose_name_plural': 'registered through models [en]',
+                'db_table': 'tests_registeredthroughmodel_en',
+                'db_tablespace': '',
+                'auto_created': False,
+            },
+        ),
+        migrations.CreateModel(
+            name='RegisteredThroughModel',
+            fields=[
+                (
+                    'id',
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                    ),
+                ),
+                ('title', models.CharField(max_length=255)),
+                ('title_de', models.CharField(max_length=255, null=True)),
+                ('title_en', models.CharField(max_length=255, null=True)),
+                (
+                    'rel_1',
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to='tests.manytomanyfieldmodel'
+                    ),
+                ),
+                (
+                    'rel_2',
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to='tests.testmodel'
+                    ),
+                ),
+            ],
+        ),
+        migrations.AddField(
+            model_name='manytomanyfieldmodel',
+            name='test',
+            field=models.ManyToManyField(related_name='m2m_test_ref', to='tests.testmodel'),
+        ),
+        migrations.AddField(
+            model_name='manytomanyfieldmodel',
+            name='test_en',
+            field=models.ManyToManyField(
+                null=True, related_name='m2m_test_ref', to='tests.testmodel'
+            ),
+        ),
+        migrations.AddField(
+            model_name='manytomanyfieldmodel',
+            name='test_de',
+            field=models.ManyToManyField(
+                null=True, related_name='m2m_test_ref', to='tests.testmodel'
+            ),
+        ),
+        migrations.AddField(
+            model_name='manytomanyfieldmodel',
+            name='through_model',
+            field=models.ManyToManyField(
+                related_name='m2m_through_model_ref',
+                through='tests.CustomThroughModel',
+                to='tests.testmodel',
+            ),
+        ),
+        migrations.AddField(
+            model_name='manytomanyfieldmodel',
+            name='through_model_en',
+            field=models.ManyToManyField(
+                null=True,
+                related_name='manytomanyfieldmodel_through_model_en_set',
+                through='tests.CustomThroughModel',
+                to='tests.testmodel',
+            ),
+        ),
+        migrations.AddField(
+            model_name='manytomanyfieldmodel',
+            name='through_model_de',
+            field=models.ManyToManyField(
+                null=True,
+                related_name='manytomanyfieldmodel_through_model_de_set',
+                through='tests.CustomThroughModel',
+                to='tests.testmodel',
+            ),
+        ),
+        migrations.AddField(
+            model_name='manytomanyfieldmodel',
+            name='trans_through_model',
+            field=models.ManyToManyField(
+                related_name='m2m_trans_through_model_ref',
+                through='tests.RegisteredThroughModel',
+                to='tests.testmodel',
+            ),
+        ),
+        migrations.AddField(
+            model_name='manytomanyfieldmodel',
+            name='trans_through_model_en',
+            field=models.ManyToManyField(
+                null=True,
+                related_name='m2m_trans_through_model_ref',
+                through='tests.RegisteredThroughModel',
+                to='tests.testmodel',
+            ),
+        ),
+        migrations.AddField(
+            model_name='manytomanyfieldmodel',
+            name='trans_through_model_de',
+            field=models.ManyToManyField(
+                null=True,
+                related_name='m2m_trans_through_model_ref',
+                through='tests.RegisteredThroughModel',
+                to='tests.testmodel',
+            ),
+        ),
+        migrations.AddField(
+            model_name='manytomanyfieldmodel',
+            name='untrans',
+            field=models.ManyToManyField(related_name='m2m_untrans_ref', to='tests.nontranslated'),
+        ),
+        migrations.AddField(
+            model_name='manytomanyfieldmodel',
+            name='untrans_en',
+            field=models.ManyToManyField(
+                null=True, related_name='m2m_untrans_ref', to='tests.nontranslated'
+            ),
+        ),
+        migrations.AddField(
+            model_name='manytomanyfieldmodel',
+            name='untrans_de',
+            field=models.ManyToManyField(
+                null=True, related_name='m2m_untrans_ref', to='tests.nontranslated'
+            ),
+        ),
+        migrations.CreateModel(
+            name='CustomThroughModel_de',
+            fields=[
+                (
+                    'id',
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                    ),
+                ),
+                (
+                    'rel_1',
+                    models.ForeignKey(
+                        db_tablespace='',
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name='CustomThroughModel_de+',
+                        to='tests.manytomanyfieldmodel',
+                    ),
+                ),
+                (
+                    'rel_2',
+                    models.ForeignKey(
+                        db_tablespace='',
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name='CustomThroughModel_de+',
+                        to='tests.testmodel',
+                    ),
+                ),
+            ],
+            options={
+                'verbose_name': 'custom through model [de]',
+                'verbose_name_plural': 'custom through models [de]',
+                'db_table': 'tests_customthroughmodel_de',
+                'db_tablespace': '',
+                'auto_created': False,
+            },
+        ),
+        migrations.CreateModel(
+            name='CustomThroughModel_en',
+            fields=[
+                (
+                    'id',
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                    ),
+                ),
+                (
+                    'rel_1',
+                    models.ForeignKey(
+                        db_tablespace='',
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name='CustomThroughModel_en+',
+                        to='tests.manytomanyfieldmodel',
+                    ),
+                ),
+                (
+                    'rel_2',
+                    models.ForeignKey(
+                        db_tablespace='',
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name='CustomThroughModel_en+',
+                        to='tests.testmodel',
+                    ),
+                ),
+            ],
+            options={
+                'verbose_name': 'custom through model [en]',
+                'verbose_name_plural': 'custom through models [en]',
+                'db_table': 'tests_customthroughmodel_en',
+                'db_tablespace': '',
+                'auto_created': False,
+            },
+        ),
+        migrations.AddField(
+            model_name='customthroughmodel',
+            name='rel_1',
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to='tests.manytomanyfieldmodel'
+            ),
+        ),
+        migrations.AddField(
+            model_name='customthroughmodel',
+            name='rel_2',
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to='tests.testmodel'
+            ),
+        ),
+        migrations.CreateModel(
             name='ProxyTestModel',
             fields=[],
             options={
