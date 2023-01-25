@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from functools import partial
+from typing import Callable, Iterable
 
 import django
 from django.core.exceptions import ImproperlyConfigured
@@ -445,7 +446,7 @@ class Translator(object):
         # All seen models (model class -> ``TranslationOptions`` instance).
         self._registry = {}
         # List of funcs to execute after all imports are done.
-        self._lazy_operations = []
+        self._lazy_operations: Iterable[Callable] = []
 
     def register(self, model_or_iterable, opts_class=None, **options):
         """
@@ -652,11 +653,11 @@ class Translator(object):
             )
         return opts
 
-    def execute_lazy_operations(self):
+    def execute_lazy_operations(self) -> None:
         while self._lazy_operations:
             self._lazy_operations.pop(0)(translator=self)
 
-    def lazy_operation(self, func, *args, **kwargs):
+    def lazy_operation(self, func: Callable, *args, **kwargs) -> None:
         self._lazy_operations.append(partial(func, *args, **kwargs))
 
 

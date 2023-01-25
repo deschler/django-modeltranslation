@@ -1,5 +1,6 @@
 from contextlib import contextmanager
 
+from django.db import models
 from django.utils.encoding import force_str
 from django.utils.translation import get_language as _get_language
 from django.utils.translation import get_language_info
@@ -184,10 +185,9 @@ def parse_field(setting, field_name, default):
         return setting
 
 
-def patch_intermediary_model(field, lang, translator):
-    from django.db import models
+def build_localized_intermediary_model(intermediary_model: models.Model, lang: str) -> models.Model:
+    from modeltranslation.translator import translator
 
-    intermediary_model = field.remote_field.through
     meta = type(
         "Meta",
         (),
@@ -218,7 +218,7 @@ def patch_intermediary_model(field, lang, translator):
 
     def lazy_register_model(old_model, new_model, translator):
         cls_opts = translator._get_options_for_model(old_model)
-        if cls_opts.registered and not new_model in translator._registry:
+        if cls_opts.registered and new_model not in translator._registry:
             name = "%sTranslationOptions" % new_model.__name__
             translator.register(new_model, type(name, (cls_opts.__class__,), {}))
 
