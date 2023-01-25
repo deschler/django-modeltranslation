@@ -1061,35 +1061,38 @@ class ManyToManyFieldsTest(ModeltranslationTestBase):
         )
 
         testmodel_qs = models.TestModel.objects.all()
+        testmodel_qs_1 = testmodel_qs.filter(title_en__in=['m2m_test_%s_en' % i for i in range(4)])
+        testmodel_qs_2 = testmodel_qs.filter(
+            title_en__in=['m2m_test_%s_en' % i for i in range(4, 10)]
+        )
         untranslated_qs = models.NonTranslated.objects.all()
         self_qs = self.model.objects.all()
+        self_qs_1 = self_qs.filter(title_en__in=['m2m_test_%s_en' % i for i in range(6)])
+        self_qs_2 = self_qs.filter(title_en__in=['m2m_test_%s_en' % i for i in range(6, 10)])
 
         inst = self.model()
         inst.save()
 
         trans_real.activate("de")
-        inst.test.set(list(testmodel_qs.filter(pk__lt=2).values_list("pk", flat=True)))
-        assert inst.test.through.objects.all().count() == testmodel_qs.filter(pk__lt=2).count()
+        inst.test.set(list(testmodel_qs_1.values_list("pk", flat=True)))
+        assert inst.test.through.objects.all().count() == testmodel_qs_1.count()
 
-        inst.through_model.set(testmodel_qs.filter(pk__lt=4))
-        assert (
-            inst.through_model.through.objects.all().count()
-            == testmodel_qs.filter(pk__lt=4).count()
-        )
+        inst.through_model.set(testmodel_qs_2)
+        assert inst.through_model.through.objects.all().count() == testmodel_qs_2.count()
 
-        inst.self_call_2.set(self_qs.filter(pk__gt=4))
-        assert inst.self_call_2.all().count() == self_qs.filter(pk__gt=4).count()
+        inst.self_call_2.set(self_qs_1)
+        assert inst.self_call_2.all().count() == self_qs_1.count()
 
         trans_real.activate("en")
         inst.trans_through_model.through.objects.bulk_create(
             (
                 inst.trans_through_model.through(
-                    title_en='m2m_test_%s_en' % i,
-                    title_de='m2m_test_%s_de' % i,
+                    title_en='m2m_test_%s_en' % (i + 1),
+                    title_de='m2m_test_%s_de' % (i + 1),
                     rel_1_id=int(inst.pk),
-                    rel_2_id=i,
+                    rel_2_id=tst_model.pk,
                 )
-                for i in range(1, 3)
+                for i, tst_model in enumerate(testmodel_qs[:2])
             )
         )
         assert inst.trans_through_model.all().count() == 2
@@ -1097,20 +1100,15 @@ class ManyToManyFieldsTest(ModeltranslationTestBase):
         inst.untrans.set(untranslated_qs)
         assert inst.untrans.through.objects.all().count() == untranslated_qs.count()
 
-        inst.self_call_1.set(self_qs.filter(pk__lt=4))
+        inst.self_call_1.set(self_qs_2)
         assert (
-            inst.self_call_1.filter(
-                pk__in=self_qs.filter(pk__lt=4).values_list("pk", flat=True)
-            ).count()
-            == self_qs.filter(pk__lt=4).count()
+            inst.self_call_1.filter(pk__in=self_qs_2.values_list("pk", flat=True)).count()
+            == self_qs_2.count()
         )
 
         trans_real.activate("de")
-        assert inst.test.through.objects.all().count() == testmodel_qs.filter(pk__lt=2).count()
-        assert (
-            inst.through_model.through.objects.all().count()
-            == testmodel_qs.filter(pk__lt=4).count()
-        )
+        assert inst.test.through.objects.all().count() == testmodel_qs_1.count()
+        assert inst.through_model.through.objects.all().count() == testmodel_qs_2.count()
         assert inst.untrans.through.objects.count() == 0
         assert inst.self_call_1.count() == 0
 
@@ -1131,55 +1129,47 @@ class ManyToManyFieldsTest(ModeltranslationTestBase):
         # Check filtering in direct way + lookup spanning
         manager = self.model.objects
         trans_real.activate("de")
-        assert manager.filter(test__in=testmodel_qs.filter(pk__lt=2)).count() == 1
-        assert manager.filter(test_en__in=testmodel_qs.filter(pk__lt=2)).count() == 0
-        assert manager.filter(test_de__in=testmodel_qs.filter(pk__lt=2)).count() == 1
+        assert manager.filter(test__in=testmodel_qs_1).distinct().count() == 1
+        assert manager.filter(test_en__in=testmodel_qs_1).distinct().count() == 0
+        assert manager.filter(test_de__in=testmodel_qs_1).distinct().count() == 1
 
         assert (
-            manager.filter(
-                through_model__title__in=testmodel_qs.filter(pk__lt=4).values_list(
-                    "title", flat=True
-                )
-            )
+            manager.filter(through_model__title__in=testmodel_qs_2.values_list("title", flat=True))
             .distinct()
             .count()
             == 1
         )
         assert (
             manager.filter(
-                through_model_en__title__in=testmodel_qs.filter(pk__lt=4).values_list(
-                    "title", flat=True
-                )
+                through_model_en__title__in=testmodel_qs_2.values_list("title", flat=True)
             ).count()
             == 0
         )
         assert (
             manager.filter(
-                through_model_de__title__in=testmodel_qs.filter(pk__lt=4).values_list(
-                    "title", flat=True
-                )
+                through_model_de__title__in=testmodel_qs_2.values_list("title", flat=True)
             )
             .distinct()
             .count()
             == 1
         )
 
-        assert manager.filter(self_call_2__in=self_qs.filter(pk__gt=4)).distinct().count() == 7
-        assert manager.filter(self_call_2_en__in=self_qs.filter(pk__gt=4)).count() == 0
-        assert manager.filter(self_call_2_de__in=self_qs.filter(pk__gt=4)).distinct().count() == 7
+        assert manager.filter(self_call_2__in=self_qs_1).distinct().count() == 1
+        assert manager.filter(self_call_2_en__in=self_qs_1).count() == 0
+        assert manager.filter(self_call_2_de__in=self_qs_1).distinct().count() == 1
 
         trans_real.activate("en")
-        assert manager.filter(trans_through_model__in=testmodel_qs.filter(pk__lt=2)).count() == 1
-        assert manager.filter(trans_through_model_de__in=testmodel_qs.filter(pk__lt=2)).count() == 0
-        assert manager.filter(trans_through_model_en__in=testmodel_qs.filter(pk__lt=2)).count() == 1
+        assert manager.filter(trans_through_model__in=testmodel_qs_1).distinct().count() == 1
+        assert manager.filter(trans_through_model_de__in=testmodel_qs_1).count() == 0
+        assert manager.filter(trans_through_model_en__in=testmodel_qs_1).distinct().count() == 1
 
         assert manager.filter(untrans__in=untranslated_qs).distinct().count() == 1
         assert manager.filter(untrans_de__in=untranslated_qs).count() == 0
         assert manager.filter(untrans_en__in=untranslated_qs).distinct().count() == 1
 
-        assert manager.filter(self_call_1__in=self_qs.filter(pk__lt=4)).distinct().count() == 1
-        assert manager.filter(self_call_1_de__in=self_qs.filter(pk__lt=4)).count() == 0
-        assert manager.filter(self_call_1_en__in=self_qs.filter(pk__lt=4)).distinct().count() == 1
+        assert manager.filter(self_call_1__in=self_qs_2).distinct().count() == 1
+        assert manager.filter(self_call_1_de__in=self_qs_2).count() == 0
+        assert manager.filter(self_call_1_en__in=self_qs_2).distinct().count() == 1
 
     def test_reverse_relations(self):
         models.TestModel.objects.bulk_create(
