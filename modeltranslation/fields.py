@@ -1,18 +1,20 @@
-from django import VERSION
-from django import forms
+import copy
+from typing import Iterable
+
+from django import VERSION, forms
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import fields
 
 from modeltranslation import settings as mt_settings
 from modeltranslation.thread_context import fallbacks_enabled
 from modeltranslation.utils import (
-    get_language,
     build_localized_fieldname,
+    build_localized_intermediary_model,
     build_localized_verbose_name,
+    get_language,
     resolution_order,
 )
 from modeltranslation.widgets import ClearableWidgetWrapper
-
 
 SUPPORTED_FIELDS = (
     fields.CharField,
@@ -35,6 +37,7 @@ SUPPORTED_FIELDS = (
     fields.files.ImageField,
     fields.related.ForeignKey,
     # Above implies also OneToOneField
+    fields.related.ManyToManyField,
 )
 
 NEW_RELATED_API = VERSION >= (1, 9)
@@ -83,7 +86,7 @@ def field_factory(baseclass):
     return TranslationFieldSpecific
 
 
-class TranslationField(object):
+class TranslationField:
     """
     The translation field functions as a proxy to the original field which is
     wrapped.
@@ -156,9 +159,54 @@ class TranslationField(object):
         # (will show up e.g. in the admin).
         self.verbose_name = build_localized_verbose_name(translated_field.verbose_name, language)
 
+        # M2M support - <rewrite related_name> <patch intermediary model>
+        if isinstance(self.translated_field, fields.related.ManyToManyField) and hasattr(
+            self.remote_field, "through"
+        ):
+
+            # Since fields cannot share the same remote_field object:
+            self.remote_field = copy.copy(self.remote_field)
+
+            # To support multiple relations to self, must provide a non null language scoped related_name
+            if self.remote_field.symmetrical and (
+                self.remote_field.model == "self"
+                or self.remote_field.model == self.model._meta.object_name
+                or self.remote_field.model == self.model
+            ):
+                self.remote_field.related_name = "%s_rel_+" % self.name
+            elif self.remote_field.is_hidden():
+                # Even if the backwards relation is disabled, django internally uses it, need to use a language scoped related_name
+                self.remote_field.related_name = "_%s_%s_+" % (
+                    self.model.__name__.lower(),
+                    self.name,
+                )
+            else:
+                # Default case with standard related_name must also include language scope
+                if self.remote_field.related_name is None:
+                    # For implicit related_name use different query field name
+                    loc_related_query_name = build_localized_fieldname(
+                        self.related_query_name(), self.language
+                    )
+                    self.related_query_name = lambda: loc_related_query_name
+                    self.remote_field.related_name = "%s_set" % (
+                        build_localized_fieldname(self.model.__name__.lower(), language),
+                    )
+                else:
+                    self.remote_field.related_name = build_localized_fieldname(
+                        self.remote_field.get_accessor_name(), language
+                    )
+
+            # Patch intermediary model with language scope to create correct db table
+            self.remote_field.through = build_localized_intermediary_model(
+                self.remote_field.through, language
+            )
+            self.remote_field.field = self
+
+            if hasattr(self.remote_field.model._meta, '_related_objects_cache'):
+                del self.remote_field.model._meta._related_objects_cache
+
         # ForeignKey support - rewrite related_name
-        if not NEW_RELATED_API and self.rel and self.related and not self.rel.is_hidden():
-            import copy
+        elif not NEW_RELATED_API and self.rel and self.related and not self.rel.is_hidden():
 
             current = self.related.get_accessor_name()
             self.rel = copy.copy(self.rel)  # Since fields cannot share the same rel object.
@@ -172,11 +220,10 @@ class TranslationField(object):
                 )
                 self.related_query_name = lambda: loc_related_query_name
             self.rel.related_name = build_localized_fieldname(current, self.language)
-            self.rel.field = self  # Django 1.6
+            self.rel.field = self
             if hasattr(self.rel.to._meta, '_related_objects_cache'):
                 del self.rel.to._meta._related_objects_cache
         elif NEW_RELATED_API and self.remote_field and not self.remote_field.is_hidden():
-            import copy
 
             current = self.remote_field.get_accessor_name()
             # Since fields cannot share the same rel object:
@@ -189,7 +236,7 @@ class TranslationField(object):
                 )
                 self.related_query_name = lambda: loc_related_query_name
             self.remote_field.related_name = build_localized_fieldname(current, self.language)
-            self.remote_field.field = self  # Django 1.6
+            self.remote_field.field = self
             if hasattr(self.remote_field.model._meta, '_related_objects_cache'):
                 del self.remote_field.model._meta._related_objects_cache
 
@@ -289,7 +336,7 @@ class TranslationField(object):
         return cls(*args, **kwargs)
 
 
-class TranslationFieldDescriptor(object):
+class TranslationFieldDescriptor:
     """
     A descriptor used for the original translated field.
     """
@@ -367,13 +414,13 @@ class TranslationFieldDescriptor(object):
             return default
 
 
-class TranslatedRelationIdDescriptor(object):
+class TranslatedRelationIdDescriptor:
     """
     A descriptor used for the original '_id' attribute of a translated
     ForeignKey field.
     """
 
-    def __init__(self, field_name, fallback_languages):
+    def __init__(self, field_name: str, fallback_languages: Iterable[str]):
         self.field_name = field_name  # The name of the original field (excluding '_id')
         self.fallback_languages = fallback_languages
 
@@ -400,7 +447,28 @@ class TranslatedRelationIdDescriptor(object):
         return None
 
 
-class LanguageCacheSingleObjectDescriptor(object):
+class TranslatedManyToManyDescriptor:
+    """
+    A descriptor used to return correct related manager without language fallbacks.
+    """
+
+    def __init__(self, field_name, fallback_languages):
+        self.field_name = field_name  # The name of the original field
+        self.fallback_languages = fallback_languages
+
+    def __get__(self, instance, owner):
+        # TODO: do we really need to handle fallbacks with m2m relations?
+        loc_field_name = build_localized_fieldname(self.field_name, get_language())
+        loc_attname = (instance or owner)._meta.get_field(loc_field_name).get_attname()
+        return getattr((instance or owner), loc_attname)
+
+    def __set__(self, instance, value):
+        loc_field_name = build_localized_fieldname(self.field_name, get_language())
+        loc_attname = instance._meta.get_field(loc_field_name).get_attname()
+        setattr(instance, loc_attname, value)
+
+
+class LanguageCacheSingleObjectDescriptor:
     """
     A Mixin for RelatedObjectDescriptors which use current language in cache lookups.
     """

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.db.models import F, Q
+from django.db.models import F, Q, ManyToManyField
 from django.core.management.base import BaseCommand, CommandError
 
 from modeltranslation.settings import AVAILABLE_LANGUAGES, DEFAULT_LANGUAGE
@@ -85,6 +85,17 @@ class Command(BaseCommand):
                 # We'll only update fields which do not have an existing value
                 q = Q(**{def_lang_fieldname: None})
                 field = model._meta.get_field(field_name)
+                if isinstance(field, ManyToManyField):
+                    trans_field = getattr(model, def_lang_fieldname)
+                    if not trans_field.through.objects.exists():
+                        field_names = [f.name for f in trans_field.through._meta.fields]
+                        trans_field.through.objects.bulk_create(
+                            trans_field.through(
+                                **{f: v for f, v in dict(inst.__dict__) if f in field_names}
+                            )
+                            for inst in getattr(model, field_name).through.objects.all()
+                        )
+                    continue
                 if field.empty_strings_allowed:
                     q |= Q(**{def_lang_fieldname: ""})
 

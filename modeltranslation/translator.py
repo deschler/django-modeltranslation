@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from functools import partial
+from typing import Callable, Iterable
 
 import django
 from django.core.exceptions import ImproperlyConfigured
-from django.db.models import Manager, ForeignKey, OneToOneField, options
+from django.db.models import Manager, ForeignKey, ManyToManyField, OneToOneField, options
 from django.db.models.base import ModelBase
 from django.db.models.signals import post_init
 from django.utils.functional import cached_property
@@ -14,6 +15,7 @@ from modeltranslation.fields import (
     create_translation_field,
     TranslationFieldDescriptor,
     TranslatedRelationIdDescriptor,
+    TranslatedManyToManyDescriptor,
     LanguageCacheSingleObjectDescriptor,
 )
 from modeltranslation.manager import (
@@ -443,6 +445,8 @@ class Translator(object):
     def __init__(self):
         # All seen models (model class -> ``TranslationOptions`` instance).
         self._registry = {}
+        # List of funcs to execute after all imports are done.
+        self._lazy_operations: Iterable[Callable] = []
 
     def register(self, model_or_iterable, opts_class=None, **options):
         """
@@ -543,11 +547,16 @@ class Translator(object):
                 fallback_undefined=field_fallback_undefined,
             )
             setattr(model, field_name, descriptor)
-            if isinstance(field, ForeignKey):
+            if isinstance(field, (ForeignKey, ManyToManyField)):
                 # We need to use a special descriptor so that
                 # _id fields on translated ForeignKeys work
                 # as expected.
-                desc = TranslatedRelationIdDescriptor(field_name, model_fallback_languages)
+                desc_class = (
+                    TranslatedManyToManyDescriptor
+                    if isinstance(field, ManyToManyField)
+                    else TranslatedRelationIdDescriptor
+                )
+                desc = desc_class(field_name, model_fallback_languages)
                 setattr(model, field.get_attname(), desc)
 
                 # Set related field names on other model
@@ -643,6 +652,13 @@ class Translator(object):
                 'The model "%s" is not registered for ' 'translation' % model.__name__
             )
         return opts
+
+    def execute_lazy_operations(self) -> None:
+        while self._lazy_operations:
+            self._lazy_operations.pop(0)(translator=self)
+
+    def lazy_operation(self, func: Callable, *args, **kwargs) -> None:
+        self._lazy_operations.append(partial(func, *args, **kwargs))
 
 
 # This global object represents the singleton translator object

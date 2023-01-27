@@ -41,7 +41,7 @@ from modeltranslation.utils import (
 request = None
 
 # How many models are registered for tests.
-TEST_MODELS = 36
+TEST_MODELS = 40
 
 
 class reload_override_settings(override_settings):
@@ -992,6 +992,284 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
     def test_indonesian(self):
         field = models.ForeignKeyModel._meta.get_field('test')
         assert field.attname != build_localized_fieldname(field.name, 'id')
+
+
+class ManyToManyFieldsTest(ModeltranslationTestBase):
+    @classmethod
+    def setUpClass(cls):
+        # 'model' attribute cannot be assigned to class in its definition,
+        # because ``models`` module will be reloaded and hence class would use old model classes.
+        super(ManyToManyFieldsTest, cls).setUpClass()
+        cls.model = models.ManyToManyFieldModel
+
+    def test_translated_models(self):
+        field_names = dir(self.model())
+        assert 'id' in field_names
+        for f in ('test', 'test_de', 'test_en', 'self_call_1', 'self_call_1_en', 'self_call_1_de'):
+            assert f in field_names
+
+    def test_db_column_names(self):
+        meta = self.model._meta
+
+        # Make sure the correct database columns always get used:
+        field = meta.get_field('test')
+        assert field.remote_field.through._meta.db_table == "tests_manytomanyfieldmodel_test"
+
+        field = meta.get_field('test_en')
+        assert field.remote_field.through._meta.db_table == "tests_manytomanyfieldmodel_test_en"
+
+        field = meta.get_field('test_de')
+        assert field.remote_field.through._meta.db_table == "tests_manytomanyfieldmodel_test_de"
+
+        field = meta.get_field('self_call_1')
+        assert field.remote_field.through._meta.db_table == "tests_manytomanyfieldmodel_self_call_1"
+
+        field = meta.get_field('self_call_1_en')
+        assert (
+            field.remote_field.through._meta.db_table == "tests_manytomanyfieldmodel_self_call_1_en"
+        )
+
+        field = meta.get_field('self_call_1_de')
+        assert (
+            field.remote_field.through._meta.db_table == "tests_manytomanyfieldmodel_self_call_1_de"
+        )
+
+        field = meta.get_field('through_model')
+        assert field.remote_field.through._meta.db_table == "tests_customthroughmodel"
+
+        field = meta.get_field('through_model_en')
+        assert field.remote_field.through._meta.db_table == "tests_customthroughmodel_en"
+
+        field = meta.get_field('through_model_de')
+        assert field.remote_field.through._meta.db_table == "tests_customthroughmodel_de"
+
+    def test_translated_models_instance(self):
+        models.TestModel.objects.bulk_create(
+            (
+                models.TestModel(title_en='m2m_test_%s_en' % i, title_de='m2m_test_%s_de' % i)
+                for i in range(10)
+            )
+        )
+        self.model.objects.bulk_create(
+            (
+                self.model(title_en='m2m_test_%s_en' % i, title_de='m2m_test_%s_de' % i)
+                for i in range(10)
+            )
+        )
+        models.NonTranslated.objects.bulk_create(
+            (models.NonTranslated(title='m2m_test_%s' % i) for i in range(10))
+        )
+
+        testmodel_qs = models.TestModel.objects.all()
+        testmodel_qs_1 = testmodel_qs.filter(title_en__in=['m2m_test_%s_en' % i for i in range(4)])
+        testmodel_qs_2 = testmodel_qs.filter(
+            title_en__in=['m2m_test_%s_en' % i for i in range(4, 10)]
+        )
+        untranslated_qs = models.NonTranslated.objects.all()
+        self_qs = self.model.objects.all()
+        self_qs_1 = self_qs.filter(title_en__in=['m2m_test_%s_en' % i for i in range(6)])
+        self_qs_2 = self_qs.filter(title_en__in=['m2m_test_%s_en' % i for i in range(6, 10)])
+
+        inst = self.model()
+        inst.save()
+
+        trans_real.activate("de")
+        inst.test.set(list(testmodel_qs_1.values_list("pk", flat=True)))
+        assert inst.test.through.objects.all().count() == testmodel_qs_1.count()
+
+        inst.through_model.set(testmodel_qs_2)
+        assert inst.through_model.through.objects.all().count() == testmodel_qs_2.count()
+
+        inst.self_call_2.set(self_qs_1)
+        assert inst.self_call_2.all().count() == self_qs_1.count()
+
+        trans_real.activate("en")
+        inst.trans_through_model.through.objects.bulk_create(
+            (
+                inst.trans_through_model.through(
+                    title_en='m2m_test_%s_en' % (i + 1),
+                    title_de='m2m_test_%s_de' % (i + 1),
+                    rel_1_id=int(inst.pk),
+                    rel_2_id=tst_model.pk,
+                )
+                for i, tst_model in enumerate(testmodel_qs[:2])
+            )
+        )
+        assert inst.trans_through_model.all().count() == 2
+
+        inst.untrans.set(untranslated_qs)
+        assert inst.untrans.through.objects.all().count() == untranslated_qs.count()
+
+        inst.self_call_1.set(self_qs_2)
+        assert (
+            inst.self_call_1.filter(pk__in=self_qs_2.values_list("pk", flat=True)).count()
+            == self_qs_2.count()
+        )
+
+        trans_real.activate("de")
+        assert inst.test.through.objects.all().count() == testmodel_qs_1.count()
+        assert inst.through_model.through.objects.all().count() == testmodel_qs_2.count()
+        assert inst.untrans.through.objects.count() == 0
+        assert inst.self_call_1.count() == 0
+
+        assert inst.trans_through_model == getattr(inst, "trans_through_model_de")
+
+        # Test prevent fallbacks:
+        trans_real.activate("en")
+        with default_fallback():
+            assert inst.untrans.through.objects.all().count() == untranslated_qs.count()
+            assert inst.trans_through_model == getattr(inst, "trans_through_model_en")
+
+        # Test through properties and methods inheriance:
+        trans_real.activate("de")
+        through_inst = inst.through_model.through.objects.first()
+        assert through_inst.test_property == "CustomThroughModel_de_%s" % inst.pk
+        assert through_inst.test_method() == inst.pk + 1
+
+        # Check filtering in direct way + lookup spanning
+        manager = self.model.objects
+        trans_real.activate("de")
+        assert manager.filter(test__in=testmodel_qs_1).distinct().count() == 1
+        assert manager.filter(test_en__in=testmodel_qs_1).distinct().count() == 0
+        assert manager.filter(test_de__in=testmodel_qs_1).distinct().count() == 1
+
+        assert (
+            manager.filter(through_model__title__in=testmodel_qs_2.values_list("title", flat=True))
+            .distinct()
+            .count()
+            == 1
+        )
+        assert (
+            manager.filter(
+                through_model_en__title__in=testmodel_qs_2.values_list("title", flat=True)
+            ).count()
+            == 0
+        )
+        assert (
+            manager.filter(
+                through_model_de__title__in=testmodel_qs_2.values_list("title", flat=True)
+            )
+            .distinct()
+            .count()
+            == 1
+        )
+
+        assert manager.filter(self_call_2__in=self_qs_1).distinct().count() == 1
+        assert manager.filter(self_call_2_en__in=self_qs_1).count() == 0
+        assert manager.filter(self_call_2_de__in=self_qs_1).distinct().count() == 1
+
+        trans_real.activate("en")
+        assert manager.filter(trans_through_model__in=testmodel_qs_1).distinct().count() == 1
+        assert manager.filter(trans_through_model_de__in=testmodel_qs_1).count() == 0
+        assert manager.filter(trans_through_model_en__in=testmodel_qs_1).distinct().count() == 1
+
+        assert manager.filter(untrans__in=untranslated_qs).distinct().count() == 1
+        assert manager.filter(untrans_de__in=untranslated_qs).count() == 0
+        assert manager.filter(untrans_en__in=untranslated_qs).distinct().count() == 1
+
+        assert manager.filter(self_call_1__in=self_qs_2).distinct().count() == 1
+        assert manager.filter(self_call_1_de__in=self_qs_2).count() == 0
+        assert manager.filter(self_call_1_en__in=self_qs_2).distinct().count() == 1
+
+    def test_reverse_relations(self):
+        models.TestModel.objects.bulk_create(
+            (
+                models.TestModel(title_en='m2m_test_%s_en' % i, title_de='m2m_test_%s_de' % i)
+                for i in range(10)
+            )
+        )
+        self.model.objects.bulk_create(
+            (
+                self.model(title_en='m2m_test_%s_en' % i, title_de='m2m_test_%s_de' % i)
+                for i in range(10)
+            )
+        )
+        models.NonTranslated.objects.bulk_create(
+            (models.NonTranslated(title='m2m_test_%s' % i) for i in range(10))
+        )
+        inst_both = self.model(title_en="inst_both_en", title_de="inst_both_de")
+        inst_both.save()
+        inst_en = self.model(title_en="inst_en_en", title_de="inst_en_de")
+        inst_en.save()
+        inst_de = self.model(title_en="inst_de_en", title_de="inst_de_de")
+        inst_de.save()
+        testmodel_qs = models.TestModel.objects.all()
+        inst_both.test_en.set(testmodel_qs)
+        inst_both.test_de.set(testmodel_qs)
+        inst_en.test_en.set(testmodel_qs)
+        inst_de.test_de.set(testmodel_qs)
+
+        # Check that the reverse accessors are created on the model:
+        # Explicit related_name
+        testmodel_fields = get_field_names(models.TestModel)
+        testmodel_methods = dir(models.TestModel)
+
+        assert 'm2m_test_ref' in testmodel_fields
+        assert 'm2m_test_ref_de' in testmodel_fields
+        assert 'm2m_test_ref_en' in testmodel_fields
+        assert 'm2m_test_ref' in testmodel_methods
+        assert 'm2m_test_ref_de' in testmodel_methods
+        assert 'm2m_test_ref_en' in testmodel_methods
+        # Implicit related_name: manager descriptor name != query field name
+        assert 'customthroughmodel' in testmodel_fields
+        assert 'customthroughmodel_en' in testmodel_fields
+        assert 'customthroughmodel_de' in testmodel_fields
+        assert 'manytomanyfieldmodel_set' in testmodel_methods
+        assert 'manytomanyfieldmodel_en_set' in testmodel_methods
+        assert 'manytomanyfieldmodel_de_set' in testmodel_methods
+
+        test_inst = models.TestModel.objects.first()
+        # Check the German reverse accessor:
+        assert inst_both in test_inst.m2m_test_ref_de.all()
+        assert inst_de in test_inst.m2m_test_ref_de.all()
+        assert inst_en not in test_inst.m2m_test_ref_de.all()
+
+        # Check the English reverse accessor:
+        assert inst_both in test_inst.m2m_test_ref_en.all()
+        assert inst_en in test_inst.m2m_test_ref_en.all()
+        assert inst_de not in test_inst.m2m_test_ref_en.all()
+
+        # Check the default reverse accessor:
+        trans_real.activate("de")
+        assert inst_de in test_inst.m2m_test_ref.all()
+        assert inst_en not in test_inst.m2m_test_ref.all()
+        trans_real.activate("en")
+        assert inst_en in test_inst.m2m_test_ref.all()
+        assert inst_de not in test_inst.m2m_test_ref.all()
+
+        # Check implicit related_name reverse accessor:
+        inst_en.through_model.set(testmodel_qs)
+        assert inst_en in test_inst.manytomanyfieldmodel_set.all()
+
+        # Check filtering in reverse way + lookup spanning:
+
+        manager = models.TestModel.objects
+        trans_real.activate("de")
+        assert manager.filter(m2m_test_ref__in=[inst_both]).count() == 10
+        assert manager.filter(m2m_test_ref__in=[inst_de]).count() == 10
+        assert manager.filter(m2m_test_ref__id__in=[inst_de.pk]).count() == 10
+        assert manager.filter(m2m_test_ref__in=[inst_en]).count() == 0
+        assert manager.filter(m2m_test_ref_en__in=[inst_en]).count() == 10
+        assert manager.filter(manytomanyfieldmodel__in=[inst_en]).count() == 0
+        assert manager.filter(manytomanyfieldmodel_en__in=[inst_en]).count() == 10
+        assert manager.filter(m2m_test_ref__title='inst_de_de').distinct().count() == 10
+        assert manager.filter(m2m_test_ref__title='inst_de_en').distinct().count() == 0
+        assert manager.filter(m2m_test_ref__title_en='inst_de_en').distinct().count() == 10
+        assert manager.filter(m2m_test_ref_en__title='inst_en_de').distinct().count() == 10
+
+        trans_real.activate("en")
+        assert manager.filter(m2m_test_ref__in=[inst_both]).count() == 10
+        assert manager.filter(m2m_test_ref__in=[inst_en]).count() == 10
+        assert manager.filter(m2m_test_ref__id__in=[inst_en.pk]).count() == 10
+        assert manager.filter(m2m_test_ref__in=[inst_de]).count() == 0
+        assert manager.filter(m2m_test_ref_de__in=[inst_de]).count() == 10
+        assert manager.filter(manytomanyfieldmodel__in=[inst_en]).count() == 10
+        assert manager.filter(manytomanyfieldmodel__in=[inst_de]).count() == 0
+        assert manager.filter(manytomanyfieldmodel_de__in=[inst_de]).count() == 0
+        assert manager.filter(m2m_test_ref__title='inst_en_en').distinct().count() == 10
+        assert manager.filter(m2m_test_ref__title='inst_en_de').distinct().count() == 0
+        assert manager.filter(m2m_test_ref__title_de='inst_en_de').distinct().count() == 10
+        assert manager.filter(m2m_test_ref_de__title='inst_de_en').distinct().count() == 10
 
 
 class OneToOneFieldsTest(ForeignKeyFieldsTest):

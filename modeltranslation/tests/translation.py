@@ -69,7 +69,7 @@ class FileFieldsModelTranslationOptions(TranslationOptions):
     )
 
 
-# ######### Foreign Key / OneToOneField testing
+# ######### Foreign Key / OneToOneField / ManytoManyField testing
 
 
 @register(models.ForeignKeyModel)
@@ -100,6 +100,24 @@ class FilteredTestModelTranslationOptions(TranslationOptions):
 
 @register(models.ForeignKeyFilteredModel)
 class ForeignKeyFilteredModelTranslationOptions(TranslationOptions):
+    fields = ('title',)
+
+
+@register(models.ManyToManyFieldModel)
+class ManyToManyFieldModelTranslationOptions(TranslationOptions):
+    fields = (
+        "title",
+        "test",
+        "self_call_1",
+        "self_call_2",
+        "through_model",
+        "trans_through_model",
+        "untrans",
+    )
+
+
+@register(models.RegisteredThroughModel)
+class RegisteredThroughModelTranslationOptions(TranslationOptions):
     fields = ('title',)
 
 
