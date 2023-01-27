@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.18.8-beta.1](https://github.com/deschler/django-modeltranslation/compare/v0.18.8-beta.0...v0.18.8-beta.1) (2023-01-27)
+
+
+### Features
+
+* Add support for ManyToManyFields 🧑‍🤝‍🧑 ([#668](https://github.com/deschler/django-modeltranslation/issues/668)) ([f69e317](https://github.com/deschler/django-modeltranslation/commit/f69e3172bc6254a4ddd8def7500632d0046b30eb))
+
+
+### Bug Fixes
+
+* **docs:** Update documentation regarding inheritance ([#665](https://github.com/deschler/django-modeltranslation/issues/665)) ([ca31a21](https://github.com/deschler/django-modeltranslation/commit/ca31a21f014b04978188562a0e0e1b58d95923e6)), closes [#663](https://github.com/deschler/django-modeltranslation/issues/663)
+
 ### [0.18.8-beta.0](https://github.com/deschler/django-modeltranslation/compare/v0.18.7...v0.18.8-beta.0) (2022-11-22)
 
 
