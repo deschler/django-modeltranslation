@@ -406,8 +406,8 @@ class MultilingualQuerySet(QuerySet):
         return super(MultilingualQuerySet, self).only(*fields)
 
     # This method was not present in django-linguo
-    def raw_values(self, *fields):
-        return super(MultilingualQuerySet, self).values(*fields)
+    def raw_values(self, *fields, **expressions):
+        return super(MultilingualQuerySet, self).values(*fields, **expressions)
 
     def _values(self, *original, **kwargs):
         selects_all = kwargs.pop('selects_all', False)
@@ -429,6 +429,7 @@ class MultilingualQuerySet(QuerySet):
         if not fields:
             # Emulate original queryset behaviour: get all fields that are not translation fields
             fields = self._get_original_fields()
+        fields += tuple(expressions)
         clone = self._values(*fields, prepare=True, selects_all=selects_all, **expressions)
         clone._iterable_class = FallbackValuesIterable
         return clone
@@ -447,7 +448,25 @@ class MultilingualQuerySet(QuerySet):
         if not fields:
             # Emulate original queryset behaviour: get all fields that are not translation fields
             fields = self._get_original_fields()
-        clone = self._values(*fields, prepare=True, selects_all=selects_all)
+
+        field_names = {f for f in fields if not hasattr(f, 'resolve_expression')}
+        _fields = []
+        expressions = {}
+        counter = 1
+        for field in fields:
+            if hasattr(field, 'resolve_expression'):
+                field_id_prefix = getattr(field, 'default_alias', field.__class__.__name__.lower())
+                while True:
+                    field_id = field_id_prefix + str(counter)
+                    counter += 1
+                    if field_id not in field_names:
+                        break
+                expressions[field_id] = field
+                _fields.append(field_id)
+            else:
+                _fields.append(field)
+
+        clone = self._values(*_fields, prepare=True, selects_all=selects_all, **expressions)
         clone._iterable_class = (
             FallbackNamedValuesListIterable
             if named
