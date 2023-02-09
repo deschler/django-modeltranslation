@@ -19,7 +19,7 @@ def autodiscover():
 
     mods = [(app_config.name, app_config.module) for app_config in apps.get_app_configs()]
 
-    for (app, mod) in mods:
+    for app, mod in mods:
         # Attempt to import the app's translation module.
         module = '%s.translation' % app
         before_import_registry = copy.copy(translator._registry)

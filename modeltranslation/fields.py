@@ -163,7 +163,6 @@ class TranslationField:
         if isinstance(self.translated_field, fields.related.ManyToManyField) and hasattr(
             self.remote_field, "through"
         ):
-
             # Since fields cannot share the same remote_field object:
             self.remote_field = copy.copy(self.remote_field)
 
@@ -207,7 +206,6 @@ class TranslationField:
 
         # ForeignKey support - rewrite related_name
         elif not NEW_RELATED_API and self.rel and self.related and not self.rel.is_hidden():
-
             current = self.related.get_accessor_name()
             self.rel = copy.copy(self.rel)  # Since fields cannot share the same rel object.
             # self.related doesn't need to be copied, as it will be recreated in
@@ -224,7 +222,6 @@ class TranslationField:
             if hasattr(self.rel.to._meta, '_related_objects_cache'):
                 del self.rel.to._meta._related_objects_cache
         elif NEW_RELATED_API and self.remote_field and not self.remote_field.is_hidden():
-
             current = self.remote_field.get_accessor_name()
             # Since fields cannot share the same rel object:
             self.remote_field = copy.copy(self.remote_field)

@@ -383,7 +383,6 @@ class ModeltranslationTest(ModeltranslationTestBase):
 
         # However, by default FALLBACK_LANGUAGES is set to DEFAULT_LANGUAGE
         with default_fallback():
-
             # No change here...
             assert inst2.title == title_de
 
@@ -3013,9 +3012,13 @@ class TestManager(ModeltranslationTestBase):
         assert obj2['title'] == 'de'
 
         # Values_list behave similarly
-        assert list(manager.values_list('title', Cast("pk", output_field=CharField()))) == [('en', str(id1))]
+        assert list(manager.values_list('title', Cast("pk", output_field=CharField()))) == [
+            ('en', str(id1))
+        ]
         with override('de'):
-            assert list(manager.values_list('title', Cast("pk", output_field=CharField()))) == [('de', str(id1))]
+            assert list(manager.values_list('title', Cast("pk", output_field=CharField()))) == [
+                ('de', str(id1))
+            ]
 
     def test_custom_manager(self):
         """Test if user-defined manager is still working"""

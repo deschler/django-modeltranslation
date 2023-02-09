@@ -175,7 +175,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
     def _patch_fieldsets(self, fieldsets):
         if fieldsets:
             fieldsets_new = list(fieldsets)
-            for (name, dct) in fieldsets:
+            for name, dct in fieldsets:
                 if 'fields' in dct:
                     dct['fields'] = self.replace_orig_field(dct['fields'])
             fieldsets = fieldsets_new
