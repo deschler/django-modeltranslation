@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.18.9](https://github.com/deschler/django-modeltranslation/compare/v0.18.8...v0.18.9) (2023-02-09)
+
+
+### Bug Fixes
+
+* Fix handling of expressions in `values()`/`values_list()` ([d65ff60](https://github.com/deschler/django-modeltranslation/commit/d65ff60007d4088b1f483edd2df85f407be3b5de)), closes [#670](https://github.com/deschler/django-modeltranslation/issues/670)
+
 ### [0.18.8](https://github.com/deschler/django-modeltranslation/compare/v0.18.8-beta.1...v0.18.8) (2023-02-01)
 
 ### [0.18.8-beta.1](https://github.com/deschler/django-modeltranslation/compare/v0.18.8-beta.0...v0.18.8-beta.1) (2023-01-27)
