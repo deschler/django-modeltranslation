@@ -17,7 +17,8 @@ from django.core.files.storage import default_storage
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.db import IntegrityError
-from django.db.models import Count, F, Q, TextField, Value
+from django.db.models import CharField, Count, F, Q, TextField, Value
+from django.db.models.functions import Cast
 from django.test import TestCase, TransactionTestCase
 from django.test.utils import override_settings
 from django.utils.translation import get_language, override, trans_real
@@ -2992,6 +2993,29 @@ class TestManager(ModeltranslationTestBase):
         assert list(models.TestModel.objects.all().values_list('title').annotate(Count('id'))) == [
             ('foo', 2)
         ]
+
+    def test_values_with_expressions(self):
+        manager = models.ManagerTestModel.objects
+        id1 = manager.create(title_en='en', title_de='de').pk
+
+        raw_obj = manager.raw_values('title', str_pk=Cast("pk", output_field=CharField()))[0]
+        obj = manager.values('title', str_pk=Cast("pk", output_field=CharField()))[0]
+        with override('de'):
+            raw_obj2 = manager.raw_values('title', str_pk=Cast("pk", output_field=CharField()))[0]
+            obj2 = manager.values('title', str_pk=Cast("pk", output_field=CharField()))[0]
+
+        # Raw_values returns real database values regardless of current language
+        assert raw_obj['title'] == raw_obj2['title']
+        assert raw_obj['str_pk'] == raw_obj2['str_pk']
+        # Values present language-aware data, from the moment of retrieval
+        assert obj['title'] == 'en'
+        assert obj['str_pk'] == str(id1)
+        assert obj2['title'] == 'de'
+
+        # Values_list behave similarly
+        assert list(manager.values_list('title', Cast("pk", output_field=CharField()))) == [('en', str(id1))]
+        with override('de'):
+            assert list(manager.values_list('title', Cast("pk", output_field=CharField()))) == [('de', str(id1))]
 
     def test_custom_manager(self):
         """Test if user-defined manager is still working"""
