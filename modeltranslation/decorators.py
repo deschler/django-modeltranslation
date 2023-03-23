@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 def register(model_or_iterable, **options):
     """
     Registers the given model(s) with the given translation options.
@@ -19,7 +16,7 @@ def register(model_or_iterable, **options):
 
     def wrapper(opts_class):
         if not issubclass(opts_class, TranslationOptions):
-            raise ValueError('Wrapped class must subclass TranslationOptions.')
+            raise ValueError("Wrapped class must subclass TranslationOptions.")
         translator.register(model_or_iterable, opts_class, **options)
         return opts_class
 

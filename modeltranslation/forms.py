@@ -17,6 +17,7 @@ class NullCharField(forms.CharField):
     """
     CharField subclass that returns ``None`` when ``CharField`` would return empty string.
     """
+
     def to_python(self, value):
         if value in validators.EMPTY_VALUES:
             return None
@@ -28,6 +29,7 @@ class NullableField(forms.Field):
     Form field mixin that ensures that ``None`` is not cast to anything (like
     the empty string with ``CharField`` and its derivatives).
     """
+
     def to_python(self, value):
         if value is None:
             return value

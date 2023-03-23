@@ -66,4 +66,9 @@ Using in combination with ``django-rest-framework``
 -------------------------------------------------
 When creating a new viewset , make sure to override ``get_queryset`` method, using ``queryset`` as a property won't work because it is being evaluated once, before any language was set.
 
+Translating ``ManyToManyField`` fields
+-------------------------------------------------
+Translated ``ManyToManyField`` fields do not support fallbacks. This is because the field descriptor returns a ``Manager`` when accessed. If falbacks were enabled we could find ourselves using the manager of a different language than the current one without realizing it. This can lead to using the ``.set()`` method on the wrong language.
+Due to this behavior the fallbacks on M2M fields have been disabled.
+
 .. _documentation: https://django-audit-log.readthedocs.io/

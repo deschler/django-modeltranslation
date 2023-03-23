@@ -21,7 +21,7 @@ It is not possible to reuse existing models without modifying them.
 
     A much simpler version of the above `django-multilingual`.
 
-It works very similiar to the `django-multilingual` approach.
+It works very similar to the `django-multilingual` approach.
 
 
 `transdb`_

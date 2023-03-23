@@ -8,19 +8,21 @@ Requirements
 
 Which Modeltranslation version is required for given Django-Python combination to work?
 
-======= ==== ==== ==== ==== ====
+======= ==== ==== ==== ==== ==== ==== ==== ==== ====
 Python  Django
-------- -----------------------------
-version 1.8  1.9  1.10 1.11 2.0  2.1
-======= ==== ==== ==== ==== ==== ====
+------- --------------------------------------- ----
+version 1.8  1.9  1.10 1.11 2.0  2.1  2.2  3.0  3.2
+======= ==== ==== ==== ==== ==== ==== ==== ==== ====
 2.7     |9|  |11| |12| |13|
 3.2     |9|
 3.3     |9|
 3.4     |9|  |11| |12| |13| |13|
 3.5     |9|  |11| |12| |13| |13| |13|
-3.6                    |13| |13| |13|
-3.7                         |13| |13|
-======= ==== ==== ==== ==== ==== ====
+3.6                    |13| |13| |13| |15| |15| |17|
+3.7                         |13| |13| |15| |15| |17|
+3.8                         |13| |13| |15| |15| |17|
+3.9                         |13| |13| |15| |15| |17|
+======= ==== ==== ==== ==== ==== ==== ==== ==== ====
 
 (``-X`` denotes "up to version X", whereas ``X+`` means "from version X upwards")
 
@@ -28,7 +30,8 @@ version 1.8  1.9  1.10 1.11 2.0  2.1
 .. |11| replace:: 0.11+
 .. |12| replace:: 0.12+
 .. |13| replace:: 0.13+
-
+.. |15| replace:: 0.15+
+.. |17| replace:: 0.17+
 
 Using Pip
 ---------
@@ -269,7 +272,7 @@ Example::
 
 Default: ``()`` (empty tuple)
 
-Modeltranslation uses an autoregister feature similiar to the one in Django's
+Modeltranslation uses an autoregister feature similar to the one in Django's
 admin. The autoregistration process will look for a ``translation.py``
 file in the root directory of each application that is in ``INSTALLED_APPS``.
 
@@ -295,7 +298,7 @@ Example::
     file which was defined through
     ``MODELTRANSLATION_TRANSLATION_REGISTRY = '<PROJECT_MODULE>.translation'``.
 
-    In version 0.4 and 0.5, for backwards compatibiliy, the module defined through this setting was
+    In version 0.4 and 0.5, for backwards compatibility, the module defined through this setting was
     automatically added to ``MODELTRANSLATION_TRANSLATION_FILES``. A
     ``DeprecationWarning`` was issued in this case.
 
@@ -374,17 +377,3 @@ Default: ``True``
 .. versionadded:: 0.6
 
 Control if :ref:`fallback <fallback>` (both language and value) will occur.
-
-
-.. _settings-modeltranslation_loaddata_retain_locale:
-
-``MODELTRANSLATION_LOADDATA_RETAIN_LOCALE``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Default: ``True``
-
-.. versionadded:: 0.7
-
-Control if the ``loaddata`` command should leave the settings-defined locale alone. Setting it
-to ``False`` will result in previous behaviour of ``loaddata``: inserting fixtures to database
-under ``en-us`` locale.

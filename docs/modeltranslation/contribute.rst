@@ -77,9 +77,6 @@ against our `Travis CI config`_, checking code against different databases,
 Python and Django versions. This includes automatic tracking of test coverage
 through `Coveralls`_.
 
-.. image:: http://img.shields.io/travis/deschler/django-modeltranslation/master.png?style=flat
-    :target: https://travis-ci.org/deschler/django-modeltranslation
-
 .. image:: http://img.shields.io/coveralls/deschler/django-modeltranslation.png?style=flat
     :target: https://coveralls.io/r/deschler/django-modeltranslation
 

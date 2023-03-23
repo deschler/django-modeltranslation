@@ -1,15 +1,20 @@
-# -*- coding: utf-8 -*-
-from django import VERSION
-from django import forms
+import copy
+from typing import Iterable
+
+from django import VERSION, forms
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import fields
-import six
 
 from modeltranslation import settings as mt_settings
+from modeltranslation.thread_context import fallbacks_enabled
 from modeltranslation.utils import (
-    get_language, build_localized_fieldname, build_localized_verbose_name, resolution_order)
+    build_localized_fieldname,
+    build_localized_intermediary_model,
+    build_localized_verbose_name,
+    get_language,
+    resolution_order,
+)
 from modeltranslation.widgets import ClearableWidgetWrapper
-
 
 SUPPORTED_FIELDS = (
     fields.CharField,
@@ -32,6 +37,7 @@ SUPPORTED_FIELDS = (
     fields.files.ImageField,
     fields.related.ForeignKey,
     # Above implies also OneToOneField
+    fields.related.ManyToManyField,
 )
 
 NEW_RELATED_API = VERSION >= (1, 9)
@@ -43,6 +49,7 @@ class NONE:
     given as a fallback or undefined value) or to mark that a nullable value
     is not yet known and needs to be computed (e.g. field default).
     """
+
     pass
 
 
@@ -64,8 +71,7 @@ def create_translation_field(model, field_name, lang, empty_value):
     field = model._meta.get_field(field_name)
     cls_name = field.__class__.__name__
     if not (isinstance(field, SUPPORTED_FIELDS) or cls_name in mt_settings.CUSTOM_FIELDS):
-        raise ImproperlyConfigured(
-            '%s is not supported by modeltranslation.' % cls_name)
+        raise ImproperlyConfigured('%s is not supported by modeltranslation.' % cls_name)
     translation_class = field_factory(field.__class__)
     return translation_class(translated_field=field, language=lang, empty_value=empty_value)
 
@@ -80,7 +86,7 @@ def field_factory(baseclass):
     return TranslationFieldSpecific
 
 
-class TranslationField(object):
+class TranslationField:
     """
     The translation field functions as a proxy to the original field which is
     wrapped.
@@ -98,6 +104,7 @@ class TranslationField(object):
     The translation field needs to know which language it contains therefore
     that needs to be specified when the field is created.
     """
+
     def __init__(self, translated_field, language, empty_value, *args, **kwargs):
         from modeltranslation.translator import translator
 
@@ -152,9 +159,53 @@ class TranslationField(object):
         # (will show up e.g. in the admin).
         self.verbose_name = build_localized_verbose_name(translated_field.verbose_name, language)
 
+        # M2M support - <rewrite related_name> <patch intermediary model>
+        if isinstance(self.translated_field, fields.related.ManyToManyField) and hasattr(
+            self.remote_field, "through"
+        ):
+            # Since fields cannot share the same remote_field object:
+            self.remote_field = copy.copy(self.remote_field)
+
+            # To support multiple relations to self, must provide a non null language scoped related_name
+            if self.remote_field.symmetrical and (
+                self.remote_field.model == "self"
+                or self.remote_field.model == self.model._meta.object_name
+                or self.remote_field.model == self.model
+            ):
+                self.remote_field.related_name = "%s_rel_+" % self.name
+            elif self.remote_field.is_hidden():
+                # Even if the backwards relation is disabled, django internally uses it, need to use a language scoped related_name
+                self.remote_field.related_name = "_%s_%s_+" % (
+                    self.model.__name__.lower(),
+                    self.name,
+                )
+            else:
+                # Default case with standard related_name must also include language scope
+                if self.remote_field.related_name is None:
+                    # For implicit related_name use different query field name
+                    loc_related_query_name = build_localized_fieldname(
+                        self.related_query_name(), self.language
+                    )
+                    self.related_query_name = lambda: loc_related_query_name
+                    self.remote_field.related_name = "%s_set" % (
+                        build_localized_fieldname(self.model.__name__.lower(), language),
+                    )
+                else:
+                    self.remote_field.related_name = build_localized_fieldname(
+                        self.remote_field.get_accessor_name(), language
+                    )
+
+            # Patch intermediary model with language scope to create correct db table
+            self.remote_field.through = build_localized_intermediary_model(
+                self.remote_field.through, language
+            )
+            self.remote_field.field = self
+
+            if hasattr(self.remote_field.model._meta, '_related_objects_cache'):
+                del self.remote_field.model._meta._related_objects_cache
+
         # ForeignKey support - rewrite related_name
-        if not NEW_RELATED_API and self.rel and self.related and not self.rel.is_hidden():
-            import copy
+        elif not NEW_RELATED_API and self.rel and self.related and not self.rel.is_hidden():
             current = self.related.get_accessor_name()
             self.rel = copy.copy(self.rel)  # Since fields cannot share the same rel object.
             # self.related doesn't need to be copied, as it will be recreated in
@@ -163,14 +214,14 @@ class TranslationField(object):
             if self.rel.related_name is None:
                 # For implicit related_name use different query field name
                 loc_related_query_name = build_localized_fieldname(
-                    self.related_query_name(), self.language)
+                    self.related_query_name(), self.language
+                )
                 self.related_query_name = lambda: loc_related_query_name
             self.rel.related_name = build_localized_fieldname(current, self.language)
-            self.rel.field = self  # Django 1.6
+            self.rel.field = self
             if hasattr(self.rel.to._meta, '_related_objects_cache'):
                 del self.rel.to._meta._related_objects_cache
         elif NEW_RELATED_API and self.remote_field and not self.remote_field.is_hidden():
-            import copy
             current = self.remote_field.get_accessor_name()
             # Since fields cannot share the same rel object:
             self.remote_field = copy.copy(self.remote_field)
@@ -178,10 +229,11 @@ class TranslationField(object):
             if self.remote_field.related_name is None:
                 # For implicit related_name use different query field name
                 loc_related_query_name = build_localized_fieldname(
-                    self.related_query_name(), self.language)
+                    self.related_query_name(), self.language
+                )
                 self.related_query_name = lambda: loc_related_query_name
             self.remote_field.related_name = build_localized_fieldname(current, self.language)
-            self.remote_field.field = self  # Django 1.6
+            self.remote_field.field = self
             if hasattr(self.remote_field.model._meta, '_related_objects_cache'):
                 del self.remote_field.model._meta._related_objects_cache
 
@@ -192,8 +244,9 @@ class TranslationField(object):
     # http://docs.python.org/2.7/reference/datamodel.html#object.__hash__
     def __eq__(self, other):
         if isinstance(other, fields.Field):
-            return (self.creation_counter == other.creation_counter and
-                    self.language == getattr(other, 'language', None))
+            return self.creation_counter == other.creation_counter and self.language == getattr(
+                other, 'language', None
+            )
         return super(TranslationField, self).__eq__(other)
 
     def __ne__(self, other):
@@ -229,15 +282,19 @@ class TranslationField(object):
         if isinstance(formfield, forms.CharField):
             if self.empty_value is None:
                 from modeltranslation.forms import NullCharField
+
                 form_class = formfield.__class__
                 kwargs['form_class'] = type(
-                    'Null%s' % form_class.__name__, (NullCharField, form_class), {})
+                    'Null%s' % form_class.__name__, (NullCharField, form_class), {}
+                )
                 formfield = super(TranslationField, self).formfield(*args, **kwargs)
             elif self.empty_value == 'both':
                 from modeltranslation.forms import NullableField
+
                 form_class = formfield.__class__
                 kwargs['form_class'] = type(
-                    'Nullable%s' % form_class.__name__, (NullableField, form_class), {})
+                    'Nullable%s' % form_class.__name__, (NullableField, form_class), {}
+                )
                 formfield = super(TranslationField, self).formfield(*args, **kwargs)
                 if isinstance(formfield.widget, (forms.TextInput, forms.Textarea)):
                     formfield.widget = ClearableWidgetWrapper(formfield.widget)
@@ -266,37 +323,24 @@ class TranslationField(object):
             kwargs.update({'null': True})
         if 'db_column' in kwargs:
             kwargs['db_column'] = self.db_column
-        return six.text_type(self.name), path, args, kwargs
+        return self.name, path, args, kwargs
 
     def clone(self):
         from django.utils.module_loading import import_string
+
         name, path, args, kwargs = self.deconstruct()
         cls = import_string(path)
         return cls(*args, **kwargs)
 
-    def south_field_triple(self):
-        """
-        Returns a suitable description of this field for South.
-        """
-        # We'll just introspect the _actual_ field.
-        from south.modelsinspector import introspector
-        try:
-            # Check if the field provides its own 'field_class':
-            field_class = self.translated_field.south_field_triple()[0]
-        except AttributeError:
-            field_class = '%s.%s' % (self.translated_field.__class__.__module__,
-                                     self.translated_field.__class__.__name__)
-        args, kwargs = introspector(self)
-        # That's our definition!
-        return (field_class, args, kwargs)
 
-
-class TranslationFieldDescriptor(object):
+class TranslationFieldDescriptor:
     """
     A descriptor used for the original translated field.
     """
-    def __init__(self, field, fallback_languages=None, fallback_value=NONE,
-                 fallback_undefined=NONE):
+
+    def __init__(
+        self, field, fallback_languages=None, fallback_value=NONE, fallback_undefined=NONE
+    ):
         """
         Stores fallback options and the original field, so we know it's name
         and default.
@@ -314,9 +358,10 @@ class TranslationFieldDescriptor(object):
         instance.__dict__[self.field.name] = value
         if isinstance(self.field, fields.related.ForeignKey):
             instance.__dict__[self.field.get_attname()] = None if value is None else value.pk
-        if getattr(instance, '_mt_init', False):
+        if getattr(instance, '_mt_init', False) or getattr(instance, '_mt_disable', False):
             # When assignment takes place in model instance constructor, don't set value.
             # This is essential for only/defer to work, but I think it's sensible anyway.
+            # Setting the localized field may also be disabled by setting _mt_disable.
             return
         loc_field_name = build_localized_fieldname(self.field.name, get_language())
         setattr(instance, loc_field_name, value)
@@ -327,7 +372,8 @@ class TranslationFieldDescriptor(object):
         """
         if isinstance(val, fields.files.FieldFile):
             return val.name and not (
-                isinstance(undefined, fields.files.FieldFile) and val == undefined)
+                isinstance(undefined, fields.files.FieldFile) and val == undefined
+            )
         return val is not None and val != undefined
 
     def __get__(self, instance, owner):
@@ -349,7 +395,7 @@ class TranslationFieldDescriptor(object):
             val = getattr(instance, loc_field_name, None)
             if self.meaningful_value(val, undefined):
                 return val
-        if mt_settings.ENABLE_FALLBACKS and self.fallback_value is not NONE:
+        if fallbacks_enabled() and self.fallback_value is not NONE:
             return self.fallback_value
         else:
             if default is NONE:
@@ -358,18 +404,20 @@ class TranslationFieldDescriptor(object):
             # instance of attr_class, but rather None or ''.
             # Normally this case is handled in the descriptor, but since we have overridden it, we
             # must mock it up.
-            if (isinstance(self.field, fields.files.FileField) and
-                    not isinstance(default, self.field.attr_class)):
+            if isinstance(self.field, fields.files.FileField) and not isinstance(
+                default, self.field.attr_class
+            ):
                 return self.field.attr_class(instance, self.field, default)
             return default
 
 
-class TranslatedRelationIdDescriptor(object):
+class TranslatedRelationIdDescriptor:
     """
     A descriptor used for the original '_id' attribute of a translated
     ForeignKey field.
     """
-    def __init__(self, field_name, fallback_languages):
+
+    def __init__(self, field_name: str, fallback_languages: Iterable[str]):
         self.field_name = field_name  # The name of the original field (excluding '_id')
         self.fallback_languages = fallback_languages
 
@@ -396,10 +444,32 @@ class TranslatedRelationIdDescriptor(object):
         return None
 
 
-class LanguageCacheSingleObjectDescriptor(object):
+class TranslatedManyToManyDescriptor:
+    """
+    A descriptor used to return correct related manager without language fallbacks.
+    """
+
+    def __init__(self, field_name, fallback_languages):
+        self.field_name = field_name  # The name of the original field
+        self.fallback_languages = fallback_languages
+
+    def __get__(self, instance, owner):
+        # TODO: do we really need to handle fallbacks with m2m relations?
+        loc_field_name = build_localized_fieldname(self.field_name, get_language())
+        loc_attname = (instance or owner)._meta.get_field(loc_field_name).get_attname()
+        return getattr((instance or owner), loc_attname)
+
+    def __set__(self, instance, value):
+        loc_field_name = build_localized_fieldname(self.field_name, get_language())
+        loc_attname = instance._meta.get_field(loc_field_name).get_attname()
+        setattr(instance, loc_attname, value)
+
+
+class LanguageCacheSingleObjectDescriptor:
     """
     A Mixin for RelatedObjectDescriptors which use current language in cache lookups.
     """
+
     accessor = None  # needs to be set on instance
 
     @property
@@ -413,6 +483,6 @@ class LanguageCacheSingleObjectDescriptor(object):
 
     def get_cache_name(self):
         """
-        Used in django 2.x
+        Used in django > 2.x
         """
         return build_localized_fieldname(self.accessor, get_language())

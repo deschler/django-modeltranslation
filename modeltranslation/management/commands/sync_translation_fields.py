@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Detect new translatable fields in all models and sync database structure.
 
@@ -13,7 +12,6 @@ from django import VERSION
 from django.core.management.base import BaseCommand
 from django.core.management.color import no_style
 from django.db import connection
-from six import moves
 
 from modeltranslation.settings import AVAILABLE_LANGUAGES
 from modeltranslation.translator import translator
@@ -27,7 +25,7 @@ def ask_for_confirmation(sql_sentences, model_full_name, interactive):
     while True:
         prompt = '\nAre you sure that you want to execute the previous SQL: (y/n) [n]: '
         if interactive:
-            answer = moves.input(prompt).strip()
+            answer = input(prompt).strip()
         else:
             answer = 'y'
         if answer == '':
@@ -41,25 +39,41 @@ def ask_for_confirmation(sql_sentences, model_full_name, interactive):
 
 
 def print_missing_langs(missing_langs, field_name, model_name):
-    print('Missing languages in "%s" field from "%s" model: %s' % (
-        field_name, model_name, ", ".join(missing_langs)))
+    print(
+        'Missing languages in "%s" field from "%s" model: %s'
+        % (field_name, model_name, ", ".join(missing_langs))
+    )
 
 
 class Command(BaseCommand):
-    help = ('Detect new translatable fields or new available languages and'
-            ' sync database structure. Does not remove columns of removed'
-            ' languages or undeclared fields.')
+    help = (
+        'Detect new translatable fields or new available languages and'
+        ' sync database structure. Does not remove columns of removed'
+        ' languages or undeclared fields.'
+    )
 
     if VERSION < (1, 8):
         from optparse import make_option
+
         option_list = BaseCommand.option_list + (
-            make_option('--noinput', action='store_false', dest='interactive', default=True,
-                        help='Do NOT prompt the user for input of any kind.'),
+            make_option(
+                '--noinput',
+                action='store_false',
+                dest='interactive',
+                default=True,
+                help='Do NOT prompt the user for input of any kind.',
+            ),
         )
     else:
+
         def add_arguments(self, parser):
-            parser.add_argument('--noinput', action='store_false', dest='interactive', default=True,
-                                help='Do NOT prompt the user for input of any kind.'),
+            parser.add_argument(
+                '--noinput',
+                action='store_false',
+                dest='interactive',
+                default=True,
+                help='Do NOT prompt the user for input of any kind.',
+            ),
 
     def handle(self, *args, **options):
         """
@@ -91,7 +105,8 @@ class Command(BaseCommand):
                     print_missing_langs(missing_langs, field_name, model_full_name)
                     sql_sentences = self.get_sync_sql(field_name, missing_langs, model)
                     execute_sql = ask_for_confirmation(
-                        sql_sentences, model_full_name, self.interactive)
+                        sql_sentences, model_full_name, self.interactive
+                    )
                     if execute_sql:
                         print('Executing SQL...')
                         for sentence in sql_sentences:
@@ -112,7 +127,7 @@ class Command(BaseCommand):
 
     def get_missing_languages(self, field_name, db_table):
         """
-        Gets only missings fields.
+        Gets only missing fields.
         """
         db_table_fields = self.get_table_fields(db_table)
         for lang_code in AVAILABLE_LANGUAGES:

@@ -23,9 +23,13 @@ command:
     $ python manage.py update_translation_fields
 
 Taken the news example used throughout the documentation this command will copy
-the value from the news object's ``title`` field to the default translation
-field ``title_de``. It only does so if the default translation field is empty
+the value from the news object's ``title`` field to the translation
+field ``title_de``. It only does so if the translation field is empty
 otherwise nothing is copied.
+
+On default, only the *default language* will have its translation field populated,
+but you can provide a ``--language`` option to specify any other language listed
+in ``settings.py``.
 
 .. note::
 
@@ -37,6 +41,16 @@ otherwise nothing is copied.
 All translated models (as specified in the translation files) from all apps will be
 populated with initial data.
 
+Optionally, an app label and model name may be passed to populate only a subset
+of translated models.
+
+.. code-block:: console
+
+    $ python manage.py update_translation_fields myapp
+
+.. code-block:: console
+
+    $ python manage.py update_translation_fields myapp mymodel
 
 .. _commands-sync_translation_fields:
 

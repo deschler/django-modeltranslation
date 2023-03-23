@@ -71,6 +71,13 @@ backward compatibility:
     padding: 0;
 }
 
+.ui-tabs .ui-tab-has-errors a::after {
+    content: "•";
+    color: #ba2121;
+    position: absolute;
+    font-size: 1.8rem;
+}
+
 .inline-group .tabular .ui-tabs .ui-tabs-panel {
     padding: 5px;
 }
