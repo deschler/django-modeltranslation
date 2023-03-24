@@ -73,6 +73,7 @@ def append_fallback(model, fields):
     from modeltranslation.translator import translator
     from modeltranslation.translator import NotRegistered
     from modeltranslation.utils import get_language, build_localized_fieldname
+
     fields = list(fields)
     trans = list()
     fields_append = fields.append
@@ -93,9 +94,7 @@ def append_fallback(model, fields):
                 model_field = rel_model._meta.get_field(part)
             except Exception:
                 break
-            field_model = getattr(
-                model_field, 'related_model', None
-            )
+            field_model = getattr(model_field, 'related_model', None)
             if field_model:
                 rel_model = field_model
                 rel_part = LOOKUP_SEP.join(parts)
@@ -103,18 +102,16 @@ def append_fallback(model, fields):
             else:
                 break
         if rel_model and rel_model != model:
-            rel_fields, rel_trans = append_fallback(
-                rel_model, [rel_part])
+            rel_fields, rel_trans = append_fallback(rel_model, [rel_part])
             if rel_trans:
-                not_changed_field_part = field[:-len(part)]
+                not_changed_field_part = field[: -len(part)]
                 fields_remove(field)
                 trans_append(field)
                 for rel_field in rel_fields:
                     fields_append(not_changed_field_part + rel_field)
     for key, _ in opts.fields.items():
         if key in fields:
-            langs = resolution_order(
-                get_language(), getattr(model, key).fallback_languages)
+            langs = resolution_order(get_language(), getattr(model, key).fallback_languages)
             index = fields_index(key)
             for lang in langs:
                 d = build_localized_fieldname(key, lang)
@@ -458,10 +455,7 @@ class MultilingualQuerySet(QuerySet):
             return super(MultilingualQuerySet, self)._values(*original, **kwargs)
         new_fields, translation_fields = append_fallback(self.model, original)
         annotation_keys = set(self.query.annotation_select.keys()) if selects_all else set()
-        new_fields.extend((
-            _field for _field in annotation_keys
-            if _field not in new_fields
-        ))
+        new_fields.extend((_field for _field in annotation_keys if _field not in new_fields))
         clone = super(MultilingualQuerySet, self)._values(*new_fields, **kwargs)
         clone.original_fields = tuple(original)
         clone.translation_fields = translation_fields
@@ -538,6 +532,7 @@ class FallbackValuesIterable(ValuesIterable):
 
     def __iter__(self):
         from django.db.models.constants import LOOKUP_SEP
+
         instance = self.X()
 
         fields = self.queryset.original_fields
@@ -563,10 +558,7 @@ class FallbackValuesIterable(ValuesIterable):
                     row[key] = descriptor.__get__(instance, None)
                     descriptor.field.name = old_name
                 else:
-                    row[key] = getattr(
-                        self.queryset.model, key).__get__(instance, None)
-            # for key in self.queryset.fields_to_del:
-            #     del row[key]
+                    row[key] = getattr(self.queryset.model, key).__get__(instance, None)
             yield {k: row[k] for k in fields}
 
 
