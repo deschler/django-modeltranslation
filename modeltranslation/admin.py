@@ -47,9 +47,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         return None
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        field = super(TranslationBaseModelAdmin, self).formfield_for_dbfield(
-            db_field, **kwargs
-        )
+        field = super(TranslationBaseModelAdmin, self).formfield_for_dbfield(db_field, **kwargs)
         self.patch_translation_field(db_field, field, **kwargs)
         return field
 
@@ -67,11 +65,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         except AttributeError:
             pass
         else:
-            orig_formfield = self.formfield_for_dbfield(
-                orig_field, **kwargs
-            )
-            # TODO: remove next 1 line
-            # orig_formfield = self.formfield_for_dbfield(orig_field, request, **kwargs)
+            orig_formfield = self.formfield_for_dbfield(orig_field, **kwargs)
             field.widget = deepcopy(orig_formfield.widget)
             attrs = field.widget.attrs
             # if any widget attrs are defined on the form they should be copied
