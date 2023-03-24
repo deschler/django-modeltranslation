@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # django-modeltranslation documentation build configuration file, created by
 # sphinx-quickstart on Wed Oct 17 10:26:58 2012.
 #
@@ -18,27 +16,17 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 try:
-    import modeltranslation
+    from importlib.metadata import version
     # The version info for the project you're documenting, acts as replacement
     # for |version| and |release|, also used in various other places throughout
     # the built documents.
     #
-    # The short X.Y version (e.g.'0.5').
-    version = '.'.join(str(i) for i in modeltranslation.VERSION[:2])
     # The full PEP386-compliant version number version, including
     # normalized alpha/beta/rc/dev tags (e.g. '0.5a1').
-    try:
-        # FIXME: Can we make this work on services like read-the-docs?
-        # The build script on rtf bails out early with:
-        #
-        #     Failed to import project; skipping build.
-        #     Please make sure your repo is correct and you have a conf.py
-        #
-        release = modeltranslation.get_version()
-    except:
-        # We are broad here with the exception handling because we don't know
-        # the environment we build on.
-        release = version
+    release = version("django-modeltranslation")
+
+    # The short X.Y version (e.g.'0.5').
+    version = '.'.join(i for i in release.split('.')[:2])
 except ImportError:
     version = 'dev'
     release = 'dev'

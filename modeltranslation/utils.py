@@ -1,13 +1,16 @@
-# -*- coding: utf-8 -*-
 from contextlib import contextmanager
 
-import six
+from django.db import models
 from django.utils.encoding import force_str
 from django.utils.translation import get_language as _get_language
 from django.utils.translation import get_language_info
 from django.utils.functional import lazy
-
 from modeltranslation import settings
+from modeltranslation.thread_context import (
+    set_auto_populate,
+    set_enable_fallbacks,
+    fallbacks_enabled,
+)
 
 
 def get_language():
@@ -37,7 +40,7 @@ def get_translation_fields(field):
     """
     Returns a list of localized fieldnames for a given field.
     """
-    return [build_localized_fieldname(field, l) for l in settings.AVAILABLE_LANGUAGES]
+    return [build_localized_fieldname(field, lang) for lang in settings.AVAILABLE_LANGUAGES]
 
 
 def build_localized_fieldname(field_name, lang):
@@ -52,19 +55,21 @@ def _build_localized_verbose_name(verbose_name, lang):
     if lang == 'id':
         lang = 'ind'
     return force_str('%s [%s]') % (force_str(verbose_name), lang)
-build_localized_verbose_name = lazy(_build_localized_verbose_name, six.text_type)
+
+
+build_localized_verbose_name = lazy(_build_localized_verbose_name, str)
 
 
 def _join_css_class(bits, offset):
     if '-'.join(bits[-offset:]) in settings.AVAILABLE_LANGUAGES + ['en-us']:
-        return '%s-%s' % ('_'.join(bits[:len(bits) - offset]), '_'.join(bits[-offset:]))
+        return '%s-%s' % ('_'.join(bits[: len(bits) - offset]), '_'.join(bits[-offset:]))
     return ''
 
 
 def build_css_class(localized_fieldname, prefix=''):
     """
     Returns a css class based on ``localized_fieldname`` which is easily
-    splitable and capable of regionalized language codes.
+    splittable and capable of regionalized language codes.
 
     Takes an optional ``prefix`` which is prepended to the returned string.
     """
@@ -112,8 +117,9 @@ def resolution_order(lang, override=None):
     First is always the parameter language, later are fallback languages.
     Override parameter has priority over FALLBACK_LANGUAGES.
     """
-    if not settings.ENABLE_FALLBACKS:
+    if not fallbacks_enabled():
         return (lang,)
+
     if override is None:
         override = {}
     fallback_for_lang = override.get(lang, settings.FALLBACK_LANGUAGES.get(lang, ()))
@@ -141,12 +147,11 @@ def auto_populate(mode='all'):
         with auto_populate('required'):
             call_command('loaddata', 'fixture.json')
     """
-    current_population_mode = settings.AUTO_POPULATE
-    settings.AUTO_POPULATE = mode
+    set_auto_populate(mode)
     try:
         yield
     finally:
-        settings.AUTO_POPULATE = current_population_mode
+        set_auto_populate(None)
 
 
 @contextmanager
@@ -163,12 +168,11 @@ def fallbacks(enable=True):
     processing or check if there is a value for the current language (not
     knowing the language)
     """
-    current_enable_fallbacks = settings.ENABLE_FALLBACKS
-    settings.ENABLE_FALLBACKS = enable
+    set_enable_fallbacks(enable)
     try:
         yield
     finally:
-        settings.ENABLE_FALLBACKS = current_enable_fallbacks
+        set_enable_fallbacks(None)
 
 
 def parse_field(setting, field_name, default):
@@ -179,3 +183,45 @@ def parse_field(setting, field_name, default):
         return setting.get(field_name, default)
     else:
         return setting
+
+
+def build_localized_intermediary_model(intermediary_model: models.Model, lang: str) -> models.Model:
+    from modeltranslation.translator import translator
+
+    meta = type(
+        "Meta",
+        (),
+        {
+            "db_table": build_localized_fieldname(intermediary_model._meta.db_table, lang),
+            "auto_created": intermediary_model._meta.auto_created,
+            "app_label": intermediary_model._meta.app_label,
+            "db_tablespace": intermediary_model._meta.db_tablespace,
+            "unique_together": intermediary_model._meta.unique_together,
+            "verbose_name": build_localized_verbose_name(
+                intermediary_model._meta.verbose_name, lang
+            ),
+            "verbose_name_plural": build_localized_verbose_name(
+                intermediary_model._meta.verbose_name_plural, lang
+            ),
+            "apps": intermediary_model._meta.apps,
+        },
+    )
+    klass = type(
+        build_localized_fieldname(intermediary_model.__name__, lang),
+        (models.Model,),
+        {
+            **{k: v for k, v in dict(intermediary_model.__dict__).items() if k != "_meta"},
+            **{f.name: f.clone() for f in intermediary_model._meta.fields},
+            "Meta": meta,
+        },
+    )
+
+    def lazy_register_model(old_model, new_model, translator):
+        cls_opts = translator._get_options_for_model(old_model)
+        if cls_opts.registered and new_model not in translator._registry:
+            name = "%sTranslationOptions" % new_model.__name__
+            translator.register(new_model, type(name, (cls_opts.__class__,), {}))
+
+    translator.lazy_operation(lazy_register_model, intermediary_model, klass)
+
+    return klass

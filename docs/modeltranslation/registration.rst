@@ -4,7 +4,7 @@ Registering Models for Translation
 ==================================
 
 Modeltranslation can translate model fields of any model class. For each model
-to translate a translation option class containing the fields to translate is
+to translate, a translation option class containing the fields to translate is
 registered with a special object called the ``translator``.
 
 Registering models and their fields for translation requires the following
@@ -16,7 +16,7 @@ steps:
    ``modeltranslation.translator.translator``.
 
 The modeltranslation application reads the ``translation.py`` file in your
-app directory thereby triggering the registration of the translation
+app directory, thereby triggering the registration of the translation
 options found in the file.
 
 A translation option is a class that declares which fields of a model to
@@ -25,7 +25,7 @@ translate. The class must derive from
 ``fields`` attribute storing the list of fieldnames. The option class must be
 registered with the ``modeltranslation.translator.translator`` instance.
 
-To illustrate this let's have a look at a simple example using a ``News``
+To illustrate this, let's have a look at a simple example using a ``News``
 model. The news in this example only contains a ``title`` and a ``text`` field.
 Instead of a news, this could be any Django model class::
 
@@ -38,10 +38,10 @@ create a ``translation.py`` file in your news app directory and add the
 following::
 
     from modeltranslation.translator import translator, TranslationOptions
-    from news.models import News
+    from .models import News
 
     class NewsTranslationOptions(TranslationOptions):
-        fields = ('title', 'text',)
+        fields = ('title', 'text')
 
     translator.register(News, NewsTranslationOptions)
 
@@ -77,7 +77,34 @@ explains how things are working under the hood.
 .. versionadded:: 0.5
 
 A subclass of any ``TranslationOptions`` will inherit fields from its bases
-(similar to the way Django models inherit fields, but with a different syntax). ::
+(similar to the way Django models inherit fields, but with a different syntax).
+When dealing with abstract base classes, this can be handy::
+
+    from modeltranslation.translator import translator, TranslationOptions
+    from news.models import News, NewsWithImage
+
+    class AbstractNewsTranslationOptions(TranslationOptions):
+        fields = ('title', 'text',)
+
+    class NewsWithImageTranslationOptions(AbstractNewsTranslationOptions):
+        fields = ('image',)
+
+    translator.register(News, NewsTranslationOptions)
+    translator.register(NewsWithImage, NewsWithImageTranslationOptions)
+
+The above example adds the fields ``title`` and ``text`` from the
+``AbstractNewsTranslationOptions`` class to ``NewsWithImageTranslationOptions``, or to
+say it in code::
+
+    assert NewsWithImageTranslationOptions.fields == ('title', 'text', 'image')
+
+Of course multiple inheritance and inheritance chains (A > B > C) also work as
+expected.
+
+However, if the base class is not abstract, inheriting the ``TranslationOptions`` will 
+cause errors, because the base ``TranslationOptions`` already took care of adding 
+fields to the model. The example below illustrates how to add translation fields to a 
+child model with a non-abstract base::
 
     from modeltranslation.translator import translator, TranslationOptions
     from news.models import News, NewsWithImage
@@ -85,20 +112,15 @@ A subclass of any ``TranslationOptions`` will inherit fields from its bases
     class NewsTranslationOptions(TranslationOptions):
         fields = ('title', 'text',)
 
-    class NewsWithImageTranslationOptions(NewsTranslationOptions):
+    class NewsWithImageTranslationOptions(TranslationOptions):
         fields = ('image',)
 
     translator.register(News, NewsTranslationOptions)
     translator.register(NewsWithImage, NewsWithImageTranslationOptions)
 
-The above example adds the fields ``title`` and ``text`` from the
-``NewsTranslationOptions`` class to ``NewsWithImageTranslationOptions``, or to
-say it in code::
 
-    assert NewsWithImageTranslationOptions.fields == ('title', 'text', 'image')
-
-Of course multiple inheritance and inheritance chains (A > B > C) also work as
-expected.
+This will add the translated fields ``title`` and ``text`` to the ``News`` model and further add 
+the translated field ``image`` to the ``NewsWithImage`` model.
 
 .. note:: When upgrading from a previous modeltranslation version (<0.5), please
     review your ``TranslationOptions`` classes and see if introducing `fields
@@ -134,7 +156,7 @@ are not declared in the original ``News`` model class but rather have been
 added by the modeltranslation app. These are called *translation fields*. There
 will be one for every language in your project's ``settings.py``.
 
-The name of these additional fields is build using the original name of the
+The names of these additional fields are built using the original name of the
 translated field and appending one of the language identifiers found in the
 ``settings.LANGUAGES``.
 
@@ -183,13 +205,12 @@ fields) and apply it. If not, you can use a little helper:
 :ref:`commands-sync_translation_fields` which can execute schema-ALTERing SQL
 to add new fields. Use either of these two solutions, not both.
 
-If you are adding translation fields to a third-party app that is using South,
+If you are adding translation fields to a third-party app,
 things get more complicated. In order to be able to update the app in the future,
 and to feel comfortable, you should use the ``sync_translation_fields`` command.
 Although it's possible to introduce new fields in a migration, it's nasty and
-involves copying migration files, using ``SOUTH_MIGRATION_MODULES`` setting,
-and passing ``--delete-ghost-migrations`` flag, so we don't recommend it.
-Invoking ``sync_translation_fields`` is plain easier.
+involves copying migration files, using ``MIGRATION_MODULES`` setting,
+so we don't recommend it. Invoking ``sync_translation_fields`` is plain easier.
 
 Note that all added fields are by default declared ``blank=True`` and
 ``null=True`` no matter if the original field is required or not. In other

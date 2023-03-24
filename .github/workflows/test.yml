@@ -1,0 +1,101 @@
+# Docs:
+#  - https://docs.github.com/en/actions/guides/about-service-containers
+# Example
+#  - https://github.com/actions/example-services/blob/main/.github/workflows/postgres-service.yml
+name: CI
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+jobs:
+  Check:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    strategy:
+      matrix:
+        python: ["3.10"]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install linters
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 black
+      - name: Run linters
+        run: |
+          flake8 modeltranslation
+          black --check modeltranslation *.py
+      - name: Test package install
+        run: |
+          python -m pip install --upgrade pip
+          python setup.py sdist
+          pip install dist/*
+
+  Test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.8", "3.9", "3.10"]
+        django: ["3.2", "4.0"]
+        database: ["sqlite", "postgres", "mysql"]
+        include:
+          - python: "3.7"
+            django: "3.2"
+            database: "postgres"
+          - python: "3.7"
+            django: "3.2"
+            database: "postgres"
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      DJANGO: ${{ matrix.django }}
+      DB: ${{ matrix.database }}
+      DB_HOST: 127.0.0.1
+      MYSQL_DATABASE: "modeltranslation"
+      MYSQL_USER: "root"
+      MYSQL_PASSWORD: "password"
+      POSTGRES_DB: "modeltranslation"
+      POSTGRES_USER: "modeltranslation"
+      POSTGRES_PASSWORD: "modeltranslation"
+    services:
+      mariadb:
+        image: mariadb
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_DATABASE: "modeltranslation"
+          MYSQL_USER: "modeltranslation"
+          MYSQL_PASSWORD: "password"
+          MYSQL_ROOT_PASSWORD: "password"
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+      postgres:
+        image: postgres
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+        env:
+          POSTGRES_DB: "modeltranslation"
+          POSTGRES_USER: "modeltranslation"
+          POSTGRES_PASSWORD: "modeltranslation"
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Set up env
+        run: |
+          if [[ $DB == mysql ]]; then
+            pip install -q mysqlclient
+          fi
+          if [[ $DB == postgres ]]; then
+            pip install -q psycopg2-binary
+          fi
+          pip install typing-extensions coverage pytest pytest-django pytest-cov $(./get-django-version.py ${{ matrix.django }})
+      - name: Run tests
+        run: |
+          pytest --cov-report term

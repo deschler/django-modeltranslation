@@ -1,0 +1,11 @@
+{
+  "host": "github.com",
+  "owner": "deschler",
+  "repository": "django-modeltranslation",
+  "bumpFiles": [
+    {
+      "filename": "VERSION",
+      "type": "plain-text"
+    }
+  ]
+}

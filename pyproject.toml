@@ -1,0 +1,34 @@
+[tool.poetry]
+name = "django-modeltranslation"
+version = "0.16.1"
+description = "Translates Django models using a registration approach."
+authors = ["Peter Eschler <peschler@gmail.com>"]
+maintainers = ["Serhii Tereshchenko <serg.partizan@gmail.com>"]
+packages = [
+    { include = "modeltranslation" },
+]
+
+[tool.poetry.dependencies]
+python = ">=3.7,<4"
+django = ">=3.2"
+typing-extensions = "*"
+
+[tool.poetry.dev-dependencies]
+pdbpp = "*"
+flake8 = "*"
+black = "*"
+pytest-cov = "*"
+pytest = "*"
+pytest-sugar = "*"
+pytest-django = "*"
+django-types = "*"
+
+[tool.black]
+line-length = 100
+skip-string-normalization = true
+
+[tool.isort]
+line_length = 100
+multi_line_output = 3
+skip_gitignore = true
+include_trailing_comma = true
