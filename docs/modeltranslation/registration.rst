@@ -129,7 +129,7 @@ the translated field ``image`` to the ``NewsWithImage`` model.
 
 .. versionadded:: 0.19.0
 
-If you need to specify the translation options available for each model, you can do so using the ``languages``
+If you need to specify the languages available for each model, you can do so using the ``languages``
 argument::
 
     from modeltranslation.translator import translator, TranslationOptions
