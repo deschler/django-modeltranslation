@@ -157,7 +157,9 @@ def add_translation_fields(model, opts):
     model_empty_values = getattr(opts, 'empty_values', NONE)
     for field_name in opts.local_fields.keys():
         field_empty_value = parse_field(model_empty_values, field_name, NONE)
-        for lang in mt_settings.AVAILABLE_LANGUAGES:
+
+        model_available_languages = getattr(opts, 'languages', mt_settings.AVAILABLE_LANGUAGES)
+        for lang in model_available_languages:
             # Create a dynamic translation field
             translation_field = create_translation_field(
                 model=model, field_name=field_name, lang=lang, empty_value=field_empty_value
@@ -217,13 +219,13 @@ def patch_manager_class(manager):
             def __eq__(self, other):
                 if isinstance(other, NewMultilingualManager):
                     return (
-                        self._old_module == other._old_module
-                        and self._old_class == other._old_class
+                            self._old_module == other._old_module
+                            and self._old_class == other._old_class
                     )
                 if hasattr(other, "__module__") and hasattr(other, "__class__"):
                     return (
-                        self._old_module == other.__module__
-                        and self._old_class == other.__class__.__name__
+                            self._old_module == other.__module__
+                            and self._old_class == other.__class__.__name__
                     )
                 return False
 
@@ -663,7 +665,6 @@ class Translator(object):
 
 # This global object represents the singleton translator object
 translator = Translator()
-
 
 # Re-export the decorator for convenience
 from modeltranslation.decorators import register  # NOQA re-export
