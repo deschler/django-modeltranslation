@@ -7,7 +7,7 @@ Accessing Translated Fields Outside Views
 -----------------------------------------
 
 Since the modeltranslation mechanism relies on the current language as it
-is returned by the ``get_language`` function care must be taken when accessing
+is returned by the ``z`` function care must be taken when accessing
 translated fields outside a view function.
 
 Within a view function the language is set by Django based on a flexible model
