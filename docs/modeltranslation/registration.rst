@@ -153,7 +153,7 @@ In this case, for the ``News`` model, translations will be available in the lang
 For the ``NewsWithImage`` model, since the ``languages`` argument was not passed, the value from
 ``settings.MODELTRANSLATION_LANGUAGES`` will be used.
 
-Also, if you wish, you can pass the ``languages`` argument in the ``@register`` decorator::
+Also, if you wish, you can pass the ``languages`` argument in the ``register`` decorator::
 
     from modeltranslation.translator import register, TranslationOptions
     from news.models import News
