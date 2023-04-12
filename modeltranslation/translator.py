@@ -157,7 +157,8 @@ def add_translation_fields(model, opts):
     model_empty_values = getattr(opts, 'empty_values', NONE)
     for field_name in opts.local_fields.keys():
         field_empty_value = parse_field(model_empty_values, field_name, NONE)
-        for lang in mt_settings.AVAILABLE_LANGUAGES:
+        available_languages = getattr(opts, 'languages', mt_settings.AVAILABLE_LANGUAGES)
+        for lang in available_languages:
             # Create a dynamic translation field
             translation_field = create_translation_field(
                 model=model, field_name=field_name, lang=lang, empty_value=field_empty_value
@@ -663,7 +664,6 @@ class Translator(object):
 
 # This global object represents the singleton translator object
 translator = Translator()
-
 
 # Re-export the decorator for convenience
 from modeltranslation.decorators import register  # NOQA re-export
