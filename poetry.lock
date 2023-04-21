@@ -451,8 +451,6 @@ category = "dev"
 optional = false
 python-versions = "*"
 files = [
-    {file = "pyreadline-2.1.win-amd64.exe", hash = "sha256:9ce5fa65b8992dfa373bddc5b6e0864ead8f291c94fbfec05fbd5c836162e67b"},
-    {file = "pyreadline-2.1.win32.exe", hash = "sha256:65540c21bfe14405a3a77e4c085ecfce88724743a4ead47c66b84defcf82c32e"},
     {file = "pyreadline-2.1.zip", hash = "sha256:4530592fc2e85b25b1a9f79664433da09237c1a270e4d78ea5aa3a2c7229e2d1"},
 ]
 
@@ -561,15 +559,20 @@ files = [
 
 [[package]]
 name = "sqlparse"
-version = "0.4.3"
+version = "0.4.4"
 description = "A non-validating SQL parser."
 category = "main"
 optional = false
 python-versions = ">=3.5"
 files = [
-    {file = "sqlparse-0.4.3-py3-none-any.whl", hash = "sha256:0323c0ec29cd52bceabc1b4d9d579e311f3e4961b98d174201d5622a23b85e34"},
-    {file = "sqlparse-0.4.3.tar.gz", hash = "sha256:69ca804846bb114d2ec380e4360a8a340db83f0ccf3afceeb1404df028f57268"},
+    {file = "sqlparse-0.4.4-py3-none-any.whl", hash = "sha256:5430a4fe2ac7d0f93e66f1efc6e1338a41884b7ddf2a350cedd20ccc4d9d28f3"},
+    {file = "sqlparse-0.4.4.tar.gz", hash = "sha256:d446183e84b8349fa3061f0fe7f06ca94ba65b426946ffebe6e3e8295332420c"},
 ]
+
+[package.extras]
+dev = ["build", "flake8"]
+doc = ["sphinx"]
+test = ["pytest", "pytest-cov"]
 
 [[package]]
 name = "termcolor"
