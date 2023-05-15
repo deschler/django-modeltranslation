@@ -524,3 +524,24 @@ class ModelY(AbstractModelY):
 
 class InheritedPermission(Permission):
     translated_var = models.CharField(max_length=255)
+
+
+# Model for special language
+
+
+class SpecificLanguageModelRegisterX(models.Model):
+    title = models.CharField(max_length=255)
+    text = models.TextField(blank=True, null=True)
+
+
+class SpecificLanguageModelRegisterY(models.Model):
+    title = models.CharField(max_length=255)
+    text = models.TextField(blank=True, null=True)
+
+
+class SpecificLanguageModelX(SpecificLanguageModelRegisterX):
+    slug = models.SlugField(blank=True, null=True)
+
+
+class SpecificLanguageModelY(SpecificLanguageModelX):
+    slug = models.SlugField(blank=True, null=True)
