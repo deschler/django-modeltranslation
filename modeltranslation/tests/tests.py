@@ -2520,9 +2520,9 @@ class TranslationAdminTest(ModeltranslationTestBase):
     def test_build_css_class(self):
         with reload_override_settings(
             LANGUAGES=(
-                    ('de', 'German'),
-                    ('en', 'English'),
-                    ('es-ar', 'Argentinian Spanish'),
+                ('de', 'German'),
+                ('en', 'English'),
+                ('es-ar', 'Argentinian Spanish'),
             )
         ):
             fields = {
