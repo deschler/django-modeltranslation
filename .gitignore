@@ -34,5 +34,3 @@ nosetests.xml
 
 # Sphinx
 _build
-.idea
-venv
