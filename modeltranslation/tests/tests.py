@@ -1026,12 +1026,12 @@ class ManyToManyFieldsTest(ModeltranslationTestBase):
 
         field = meta.get_field('self_call_1_en')
         assert (
-                field.remote_field.through._meta.db_table == "tests_manytomanyfieldmodel_self_call_1_en"
+            field.remote_field.through._meta.db_table == "tests_manytomanyfieldmodel_self_call_1_en"
         )
 
         field = meta.get_field('self_call_1_de')
         assert (
-                field.remote_field.through._meta.db_table == "tests_manytomanyfieldmodel_self_call_1_de"
+            field.remote_field.through._meta.db_table == "tests_manytomanyfieldmodel_self_call_1_de"
         )
 
         field = meta.get_field('through_model')
@@ -1102,8 +1102,8 @@ class ManyToManyFieldsTest(ModeltranslationTestBase):
 
         inst.self_call_1.set(self_qs_2)
         assert (
-                inst.self_call_1.filter(pk__in=self_qs_2.values_list("pk", flat=True)).count()
-                == self_qs_2.count()
+            inst.self_call_1.filter(pk__in=self_qs_2.values_list("pk", flat=True)).count()
+            == self_qs_2.count()
         )
 
         trans_real.activate("de")
@@ -1134,24 +1134,24 @@ class ManyToManyFieldsTest(ModeltranslationTestBase):
         assert manager.filter(test_de__in=testmodel_qs_1).distinct().count() == 1
 
         assert (
-                manager.filter(through_model__title__in=testmodel_qs_2.values_list("title", flat=True))
-                .distinct()
-                .count()
-                == 1
+            manager.filter(through_model__title__in=testmodel_qs_2.values_list("title", flat=True))
+            .distinct()
+            .count()
+            == 1
         )
         assert (
-                manager.filter(
-                    through_model_en__title__in=testmodel_qs_2.values_list("title", flat=True)
-                ).count()
-                == 0
+            manager.filter(
+                through_model_en__title__in=testmodel_qs_2.values_list("title", flat=True)
+            ).count()
+            == 0
         )
         assert (
-                manager.filter(
-                    through_model_de__title__in=testmodel_qs_2.values_list("title", flat=True)
-                )
-                .distinct()
-                .count()
-                == 1
+            manager.filter(
+                through_model_de__title__in=testmodel_qs_2.values_list("title", flat=True)
+            )
+            .distinct()
+            .count()
+            == 1
         )
 
         assert manager.filter(self_call_2__in=self_qs_1).distinct().count() == 1
@@ -2422,8 +2422,8 @@ class TranslationAdminTest(ModeltranslationTestBase):
         for field in fields:
             assert 'myprop' in ma.get_form(request).base_fields.get(field).widget.attrs.keys()
             assert (
-                    'myval'
-                    in ma.get_form(request, self.test_obj).base_fields.get(field).widget.attrs.values()
+                'myval'
+                in ma.get_form(request, self.test_obj).base_fields.get(field).widget.attrs.values()
             )
 
     def test_widget_ordering_via_formfield_for_dbfield(self):
@@ -2446,8 +2446,8 @@ class TranslationAdminTest(ModeltranslationTestBase):
         for field in fields:
             assert 'myprop' in ma.get_form(request).base_fields.get(field).widget.attrs.keys()
             assert (
-                    'myval'
-                    in ma.get_form(request, self.test_obj).base_fields.get(field).widget.attrs.values()
+                'myval'
+                in ma.get_form(request, self.test_obj).base_fields.get(field).widget.attrs.values()
             )
 
     def test_widget_classes_appended_by_formfield_for_dbfield(self):
@@ -2519,11 +2519,11 @@ class TranslationAdminTest(ModeltranslationTestBase):
 
     def test_build_css_class(self):
         with reload_override_settings(
-                LANGUAGES=(
-                        ('de', 'German'),
-                        ('en', 'English'),
-                        ('es-ar', 'Argentinian Spanish'),
-                )
+            LANGUAGES=(
+                    ('de', 'German'),
+                    ('en', 'English'),
+                    ('es-ar', 'Argentinian Spanish'),
+            )
         ):
             fields = {
                 'foo_en': 'foo-en',
@@ -2677,6 +2677,7 @@ class TranslationAdminTest(ModeltranslationTestBase):
 
         # Prepopulation language can be overriden by MODELTRANSLATION_PREPOPULATE_LANGUAGE
         with reload_override_settings(MODELTRANSLATION_PREPOPULATE_LANGUAGE='de'):
+
             class NameModelAdmin(admin.TranslationAdmin):
                 prepopulated_fields = {'slug': ('firstname',)}
 
@@ -2970,8 +2971,8 @@ class TestManager(ModeltranslationTestBase):
         # custom annotation
         assert list(manager.filter(id=id1).annotate(custom_id=F('id')).values_list())[0][-1] == id1
         assert (
-                list(manager.filter(id=id1).annotate(custom_id=F('id')).values())[0].get('custom_id')
-                == id1
+            list(manager.filter(id=id1).annotate(custom_id=F('id')).values())[0].get('custom_id')
+            == id1
         )
 
         # custom annotation with fields specified
@@ -2979,10 +2980,10 @@ class TestManager(ModeltranslationTestBase):
             id1,
         )
         assert (
-                list(manager.filter(id=id1).annotate(custom_id=F('id')).values('id'))[0].get(
-                    'custom_id'
-                )
-                is None
+            list(manager.filter(id=id1).annotate(custom_id=F('id')).values('id'))[0].get(
+                'custom_id'
+            )
+            is None
         )
 
     def test_values_list_annotation(self):
@@ -3349,8 +3350,8 @@ class TestManager(ModeltranslationTestBase):
         assert 'untrans' not in fk_qs[0]._state.fields_cache
         assert 'untrans' in fk_qs.select_related('untrans')[0]._state.fields_cache
         assert (
-                'untrans'
-                not in fk_qs.select_related('untrans').select_related(None)[0]._state.fields_cache
+            'untrans'
+            not in fk_qs.select_related('untrans').select_related(None)[0]._state.fields_cache
         )
         # untrans is nullable so not included when select_related=True
         assert 'untrans' not in fk_qs.select_related()[0]._state.fields_cache
