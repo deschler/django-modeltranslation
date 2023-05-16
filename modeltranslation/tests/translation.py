@@ -208,9 +208,11 @@ translator.register(models.RichText, RichTextTranslationOptions)
 translator.register(models.Displayable)
 translator.register(models.Page, PageTranslationOptions)
 translator.register(models.RichTextPage)
-translator.register(models.SpecificLanguageModelX, SpecificLanguageTranslationOptionsX, languages=['de', 'en'])
 translator.register(
-    models.SpecificLanguageModelY, SpecificLanguageTranslationOptionsY, languages=['de']
+    models.SpecificLanguageModelX, SpecificLanguageTranslationOptionsX, languages=['de', 'en']
+)
+translator.register(
+    models.SpecificLanguageModelY, SpecificLanguageTranslationOptionsY, languages=['en']
 )
 
 
@@ -334,6 +336,6 @@ class SpecificLanguageTranslationOptionsX(TranslationOptions):
     languages = ['de', 'en']
 
 
-@register(models.SpecificLanguageModelRegisterY, languages=['de'])
+@register(models.SpecificLanguageModelRegisterY, languages=['en'])
 class SpecificLanguageTranslationOptionsY(TranslationOptions):
     fields = ('slug',)

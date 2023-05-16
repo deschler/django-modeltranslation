@@ -3620,13 +3620,13 @@ class SpecificLanguageModel:
         assert 0 == y_baz.count()
 
     def test_register_decorator(self):
-        models.SpecificLanguageModelY.objects.create(title_de="foo", text="bar")
-        models.SpecificLanguageModelY.objects.create(title_de="foo")
+        models.SpecificLanguageModelY.objects.create(title_en="foo", text="bar")
+        models.SpecificLanguageModelY.objects.create(title_en="foo")
 
-        y_foo = models.SpecificLanguageModelY.objects.filter(title_de="foo")
+        y_foo = models.SpecificLanguageModelY.objects.filter(title_en="foo")
         assert 2 == y_foo.count()
 
-        y_baz = models.SpecificLanguageModelY.objects.filter(title_de="baz")
+        y_baz = models.SpecificLanguageModelY.objects.filter(title_en="baz")
         assert 0 == y_baz.count()
 
     def test_class_files_translator_register(self):
@@ -3642,11 +3642,11 @@ class SpecificLanguageModel:
         assert 0 == y_baz.count()
 
     def test_translator_register(self):
-        models.SpecificLanguageModelRegisterY.objects.create(slug_de="foo", text="bar")
-        models.SpecificLanguageModelRegisterY.objects.create(slug_de="foo")
+        models.SpecificLanguageModelRegisterY.objects.create(slug_en="foo", text="bar")
+        models.SpecificLanguageModelRegisterY.objects.create(slug_en="foo")
 
-        y_foo = models.SpecificLanguageModelRegisterY.objects.filter(slug_de="foo")
+        y_foo = models.SpecificLanguageModelRegisterY.objects.filter(slug_en="foo")
         assert 2 == y_foo.count()
 
-        y_baz = models.SpecificLanguageModelRegisterY.objects.filter(slug_de="baz")
+        y_baz = models.SpecificLanguageModelRegisterY.objects.filter(slug_en="baz")
         assert 0 == y_baz.count()
