@@ -46,7 +46,7 @@ INSTALLED_APPS = (
     'modeltranslation.tests',
 )
 
-LANGUAGES = (('de', 'Deutsch'), ('en', 'English'))
+LANGUAGES = (('de', 'Deutsch'), ('en', 'English'), ('uk', 'Ukrainian'))
 LANGUAGE_CODE = 'de'
 
 USE_I18N = True
