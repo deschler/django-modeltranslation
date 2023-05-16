@@ -76,7 +76,6 @@ class TranslationOptions(metaclass=FieldsAggregationMetaClass):
     """
 
     required_languages = ()
-
     def __init__(self, model):
         """
         Create fields dicts without any translation fields.
@@ -664,6 +663,7 @@ class Translator(object):
 
 # This global object represents the singleton translator object
 translator = Translator()
+
 
 # Re-export the decorator for convenience
 from modeltranslation.decorators import register  # NOQA re-export
