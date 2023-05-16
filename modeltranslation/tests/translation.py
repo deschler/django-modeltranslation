@@ -209,10 +209,10 @@ translator.register(models.Displayable)
 translator.register(models.Page, PageTranslationOptions)
 translator.register(models.RichTextPage)
 translator.register(
-    models.SpecificLanguageModelX, SpecificLanguageTranslationOptionsX, languages=['de', 'en', 'uk']
+    models.SpecificLanguageModelX, SpecificLanguageTranslationOptionsX, languages=['de', 'en']
 )
 translator.register(
-    models.SpecificLanguageModelY, SpecificLanguageTranslationOptionsY, languages=['de', 'en']
+    models.SpecificLanguageModelY, SpecificLanguageTranslationOptionsY, languages=['de',]
 )
 
 
@@ -333,9 +333,9 @@ class InheritedPermissionOptions(TranslationOptions):
 @register(models.SpecificLanguageModelRegisterX)
 class SpecificLanguageTranslationOptionsX(TranslationOptions):
     fields = ('slug',)
-    languages = ['de', 'en', 'uk']
+    languages = ['de', 'en']
 
 
-@register(models.SpecificLanguageModelRegisterY, languages=['en', 'de'])
+@register(models.SpecificLanguageModelRegisterY, languages=['en'])
 class SpecificLanguageTranslationOptionsY(TranslationOptions):
     fields = ('slug',)
