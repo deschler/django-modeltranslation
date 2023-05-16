@@ -2258,7 +2258,7 @@ class TranslationAdminTest(ModeltranslationTestBase):
             fields = ['title']
 
         ma = TestModelAdmin(models.TestModel, self.site)
-        fields = ['title_de', 'title_en','title_uk' ]
+        fields = ['title_de', 'title_en', 'title_uk']
         assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
         assert tuple(ma.get_form(request, self.test_obj).base_fields.keys()) == tuple(fields)
 
@@ -2302,7 +2302,11 @@ class TranslationAdminTest(ModeltranslationTestBase):
             exclude = ['url']
 
         ma = TestModelAdmin(models.TestModel, self.site)
-        assert tuple(ma.get_form(request).base_fields.keys()) == ('title_de', 'title_en', 'title_uk')
+        assert tuple(ma.get_form(request).base_fields.keys()) == (
+            'title_de',
+            'title_en',
+            'title_uk',
+        )
 
         # Using `fields` and `readonly_fields`.
         class TestModelAdmin(admin.TranslationAdmin):
@@ -2310,7 +2314,11 @@ class TranslationAdminTest(ModeltranslationTestBase):
             readonly_fields = ['url']
 
         ma = TestModelAdmin(models.TestModel, self.site)
-        assert tuple(ma.get_form(request).base_fields.keys()) == ('title_de', 'title_en', 'title_uk')
+        assert tuple(ma.get_form(request).base_fields.keys()) == (
+            'title_de',
+            'title_en',
+            'title_uk',
+        )
 
         # Using `readonly_fields`.
         # Note: readonly fields are not included in the form.
@@ -2356,7 +2364,17 @@ class TranslationAdminTest(ModeltranslationTestBase):
             fieldsets = [(None, {'fields': ('email', ('title', 'url'))})]
 
         ma = TestModelAdmin(models.TestModel, self.site)
-        fields = ['email_de', 'email_en','email_uk', 'title_de', 'title_en', 'title_uk', 'url_de', 'url_en', 'url_uk']
+        fields = [
+            'email_de',
+            'email_en',
+            'email_uk',
+            'title_de',
+            'title_en',
+            'title_uk',
+            'url_de',
+            'url_en',
+            'url_uk',
+        ]
         assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
         assert tuple(ma.get_form(request, self.test_obj).base_fields.keys()) == tuple(fields)
 
@@ -2371,7 +2389,7 @@ class TranslationAdminTest(ModeltranslationTestBase):
             form = TestModelForm
 
         ma = TestModelAdmin(models.TestModel, self.site)
-        fields = ['url_de', 'url_en','url_uk', 'email_de', 'email_en', 'email_uk']
+        fields = ['url_de', 'url_en', 'url_uk', 'email_de', 'email_en', 'email_uk']
         assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
         assert tuple(ma.get_form(request, self.test_obj).base_fields.keys()) == tuple(fields)
 
@@ -2385,7 +2403,7 @@ class TranslationAdminTest(ModeltranslationTestBase):
             form = TestModelForm
 
         ma = TestModelAdmin(models.TestModel, self.site)
-        fields = ['title_de', 'title_en','title_uk', 'text_de', 'text_en','text_uk']
+        fields = ['title_de', 'title_en', 'title_uk', 'text_de', 'text_en', 'text_uk']
         assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
         assert tuple(ma.get_form(request, self.test_obj).base_fields.keys()) == tuple(fields)
 
@@ -2396,7 +2414,17 @@ class TranslationAdminTest(ModeltranslationTestBase):
             exclude = ['url']
 
         ma = TestModelAdmin(models.TestModel, self.site)
-        fields = ['title_de', 'title_en', 'title_uk', 'text_de', 'text_en','text_uk', 'email_de', 'email_en','email_uk']
+        fields = [
+            'title_de',
+            'title_en',
+            'title_uk',
+            'text_de',
+            'text_en',
+            'text_uk',
+            'email_de',
+            'email_en',
+            'email_uk',
+        ]
         assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
         assert tuple(ma.get_form(request, self.test_obj).base_fields.keys()) == tuple(fields)
 
@@ -2565,7 +2593,11 @@ class TranslationAdminTest(ModeltranslationTestBase):
         maa = MultitableModelAAdmin(models.MultitableModelA, self.site)
         mab = MultitableModelBAdmin(models.MultitableModelB, self.site)
 
-        assert tuple(maa.get_form(request).base_fields.keys()) == ('titlea_de', 'titlea_en', 'titlea_uk')
+        assert tuple(maa.get_form(request).base_fields.keys()) == (
+            'titlea_de',
+            'titlea_en',
+            'titlea_uk',
+        )
         assert tuple(mab.get_form(request).base_fields.keys()) == (
             'titlea_de',
             'titlea_en',
@@ -2596,7 +2628,10 @@ class TranslationAdminTest(ModeltranslationTestBase):
         # (email only) and one for each translation field (text and title).
         fieldsets = [
             ('', {'fields': ['email']}),
-            ('Title', {'classes': ('mt-fieldset',), 'fields': ['title_de', 'title_en', 'title_uk']}),
+            (
+                'Title',
+                {'classes': ('mt-fieldset',), 'fields': ['title_de', 'title_en', 'title_uk']},
+            ),
             ('Text', {'classes': ('mt-fieldset',), 'fields': ['text_de', 'text_en', 'text_uk']}),
         ]
         assert ma.get_fieldsets(request) == fieldsets
@@ -2611,7 +2646,10 @@ class TranslationAdminTest(ModeltranslationTestBase):
 
         ma = GroupFieldsetsModelAdmin(models.GroupFieldsetsModel, self.site)
         fieldsets = [
-            ('Title', {'classes': ('mt-fieldset',), 'fields': ['title_de', 'title_en', 'title_uk']}),
+            (
+                'Title',
+                {'classes': ('mt-fieldset',), 'fields': ['title_de', 'title_en', 'title_uk']},
+            ),
             ('Text', {'classes': ('mt-fieldset',), 'fields': ['text_de', 'text_en', 'text_uk']}),
         ]
         assert ma.get_fieldsets(request) == fieldsets
@@ -2625,7 +2663,10 @@ class TranslationAdminTest(ModeltranslationTestBase):
         ma = GroupFieldsetsModelAdmin(models.GroupFieldsetsModel, self.site)
         fieldsets = [
             ('', {'fields': ['email']}),
-            ('Title', {'classes': ('mt-fieldset',), 'fields': ['title_de', 'title_en', 'title_uk']}),
+            (
+                'Title',
+                {'classes': ('mt-fieldset',), 'fields': ['title_de', 'title_en', 'title_uk']},
+            ),
         ]
         assert ma.get_fieldsets(request) == fieldsets
         assert ma.get_fieldsets(request, self.test_obj) == fieldsets
@@ -2670,7 +2711,11 @@ class TranslationAdminTest(ModeltranslationTestBase):
             prepopulated_fields = {'slug2': ('age',)}
 
         ma = NameModelAdmin(models.NameModel, self.site)
-        assert ma.prepopulated_fields == {'slug2_en': ('age',), 'slug2_de': ('age',), 'slug2_uk': ('age',)}
+        assert ma.prepopulated_fields == {
+            'slug2_en': ('age',),
+            'slug2_de': ('age',),
+            'slug2_uk': ('age',),
+        }
 
         # Translated slug based on translated field (corresponding)
         class NameModelAdmin(admin.TranslationAdmin):
@@ -2909,7 +2954,7 @@ class TestManager(ModeltranslationTestBase):
 
     def test_values(self):
         manager = models.ManagerTestModel.objects
-        id1 = manager.create(title_en='en', title_de='de',  title_uk='uk').pk
+        id1 = manager.create(title_en='en', title_de='de', title_uk='uk').pk
 
         raw_obj = manager.raw_values('title')[0]
         obj = manager.values('title')[0]
@@ -3397,12 +3442,12 @@ class TestManager(ModeltranslationTestBase):
         assert set(['test', 'test_en', 'test_de', 'test_uk']) == append_lookup_key(
             models.ForeignKeyModel, 'test'
         )
-        assert set(['title__eq', 'title_en__eq', 'title_de__eq', 'title_uk__eq']) == append_lookup_key(
-            models.ForeignKeyModel, 'title__eq'
-        )
-        assert set(['test__smt', 'test_en__smt', 'test_de__smt', 'test_uk__smt']) == append_lookup_key(
-            models.ForeignKeyModel, 'test__smt'
-        )
+        assert set(
+            ['title__eq', 'title_en__eq', 'title_de__eq', 'title_uk__eq']
+        ) == append_lookup_key(models.ForeignKeyModel, 'title__eq')
+        assert set(
+            ['test__smt', 'test_en__smt', 'test_de__smt', 'test_uk__smt']
+        ) == append_lookup_key(models.ForeignKeyModel, 'test__smt')
         big_set = set(
             [
                 'test__url',
@@ -3424,9 +3469,9 @@ class TestManager(ModeltranslationTestBase):
             ]
         )
         assert big_set == append_lookup_key(models.ForeignKeyModel, 'test__url')
-        assert set(['untrans__url', 'untrans__url_en', 'untrans__url_de', 'untrans__url_uk']) == append_lookup_key(
-            models.ForeignKeyModel, 'untrans__url'
-        )
+        assert set(
+            ['untrans__url', 'untrans__url_en', 'untrans__url_de', 'untrans__url_uk']
+        ) == append_lookup_key(models.ForeignKeyModel, 'untrans__url')
 
         assert big_set.union(['title', 'title_en', 'title_de', 'title_uk']) == append_lookup_keys(
             models.ForeignKeyModel, ['test__url', 'title']
@@ -3481,8 +3526,18 @@ class TestManager(ModeltranslationTestBase):
         with override('de'):
             titles_for_de = tuple(m.title for m in manager.order_by('title').distinct())
 
-        assert titles_for_en == ('title_1_en', 'title_1_en', 'title_2_en', 'title_2_en', )
-        assert titles_for_de == ('title_1_de', 'title_1_de', 'title_2_de', 'title_2_de', )
+        assert titles_for_en == (
+            'title_1_en',
+            'title_1_en',
+            'title_2_en',
+            'title_2_en',
+        )
+        assert titles_for_de == (
+            'title_1_de',
+            'title_1_de',
+            'title_2_de',
+            'title_2_de',
+        )
 
         # On PostgreSQL only, distinct() can have field arguments (*fields) to specify which fields
         # the distinct applies to (this generates a DISTINCT ON (*fields) sql expression).
@@ -3499,8 +3554,16 @@ class TestManager(ModeltranslationTestBase):
                     for m in manager.order_by('title', 'description').distinct('title')
                 )
 
-            assert titles_for_en == (('title_1_en', 'desc_1_en'), ('title_2_en', 'desc_1_en'), ('title_3_uk', 'desc_1_uk'))
-            assert titles_for_de == (('title_1_de', 'desc_1_de'), ('title_2_de', 'desc_1_de'), ('title_3_uk', 'desc_1_uk'))
+            assert titles_for_en == (
+                ('title_1_en', 'desc_1_en'),
+                ('title_2_en', 'desc_1_en'),
+                ('title_3_uk', 'desc_1_uk'),
+            )
+            assert titles_for_de == (
+                ('title_1_de', 'desc_1_de'),
+                ('title_2_de', 'desc_1_de'),
+                ('title_3_uk', 'desc_1_uk'),
+            )
 
 
 class TranslationModelFormTest(ModeltranslationTestBase):
