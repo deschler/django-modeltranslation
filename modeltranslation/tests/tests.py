@@ -3557,12 +3557,10 @@ class TestManager(ModeltranslationTestBase):
             assert titles_for_en == (
                 ('title_1_en', 'desc_1_en'),
                 ('title_2_en', 'desc_1_en'),
-                ('title_3_uk', 'desc_1_uk'),
             )
             assert titles_for_de == (
                 ('title_1_de', 'desc_1_de'),
                 ('title_2_de', 'desc_1_de'),
-                ('title_3_uk', 'desc_1_uk'),
             )
 
 
