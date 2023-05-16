@@ -76,6 +76,7 @@ class TranslationOptions(metaclass=FieldsAggregationMetaClass):
     """
 
     required_languages = ()
+    languages = ()
 
     def __init__(self, model):
         """
