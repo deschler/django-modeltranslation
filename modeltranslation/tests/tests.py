@@ -3610,13 +3610,13 @@ class InheritedPermissionTestCase(ModeltranslationTestBase):
 
 class SpecificLanguageModelTest(ModeltranslationTestBase):
     def test_class_field(self):
-        models.SpecificLanguageModelX.objects.create(title_de="foo", title_en="bag", text="bar")
-        models.SpecificLanguageModelX.objects.create(title_de="foo", title_en="bag")
+        models.SpecificLanguageModelX.objects.create(title_de="foo", text="bar")
+        models.SpecificLanguageModelX.objects.create(title_de="foo")
 
-        y_foo = models.SpecificLanguageModelX.objects.filter(title_en="bag")
+        y_foo = models.SpecificLanguageModelX.objects.filter(title_de="foo")
         assert 2 == y_foo.count()
 
-        y_baz = models.SpecificLanguageModelX.objects.filter(title_en="baz")
+        y_baz = models.SpecificLanguageModelX.objects.filter(title_de="baz")
         assert 0 == y_baz.count()
 
     def test_register_decorator(self):
