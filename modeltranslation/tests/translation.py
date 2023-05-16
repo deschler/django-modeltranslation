@@ -199,7 +199,9 @@ class SpecificLanguageTranslationOptionsX(TranslationOptions):
 
 
 class SpecificLanguageTranslationOptionsY(TranslationOptions):
-    allowed_languages = ['de', ]
+    allowed_languages = [
+        'de',
+    ]
     fields = ('title_y',)
 
 
