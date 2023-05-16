@@ -146,6 +146,7 @@ class TestAutodiscover(ModeltranslationTestBase):
         from .test_app.models import News
 
         fields = dir(News())
+        print("ТЕстінг",fields)
         assert 'title' in fields
         assert 'title_en' in fields
         assert 'title_de' in fields
