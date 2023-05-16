@@ -3610,7 +3610,9 @@ class InheritedPermissionTestCase(ModeltranslationTestBase):
 
 class SpecificLanguageModelTest(ModeltranslationTestBase):
     def test_class_field(self):
-        models.SpecificLanguageModelRegisterX.objects.create(title_de="foo", title_en="bag", text="bar")
+        models.SpecificLanguageModelRegisterX.objects.create(
+            title_de="foo", title_en="bag", text="bar"
+        )
         models.SpecificLanguageModelRegisterX.objects.create(title_de="foo", title_en="bag")
 
         with override("en"):
