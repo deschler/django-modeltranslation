@@ -76,6 +76,7 @@ class TranslationOptions(metaclass=FieldsAggregationMetaClass):
     """
 
     required_languages = ()
+
     def __init__(self, model):
         """
         Create fields dicts without any translation fields.
