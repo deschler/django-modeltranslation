@@ -543,5 +543,5 @@ class SpecificLanguageModelX(SpecificLanguageModelRegisterX):
     slug = models.SlugField(blank=True, null=True)
 
 
-class SpecificLanguageModelY(SpecificLanguageModelX):
+class SpecificLanguageModelY(SpecificLanguageModelRegisterY):
     slug = models.SlugField(blank=True, null=True)
