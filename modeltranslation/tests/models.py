@@ -539,9 +539,13 @@ class SpecificLanguageModelY(models.Model):
     text = models.TextField(blank=True, null=True)
 
 
-class SpecificLanguageModelRegisterX(SpecificLanguageModelX):
+class SpecificLanguageModelRegisterX(models.Model):
+    title = models.CharField(max_length=255)
+    text = models.TextField(blank=True, null=True)
     slug = models.SlugField(blank=True, null=True)
 
 
-class SpecificLanguageModelRegisterY(SpecificLanguageModelY):
+class SpecificLanguageModelRegisterY(models.Model):
+    title = models.CharField(max_length=255)
+    text = models.TextField(blank=True, null=True)
     slug = models.SlugField(blank=True, null=True)
