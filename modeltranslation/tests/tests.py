@@ -3613,8 +3613,8 @@ class SpecificLanguageModelTest(ModeltranslationTestBase):
         models.SpecificLanguageModelX.objects.create(title_de="foo", title_en="bag", text="bar")
         models.SpecificLanguageModelX.objects.create(title_de="foo", title_en="bag")
 
-        y_foo = models.SpecificLanguageModelX.objects.filter(title_en="foo")
-        assert 1 == y_foo.count()
+        y_foo = models.SpecificLanguageModelX.objects.filter(title_en="bag")
+        assert 2 == y_foo.count()
 
         y_baz = models.SpecificLanguageModelX.objects.filter(title_en="baz")
         assert 0 == y_baz.count()
@@ -3624,7 +3624,7 @@ class SpecificLanguageModelTest(ModeltranslationTestBase):
         models.SpecificLanguageModelY.objects.create(title_de="foo")
 
         y_foo = models.SpecificLanguageModelY.objects.filter(title_de="foo")
-        assert 1 == y_foo.count()
+        assert 2 == y_foo.count()
 
         y_baz = models.SpecificLanguageModelY.objects.filter(title_de="baz")
         assert 0 == y_baz.count()
@@ -3635,8 +3635,8 @@ class SpecificLanguageModelTest(ModeltranslationTestBase):
         )
         models.SpecificLanguageModelRegisterX.objects.create(slug_de="foo", slug_en="bag")
 
-        y_foo = models.SpecificLanguageModelRegisterX.objects.filter(slug_en="foo")
-        assert 1 == y_foo.count()
+        y_foo = models.SpecificLanguageModelRegisterX.objects.filter(slug_en="bag")
+        assert 2 == y_foo.count()
 
         y_baz = models.SpecificLanguageModelRegisterX.objects.filter(slug_en="baz")
         assert 0 == y_baz.count()
@@ -3646,7 +3646,7 @@ class SpecificLanguageModelTest(ModeltranslationTestBase):
         models.SpecificLanguageModelRegisterY.objects.create(slug_de="foo")
 
         y_foo = models.SpecificLanguageModelRegisterY.objects.filter(slug_de="foo")
-        assert 1 == y_foo.count()
+        assert 2 == y_foo.count()
 
         y_baz = models.SpecificLanguageModelRegisterY.objects.filter(slug_de="baz")
         assert 0 == y_baz.count()
