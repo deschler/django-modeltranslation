@@ -194,12 +194,12 @@ class PageTranslationOptions(TranslationOptions):
 
 
 class SpecificLanguageTranslationOptionsX(TranslationOptions):
-    fields = ('slug',)
+    fields = ('title',)
     languages = ['de', 'en']
 
 
 class SpecificLanguageTranslationOptionsY(TranslationOptions):
-    fields = ('slug',)
+    fields = ('title',)
 
 
 # BasePage left unregistered intentionally.
@@ -331,10 +331,10 @@ class InheritedPermissionOptions(TranslationOptions):
 
 @register(models.SpecificLanguageModelRegisterX)
 class SpecificLanguageTranslationOptionsX(TranslationOptions):
-    fields = ('title',)
+    fields = ('slug',)
     languages = ['de', 'en']
 
 
 @register(models.SpecificLanguageModelRegisterY, languages=['de'])
 class SpecificLanguageTranslationOptionsY(TranslationOptions):
-    fields = ('title',)
+    fields = ('slug',)

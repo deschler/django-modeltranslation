@@ -3610,47 +3610,47 @@ class InheritedPermissionTestCase(ModeltranslationTestBase):
 
 class SpecificLanguageModelTest(ModeltranslationTestBase):
     def test_class_field(self):
-        models.SpecificLanguageModelRegisterX.objects.create(
-            title_de="foo", title_en="bag", text="bar"
-        )
-        models.SpecificLanguageModelRegisterX.objects.create(title_de="foo", title_en="bag")
+        models.SpecificLanguageModelX.objects.create(title_de="foo", title_en="bag", text="bar")
+        models.SpecificLanguageModelX.objects.create(title_de="foo", title_en="bag")
 
         with override("en"):
-            y_foo = models.SpecificLanguageModelRegisterX.objects.filter(xs__title="foo")
+            y_foo = models.SpecificLanguageModelX.objects.filter(xs__title="foo")
             assert 1 == y_foo.count()
 
-            y_baz = models.SpecificLanguageModelRegisterX.objects.filter(xs__title="baz")
+            y_baz = models.SpecificLanguageModelX.objects.filter(xs__title="baz")
             assert 0 == y_baz.count()
 
     def test_register_decorator(self):
-        models.SpecificLanguageModelRegisterY.objects.create(title_de="foo", text="bar")
-        models.SpecificLanguageModelRegisterY.objects.create(title_de="foo")
+        models.SpecificLanguageModelY.objects.create(title_de="foo", text="bar")
+        models.SpecificLanguageModelY.objects.create(title_de="foo")
 
         with override("de"):
-            y_foo = models.SpecificLanguageModelRegisterY.objects.filter(xs__title="foo")
+            y_foo = models.SpecificLanguageModelY.objects.filter(xs__title="foo")
             assert 1 == y_foo.count()
 
-            y_baz = models.SpecificLanguageModelRegisterY.objects.filter(xs__title="baz")
+            y_baz = models.SpecificLanguageModelY.objects.filter(xs__title="baz")
             assert 0 == y_baz.count()
 
     def test_class_files_translator_register(self):
-        models.SpecificLanguageModelX.objects.create(slug_de="foo", slug_en="bag", text="bar")
-        models.SpecificLanguageModelX.objects.create(slug_de="foo", slug_en="bag")
+        models.SpecificLanguageModelRegisterX.objects.create(
+            slug_de="foo", slug_en="bag", text="bar"
+        )
+        models.SpecificLanguageModelRegisterX.objects.create(slug_de="foo", slug_en="bag")
 
         with override("en"):
-            y_foo = models.SpecificLanguageModelX.objects.filter(xs__slug="foo")
+            y_foo = models.SpecificLanguageModelRegisterX.objects.filter(xs__slug="foo")
             assert 1 == y_foo.count()
 
-            y_baz = models.SpecificLanguageModelX.objects.filter(xs__slug="baz")
+            y_baz = models.SpecificLanguageModelRegisterX.objects.filter(xs__slug="baz")
             assert 0 == y_baz.count()
 
     def test_translator_register(self):
-        models.SpecificLanguageModelY.objects.create(slug_de="foo", text="bar")
-        models.SpecificLanguageModelY.objects.create(slug_de="foo")
+        models.SpecificLanguageModelRegisterY.objects.create(slug_de="foo", text="bar")
+        models.SpecificLanguageModelRegisterY.objects.create(slug_de="foo")
 
         with override("de"):
-            y_foo = models.SpecificLanguageModelY.objects.filter(xs__slug="foo")
+            y_foo = models.SpecificLanguageModelRegisterY.objects.filter(xs__slug="foo")
             assert 1 == y_foo.count()
 
-            y_baz = models.SpecificLanguageModelY.objects.filter(xs__slug="baz")
+            y_baz = models.SpecificLanguageModelRegisterY.objects.filter(xs__slug="baz")
             assert 0 == y_baz.count()
