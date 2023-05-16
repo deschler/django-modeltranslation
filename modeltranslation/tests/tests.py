@@ -3608,7 +3608,7 @@ class InheritedPermissionTestCase(ModeltranslationTestBase):
         user.has_perm('test_perm')
 
 
-class SpecificLanguageModelTest(ModeltranslationTestBase):
+class SpecificLanguageModel:
     def test_class_field(self):
         models.SpecificLanguageModelX.objects.create(title_de="foo", text="bar")
         models.SpecificLanguageModelX.objects.create(title_de="foo")
