@@ -529,19 +529,19 @@ class InheritedPermission(Permission):
 # Model for special language
 
 
-class SpecificLanguageModelRegisterX(models.Model):
+class SpecificLanguageModelX(models.Model):
     title = models.CharField(max_length=255)
     text = models.TextField(blank=True, null=True)
 
 
-class SpecificLanguageModelRegisterY(models.Model):
+class SpecificLanguageModelY(models.Model):
     title = models.CharField(max_length=255)
     text = models.TextField(blank=True, null=True)
 
 
-class SpecificLanguageModelX(SpecificLanguageModelRegisterX):
+class SpecificLanguageModelRegisterX(SpecificLanguageModelX):
     slug = models.SlugField(blank=True, null=True)
 
 
-class SpecificLanguageModelY(SpecificLanguageModelRegisterY):
+class SpecificLanguageModelRegisterY(SpecificLanguageModelY):
     slug = models.SlugField(blank=True, null=True)
