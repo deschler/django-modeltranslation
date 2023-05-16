@@ -195,7 +195,6 @@ class PageTranslationOptions(TranslationOptions):
 
 class SpecificLanguageTranslationOptionsX(TranslationOptions):
     fields = ('title',)
-    languages = ['de', 'en']
 
 
 class SpecificLanguageTranslationOptionsY(TranslationOptions):
@@ -209,7 +208,7 @@ translator.register(models.RichText, RichTextTranslationOptions)
 translator.register(models.Displayable)
 translator.register(models.Page, PageTranslationOptions)
 translator.register(models.RichTextPage)
-translator.register(models.SpecificLanguageModelX, SpecificLanguageTranslationOptionsX)
+translator.register(models.SpecificLanguageModelX, SpecificLanguageTranslationOptionsX, languages=['de', 'en'])
 translator.register(
     models.SpecificLanguageModelY, SpecificLanguageTranslationOptionsY, languages=['de']
 )
