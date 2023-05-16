@@ -3608,25 +3608,25 @@ class InheritedPermissionTestCase(ModeltranslationTestBase):
         user.has_perm('test_perm')
 
 
-class SpecificLanguageModel:
+class SpecificLanguageModelTestCase(ModeltranslationTestBase):
     def test_class_field(self):
-        models.SpecificLanguageModelX.objects.create(title_de="foo", text="bar")
-        models.SpecificLanguageModelX.objects.create(title_de="foo")
+        models.SpecificLanguageModelX.objects.create(title_x_de="foo", text="bar")
+        models.SpecificLanguageModelX.objects.create(title_x_de="foo")
 
-        y_foo = models.SpecificLanguageModelX.objects.filter(title_de="foo")
+        y_foo = models.SpecificLanguageModelX.objects.filter(title_x_de="foo")
         assert 2 == y_foo.count()
 
-        y_baz = models.SpecificLanguageModelX.objects.filter(title_de="baz")
+        y_baz = models.SpecificLanguageModelX.objects.filter(title_x_de="baz")
         assert 0 == y_baz.count()
 
     def test_register_decorator(self):
-        models.SpecificLanguageModelY.objects.create(title_en="foo", text="bar")
-        models.SpecificLanguageModelY.objects.create(title_en="foo")
+        models.SpecificLanguageModelY.objects.create(title_y_de="foo", text="bar")
+        models.SpecificLanguageModelY.objects.create(title_y_de="foo")
 
-        y_foo = models.SpecificLanguageModelY.objects.filter(title_en="foo")
+        y_foo = models.SpecificLanguageModelY.objects.filter(title_y_de="foo")
         assert 2 == y_foo.count()
 
-        y_baz = models.SpecificLanguageModelY.objects.filter(title_en="baz")
+        y_baz = models.SpecificLanguageModelY.objects.filter(title_y_de="baz")
         assert 0 == y_baz.count()
 
     def test_class_files_translator_register(self):

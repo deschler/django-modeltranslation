@@ -194,11 +194,13 @@ class PageTranslationOptions(TranslationOptions):
 
 
 class SpecificLanguageTranslationOptionsX(TranslationOptions):
-    fields = ('title',)
+    languages = ['de', 'en']
+    fields = ('title_x',)
 
 
 class SpecificLanguageTranslationOptionsY(TranslationOptions):
-    fields = ('title',)
+    languages = ['de', ]
+    fields = ('title_y',)
 
 
 # BasePage left unregistered intentionally.
@@ -208,12 +210,8 @@ translator.register(models.RichText, RichTextTranslationOptions)
 translator.register(models.Displayable)
 translator.register(models.Page, PageTranslationOptions)
 translator.register(models.RichTextPage)
-translator.register(
-    models.SpecificLanguageModelX, SpecificLanguageTranslationOptionsX, languages=['de', 'en']
-)
-translator.register(
-    models.SpecificLanguageModelY, SpecificLanguageTranslationOptionsY, languages=['de',]
-)
+translator.register(models.SpecificLanguageModelX, SpecificLanguageTranslationOptionsX)
+translator.register(models.SpecificLanguageModelY, SpecificLanguageTranslationOptionsY)
 
 
 # ######### Manager testing
@@ -333,9 +331,10 @@ class InheritedPermissionOptions(TranslationOptions):
 @register(models.SpecificLanguageModelRegisterX)
 class SpecificLanguageTranslationOptionsX(TranslationOptions):
     fields = ('slug',)
-    languages = ['de', 'en']
+    allow_languages = ['de', 'en']
 
 
-@register(models.SpecificLanguageModelRegisterY, languages=['en'])
+@register(models.SpecificLanguageModelRegisterY)
 class SpecificLanguageTranslationOptionsY(TranslationOptions):
     fields = ('slug',)
+    allow_languages = ['en']

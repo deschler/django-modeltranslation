@@ -76,7 +76,7 @@ class TranslationOptions(metaclass=FieldsAggregationMetaClass):
     """
 
     required_languages = ()
-
+    allow_languages = ()
     def __init__(self, model):
         """
         Create fields dicts without any translation fields.
@@ -218,13 +218,13 @@ def patch_manager_class(manager):
             def __eq__(self, other):
                 if isinstance(other, NewMultilingualManager):
                     return (
-                        self._old_module == other._old_module
-                        and self._old_class == other._old_class
+                            self._old_module == other._old_module
+                            and self._old_class == other._old_class
                     )
                 if hasattr(other, "__module__") and hasattr(other, "__class__"):
                     return (
-                        self._old_module == other.__module__
-                        and self._old_class == other.__class__.__name__
+                            self._old_module == other.__module__
+                            and self._old_class == other.__class__.__name__
                     )
                 return False
 
@@ -638,6 +638,7 @@ class Translator(object):
 
             # Cache options for all models -- we may want to compute options
             # of registered subclasses of unregistered models.
+            print(opts)
             self._registry[model] = opts
 
         return self._registry[model]
@@ -664,7 +665,6 @@ class Translator(object):
 
 # This global object represents the singleton translator object
 translator = Translator()
-
 
 # Re-export the decorator for convenience
 from modeltranslation.decorators import register  # NOQA re-export
