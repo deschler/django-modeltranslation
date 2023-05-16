@@ -199,9 +199,6 @@ class SpecificLanguageTranslationOptionsX(TranslationOptions):
 
 
 class SpecificLanguageTranslationOptionsY(TranslationOptions):
-    allowed_languages = [
-        'de',
-    ]
     fields = ('title_y',)
 
 
@@ -213,7 +210,7 @@ translator.register(models.Displayable)
 translator.register(models.Page, PageTranslationOptions)
 translator.register(models.RichTextPage)
 translator.register(models.SpecificLanguageModelX, SpecificLanguageTranslationOptionsX)
-translator.register(models.SpecificLanguageModelY, SpecificLanguageTranslationOptionsY)
+translator.register(models.SpecificLanguageModelY, SpecificLanguageTranslationOptionsY, allowed_languages=['de'])
 
 
 # ######### Manager testing
@@ -336,7 +333,7 @@ class SpecificLanguageTranslationOptionsX(TranslationOptions):
     allowed_languages = ['de', 'en']
 
 
-@register(models.SpecificLanguageModelRegisterY)
+@register(models.SpecificLanguageModelRegisterY, allowed_languages = ['en'])
 class SpecificLanguageTranslationOptionsY(TranslationOptions):
     fields = ('slug',)
-    allowed_languages = ['en']
+
