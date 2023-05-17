@@ -157,7 +157,7 @@ def add_translation_fields(model, opts):
     model_empty_values = getattr(opts, 'empty_values', NONE)
     for field_name in opts.local_fields.keys():
         field_empty_value = parse_field(model_empty_values, field_name, NONE)
-        available_languages = getattr(opts, 'allowed_languages', mt_settings.AVAILABLE_LANGUAGES)
+        available_languages = getattr(opts, 'languages', mt_settings.AVAILABLE_LANGUAGES)
         for lang in available_languages:
             # Create a dynamic translation field
             translation_field = create_translation_field(

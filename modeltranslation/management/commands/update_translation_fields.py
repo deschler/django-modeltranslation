@@ -79,8 +79,8 @@ class Command(BaseCommand):
                 self.stdout.write("Updating data of model '%s'" % model)
 
             opts = translator.get_options_for_model(model)
-            allowed_languages = getattr(opts, 'allowed_languages', ())
-            if allowed_languages and lang not in allowed_languages:
+            languages = getattr(opts, 'languages', ())
+            if languages and lang not in languages:
                 continue
             for field_name in opts.fields.keys():
                 def_lang_fieldname = build_localized_fieldname(field_name, lang)
