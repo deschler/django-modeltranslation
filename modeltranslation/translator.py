@@ -76,6 +76,7 @@ class TranslationOptions(metaclass=FieldsAggregationMetaClass):
     """
 
     required_languages = ()
+    languages = mt_settings.AVAILABLE_LANGUAGES
 
     def __init__(self, model):
         """
@@ -157,8 +158,7 @@ def add_translation_fields(model, opts):
     model_empty_values = getattr(opts, 'empty_values', NONE)
     for field_name in opts.local_fields.keys():
         field_empty_value = parse_field(model_empty_values, field_name, NONE)
-        available_languages = getattr(opts, 'languages', mt_settings.AVAILABLE_LANGUAGES)
-        for lang in available_languages:
+        for lang in opts.languages:
             # Create a dynamic translation field
             translation_field = create_translation_field(
                 model=model, field_name=field_name, lang=lang, empty_value=field_empty_value
