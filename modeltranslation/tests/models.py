@@ -526,7 +526,7 @@ class InheritedPermission(Permission):
     translated_var = models.CharField(max_length=255)
 
 
-# Model for special language
+# Models for specic language tests
 
 
 class SpecificLanguageModelX(models.Model):
