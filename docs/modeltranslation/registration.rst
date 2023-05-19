@@ -135,9 +135,6 @@ argument::
     from modeltranslation.translator import translator, TranslationOptions
     from news.models import News, NewsWithImage
 
-    class NewsTranslationOptions(TranslationOptions):
-        fields = ('title', 'text',)
-
     class NewsWithImageTranslationOptions(TranslationOptions):
         languages = ('en','uk')
         fields = ('image',)
