@@ -139,9 +139,6 @@ argument::
         languages = ('en','uk')
         fields = ('image',)
 
-    translator.register(
-        News, NewsTranslationOptions,
-    )
     translator.register(NewsWithImage, NewsWithImageTranslationOptions)
 
 
@@ -158,6 +155,7 @@ Also, if you wish, you can pass the ``languages`` argument in the ``register`` d
     @register(News, languages=('en','uk'))
     class NewsTranslationOptions(TranslationOptions):
         fields = ('title', 'text',)
+
 
 Changes Automatically Applied to the Model Class
 ------------------------------------------------
