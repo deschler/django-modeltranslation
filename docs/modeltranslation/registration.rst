@@ -139,7 +139,7 @@ argument::
         fields = ('title', 'text',)
 
     class NewsWithImageTranslationOptions(TranslationOptions):
-        languages=('en','uk')
+        languages = ('en','uk')
         fields = ('image',)
 
     translator.register(
