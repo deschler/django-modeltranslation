@@ -256,7 +256,7 @@ class MultilingualQuerySet(QuerySet):
             for key, value in defaults.items():
                 rewritten_defaults[rewrite_lookup_key(self.model, key)] = value
             defaults = rewritten_defaults
-        return super(MultilingualQuerySet, self).update_or_create(defaults=defaults, **kwargs)
+        return super().update_or_create(defaults=defaults, **kwargs)
 
     # This method was not present in django-linguo
     def _rewrite_col(self, col):

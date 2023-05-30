@@ -471,20 +471,33 @@ class ModeltranslationTest(ModeltranslationTestBase):
         obj = models.TestModel.objects.create(title_de='old de', title_en='old en')
 
         # Update existing object
-        obj_1, created = models.TestModel.objects.update_or_create(
+        instance, created = models.TestModel.objects.update_or_create(
             pk=obj.pk, defaults={'title': 'NEW DE TITLE'}
         )
         assert created is False
-        assert obj_1.title == 'NEW DE TITLE'
-        assert obj_1.title_en == 'old en'
-        assert obj_1.title_de == 'NEW DE TITLE'
+        assert instance.title == 'NEW DE TITLE'
+        assert instance.title_en == 'old en'
+        assert instance.title_de == 'NEW DE TITLE'
 
         # Check that the translation fields are correctly saved and provide the
         # correct value when retrieving them again.
-        obj_2 = models.TestModel.objects.get()
-        assert obj_2.title == 'NEW DE TITLE'
-        assert obj_2.title_en == 'old en'
-        assert obj_2.title_de == 'NEW DE TITLE'
+        instance.refresh_from_db()
+        assert instance.title == 'NEW DE TITLE'
+        assert instance.title_en == 'old en'
+        assert instance.title_de == 'NEW DE TITLE'
+
+        # Create new object
+        instance, created = models.TestModel.objects.update_or_create(
+            title_de='old de', title_en='old en'
+        )
+
+        # Check that the translation fields are correctly saved and provide the
+        # correct value when retrieving them again.
+        assert created is True
+        instance.refresh_from_db()
+        assert instance.title == 'old de'
+        assert instance.title_en == 'old en'
+        assert instance.title_de == 'old de'
 
 
 class ModeltranslationTransactionTest(ModeltranslationTransactionTestBase):
