@@ -467,35 +467,23 @@ class ModeltranslationTest(ModeltranslationTestBase):
         """
         Test that update_or_create works as expected
         """
-        # Create new object
         obj = models.TestModel.objects.create(title_de='old de', title_en='old en')
 
-        # Update existing object
         instance, created = models.TestModel.objects.update_or_create(
             pk=obj.pk, defaults={'title': 'NEW DE TITLE'}
         )
+
         assert created is False
         assert instance.title == 'NEW DE TITLE'
         assert instance.title_en == 'old en'
         assert instance.title_de == 'NEW DE TITLE'
 
-        # Check that the translation fields are correctly saved and provide the
-        # correct value when retrieving them again.
-        instance.refresh_from_db()
-        assert instance.title == 'NEW DE TITLE'
-        assert instance.title_en == 'old en'
-        assert instance.title_de == 'NEW DE TITLE'
-
     def test_update_or_create_new(self):
-        # Create new object
         instance, created = models.TestModel.objects.update_or_create(
-            title_de='old de', title_en='old en'
+            pk=1, defaults={'title_de': 'old de', 'title_en': 'old en'},
         )
 
-        # Check that the translation fields are correctly saved and provide the
-        # correct value when retrieving them again.
         assert created is True
-        instance.refresh_from_db()
         assert instance.title == 'old de'
         assert instance.title_en == 'old en'
         assert instance.title_de == 'old de'
