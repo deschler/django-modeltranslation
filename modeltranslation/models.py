@@ -4,15 +4,16 @@ def autodiscover():
     not present. This forces an import on them to register.
     Also import explicit modules.
     """
+    import copy
     import os
     import sys
-    import copy
-    from django.utils.module_loading import module_has_submodule
-    from modeltranslation.translator import translator
-    from modeltranslation.settings import TRANSLATION_FILES, DEBUG
-
     from importlib import import_module
+
     from django.apps import apps
+    from django.utils.module_loading import module_has_submodule
+
+    from modeltranslation.settings import DEBUG, TRANSLATION_FILES
+    from modeltranslation.translator import translator
 
     mods = [(app_config.name, app_config.module) for app_config in apps.get_app_configs()]
 

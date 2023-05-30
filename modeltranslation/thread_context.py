@@ -1,9 +1,7 @@
 import threading
-from typing import Union
-from typing import Literal
+from typing import Literal, Union
 
 from modeltranslation import settings
-
 
 AutoPopulate = Union[bool, Literal["all", "default", "required"]]
 

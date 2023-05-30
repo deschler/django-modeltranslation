@@ -3,7 +3,7 @@ from typing import Callable, Iterable
 
 import django
 from django.core.exceptions import ImproperlyConfigured
-from django.db.models import Manager, ForeignKey, ManyToManyField, OneToOneField, options
+from django.db.models import ForeignKey, Manager, ManyToManyField, OneToOneField, options
 from django.db.models.base import ModelBase
 from django.db.models.signals import post_init
 from django.utils.functional import cached_property
@@ -11,17 +11,17 @@ from django.utils.functional import cached_property
 from modeltranslation import settings as mt_settings
 from modeltranslation.fields import (
     NONE,
-    create_translation_field,
-    TranslationFieldDescriptor,
-    TranslatedRelationIdDescriptor,
-    TranslatedManyToManyDescriptor,
     LanguageCacheSingleObjectDescriptor,
+    TranslatedManyToManyDescriptor,
+    TranslatedRelationIdDescriptor,
+    TranslationFieldDescriptor,
+    create_translation_field,
 )
 from modeltranslation.manager import (
     MultilingualManager,
     MultilingualQuerysetManager,
-    rewrite_lookup_key,
     append_translated,
+    rewrite_lookup_key,
 )
 from modeltranslation.thread_context import auto_populate_mode
 from modeltranslation.utils import build_localized_fieldname, parse_field

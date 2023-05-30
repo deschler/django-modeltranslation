@@ -1,23 +1,21 @@
 from copy import deepcopy
 
-from django.contrib import admin
-from django.contrib.admin.options import BaseModelAdmin, flatten_fieldsets, InlineModelAdmin
 from django import forms
+from django.contrib import admin
+from django.contrib.admin.options import BaseModelAdmin, InlineModelAdmin, flatten_fieldsets
+from django.contrib.contenttypes.admin import GenericStackedInline, GenericTabularInline
 
 from modeltranslation import settings as mt_settings
 from modeltranslation.translator import translator
 from modeltranslation.utils import (
-    get_translation_fields,
     build_css_class,
     build_localized_fieldname,
     get_language,
     get_language_bidi,
+    get_translation_fields,
     unique,
 )
 from modeltranslation.widgets import ClearableWidgetWrapper
-
-from django.contrib.contenttypes.admin import GenericTabularInline
-from django.contrib.contenttypes.admin import GenericStackedInline
 
 
 class TranslationBaseModelAdmin(BaseModelAdmin):

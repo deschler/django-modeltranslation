@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib.auth.models import Group
 from django.utils.translation import gettext_lazy
+
 from modeltranslation.tests import models
 from modeltranslation.tests.models import InheritedPermission
 from modeltranslation.translator import TranslationOptions, register, translator

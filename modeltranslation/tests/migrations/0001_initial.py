@@ -2,8 +2,9 @@
 
 import django.contrib.auth.models
 import django.core.validators
-from django.db import migrations, models
 import django.db.models.deletion
+from django.db import migrations, models
+
 import modeltranslation.tests.models
 
 
