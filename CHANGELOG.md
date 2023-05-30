@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.18.10-beta.0](https://github.com/deschler/django-modeltranslation/compare/v0.18.9...v0.18.10-beta.0) (2023-05-30)
+
+
+### Bug Fixes
+
+* Fix update_or_create for Django 4.2 ([d5eefa8](https://github.com/deschler/django-modeltranslation/commit/d5eefa8bd193cd8aee1cd1f97561d2a7e9dc0801)), closes [#682](https://github.com/deschler/django-modeltranslation/issues/682) [#683](https://github.com/deschler/django-modeltranslation/issues/683)
+
 ### [0.18.9](https://github.com/deschler/django-modeltranslation/compare/v0.18.8...v0.18.9) (2023-02-09)
 
 
