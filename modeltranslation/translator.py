@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from functools import partial
 from typing import Callable, Iterable
 
@@ -51,7 +50,7 @@ class FieldsAggregationMetaClass(type):
             if isinstance(base, FieldsAggregationMetaClass):
                 attrs['fields'].update(base.fields)
         attrs['fields'] = tuple(attrs['fields'])
-        return super(FieldsAggregationMetaClass, cls).__new__(cls, name, bases, attrs)
+        return super().__new__(cls, name, bases, attrs)
 
 
 class TranslationOptions(metaclass=FieldsAggregationMetaClass):
@@ -84,8 +83,8 @@ class TranslationOptions(metaclass=FieldsAggregationMetaClass):
         self.model = model
         self.registered = False
         self.related = False
-        self.local_fields = dict((f, set()) for f in self.fields)
-        self.fields = dict((f, set()) for f in self.fields)
+        self.local_fields = {f: set() for f in self.fields}
+        self.fields = {f: set() for f in self.fields}
         self.related_fields = []
 
     def validate(self):
@@ -142,7 +141,7 @@ class TranslationOptions(metaclass=FieldsAggregationMetaClass):
 class MultilingualOptions(options.Options):
     @cached_property
     def base_manager(self):
-        manager = super(MultilingualOptions, self).base_manager
+        manager = super().base_manager
         patch_manager_class(manager)
         return manager
 
@@ -436,7 +435,7 @@ def patch_related_object_descriptor_caching(ro_descriptor):
     ro_descriptor.__class__ = NewSingleObjectDescriptor
 
 
-class Translator(object):
+class Translator:
     """
     A Translator object encapsulates an instance of a translator. Models are
     registered with the Translator using the register() method.

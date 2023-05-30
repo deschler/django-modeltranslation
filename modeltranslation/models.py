@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 def autodiscover():
     """
     Auto-discover INSTALLED_APPS translation.py modules and fail silently when

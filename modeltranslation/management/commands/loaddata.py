@@ -27,7 +27,7 @@ class Command(LoadDataCommand):
             check_mode(self, option_string, value, parser, namespace)
 
     def add_arguments(self, parser):
-        super(Command, self).add_arguments(parser)
+        super().add_arguments(parser)
         parser.add_argument(
             '--populate',
             action=self.CheckAction,
@@ -44,6 +44,6 @@ class Command(LoadDataCommand):
         mode = options.get('populate')
         if mode is not None:
             with auto_populate(mode):
-                return super(Command, self).handle(*fixture_labels, **options)
+                return super().handle(*fixture_labels, **options)
         else:
-            return super(Command, self).handle(*fixture_labels, **options)
+            return super().handle(*fixture_labels, **options)

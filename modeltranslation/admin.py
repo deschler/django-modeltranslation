@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from copy import deepcopy
 
 from django.contrib import admin
@@ -26,7 +25,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
     both_empty_values_fields = ()
 
     def __init__(self, *args, **kwargs):
-        super(TranslationBaseModelAdmin, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.trans_opts = translator.get_options_for_model(self.model)
         self._patch_prepopulated_fields()
 
@@ -47,7 +46,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         return None
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
-        field = super(TranslationBaseModelAdmin, self).formfield_for_dbfield(
+        field = super().formfield_for_dbfield(
             db_field, request, **kwargs
         )
         self.patch_translation_field(db_field, field, request, **kwargs)
@@ -271,7 +270,7 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
     group_fieldsets = False
 
     def __init__(self, *args, **kwargs):
-        super(TranslationAdmin, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._patch_list_editable()
 
     def _patch_list_editable(self):
@@ -297,7 +296,7 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
             flattened_fieldsets = flatten_fieldsets(fieldsets)
 
             # Create a fieldset to group each translated field's localized fields
-            fields = sorted((f for f in self.opts.get_fields() if f.concrete))
+            fields = sorted(f for f in self.opts.get_fields() if f.concrete)
             untranslated_fields = [
                 f.name
                 for f in fields
@@ -352,7 +351,7 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
 
     def get_form(self, request, obj=None, **kwargs):
         kwargs = self._get_form_or_formset(request, obj, **kwargs)
-        return super(TranslationAdmin, self).get_form(request, obj, **kwargs)
+        return super().get_form(request, obj, **kwargs)
 
     def get_fieldsets(self, request, obj=None):
         return self._get_fieldsets_pre_form_or_formset(request, obj) or self._group_fieldsets(
@@ -365,7 +364,7 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
 class TranslationInlineModelAdmin(TranslationBaseModelAdmin, InlineModelAdmin):
     def get_formset(self, request, obj=None, **kwargs):
         kwargs = self._get_form_or_formset(request, obj, **kwargs)
-        return super(TranslationInlineModelAdmin, self).get_formset(request, obj, **kwargs)
+        return super().get_formset(request, obj, **kwargs)
 
     def get_fieldsets(self, request, obj=None):
         # FIXME: If fieldsets are declared on an inline some kind of ghost

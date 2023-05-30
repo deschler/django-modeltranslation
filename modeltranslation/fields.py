@@ -247,7 +247,7 @@ class TranslationField:
             return self.creation_counter == other.creation_counter and self.language == getattr(
                 other, 'language', None
             )
-        return super(TranslationField, self).__eq__(other)
+        return super().__eq__(other)
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -278,7 +278,7 @@ class TranslationField:
         The ``forms.CharField`` somewhat surprising behaviour is documented as a
         "won't fix": https://code.djangoproject.com/ticket/9590.
         """
-        formfield = super(TranslationField, self).formfield(*args, **kwargs)
+        formfield = super().formfield(*args, **kwargs)
         if isinstance(formfield, forms.CharField):
             if self.empty_value is None:
                 from modeltranslation.forms import NullCharField
@@ -287,7 +287,7 @@ class TranslationField:
                 kwargs['form_class'] = type(
                     'Null%s' % form_class.__name__, (NullCharField, form_class), {}
                 )
-                formfield = super(TranslationField, self).formfield(*args, **kwargs)
+                formfield = super().formfield(*args, **kwargs)
             elif self.empty_value == 'both':
                 from modeltranslation.forms import NullableField
 
@@ -295,7 +295,7 @@ class TranslationField:
                 kwargs['form_class'] = type(
                     'Nullable%s' % form_class.__name__, (NullableField, form_class), {}
                 )
-                formfield = super(TranslationField, self).formfield(*args, **kwargs)
+                formfield = super().formfield(*args, **kwargs)
                 if isinstance(formfield.widget, (forms.TextInput, forms.Textarea)):
                     formfield.widget = ClearableWidgetWrapper(formfield.widget)
         return formfield
@@ -315,7 +315,7 @@ class TranslationField:
                 instance._mt_form_pending_clear = {}
             instance._mt_form_pending_clear[self.name] = data
         else:
-            super(TranslationField, self).save_form_data(instance, data)
+            super().save_form_data(instance, data)
 
     def deconstruct(self):
         name, path, args, kwargs = self.translated_field.deconstruct()
