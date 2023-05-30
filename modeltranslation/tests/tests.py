@@ -463,7 +463,7 @@ class ModeltranslationTest(ModeltranslationTestBase):
         )
         self._test_constructor(keywords)
 
-    def test_update_or_create(self):
+    def test_update_or_create_existing(self):
         """
         Test that update_or_create works as expected
         """
@@ -486,6 +486,7 @@ class ModeltranslationTest(ModeltranslationTestBase):
         assert instance.title_en == 'old en'
         assert instance.title_de == 'NEW DE TITLE'
 
+    def test_update_or_create_new(self):
         # Create new object
         instance, created = models.TestModel.objects.update_or_create(
             title_de='old de', title_en='old en'
