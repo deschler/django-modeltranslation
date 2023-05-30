@@ -364,12 +364,7 @@ class ManagerTestModel(models.Model):
 
 class CustomManager(models.Manager):
     def get_queryset(self):
-        return (
-            super()
-            .get_queryset()
-            .filter(title__contains='a')
-            .exclude(description__contains='x')
-        )
+        return super().get_queryset().filter(title__contains='a').exclude(description__contains='x')
 
     def custom_qs(self):
         return super().get_queryset()

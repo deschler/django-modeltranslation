@@ -1082,12 +1082,12 @@ class ManyToManyFieldsTest(ModeltranslationTestBase):
 
     def test_translated_models_instance(self):
         models.TestModel.objects.bulk_create(
-                models.TestModel(title_en='m2m_test_%s_en' % i, title_de='m2m_test_%s_de' % i)
-                for i in range(10)
+            models.TestModel(title_en='m2m_test_%s_en' % i, title_de='m2m_test_%s_de' % i)
+            for i in range(10)
         )
         self.model.objects.bulk_create(
-                self.model(title_en='m2m_test_%s_en' % i, title_de='m2m_test_%s_de' % i)
-                for i in range(10)
+            self.model(title_en='m2m_test_%s_en' % i, title_de='m2m_test_%s_de' % i)
+            for i in range(10)
         )
         models.NonTranslated.objects.bulk_create(
             models.NonTranslated(title='m2m_test_%s' % i) for i in range(10)
@@ -1206,12 +1206,12 @@ class ManyToManyFieldsTest(ModeltranslationTestBase):
 
     def test_reverse_relations(self):
         models.TestModel.objects.bulk_create(
-                models.TestModel(title_en='m2m_test_%s_en' % i, title_de='m2m_test_%s_de' % i)
-                for i in range(10)
+            models.TestModel(title_en='m2m_test_%s_en' % i, title_de='m2m_test_%s_de' % i)
+            for i in range(10)
         )
         self.model.objects.bulk_create(
-                self.model(title_en='m2m_test_%s_en' % i, title_de='m2m_test_%s_de' % i)
-                for i in range(10)
+            self.model(title_en='m2m_test_%s_en' % i, title_de='m2m_test_%s_de' % i)
+            for i in range(10)
         )
         models.NonTranslated.objects.bulk_create(
             models.NonTranslated(title='m2m_test_%s' % i) for i in range(10)
@@ -2463,9 +2463,7 @@ class TranslationAdminTest(ModeltranslationTestBase):
                 if isinstance(db_field, TextField):
                     kwargs["widget"] = forms.Textarea(attrs={'myprop': 'myval'})
                     return db_field.formfield(**kwargs)
-                return super().formfield_for_dbfield(
-                    db_field, request, **kwargs
-                )
+                return super().formfield_for_dbfield(db_field, request, **kwargs)
 
         ma = TestModelAdmin(models.TestModel, self.site)
         fields = ['text_de', 'text_en']
@@ -3392,9 +3390,7 @@ class TestManager(ModeltranslationTestBase):
         assert {'title', 'title_en', 'title_de'} == append_lookup_key(
             models.ForeignKeyModel, 'title'
         )
-        assert {'test', 'test_en', 'test_de'} == append_lookup_key(
-            models.ForeignKeyModel, 'test'
-        )
+        assert {'test', 'test_en', 'test_de'} == append_lookup_key(models.ForeignKeyModel, 'test')
         assert {'title__eq', 'title_en__eq', 'title_de__eq'} == append_lookup_key(
             models.ForeignKeyModel, 'title__eq'
         )
@@ -3402,15 +3398,15 @@ class TestManager(ModeltranslationTestBase):
             models.ForeignKeyModel, 'test__smt'
         )
         big_set = {
-                'test__url',
-                'test__url_en',
-                'test__url_de',
-                'test_en__url',
-                'test_en__url_en',
-                'test_en__url_de',
-                'test_de__url',
-                'test_de__url_en',
-                'test_de__url_de',
+            'test__url',
+            'test__url_en',
+            'test__url_de',
+            'test_en__url',
+            'test_en__url_en',
+            'test_en__url_de',
+            'test_de__url',
+            'test_de__url_en',
+            'test_de__url_de',
         }
         assert big_set == append_lookup_key(models.ForeignKeyModel, 'test__url')
         assert {'untrans__url', 'untrans__url_en', 'untrans__url_de'} == append_lookup_key(

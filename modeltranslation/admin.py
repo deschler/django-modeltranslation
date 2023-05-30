@@ -46,9 +46,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         return None
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
-        field = super().formfield_for_dbfield(
-            db_field, request, **kwargs
-        )
+        field = super().formfield_for_dbfield(db_field, request, **kwargs)
         self.patch_translation_field(db_field, field, request, **kwargs)
         return field
 
