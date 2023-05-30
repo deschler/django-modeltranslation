@@ -243,6 +243,21 @@ class MultilingualQuerySet(QuerySet):
                 new_args.append(rewrite_lookup_key(self.model, key))
         return super(MultilingualQuerySet, self).select_related(*new_args, **kwargs)
 
+    def update_or_create(self, defaults=None, **kwargs):
+        """
+        Updates or creates a database record with the specified kwargs. The method first
+        rewrites the keys in the defaults dictionary using a custom function named
+        `rewrite_lookup_key`. This ensures that the keys are valid for the current model
+        before calling the inherited update_or_create() method from the super class.
+        Returns the updated or created model instance.
+        """
+        if defaults is not None:
+            rewritten_defaults = {}
+            for key, value in defaults.items():
+                rewritten_defaults[rewrite_lookup_key(self.model, key)] = value
+            defaults = rewritten_defaults
+        return super(MultilingualQuerySet, self).update_or_create(defaults=defaults, **kwargs)
+
     # This method was not present in django-linguo
     def _rewrite_col(self, col):
         """Django >= 1.7 column name rewriting"""

@@ -463,6 +463,29 @@ class ModeltranslationTest(ModeltranslationTestBase):
         )
         self._test_constructor(keywords)
 
+    def test_update_or_create(self):
+        """
+        Test that update_or_create works as expected
+        """
+        # Create new object
+        obj = models.TestModel.objects.create(title_de='old de', title_en='old en')
+
+        # Update existing object
+        obj_1, created = models.TestModel.objects.update_or_create(
+            pk=obj.pk, defaults={'title': 'NEW DE TITLE'}
+        )
+        assert created is False
+        assert obj_1.title == 'NEW DE TITLE'
+        assert obj_1.title_en == 'old en'
+        assert obj_1.title_de == 'NEW DE TITLE'
+
+        # Check that the translation fields are correctly saved and provide the
+        # correct value when retrieving them again.
+        obj_2 = models.TestModel.objects.get()
+        assert obj_2.title == 'NEW DE TITLE'
+        assert obj_2.title_en == 'old en'
+        assert obj_2.title_de == 'NEW DE TITLE'
+
 
 class ModeltranslationTransactionTest(ModeltranslationTransactionTestBase):
     def test_unique_nullable_field(self):
