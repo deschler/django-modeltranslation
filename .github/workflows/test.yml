@@ -43,13 +43,6 @@ jobs:
         python: ["3.8", "3.9", "3.10", "3.11"]
         django: ["3.2", "4.0", "4.2"]
         database: ["sqlite", "postgres", "mysql"]
-        include:
-          - python: "3.7"
-            django: "3.2"
-            database: "postgres"
-          - python: "3.7"
-            django: "3.2"
-            database: "postgres"
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       DJANGO: ${{ matrix.django }}

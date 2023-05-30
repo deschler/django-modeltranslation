@@ -171,7 +171,7 @@ class OtherFieldsModel(models.Model):
     genericip = models.GenericIPAddressField(blank=True, null=True)
 
 
-class FancyDescriptor(object):
+class FancyDescriptor:
     """
     Stupid demo descriptor, that store int in database and return string of that length on get.
     """
@@ -197,14 +197,14 @@ class FancyDescriptor(object):
 class FancyField(models.PositiveIntegerField):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('default', '')
-        super(FancyField, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def contribute_to_class(self, cls, name):
-        super(FancyField, self).contribute_to_class(cls, name)
+        super().contribute_to_class(cls, name)
         setattr(cls, self.name, FancyDescriptor(self))
 
     def pre_save(self, model_instance, add):
-        value = super(FancyField, self).pre_save(model_instance, add)
+        value = super().pre_save(model_instance, add)
         # In this part value should be retrieved using descriptor and be a string
         assert isinstance(value, str)
         # We put an int to database
@@ -242,7 +242,7 @@ class AbstractModelA(models.Model):
     titlea = models.CharField(gettext_lazy('title a'), max_length=255)
 
     def __init__(self, *args, **kwargs):
-        super(AbstractModelA, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.titlea = 'title_a'
 
     class Meta:
@@ -253,7 +253,7 @@ class AbstractModelB(AbstractModelA):
     titleb = models.CharField(gettext_lazy('title b'), max_length=255)
 
     def __init__(self, *args, **kwargs):
-        super(AbstractModelB, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.titleb = 'title_b'
 
 
@@ -335,7 +335,7 @@ class ThirdPartyRegisteredModel(models.Model):
 class FilteredManager(MultilingualManager):
     def get_queryset(self):
         # always return empty queryset
-        return super(FilteredManager, self).get_queryset().filter(pk=None)
+        return super().get_queryset().filter(pk=None)
 
 
 class FilteredTestModel(models.Model):
@@ -364,15 +364,10 @@ class ManagerTestModel(models.Model):
 
 class CustomManager(models.Manager):
     def get_queryset(self):
-        return (
-            super(CustomManager, self)
-            .get_queryset()
-            .filter(title__contains='a')
-            .exclude(description__contains='x')
-        )
+        return super().get_queryset().filter(title__contains='a').exclude(description__contains='x')
 
     def custom_qs(self):
-        return super(CustomManager, self).get_queryset()
+        return super().get_queryset()
 
     def foo(self):
         return 'bar'
