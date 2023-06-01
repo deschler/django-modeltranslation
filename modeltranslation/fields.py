@@ -21,6 +21,7 @@ SUPPORTED_FIELDS = (
     # Above implies also CommaSeparatedIntegerField, EmailField, FilePathField, SlugField
     # and URLField as they are subclasses of CharField.
     fields.TextField,
+    fields.json.JSONField,
     fields.IntegerField,
     # Above implies also BigIntegerField, SmallIntegerField, PositiveIntegerField and
     # PositiveSmallIntegerField, as they are subclasses of IntegerField.

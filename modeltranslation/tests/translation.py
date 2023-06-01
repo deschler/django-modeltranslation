@@ -136,6 +136,7 @@ class OtherFieldsModelTranslationOptions(TranslationOptions):
         'date',
         'datetime',
         'time',
+        'json',
     )
 
 
