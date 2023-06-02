@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [0.18.10-beta.1](https://github.com/deschler/django-modeltranslation/compare/v0.18.10-beta.0...v0.18.10-beta.1) (2023-06-02)
 
+
+### Bug Fixes
+
+* Add support for JSONField ([25f7305](https://github.com/deschler/django-modeltranslation/commit/25f73058f5f176a61c5368b7aee563874309687e)), closes [#685](https://github.com/deschler/django-modeltranslation/issues/685)
+
+### [0.18.10-beta.1](https://github.com/deschler/django-modeltranslation/compare/v0.18.10-beta.0...v0.18.10-beta.1) (2023-06-02)
+
 ### [0.18.10-beta.0](https://github.com/deschler/django-modeltranslation/compare/v0.18.9...v0.18.10-beta.0) (2023-05-30)
 
 
