@@ -56,12 +56,17 @@ Python 3 is supported since 0.7 release. Although 0.6 release supported Django 1
 Unittests
 *********
 
-Modeltranslation has a comprehensive test suite. A test runner is provided which
-allows to run the tests outside of a Django project:
+To test Modeltranslation, you can use the comprehensive test suite that comes
+with the package. First, make sure you have installed the project's requirements
+using Poetry. Once the requirements are installed,
+you can run the tests using pytest. This will run all of the tests in the test
+suite and report any failures or errors.
 
 .. code-block:: console
 
-    $ python runtests.py
+    $ pip install poetry
+    $ poetry install
+    $ poetry run pytest
 
 Non trivial changes and new features should always be accompanied by a unittest.
 Pull requests which add unittests for uncovered code or rare edge cases are also
@@ -71,10 +76,11 @@ appreciated.
 Continuous Integration
 **********************
 
-The project uses `Travis CI`_ for continuous integration tests. Hooks provided
-by Github are active, so that each push and pull request is automatically run
-against our `Travis CI config`_, checking code against different databases,
-Python and Django versions. This includes automatic tracking of test coverage
+The project uses `Github Actions`_ for continuous integration tests. Hooks
+provided by Github are active, so that each push and pull request is
+automatically run against our `Github Actions Workflows`_, checking code
+against different databases, Python and Django versions.
+This includes automatic tracking of test coverage
 through `Coveralls`_.
 
 .. image:: http://img.shields.io/coveralls/deschler/django-modeltranslation.png?style=flat
@@ -117,8 +123,8 @@ Please do not use the issue tracker for general questions, we run a dedicated
 .. _pyflakes: https://pypi.python.org/pypi/pyflakes
 .. _flake8: https://pypi.python.org/pypi/flake8
 .. _Github: https://github.com/deschler/django-modeltranslation
-.. _Travis CI: https://travis-ci.org/deschler/django-modeltranslation
-.. _Travis CI config: https://github.com/deschler/django-modeltranslation/blob/master/.travis.yml
+.. _Github Actions: https://travis-ci.org/deschler/django-modeltranslation
+.. _Github Actions Workflows: https://github.com/deschler/django-modeltranslation/blob/master/.github/workflows
 .. _Coveralls: https://coveralls.io/r/deschler/django-modeltranslation
 .. _reStructuredText: http://docutils.sourceforge.net/rst.html
 .. _Sphinx: http://sphinx-doc.org/
