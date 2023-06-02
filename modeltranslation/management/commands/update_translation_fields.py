@@ -81,7 +81,7 @@ class Command(BaseCommand):
                 def_lang_fieldname = build_localized_fieldname(field_name, lang)
 
                 # We'll only update fields which do not have an existing value
-                q = Q(**{def_lang_fieldname: None})
+                q = Q(**{f"{def_lang_fieldname}__isnull": True})
                 field = model._meta.get_field(field_name)
                 if isinstance(field, ManyToManyField):
                     trans_field = getattr(model, def_lang_fieldname)

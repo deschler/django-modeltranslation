@@ -169,6 +169,7 @@ class OtherFieldsModel(models.Model):
     datetime = models.DateTimeField(blank=True, null=True)
     time = models.TimeField(blank=True, null=True)
     genericip = models.GenericIPAddressField(blank=True, null=True)
+    json = models.JSONField(blank=True, null=True)
 
 
 class FancyDescriptor:
