@@ -8,6 +8,3 @@ publish: clean
 
 clean:
 	rm -rf dist
-
-test:
-	poetry run python ./runtests.py

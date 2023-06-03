@@ -8,21 +8,23 @@ Requirements
 
 Which Modeltranslation version is required for given Django-Python combination to work?
 
-======= ==== ==== ==== ==== ==== ==== ==== ==== ====
+======= ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ====
 Python  Django
-------- --------------------------------------- ----
-version 1.8  1.9  1.10 1.11 2.0  2.1  2.2  3.0  3.2
-======= ==== ==== ==== ==== ==== ==== ==== ==== ====
+------- -----------------------------------------------------------
+version 1.8  1.9  1.10 1.11 2.0  2.1  2.2  3.0  3.2  4.0  4.1  4.2
+======= ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ====
 2.7     |9|  |11| |12| |13|
 3.2     |9|
 3.3     |9|
 3.4     |9|  |11| |12| |13| |13|
 3.5     |9|  |11| |12| |13| |13| |13|
-3.6                    |13| |13| |13| |15| |15| |17|
-3.7                         |13| |13| |15| |15| |17|
-3.8                         |13| |13| |15| |15| |17|
-3.9                         |13| |13| |15| |15| |17|
-======= ==== ==== ==== ==== ==== ==== ==== ==== ====
+3.6                    |13| |13| |13| |15| |15| |17| |17| |17| |18|
+3.7                         |13| |13| |15| |15| |17| |17| |17| |18|
+3.8                         |13| |13| |15| |15| |17| |17| |17| |18|
+3.9                         |13| |13| |15| |15| |17| |17| |17| |18|
+3.10                        |13| |13| |15| |15| |17| |17| |17| |18|
+3.11                        |13| |13| |15| |15| |17| |17| |17| |18|
+======= ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ====
 
 (``-X`` denotes "up to version X", whereas ``X+`` means "from version X upwards")
 
@@ -32,6 +34,7 @@ version 1.8  1.9  1.10 1.11 2.0  2.1  2.2  3.0  3.2
 .. |13| replace:: 0.13+
 .. |15| replace:: 0.15+
 .. |17| replace:: 0.17+
+.. |18| replace:: 0.18+
 
 Using Pip
 ---------
@@ -77,10 +80,6 @@ in detail in the following sections:
 
    .. note:: This only applies if the models registered in ``translation.py`` haven't been
              synced to the database before. If they have, please read :ref:`db-fields`.
-
-   .. note:: If you are using Django 1.7 and its internal migration system, run
-             ``python manage.py makemigrations``, followed by
-             ``python manage.py migrate`` instead. See :ref:`migrations` for details.
 
 
 Configuration
