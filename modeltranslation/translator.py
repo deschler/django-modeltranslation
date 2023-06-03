@@ -5,7 +5,7 @@ import django
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import ForeignKey, Manager, ManyToManyField, OneToOneField, options
 from django.db.models.base import ModelBase
-from django.db.models.signals import post_init
+from django.db.models.signals import post_init, pre_save
 from django.utils.functional import cached_property
 
 from modeltranslation import settings as mt_settings
@@ -25,6 +25,7 @@ from modeltranslation.manager import (
 )
 from modeltranslation.thread_context import auto_populate_mode
 from modeltranslation.utils import build_localized_fieldname, parse_field
+from modeltranslation.signals import delete_mt_init, populate_update_fields
 
 
 class AlreadyRegistered(Exception):
@@ -280,11 +281,6 @@ def patch_constructor(model):
     model.__init__ = new_init
 
 
-def delete_mt_init(sender, instance, **kwargs):
-    if hasattr(instance, '_mt_init'):
-        del instance._mt_init
-
-
 def patch_clean_fields(model):
     """
     Patch clean_fields method to handle different form types submission.
@@ -523,6 +519,7 @@ class Translator:
 
         # Connect signal for model
         post_init.connect(delete_mt_init, sender=model)
+        pre_save.connect(populate_update_fields, sender=model)
 
         # Patch clean_fields to verify form field clearing
         patch_clean_fields(model)

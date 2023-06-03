@@ -489,6 +489,39 @@ class ModeltranslationTest(ModeltranslationTestBase):
         assert instance.title_en == 'old en'
         assert instance.title_de == 'old de'
 
+    def test_save_with_update_fields(self):
+        """
+        Test that save with update_fields works as expected
+        """
+        instance = models.TestModel.objects.create(title_de='old de', title_en='old en')
+
+        instance.title = 'NEW DE TITLE'
+        instance.save(update_fields=['title'])
+
+        instance.refresh_from_db()
+
+        assert instance.title == 'NEW DE TITLE'
+        assert instance.title_en == 'old en'
+        assert instance.title_de == 'NEW DE TITLE'
+
+        instance.title = 'NEW DE TITLE 2'
+
+        with self.assertNumQueries(1):
+            instance.save(update_fields=['title', 'title_de'])
+
+        instance.refresh_from_db()
+        assert instance.title == 'NEW DE TITLE 2'
+        assert instance.title_en == 'old en'
+        assert instance.title_de == 'NEW DE TITLE 2'
+
+        instance.title_en = 'NEW EN TITLE'
+        instance.save(update_fields=['title_en'])
+
+        instance.refresh_from_db()
+        assert instance.title == 'NEW DE TITLE 2'
+        assert instance.title_en == 'NEW EN TITLE'
+        assert instance.title_de == 'NEW DE TITLE 2'
+
 
 class ModeltranslationTransactionTest(ModeltranslationTransactionTestBase):
     def test_unique_nullable_field(self):
