@@ -56,7 +56,7 @@ jobs:
       POSTGRES_PASSWORD: "modeltranslation"
     services:
       mariadb:
-        image: mariadb
+        image: mariadb:10
         ports:
           - 3306:3306
         env:
