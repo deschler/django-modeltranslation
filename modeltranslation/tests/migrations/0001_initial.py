@@ -2,8 +2,9 @@
 
 import django.contrib.auth.models
 import django.core.validators
-from django.db import migrations, models
 import django.db.models.deletion
+from django.db import migrations, models
+
 import modeltranslation.tests.models
 
 
@@ -464,6 +465,9 @@ class Migration(migrations.Migration):
                 ('genericip', models.GenericIPAddressField(blank=True, null=True)),
                 ('genericip_de', models.GenericIPAddressField(blank=True, null=True)),
                 ('genericip_en', models.GenericIPAddressField(blank=True, null=True)),
+                ('json', models.JSONField(blank=True, null=True)),
+                ('json_de', models.JSONField(blank=True, null=True)),
+                ('json_en', models.JSONField(blank=True, null=True)),
             ],
         ),
         migrations.CreateModel(

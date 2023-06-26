@@ -1,6 +1,4 @@
-from __future__ import unicode_literals
-
-from django.forms.widgets import Media, Widget, CheckboxInput
+from django.forms.widgets import CheckboxInput, Media, Widget
 from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _

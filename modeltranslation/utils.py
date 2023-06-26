@@ -2,14 +2,15 @@ from contextlib import contextmanager
 
 from django.db import models
 from django.utils.encoding import force_str
+from django.utils.functional import lazy
 from django.utils.translation import get_language as _get_language
 from django.utils.translation import get_language_info
-from django.utils.functional import lazy
+
 from modeltranslation import settings
 from modeltranslation.thread_context import (
+    fallbacks_enabled,
     set_auto_populate,
     set_enable_fallbacks,
-    fallbacks_enabled,
 )
 
 

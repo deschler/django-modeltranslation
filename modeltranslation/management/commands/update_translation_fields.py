@@ -1,10 +1,11 @@
-# -*- coding: utf-8 -*-
-from django.db.models import F, Q, ManyToManyField
 from django.core.management.base import BaseCommand, CommandError
+from django.db.models import F, ManyToManyField, Q
 
 from modeltranslation.settings import AVAILABLE_LANGUAGES, DEFAULT_LANGUAGE
 from modeltranslation.translator import translator
 from modeltranslation.utils import build_localized_fieldname
+
+COMMASPACE = ", "
 
 
 COMMASPACE = ", "
@@ -83,7 +84,7 @@ class Command(BaseCommand):
                 def_lang_fieldname = build_localized_fieldname(field_name, lang)
 
                 # We'll only update fields which do not have an existing value
-                q = Q(**{def_lang_fieldname: None})
+                q = Q(**{f"{def_lang_fieldname}__isnull": True})
                 field = model._meta.get_field(field_name)
                 if isinstance(field, ManyToManyField):
                     trans_field = getattr(model, def_lang_fieldname)

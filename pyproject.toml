@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "django-modeltranslation"
-version = "0.16.1"
+version = "0.18.10"
 description = "Translates Django models using a registration approach."
 authors = ["Peter Eschler <peschler@gmail.com>"]
 maintainers = ["Serhii Tereshchenko <serg.partizan@gmail.com>"]
@@ -9,7 +9,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.7,<4"
+python = ">=3.8,<4"
 django = ">=3.2"
 typing-extensions = "*"
 

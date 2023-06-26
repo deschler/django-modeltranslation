@@ -49,11 +49,11 @@ class reload_override_settings(override_settings):
     """Context manager that not only override settings, but also reload modeltranslation conf."""
 
     def __enter__(self):
-        super(reload_override_settings, self).__enter__()
+        super().__enter__()
         importlib.reload(mt_settings)
 
     def __exit__(self, exc_type, exc_value, traceback):
-        super(reload_override_settings, self).__exit__(exc_type, exc_value, traceback)
+        super().__exit__(exc_type, exc_value, traceback)
         importlib.reload(mt_settings)
 
 
@@ -120,7 +120,7 @@ class TestAutodiscover(ModeltranslationTestBase):
     # class B settings would be overwritten by class A settings (if some keys clash).
     # To solve this, override some settings after parents ``_pre_setup`` is called.
     def _pre_setup(self):
-        super(TestAutodiscover, self)._pre_setup()
+        super()._pre_setup()
         # Add test_app to INSTALLED_APPS
         new_installed_apps = django_settings.INSTALLED_APPS + ('modeltranslation.tests.test_app',)
         self.__override = override_settings(INSTALLED_APPS=new_installed_apps)
@@ -129,7 +129,7 @@ class TestAutodiscover(ModeltranslationTestBase):
     def _post_teardown(self):
         self.__override.disable()
         importlib.reload(mt_settings)  # restore mt_settings.FALLBACK_LANGUAGES
-        super(TestAutodiscover, self)._post_teardown()
+        super()._post_teardown()
 
     def tearDown(self):
         # Rollback model classes
@@ -140,7 +140,7 @@ class TestAutodiscover(ModeltranslationTestBase):
         # Delete translation modules from import cache
         sys.modules.pop('modeltranslation.tests.test_app.translation', None)
         sys.modules.pop('modeltranslation.tests.project_translation', None)
-        super(TestAutodiscover, self).tearDown()
+        super().tearDown()
 
     def check_news(self):
         from .test_app.models import News
@@ -286,13 +286,13 @@ class ModeltranslationTest(ModeltranslationTestBase):
         assert hash(orig) != hash(en)
         assert hash(orig) != hash(de)
         assert hash(en) != hash(de)
-        assert 3 == len(set([orig, en, de]))
+        assert 3 == len({orig, en, de})
         # TranslationFields can compare equal if they have the same language
         de.language = 'en'
         assert orig != de
         assert en == de
         assert hash(en) == hash(de)
-        assert 2 == len(set([orig, en, de]))
+        assert 2 == len({orig, en, de})
         de.language = 'de'
 
     def test_set_translation(self):
@@ -463,6 +463,32 @@ class ModeltranslationTest(ModeltranslationTestBase):
         )
         self._test_constructor(keywords)
 
+    def test_update_or_create_existing(self):
+        """
+        Test that update_or_create works as expected
+        """
+        obj = models.TestModel.objects.create(title_de='old de', title_en='old en')
+
+        instance, created = models.TestModel.objects.update_or_create(
+            pk=obj.pk, defaults={'title': 'NEW DE TITLE'}
+        )
+
+        assert created is False
+        assert instance.title == 'NEW DE TITLE'
+        assert instance.title_en == 'old en'
+        assert instance.title_de == 'NEW DE TITLE'
+
+    def test_update_or_create_new(self):
+        instance, created = models.TestModel.objects.update_or_create(
+            pk=1,
+            defaults={'title_de': 'old de', 'title_en': 'old en'},
+        )
+
+        assert created is True
+        assert instance.title == 'old de'
+        assert instance.title_en == 'old en'
+        assert instance.title_de == 'old de'
+
 
 class ModeltranslationTransactionTest(ModeltranslationTransactionTestBase):
     def test_unique_nullable_field(self):
@@ -616,7 +642,7 @@ class FileFieldsTest(ModeltranslationTestBase):
             tests_dir = default_storage.path('modeltranslation_tests')
             if os.path.isdir(tests_dir):
                 shutil.rmtree(tests_dir)
-        super(FileFieldsTest, self).tearDown()
+        super().tearDown()
 
     def test_translated_models(self):
         field_names = dir(models.FileFieldsModel())
@@ -719,7 +745,7 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
     def setUpClass(cls):
         # 'model' attribute cannot be assigned to class in its definition,
         # because ``models`` module will be reloaded and hence class would use old model classes.
-        super(ForeignKeyFieldsTest, cls).setUpClass()
+        super().setUpClass()
         cls.model = models.ForeignKeyModel
 
     def test_translated_models(self):
@@ -999,7 +1025,7 @@ class ManyToManyFieldsTest(ModeltranslationTestBase):
     def setUpClass(cls):
         # 'model' attribute cannot be assigned to class in its definition,
         # because ``models`` module will be reloaded and hence class would use old model classes.
-        super(ManyToManyFieldsTest, cls).setUpClass()
+        super().setUpClass()
         cls.model = models.ManyToManyFieldModel
 
     def test_translated_models(self):
@@ -1045,19 +1071,15 @@ class ManyToManyFieldsTest(ModeltranslationTestBase):
 
     def test_translated_models_instance(self):
         models.TestModel.objects.bulk_create(
-            (
-                models.TestModel(title_en='m2m_test_%s_en' % i, title_de='m2m_test_%s_de' % i)
-                for i in range(10)
-            )
+            models.TestModel(title_en='m2m_test_%s_en' % i, title_de='m2m_test_%s_de' % i)
+            for i in range(10)
         )
         self.model.objects.bulk_create(
-            (
-                self.model(title_en='m2m_test_%s_en' % i, title_de='m2m_test_%s_de' % i)
-                for i in range(10)
-            )
+            self.model(title_en='m2m_test_%s_en' % i, title_de='m2m_test_%s_de' % i)
+            for i in range(10)
         )
         models.NonTranslated.objects.bulk_create(
-            (models.NonTranslated(title='m2m_test_%s' % i) for i in range(10))
+            models.NonTranslated(title='m2m_test_%s' % i) for i in range(10)
         )
 
         testmodel_qs = models.TestModel.objects.all()
@@ -1173,19 +1195,15 @@ class ManyToManyFieldsTest(ModeltranslationTestBase):
 
     def test_reverse_relations(self):
         models.TestModel.objects.bulk_create(
-            (
-                models.TestModel(title_en='m2m_test_%s_en' % i, title_de='m2m_test_%s_de' % i)
-                for i in range(10)
-            )
+            models.TestModel(title_en='m2m_test_%s_en' % i, title_de='m2m_test_%s_de' % i)
+            for i in range(10)
         )
         self.model.objects.bulk_create(
-            (
-                self.model(title_en='m2m_test_%s_en' % i, title_de='m2m_test_%s_de' % i)
-                for i in range(10)
-            )
+            self.model(title_en='m2m_test_%s_en' % i, title_de='m2m_test_%s_de' % i)
+            for i in range(10)
         )
         models.NonTranslated.objects.bulk_create(
-            (models.NonTranslated(title='m2m_test_%s' % i) for i in range(10))
+            models.NonTranslated(title='m2m_test_%s' % i) for i in range(10)
         )
         inst_both = self.model(title_en="inst_both_en", title_de="inst_both_de")
         inst_both.save()
@@ -1277,7 +1295,7 @@ class OneToOneFieldsTest(ForeignKeyFieldsTest):
     def setUpClass(cls):
         # 'model' attribute cannot be assigned to class in its definition,
         # because ``models`` module will be reloaded and hence class would use old model classes.
-        super(OneToOneFieldsTest, cls).setUpClass()
+        super().setUpClass()
         cls.model = models.OneToOneFieldModel
 
     def test_uniqueness(self):
@@ -1456,6 +1474,9 @@ class OtherFieldsTest(ModeltranslationTestBase):
         assert 'decimal' in field_names
         assert 'decimal_de' in field_names
         assert 'decimal_en' in field_names
+        assert 'json' in field_names
+        assert 'json_de' in field_names
+        assert 'json_en' in field_names
         inst.delete()
 
     def test_translated_models_integer_instance(self):
@@ -2197,16 +2218,39 @@ class UpdateCommandTest(ModeltranslationTestBase):
         with pytest.raises(CommandError):
             call_command('update_translation_fields', language='xx', verbosity=0)
 
+    def test_update_command_with_json_field(self):
+        """
+        Test that the update_translation_fields command works with JSON fields.
+        """
+        instance_pk = models.OtherFieldsModel.objects.create(json={'foo': 'bar'}).pk
+        models.OtherFieldsModel.objects.all().rewrite(False).update(json_de=None)
+
+        instance = models.OtherFieldsModel.objects.filter(pk=instance_pk).raw_values()[0]
+
+        assert instance['json'] == {'foo': 'bar'}
+        assert instance['json_de'] is None
+        assert instance['json_en'] is None
+
+        call_command(
+            'update_translation_fields', 'tests', model_name='OtherFieldsModel', verbosity=0
+        )
+
+        instance = models.OtherFieldsModel.objects.filter(pk=instance_pk).raw_values()[0]
+
+        assert instance['json'] == {'foo': 'bar'}
+        assert instance['json_de'] == {'foo': 'bar'}
+        assert instance['json_en'] is None
+
 
 class TranslationAdminTest(ModeltranslationTestBase):
     def setUp(self):
-        super(TranslationAdminTest, self).setUp()
+        super().setUp()
         self.test_obj = models.TestModel.objects.create(title='Testtitle', text='Testtext')
         self.site = AdminSite()
 
     def tearDown(self):
         self.test_obj.delete()
-        super(TranslationAdminTest, self).tearDown()
+        super().tearDown()
 
     def test_default_fields(self):
         class TestModelAdmin(admin.TranslationAdmin):
@@ -2434,9 +2478,7 @@ class TranslationAdminTest(ModeltranslationTestBase):
                 if isinstance(db_field, TextField):
                     kwargs["widget"] = forms.Textarea(attrs={'myprop': 'myval'})
                     return db_field.formfield(**kwargs)
-                return super(TestModelAdmin, self).formfield_for_dbfield(
-                    db_field, request, **kwargs
-                )
+                return super().formfield_for_dbfield(db_field, request, **kwargs)
 
         ma = TestModelAdmin(models.TestModel, self.site)
         fields = ['text_de', 'text_en']
@@ -2707,7 +2749,7 @@ class ThirdPartyAppIntegrationTest(ModeltranslationTestBase):
     def setUpClass(cls):
         # 'model' attribute cannot be assigned to class in its definition,
         # because ``models`` module will be reloaded and hence class would use old model classes.
-        super(ThirdPartyAppIntegrationTest, cls).setUpClass()
+        super().setUpClass()
         cls.model = models.ThirdPartyModel
 
     def test_form(self):
@@ -2728,14 +2770,14 @@ class ThirdPartyAppIntegrationRegisteredTest(ThirdPartyAppIntegrationTest):
 
     @classmethod
     def setUpClass(cls):
-        super(ThirdPartyAppIntegrationRegisteredTest, cls).setUpClass()
+        super().setUpClass()
         cls.model = models.ThirdPartyRegisteredModel
 
 
 class TestManager(ModeltranslationTestBase):
     def setUp(self):
         # In this test case the default language is en, not de.
-        super(TestManager, self).setUp()
+        super().setUp()
         trans_real.activate('en')
 
     def test_filter_update(self):
@@ -3359,34 +3401,30 @@ class TestManager(ModeltranslationTestBase):
     def test_translation_fields_appending(self):
         from modeltranslation.manager import append_lookup_key, append_lookup_keys
 
-        assert set(['untrans']) == append_lookup_key(models.ForeignKeyModel, 'untrans')
-        assert set(['title', 'title_en', 'title_de']) == append_lookup_key(
+        assert {'untrans'} == append_lookup_key(models.ForeignKeyModel, 'untrans')
+        assert {'title', 'title_en', 'title_de'} == append_lookup_key(
             models.ForeignKeyModel, 'title'
         )
-        assert set(['test', 'test_en', 'test_de']) == append_lookup_key(
-            models.ForeignKeyModel, 'test'
-        )
-        assert set(['title__eq', 'title_en__eq', 'title_de__eq']) == append_lookup_key(
+        assert {'test', 'test_en', 'test_de'} == append_lookup_key(models.ForeignKeyModel, 'test')
+        assert {'title__eq', 'title_en__eq', 'title_de__eq'} == append_lookup_key(
             models.ForeignKeyModel, 'title__eq'
         )
-        assert set(['test__smt', 'test_en__smt', 'test_de__smt']) == append_lookup_key(
+        assert {'test__smt', 'test_en__smt', 'test_de__smt'} == append_lookup_key(
             models.ForeignKeyModel, 'test__smt'
         )
-        big_set = set(
-            [
-                'test__url',
-                'test__url_en',
-                'test__url_de',
-                'test_en__url',
-                'test_en__url_en',
-                'test_en__url_de',
-                'test_de__url',
-                'test_de__url_en',
-                'test_de__url_de',
-            ]
-        )
+        big_set = {
+            'test__url',
+            'test__url_en',
+            'test__url_de',
+            'test_en__url',
+            'test_en__url_en',
+            'test_en__url_de',
+            'test_de__url',
+            'test_de__url_en',
+            'test_de__url_de',
+        }
         assert big_set == append_lookup_key(models.ForeignKeyModel, 'test__url')
-        assert set(['untrans__url', 'untrans__url_en', 'untrans__url_de']) == append_lookup_key(
+        assert {'untrans__url', 'untrans__url_en', 'untrans__url_de'} == append_lookup_key(
             models.ForeignKeyModel, 'untrans__url'
         )
 
@@ -3548,7 +3586,7 @@ class TestRequired(ModeltranslationTestBase):
             inst.full_clean()
         except ValidationError as e:
             error_fields = set(e.message_dict.keys())
-            assert set(('req_reg_en', 'req_en_reg', 'req_en_reg_en')) == error_fields
+            assert {'req_reg_en', 'req_en_reg', 'req_en_reg_en'} == error_fields
         else:
             self.fail('ValidationError not raised!')
 

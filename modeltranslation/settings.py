@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
-
 TRANSLATION_FILES = tuple(getattr(settings, "MODELTRANSLATION_TRANSLATION_FILES", ()))
 
 AVAILABLE_LANGUAGES = list(
