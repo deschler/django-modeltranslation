@@ -48,7 +48,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         self.patch_translation_field(db_field, field, request, **kwargs)
         return field
 
-    def patch_translation_field(self, db_field, field, **kwargs):
+    def patch_translation_field(self, db_field, field, request, **kwargs):
         if db_field.name in self.trans_opts.fields:
             if field.required:
                 field.required = False

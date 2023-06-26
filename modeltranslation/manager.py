@@ -69,21 +69,17 @@ def append_fallback(model, fields):
     If translated field is encountered, add also all its fallback fields.
     Returns tuple: (set_of_new_fields_to_use, set_of_translated_field_names)
     """
-    from django.db.models.constants import LOOKUP_SEP
+    fields = set(fields)
+    trans = set()
     from modeltranslation.translator import translator
 
     opts = translator.get_options_for_model(model)
     for key, _ in opts.fields.items():
         if key in fields:
             langs = resolution_order(get_language(), getattr(model, key).fallback_languages)
-            index = fields_index(key)
-            for lang in langs:
-                d = build_localized_fieldname(key, lang)
-                if d not in fields:
-                    fields_insert(index + 1, d)
-                    index += 1
-            fields_remove(key)
-            trans_append(key)
+            fields = fields.union(build_localized_fieldname(key, lang) for lang in langs)
+            fields.remove(key)
+            trans.add(key)
     return fields, trans
 
 
@@ -509,8 +505,6 @@ class FallbackValuesIterable(ValuesIterable):
         pass
 
     def __iter__(self):
-        from django.db.models.constants import LOOKUP_SEP
-
         instance = self.X()
 
         fields = self.queryset.original_fields
