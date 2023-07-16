@@ -29,7 +29,7 @@ def _get_database_config():
             {
                 'ENGINE': 'django.db.backends.postgresql',
                 'USER': os.getenv('POSTGRES_USER', 'postgres'),
-                'PASSWORD': os.getenv('POSTGRES_DB', 'postgres'),
+                'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'postgres'),
                 'NAME': os.getenv('POSTGRES_DB', 'modeltranslation'),
                 'HOST': host,
             }

@@ -6,11 +6,13 @@ https://github.com/zmathew/django-linguo
 """
 import itertools
 from functools import reduce
+from typing import List, Tuple, Type, Any, Optional
 
 from django import VERSION
 from django.contrib.admin.utils import get_model_from_relation
 from django.core.exceptions import FieldDoesNotExist
 from django.db import models
+from django.db.models import Field, Model
 from django.db.models.expressions import Col
 from django.db.models.lookups import Lookup
 from django.db.models.query import QuerySet, ValuesIterable
@@ -243,21 +245,6 @@ class MultilingualQuerySet(QuerySet):
                 new_args.append(rewrite_lookup_key(self.model, key))
         return super().select_related(*new_args, **kwargs)
 
-    def update_or_create(self, defaults=None, **kwargs):
-        """
-        Updates or creates a database record with the specified kwargs. The method first
-        rewrites the keys in the defaults dictionary using a custom function named
-        `rewrite_lookup_key`. This ensures that the keys are valid for the current model
-        before calling the inherited update_or_create() method from the super class.
-        Returns the updated or created model instance.
-        """
-        if defaults is not None:
-            rewritten_defaults = {}
-            for key, value in defaults.items():
-                rewritten_defaults[rewrite_lookup_key(self.model, key)] = value
-            defaults = rewritten_defaults
-        return super().update_or_create(defaults=defaults, **kwargs)
-
     # This method was not present in django-linguo
     def _rewrite_col(self, col):
         """Django >= 1.7 column name rewriting"""
@@ -385,6 +372,27 @@ class MultilingualQuerySet(QuerySet):
         return super().update(**kwargs)
 
     update.alters_data = True
+
+    def _update(self, values: List[Tuple[Field, Optional[Type[Model]], Any]]):
+        """
+        This method is called in .save() method to update an existing record.
+        Here we force to update translation fields as well if the original
+        field only is passed in `save()` in argument `update_fields`.
+        """
+        # TODO: Should the original field (field without lang code suffix) be updated
+        # when only the default translation field (`field_<DEFAULT_LANG_CODE>`) is passed in `update_fields`?
+        # Currently, we don't synchronize values of the original and default translation fields in that case.
+        field_names_to_update = {field.name for field, *_ in values}
+
+        translation_values = []
+        for field, model, value in values:
+            translation_field_name = rewrite_lookup_key(self.model, field.name)
+            if translation_field_name not in field_names_to_update:
+                translatable_field = self.model._meta.get_field(translation_field_name)
+                translation_values.append((translatable_field, model, value))
+
+        values += translation_values
+        return super()._update(values)
 
     # This method was not present in django-linguo
     @property

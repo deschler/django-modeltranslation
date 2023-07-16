@@ -22,6 +22,7 @@ from django.db.models.functions import Cast
 from django.test import TestCase, TransactionTestCase
 from django.test.utils import override_settings
 from django.utils.translation import get_language, override, trans_real
+from parameterized import parameterized
 
 from modeltranslation import admin
 from modeltranslation import settings as mt_settings
@@ -77,6 +78,20 @@ def get_field_names(model):
         if hasattr(field, 'attname'):
             names.add(field.attname)
     return names
+
+
+def assert_db_record(instance, **expected_fields):
+    """
+    Compares field values stored in the db.
+    """
+    actual = (
+        type(instance)
+        .objects.rewrite(False)
+        .filter(pk=instance.pk)
+        .values(*expected_fields.keys())
+        .first()
+    )
+    assert actual == expected_fields
 
 
 class ModeltranslationTransactionTestBase(TransactionTestCase):
@@ -358,6 +373,7 @@ class ModeltranslationTest(ModeltranslationTestBase):
         assert n.title == title_de
         assert n.title_en == title_en
         assert n.title_de == title_de
+        assert_db_record(n, title=title_de, title_de=title_de, title_en=title_en)
 
         # Queries are also language-aware:
         assert 1 == models.TestModel.objects.filter(title=title_de).count()
@@ -463,6 +479,89 @@ class ModeltranslationTest(ModeltranslationTestBase):
         )
         self._test_constructor(keywords)
 
+    @parameterized.expand(
+        [
+            ({'title': 'DE'}, ['title'], {'title': 'DE', 'title_de': 'DE', 'title_en': None}),
+            ({'title_de': 'DE'}, ['title'], {'title': 'DE', 'title_de': 'DE', 'title_en': None}),
+            ({'title': 'DE'}, ['title_de'], {'title': 'old', 'title_de': 'DE', 'title_en': None}),
+            (
+                {'title_de': 'DE'},
+                ['title_de'],
+                {'title': 'old', 'title_de': 'DE', 'title_en': None},
+            ),
+            (
+                {'title': 'DE', 'title_en': 'EN'},
+                ['title', 'title_en'],
+                {'title': 'DE', 'title_de': 'DE', 'title_en': 'EN'},
+            ),
+            (
+                {'title_de': 'DE', 'title_en': 'EN'},
+                ['title_de', 'title_en'],
+                {'title': 'old', 'title_de': 'DE', 'title_en': 'EN'},
+            ),
+            (
+                {'title_de': 'DE', 'title_en': 'EN'},
+                ['title', 'title_de', 'title_en'],
+                {'title': 'DE', 'title_de': 'DE', 'title_en': 'EN'},
+            ),
+        ]
+    )
+    def test_save_original_translation_field(self, field_values, update_fields, expected_db_values):
+        obj = models.TestModel.objects.create(title='old')
+
+        for field, value in field_values.items():
+            setattr(obj, field, value)
+
+        obj.save(update_fields=update_fields)
+        assert_db_record(obj, **expected_db_values)
+
+    @parameterized.expand(
+        [
+            ({'title': 'EN'}, ['title'], {'title': 'EN', 'title_de': None, 'title_en': 'EN'}),
+            ({'title_en': 'EN'}, ['title'], {'title': 'EN', 'title_de': None, 'title_en': 'EN'}),
+            ({'title': 'EN'}, ['title_en'], {'title': 'old', 'title_de': None, 'title_en': 'EN'}),
+            (
+                {'title_en': 'EN'},
+                ['title_en'],
+                {'title': 'old', 'title_de': None, 'title_en': 'EN'},
+            ),
+            (
+                {'title': 'EN', 'title_de': 'DE'},
+                ['title', 'title_de'],
+                {'title': 'EN', 'title_de': 'DE', 'title_en': 'EN'},
+            ),
+            (
+                {'title_de': 'DE', 'title_en': 'EN'},
+                ['title_de', 'title_en'],
+                {'title': 'old', 'title_de': 'DE', 'title_en': 'EN'},
+            ),
+            (
+                {'title_de': 'DE', 'title_en': 'EN'},
+                ['title', 'title_de', 'title_en'],
+                {'title': 'EN', 'title_de': 'DE', 'title_en': 'EN'},
+            ),
+        ]
+    )
+    def test_save_active_translation_field(self, field_values, update_fields, expected_db_values):
+        with override('en'):
+            obj = models.TestModel.objects.create(title='old')
+
+            for field, value in field_values.items():
+                setattr(obj, field, value)
+
+            obj.save(update_fields=update_fields)
+            assert_db_record(obj, **expected_db_values)
+
+    def test_save_non_original_translation_field(self):
+        obj = models.TestModel.objects.create(title='old')
+
+        obj.title_en = 'en value'
+        obj.save(update_fields=['title'])
+        assert_db_record(obj, title='old', title_de='old', title_en=None)
+
+        obj.save(update_fields=['title_en'])
+        assert_db_record(obj, title='old', title_de='old', title_en='en value')
+
     def test_update_or_create_existing(self):
         """
         Test that update_or_create works as expected
@@ -477,6 +576,43 @@ class ModeltranslationTest(ModeltranslationTestBase):
         assert instance.title == 'NEW DE TITLE'
         assert instance.title_en == 'old en'
         assert instance.title_de == 'NEW DE TITLE'
+        assert_db_record(
+            instance,
+            title='NEW DE TITLE',
+            title_en='old en',
+            title_de='NEW DE TITLE',
+        )
+
+        instance, created = models.TestModel.objects.update_or_create(
+            pk=obj.pk, defaults={'title_de': 'NEW DE TITLE 2'}
+        )
+
+        assert created is False
+        assert instance.title == 'NEW DE TITLE 2'
+        assert instance.title_en == 'old en'
+        assert instance.title_de == 'NEW DE TITLE 2'
+        assert_db_record(
+            instance,
+            # title='NEW DE TITLE',  # TODO: django < 4.2 doesn't pass `"title"` into `.save(update_fields)`
+            title_en='old en',
+            title_de='NEW DE TITLE 2',
+        )
+
+        with override('en'):
+            instance, created = models.TestModel.objects.update_or_create(
+                pk=obj.pk, defaults={'title': 'NEW EN TITLE'}
+            )
+
+            assert created is False
+            assert instance.title == 'NEW EN TITLE'
+            assert instance.title_en == 'NEW EN TITLE'
+            assert instance.title_de == 'NEW DE TITLE 2'
+            assert_db_record(
+                instance,
+                title='NEW EN TITLE',
+                title_en='NEW EN TITLE',
+                title_de='NEW DE TITLE 2',
+            )
 
     def test_update_or_create_new(self):
         instance, created = models.TestModel.objects.update_or_create(
@@ -488,6 +624,12 @@ class ModeltranslationTest(ModeltranslationTestBase):
         assert instance.title == 'old de'
         assert instance.title_en == 'old en'
         assert instance.title_de == 'old de'
+        assert_db_record(
+            instance,
+            title='old de',
+            title_en='old en',
+            title_de='old de',
+        )
 
 
 class ModeltranslationTransactionTest(ModeltranslationTransactionTestBase):
