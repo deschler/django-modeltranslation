@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.18.11](https://github.com/deschler/django-modeltranslation/compare/v0.18.10...v0.18.11) (2023-07-16)
+
+
+### Features
+
+* extend update_fields with translation fields in Model.save() ([#687](https://github.com/deschler/django-modeltranslation/issues/687)) ([d86c6de](https://github.com/deschler/django-modeltranslation/commit/d86c6defc864b3493955a41f95a85fc5aa8d5649))
+
 ### [0.18.10](https://github.com/deschler/django-modeltranslation/compare/v0.18.10-beta.0...v0.18.10) (2023-06-02)
 
 
