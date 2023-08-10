@@ -520,3 +520,28 @@ class ModelY(AbstractModelY):
 
 class InheritedPermission(Permission):
     translated_var = models.CharField(max_length=255)
+
+
+# Models for specic language tests
+
+
+class SpecificLanguageModelX(models.Model):
+    title_x = models.CharField(max_length=255, default='')
+    text = models.TextField(blank=True, null=True)
+
+
+class SpecificLanguageModelY(models.Model):
+    title_y = models.CharField(max_length=255, default='')
+    text = models.TextField(blank=True, null=True)
+
+
+class SpecificLanguageModelRegisterX(models.Model):
+    title_x = models.CharField(max_length=255, default='')
+    text = models.TextField(blank=True, null=True)
+    slug = models.SlugField(blank=True, null=True)
+
+
+class SpecificLanguageModelRegisterY(models.Model):
+    title_y = models.CharField(max_length=255, default='')
+    text = models.TextField(blank=True, null=True)
+    slug = models.SlugField(blank=True, null=True)

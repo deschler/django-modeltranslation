@@ -43,7 +43,7 @@ from modeltranslation.utils import (
 request = None
 
 # How many models are registered for tests.
-TEST_MODELS = 40
+TEST_MODELS = 44
 
 
 class reload_override_settings(override_settings):
@@ -3786,3 +3786,47 @@ class InheritedPermissionTestCase(ModeltranslationTestBase):
         ), "Permission is using MultilingualManager"
         user = User.objects.create(username='123', is_active=True)
         user.has_perm('test_perm')
+
+
+class SpecificLanguageModelTestCase(ModeltranslationTestBase):
+    def test_class_field(self):
+        models.SpecificLanguageModelX.objects.create(title_x_de="foo", text="bar")
+        models.SpecificLanguageModelX.objects.create(title_x_de="foo")
+
+        y_foo = models.SpecificLanguageModelX.objects.filter(title_x_de="foo")
+        assert 2 == y_foo.count()
+
+        y_baz = models.SpecificLanguageModelX.objects.filter(title_x_de="baz")
+        assert 0 == y_baz.count()
+
+    def test_register_decorator(self):
+        models.SpecificLanguageModelY.objects.create(title_y_de="foo", text="bar")
+        models.SpecificLanguageModelY.objects.create(title_y_de="foo")
+
+        y_foo = models.SpecificLanguageModelY.objects.filter(title_y_de="foo")
+        assert 2 == y_foo.count()
+
+        y_baz = models.SpecificLanguageModelY.objects.filter(title_y_de="baz")
+        assert 0 == y_baz.count()
+
+    def test_class_files_translator_register(self):
+        models.SpecificLanguageModelRegisterX.objects.create(
+            slug_de="foo", slug_en="bag", text="bar"
+        )
+        models.SpecificLanguageModelRegisterX.objects.create(slug_de="foo", slug_en="bag")
+
+        y_foo = models.SpecificLanguageModelRegisterX.objects.filter(slug_en="bag")
+        assert 2 == y_foo.count()
+
+        y_baz = models.SpecificLanguageModelRegisterX.objects.filter(slug_en="baz")
+        assert 0 == y_baz.count()
+
+    def test_translator_register(self):
+        models.SpecificLanguageModelRegisterY.objects.create(slug_en="foo", text="bar")
+        models.SpecificLanguageModelRegisterY.objects.create(slug_en="foo")
+
+        y_foo = models.SpecificLanguageModelRegisterY.objects.filter(slug_en="foo")
+        assert 2 == y_foo.count()
+
+        y_baz = models.SpecificLanguageModelRegisterY.objects.filter(slug_en="baz")
+        assert 0 == y_baz.count()

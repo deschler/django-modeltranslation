@@ -127,6 +127,35 @@ the translated field ``image`` to the ``NewsWithImage`` model.
     inheritance` broke the project (if you had always subclassed
     ``TranslationOptions`` only, there is no risk).
 
+.. versionadded:: 0.19.0
+
+If you need to specify the languages available for each model, you can do so using the ``languages``
+argument::
+
+    from modeltranslation.translator import translator, TranslationOptions
+    from news.models import News, NewsWithImage
+
+    class NewsWithImageTranslationOptions(TranslationOptions):
+        languages = ('en','uk')
+        fields = ('image',)
+
+    translator.register(NewsWithImage, NewsWithImageTranslationOptions)
+
+
+In this case, for the ``News`` model, translations will be available in the languages with the codes
+``en`` and ``uk``.
+For the ``NewsWithImage`` model, since the ``languages`` argument was not passed, the value from
+``settings.MODELTRANSLATION_LANGUAGES`` will be used.
+
+Also, if you wish, you can pass the ``languages`` argument in the ``register`` decorator::
+
+    from modeltranslation.translator import register, TranslationOptions
+    from news.models import News
+
+    @register(News, languages=('en','uk'))
+    class NewsTranslationOptions(TranslationOptions):
+        fields = ('title', 'text',)
+
 
 Changes Automatically Applied to the Model Class
 ------------------------------------------------
