@@ -4,6 +4,8 @@ from typing import Iterable
 from django import VERSION, forms
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import fields
+from django.utils.encoding import force_str
+from django.utils.translation import override
 
 from modeltranslation import settings as mt_settings
 from modeltranslation.thread_context import fallbacks_enabled
@@ -255,6 +257,17 @@ class TranslationField:
 
     def __hash__(self):
         return hash((self.creation_counter, self.language))
+
+    def get_default(self):
+        with override(self.language):
+            default = super().get_default()
+            # we must *force evaluation* at this point, otherwise the lazy translatable
+            # string is returned and will be evaluated only later when the main language
+            # is activated again (because this context block has exited).
+            #
+            # force_str passes protected types as-is, which includes None, int, float,
+            # datetime...
+            return force_str(default, strings_only=True)
 
     def formfield(self, *args, **kwargs):
         """
