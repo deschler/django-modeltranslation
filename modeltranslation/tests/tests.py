@@ -631,6 +631,31 @@ class ModeltranslationTest(ModeltranslationTestBase):
             title_de='old de',
         )
 
+    def test_callable_field_default_uses_field_language(self):
+        # the test uses translations from django.contrib.auth django.po file by
+        # specifying a model default with one of the translatable literals from that
+        # app
+
+        # unsaved instance must follow django's behaviour for callable default
+        raw_instance = models.TestModel()
+
+        assert raw_instance.dynamic_default == "Passwort"
+        assert raw_instance.dynamic_default_en == "password"
+        assert raw_instance.dynamic_default_de == "Passwort"
+
+        # saved instance must have same behaviour as unsaved instance
+        instance = models.TestModel.objects.create()
+
+        assert instance.dynamic_default == "Passwort"
+        assert instance.dynamic_default_en == "password"
+        assert instance.dynamic_default_de == "Passwort"
+        assert_db_record(
+            instance,
+            dynamic_default='Passwort',
+            dynamic_default_en='password',
+            dynamic_default_de='Passwort',
+        )
+
 
 class ModeltranslationTransactionTest(ModeltranslationTransactionTestBase):
     def test_unique_nullable_field(self):

@@ -11,6 +11,7 @@ class TestModel(models.Model):
     text = models.TextField(blank=True, null=True)
     url = models.URLField(blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
+    dynamic_default = models.CharField(default=gettext_lazy("password"), max_length=255)
 
 
 class UniqueNullableModel(models.Model):

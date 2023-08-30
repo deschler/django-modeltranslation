@@ -14,6 +14,7 @@ class TestTranslationOptions(TranslationOptions):
         'text',
         'url',
         'email',
+        'dynamic_default',
     )
     empty_values = ''
 
