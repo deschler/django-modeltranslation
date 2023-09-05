@@ -12,6 +12,8 @@ Contributing Code
 The preferred way for code contributions are pull requests at `Github`_, usually
 created against master.
 
+Use [Convential commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages.
+
 .. note::
 
     In order to be properly blamed for a contribution, please verify that the
@@ -25,11 +27,12 @@ Coding Style
 Please make sure that your code follows the `PEP 8`_ style guide. The only
 exception we make is to allow a maximum line length of 100. Furthermore
 your code has to validate against `pyflakes`_. It is recommended to use
-`flake8`_ which combines all the checks:
+`flake8`_ which combines all the checks, and black for code formatting.
 
 .. code-block:: console
 
-    $ flake8 --max-line-length=100 modeltranslation
+    $ flake8 modeltranslation
+    $ black modeltranslation *.py
 
 The ``#NOQA`` mark added by `flake8`_ should be used sparsely.
 
