@@ -631,6 +631,31 @@ class ModeltranslationTest(ModeltranslationTestBase):
             title_de='old de',
         )
 
+    def test_callable_field_default_uses_field_language(self):
+        # the test uses translations from django.contrib.auth django.po file by
+        # specifying a model default with one of the translatable literals from that
+        # app
+
+        # unsaved instance must follow django's behaviour for callable default
+        raw_instance = models.TestModel()
+
+        assert raw_instance.dynamic_default == "Passwort"
+        assert raw_instance.dynamic_default_en == "password"
+        assert raw_instance.dynamic_default_de == "Passwort"
+
+        # saved instance must have same behaviour as unsaved instance
+        instance = models.TestModel.objects.create()
+
+        assert instance.dynamic_default == "Passwort"
+        assert instance.dynamic_default_en == "password"
+        assert instance.dynamic_default_de == "Passwort"
+        assert_db_record(
+            instance,
+            dynamic_default='Passwort',
+            dynamic_default_en='password',
+            dynamic_default_de='Passwort',
+        )
+
 
 class ModeltranslationTransactionTest(ModeltranslationTransactionTestBase):
     def test_unique_nullable_field(self):
@@ -2408,6 +2433,8 @@ class TranslationAdminTest(ModeltranslationTestBase):
             'url_en',
             'email_de',
             'email_en',
+            'dynamic_default_de',
+            'dynamic_default_en',
         )
 
     def test_default_fieldsets(self):
@@ -2426,6 +2453,8 @@ class TranslationAdminTest(ModeltranslationTestBase):
             'url_en',
             'email_de',
             'email_en',
+            'dynamic_default_de',
+            'dynamic_default_en',
         ]
         assert ma.get_fieldsets(request) == [(None, {'fields': fields})]
         assert ma.get_fieldsets(request, self.test_obj) == [(None, {'fields': fields})]
@@ -2459,7 +2488,7 @@ class TranslationAdminTest(ModeltranslationTestBase):
 
         # Using `exclude`.
         class TestModelAdmin(admin.TranslationAdmin):
-            exclude = ['url', 'email']
+            exclude = ['url', 'email', 'dynamic_default']
 
         ma = TestModelAdmin(models.TestModel, self.site)
         fields = ['title_de', 'title_en', 'text_de', 'text_en']
@@ -2467,7 +2496,7 @@ class TranslationAdminTest(ModeltranslationTestBase):
 
         # You can also pass a tuple to `exclude`.
         class TestModelAdmin(admin.TranslationAdmin):
-            exclude = ('url', 'email')
+            exclude = ('url', 'email', 'dynamic_default')
 
         ma = TestModelAdmin(models.TestModel, self.site)
         assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
@@ -2502,6 +2531,8 @@ class TranslationAdminTest(ModeltranslationTestBase):
             'url_en',
             'email_de',
             'email_en',
+            'dynamic_default_de',
+            'dynamic_default_en',
         )
 
         # Using grouped fields.
@@ -2550,7 +2581,7 @@ class TranslationAdminTest(ModeltranslationTestBase):
         class TestModelForm(forms.ModelForm):
             class Meta:
                 model = models.TestModel
-                exclude = ['url', 'email']
+                exclude = ['url', 'email', 'dynamic_default']
 
         class TestModelAdmin(admin.TranslationAdmin):
             form = TestModelForm
@@ -2564,7 +2595,7 @@ class TranslationAdminTest(ModeltranslationTestBase):
         # option, the ModelAdmin wins. This is Django behaviour.
         class TestModelAdmin(admin.TranslationAdmin):
             form = TestModelForm
-            exclude = ['url']
+            exclude = ['url', 'dynamic_default']
 
         ma = TestModelAdmin(models.TestModel, self.site)
         fields = ['title_de', 'title_en', 'text_de', 'text_en', 'email_de', 'email_en']
@@ -3658,8 +3689,11 @@ class TranslationModelFormTest(ModeltranslationTestBase):
             'email',
             'email_de',
             'email_en',
+            'dynamic_default',
+            'dynamic_default_de',
+            'dynamic_default_en',
         ]
-        assert list(form.fields) == ['title', 'text', 'url', 'email']
+        assert list(form.fields) == ['title', 'text', 'url', 'email', 'dynamic_default']
 
     def test_updating_with_empty_value(self):
         """
@@ -3670,7 +3704,7 @@ class TranslationModelFormTest(ModeltranslationTestBase):
         class Form(forms.ModelForm):
             class Meta:
                 model = models.TestModel
-                exclude = ('text',)
+                exclude = ('text', 'dynamic_default')
 
         instance = models.TestModel.objects.create(text_de='something')
         form = Form(
