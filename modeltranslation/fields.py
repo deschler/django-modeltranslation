@@ -5,6 +5,7 @@ from django import VERSION, forms
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import fields
 from django.utils.encoding import force_str
+from django.utils.functional import Promise
 from django.utils.translation import override
 
 from modeltranslation import settings as mt_settings
@@ -267,7 +268,9 @@ class TranslationField:
             #
             # force_str passes protected types as-is, which includes None, int, float,
             # datetime...
-            return force_str(default, strings_only=True)
+            if isinstance(default, Promise):
+                default = force_str(default, strings_only=True)
+            return default
 
     def formfield(self, *args, **kwargs):
         """
