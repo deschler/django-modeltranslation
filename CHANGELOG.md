@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.18.13-beta1.0](https://github.com/deschler/django-modeltranslation/compare/v0.18.12...v0.18.13-beta1.0) (2023-09-13)
+
+
+### Bug Fixes
+
+* Apply force_str only to Promise ([e7640c7](https://github.com/deschler/django-modeltranslation/commit/e7640c71197f3c7b34386847c746663123fad07b)), closes [#701](https://github.com/deschler/django-modeltranslation/issues/701)
+
 ### [0.18.12](https://github.com/deschler/django-modeltranslation/compare/v0.18.11...v0.18.12) (2023-09-08)
 
 
