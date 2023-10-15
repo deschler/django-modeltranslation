@@ -278,12 +278,9 @@ class ModeltranslationTest(ModeltranslationTestBase):
 
     def test_descriptor_introspection(self):
         # See Django #8248
-        try:
-            models.TestModel.title
-            models.TestModel.title.__doc__
-            assert True
-        except:
-            self.fail('Descriptor accessed on class should return itself.')
+        assert isinstance(
+            models.TestModel.title.__doc__, str
+        ), 'Descriptor accessed on class should return itself.'
 
     def test_fields_hashes(self):
         opts = models.TestModel._meta
@@ -2212,9 +2209,9 @@ class ModelInheritanceTest(ModeltranslationTestBase):
         assert 'titleb' in field_names_b
         assert 'titleb_de' in field_names_b
         assert 'titleb_en' in field_names_b
-        assert not ('titled' in field_names_b)
-        assert not ('titled_de' in field_names_b)
-        assert not ('titled_en' in field_names_b)
+        assert 'titled' not in field_names_b
+        assert 'titled_de' not in field_names_b
+        assert 'titled_en' not in field_names_b
 
     def test_multitable_inheritance(self):
         field_names_a = get_field_names(models.MultitableModelA)

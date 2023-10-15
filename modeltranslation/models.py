@@ -23,7 +23,7 @@ def autodiscover():
         before_import_registry = copy.copy(translator._registry)
         try:
             import_module(module)
-        except:
+        except ImportError:
             # Reset the model registry to the state before the last import as
             # this import will have to reoccur on the next request and this
             # could raise NotRegistered and AlreadyRegistered exceptions
