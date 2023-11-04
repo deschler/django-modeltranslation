@@ -1,24 +1,12 @@
-==============
-War in Ukraine
-==============
-
-On February 24th, 2022, Russia invaded Ukraine. I'm sole maintainer of this project
-staying in safe place, but i don't know how long it would be safe.
-
-Russian military shelling our cities, targeting civilian population.
-
-Help Ukraine:
-
-- https://supportukrainenow.org/
-
-Talk to your politics, talk to your friends. Send heavy weapons to Ukraine. Close the sky.
-
-----------------
-
 ================
 Modeltranslation
 ================
 
+.. image:: https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg
+   :target: https://stand-with-ukraine.pp.ua
+   :alt: Stand With Ukraine
+
+-----
 
 .. image:: http://img.shields.io/coveralls/deschler/django-modeltranslation.svg?style=flat-square
     :target: https://coveralls.io/r/deschler/django-modeltranslation
@@ -34,7 +22,6 @@ Modeltranslation
 .. image:: https://img.shields.io/gitter/room/django-modeltranslation/community?color=4DB798&style=flat-square
     :alt: Join the chat at https://gitter.im/django-modeltranslation/community
     :target: https://gitter.im/django-modeltranslation/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
-
 
 
 The modeltranslation application is used to translate dynamic content of
