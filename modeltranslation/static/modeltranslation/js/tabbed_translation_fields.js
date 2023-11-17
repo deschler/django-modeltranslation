@@ -541,9 +541,7 @@ var google, django, gettext;
         );
 
         $(document).ready(function () {
-          $(window).on("load", function () {
             handleTabularAddAnotherInline(tabularInlineGroup);
-          });
         });
       });
     }
