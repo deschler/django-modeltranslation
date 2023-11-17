@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.18.13-beta1.1](https://github.com/deschler/django-modeltranslation/compare/v0.18.13-beta.0...v0.18.13-beta1.1) (2023-11-17)
+
+
+### Bug Fixes
+
+* Fixed bug in tabbed_translation_fields.js ([641fbe8](https://github.com/deschler/django-modeltranslation/commit/641fbe89ab674c03dcb41f584e7bb569e3c141a9)), closes [#597](https://github.com/deschler/django-modeltranslation/issues/597)
+* **ci:** Replace flake8 with ruff ([2061f6c](https://github.com/deschler/django-modeltranslation/commit/2061f6c264d7cb889ae14d2d52a7547df6d58663))
+
 ### [0.18.13-beta.0](https://github.com/deschler/django-modeltranslation/compare/v0.18.13-beta1.0...v0.18.13-beta.0) (2023-09-13)
 
 ### [0.18.13-beta1.0](https://github.com/deschler/django-modeltranslation/compare/v0.18.12...v0.18.13-beta1.0) (2023-09-13)
