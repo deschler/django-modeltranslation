@@ -15,7 +15,6 @@ ruff = "^0.0.292"
 
 [tool.poetry.dev-dependencies]
 pdbpp = "*"
-black = "*"
 parameterized = "*"
 pytest-cov = "*"
 pytest = "*"
@@ -23,13 +22,9 @@ pytest-sugar = "*"
 pytest-django = "*"
 django-types = "*"
 
-[tool.black]
-line-length = 100
-skip-string-normalization = true
-
 [tool.ruff]
 line-length = 100
 target-version = "py38"
 ignore = [
-    "E501",   # line length is handled by black
+    "E501",   # line length is handled by formatter
 ]

@@ -25,11 +25,10 @@ jobs:
       - name: Install linters
         run: |
           python -m pip install --upgrade pip
-          pip install ruff==0.0.292 black==23.9.1
+          pip install ruff==0.1.6
       - name: Run linters
         run: |
-          ruff check modeltranslation
-          black --check modeltranslation *.py
+          make lint
       - name: Test package install
         run: |
           python -m pip install --upgrade pip
