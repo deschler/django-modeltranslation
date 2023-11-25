@@ -19,7 +19,7 @@ def autodiscover():
 
     for app, mod in mods:
         # Attempt to import the app's translation module.
-        module = '%s.translation' % app
+        module = "%s.translation" % app
         before_import_registry = copy.copy(translator._registry)
         try:
             import_module(module)
@@ -32,7 +32,7 @@ def autodiscover():
             # Decide whether to bubble up this error. If the app just
             # doesn't have an translation module, we can ignore the error
             # attempting to import it, otherwise we want it to bubble up.
-            if module_has_submodule(mod, 'translation'):
+            if module_has_submodule(mod, "translation"):
                 raise
 
     for module in TRANSLATION_FILES:
@@ -46,12 +46,12 @@ def autodiscover():
     # order, as far as base classes are registered before subclasses.
     if DEBUG:
         try:
-            if sys.argv[1] in ('runserver', 'runserver_plus'):
+            if sys.argv[1] in ("runserver", "runserver_plus"):
                 models = translator.get_registered_models()
-                names = ', '.join(m.__name__ for m in models)
+                names = ", ".join(m.__name__ for m in models)
                 print(
-                    'modeltranslation: Registered %d models for translation'
-                    ' (%s) [pid: %d].' % (len(models), names, os.getpid())
+                    "modeltranslation: Registered %d models for translation"
+                    " (%s) [pid: %d]." % (len(models), names, os.getpid())
                 )
         except IndexError:
             pass

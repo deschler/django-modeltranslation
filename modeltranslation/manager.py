@@ -43,7 +43,7 @@ def get_translatable_fields_for_model(model):
 
 def rewrite_lookup_key(model, lookup_key):
     try:
-        pieces = lookup_key.split('__', 1)
+        pieces = lookup_key.split("__", 1)
         original_key = pieces[0]
 
         translatable_fields = get_translatable_fields_for_model(model)
@@ -61,7 +61,7 @@ def rewrite_lookup_key(model, lookup_key):
             if original_key in fields_to_trans_models:
                 transmodel = fields_to_trans_models[original_key]
                 pieces[1] = rewrite_lookup_key(transmodel, pieces[1])
-        return '__'.join(pieces)
+        return "__".join(pieces)
     except AttributeError:
         return lookup_key
 
@@ -99,7 +99,7 @@ def append_translated(model, fields):
 
 def append_lookup_key(model, lookup_key):
     "Transform spanned__lookup__key into all possible translation versions, on all levels"
-    pieces = lookup_key.split('__', 1)
+    pieces = lookup_key.split("__", 1)
 
     fields = append_translated(model, (pieces[0],))
 
@@ -109,9 +109,9 @@ def append_lookup_key(model, lookup_key):
         if pieces[0] in fields_to_trans_models:
             transmodel = fields_to_trans_models[pieces[0]]
             rest = append_lookup_key(transmodel, pieces[1])
-            fields = {'__'.join(pr) for pr in itertools.product(fields, rest)}
+            fields = {"__".join(pr) for pr in itertools.product(fields, rest)}
         else:
-            fields = {'%s__%s' % (f, pieces[1]) for f in fields}
+            fields = {"%s__%s" % (f, pieces[1]) for f in fields}
     return fields
 
 
@@ -129,8 +129,8 @@ def append_lookup_keys(model, fields):
 
 def rewrite_order_lookup_key(model, lookup_key):
     try:
-        if lookup_key.startswith('-'):
-            return '-' + rewrite_lookup_key(model, lookup_key[1:])
+        if lookup_key.startswith("-"):
+            return "-" + rewrite_lookup_key(model, lookup_key[1:])
         else:
             return rewrite_lookup_key(model, lookup_key)
     except AttributeError:
@@ -201,12 +201,12 @@ class MultilingualQuerySet(QuerySet):
         # This method is private, so outside code can use default _clone without `kwargs`,
         # and we're here can use private version with `kwargs`.
         # Refs: https://github.com/deschler/django-modeltranslation/issues/483
-        kwargs.setdefault('_rewrite', self._rewrite)
-        kwargs.setdefault('_populate', self._populate)
-        if hasattr(self, 'translation_fields'):
-            kwargs.setdefault('translation_fields', self.translation_fields)
-        if hasattr(self, 'original_fields'):
-            kwargs.setdefault('original_fields', self.original_fields)
+        kwargs.setdefault("_rewrite", self._rewrite)
+        kwargs.setdefault("_populate", self._populate)
+        if hasattr(self, "translation_fields"):
+            kwargs.setdefault("translation_fields", self.translation_fields)
+        if hasattr(self, "original_fields"):
+            kwargs.setdefault("original_fields", self.original_fields)
         cloned = super()._clone()
         cloned.__dict__.update(kwargs)
         return cloned
@@ -214,7 +214,7 @@ class MultilingualQuerySet(QuerySet):
     def rewrite(self, mode=True):
         return self.__clone(_rewrite=mode)
 
-    def populate(self, mode='all'):
+    def populate(self, mode="all"):
         """
         Overrides the translation fields population mode for this query set.
         """
@@ -255,9 +255,9 @@ class MultilingualQuerySet(QuerySet):
                 if col.target is col.source:
                     col.source = new_field
                 col.target = new_field
-        elif hasattr(col, 'col'):
+        elif hasattr(col, "col"):
             self._rewrite_col(col.col)
-        elif hasattr(col, 'lhs'):
+        elif hasattr(col, "lhs"):
             self._rewrite_col(col.lhs)
 
     def _rewrite_where(self, q):
@@ -302,9 +302,9 @@ class MultilingualQuerySet(QuerySet):
         if isinstance(q, Node):
             q.children = list(map(self._rewrite_f, q.children))
         # Django >= 1.8
-        if hasattr(q, 'lhs'):
+        if hasattr(q, "lhs"):
             q.lhs = self._rewrite_f(q.lhs)
-        if hasattr(q, 'rhs'):
+        if hasattr(q, "rhs"):
             q.rhs = self._rewrite_f(q.rhs)
         return q
 
@@ -333,7 +333,7 @@ class MultilingualQuerySet(QuerySet):
     def _get_original_fields(self):
         source = (
             self.model._meta.concrete_fields
-            if hasattr(self.model._meta, 'concrete_fields')
+            if hasattr(self.model._meta, "concrete_fields")
             else self.model._meta.fields
         )
         return [f.attname for f in source if not isinstance(f, TranslationField)]
@@ -433,8 +433,8 @@ class MultilingualQuerySet(QuerySet):
         return super().values(*fields, **expressions)
 
     def _values(self, *original, **kwargs):
-        selects_all = kwargs.pop('selects_all', False)
-        if not kwargs.pop('prepare', False):
+        selects_all = kwargs.pop("selects_all", False)
+        if not kwargs.pop("prepare", False):
             return super()._values(*original, **kwargs)
         new_fields, translation_fields = append_fallback(self.model, original)
         annotation_keys = set(self.query.annotation_select.keys()) if selects_all else set()
@@ -472,13 +472,13 @@ class MultilingualQuerySet(QuerySet):
             # Emulate original queryset behaviour: get all fields that are not translation fields
             fields = self._get_original_fields()
 
-        field_names = {f for f in fields if not hasattr(f, 'resolve_expression')}
+        field_names = {f for f in fields if not hasattr(f, "resolve_expression")}
         _fields = []
         expressions = {}
         counter = 1
         for field in fields:
-            if hasattr(field, 'resolve_expression'):
-                field_id_prefix = getattr(field, 'default_alias', field.__class__.__name__.lower())
+            if hasattr(field, "resolve_expression"):
+                field_id_prefix = getattr(field, "default_alias", field.__class__.__name__.lower())
                 while True:
                     field_id = field_id_prefix + str(counter)
                     counter += 1
@@ -555,7 +555,7 @@ def multilingual_queryset_factory(old_cls, instantiate=True):
         class NewClass(old_cls, MultilingualQuerySet):
             pass
 
-        NewClass.__name__ = 'Multilingual%s' % old_cls.__name__
+        NewClass.__name__ = "Multilingual%s" % old_cls.__name__
     return NewClass() if instantiate else NewClass
 
 

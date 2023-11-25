@@ -7,12 +7,12 @@ from django.core.management.commands.loaddata import Command as LoadDataCommand
 from modeltranslation import settings as mt_settings
 from modeltranslation.utils import auto_populate
 
-ALLOWED = (None, False, 'all', 'default', 'required')
-ALLOWED_FOR_PRINT = ', '.join(str(i) for i in (0,) + ALLOWED[1:])  # For pretty-printing
+ALLOWED = (None, False, "all", "default", "required")
+ALLOWED_FOR_PRINT = ", ".join(str(i) for i in (0,) + ALLOWED[1:])  # For pretty-printing
 
 
 def check_mode(option, opt_str, value, parser, namespace=None):
-    if value == '0' or value.lower() == 'false':
+    if value == "0" or value.lower() == "false":
         value = False
     if value not in ALLOWED:
         raise ValueError("%s option can be only one of: %s" % (opt_str, ALLOWED_FOR_PRINT))
@@ -29,19 +29,19 @@ class Command(LoadDataCommand):
     def add_arguments(self, parser):
         super().add_arguments(parser)
         parser.add_argument(
-            '--populate',
+            "--populate",
             action=self.CheckAction,
             type=str,
-            dest='populate',
-            metavar='MODE',
+            dest="populate",
+            metavar="MODE",
             help=(
-                'Using this option will cause fixtures to be loaded under auto-population MODE. '
-                + 'Allowed values are: %s' % ALLOWED_FOR_PRINT
+                "Using this option will cause fixtures to be loaded under auto-population MODE. "
+                + "Allowed values are: %s" % ALLOWED_FOR_PRINT
             ),
         )
 
     def handle(self, *fixture_labels, **options):
-        mode = options.get('populate')
+        mode = options.get("populate")
         if mode is not None:
             with auto_populate(mode):
                 return super().handle(*fixture_labels, **options)

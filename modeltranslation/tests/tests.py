@@ -75,7 +75,7 @@ def get_field_names(model):
             continue
 
         names.add(field.name)
-        if hasattr(field, 'attname'):
+        if hasattr(field, "attname"):
             names.add(field.attname)
     return names
 
@@ -117,7 +117,7 @@ class ModeltranslationTransactionTestBase(TransactionTestCase):
     def setUp(self):
         super().setUp()
         self._old_language = get_language()
-        trans_real.activate('de')
+        trans_real.activate("de")
 
     def tearDown(self):
         super().tearDown()
@@ -137,7 +137,7 @@ class TestAutodiscover(ModeltranslationTestBase):
     def _pre_setup(self):
         super()._pre_setup()
         # Add test_app to INSTALLED_APPS
-        new_installed_apps = django_settings.INSTALLED_APPS + ('modeltranslation.tests.test_app',)
+        new_installed_apps = django_settings.INSTALLED_APPS + ("modeltranslation.tests.test_app",)
         self.__override = override_settings(INSTALLED_APPS=new_installed_apps)
         self.__override.enable()
 
@@ -148,37 +148,37 @@ class TestAutodiscover(ModeltranslationTestBase):
 
     def tearDown(self):
         # Rollback model classes
-        del self.cache.all_models['test_app']
+        del self.cache.all_models["test_app"]
         from .test_app import models
 
         importlib.reload(models)
         # Delete translation modules from import cache
-        sys.modules.pop('modeltranslation.tests.test_app.translation', None)
-        sys.modules.pop('modeltranslation.tests.project_translation', None)
+        sys.modules.pop("modeltranslation.tests.test_app.translation", None)
+        sys.modules.pop("modeltranslation.tests.project_translation", None)
         super().tearDown()
 
     def check_news(self):
         from .test_app.models import News
 
         fields = dir(News())
-        assert 'title' in fields
-        assert 'title_en' in fields
-        assert 'title_de' in fields
-        assert 'visits' in fields
-        assert 'visits_en' not in fields
-        assert 'visits_de' not in fields
+        assert "title" in fields
+        assert "title_en" in fields
+        assert "title_de" in fields
+        assert "visits" in fields
+        assert "visits_en" not in fields
+        assert "visits_de" not in fields
 
     def check_other(self, present=True):
         from .test_app.models import Other
 
         fields = dir(Other())
-        assert 'name' in fields
+        assert "name" in fields
         if present:
-            assert 'name_en' in fields
-            assert 'name_de' in fields
+            assert "name_en" in fields
+            assert "name_de" in fields
         else:
-            assert 'name_en' not in fields
-            assert 'name_de' not in fields
+            assert "name_en" not in fields
+            assert "name_de" not in fields
 
     def test_simple(self):
         """Check if translation is imported for installed apps."""
@@ -187,7 +187,7 @@ class TestAutodiscover(ModeltranslationTestBase):
         self.check_other(present=False)
 
     @reload_override_settings(
-        MODELTRANSLATION_TRANSLATION_FILES=('modeltranslation.tests.project_translation',)
+        MODELTRANSLATION_TRANSLATION_FILES=("modeltranslation.tests.project_translation",)
     )
     def test_global(self):
         """Check if translation is imported for global translation file."""
@@ -196,7 +196,7 @@ class TestAutodiscover(ModeltranslationTestBase):
         self.check_other()
 
     @reload_override_settings(
-        MODELTRANSLATION_TRANSLATION_FILES=('modeltranslation.tests.test_app.translation',)
+        MODELTRANSLATION_TRANSLATION_FILES=("modeltranslation.tests.test_app.translation",)
     )
     def test_duplication(self):
         """Check if there is no problem with duplicated filenames."""
@@ -211,8 +211,8 @@ class ModeltranslationTest(ModeltranslationTestBase):
         langs = tuple(val for val, label in django_settings.LANGUAGES)
         assert langs == tuple(mt_settings.AVAILABLE_LANGUAGES)
         assert 2 == len(langs)
-        assert 'de' in langs
-        assert 'en' in langs
+        assert "de" in langs
+        assert "en" in langs
         assert translator.translator
 
         # Check that all models are registered for translation
@@ -241,16 +241,16 @@ class ModeltranslationTest(ModeltranslationTestBase):
 
         # Exception should be raised when conflicting field name detected
         with pytest.raises(ValueError):
-            translator.translator.register(models.ConflictModel, fields=('title',))
+            translator.translator.register(models.ConflictModel, fields=("title",))
         with pytest.raises(ValueError):
             translator.translator.register(
                 models.AbstractConflictModelB,
-                fields=('title',),
+                fields=("title",),
             )
         with pytest.raises(ValueError):
             translator.translator.register(
                 models.MultitableConflictModelB,
-                fields=('title',),
+                fields=("title",),
             )
 
         # Model should not be registered
@@ -258,35 +258,35 @@ class ModeltranslationTest(ModeltranslationTestBase):
 
     def test_fields(self):
         field_names = dir(models.TestModel())
-        assert 'id' in field_names
-        assert 'title' in field_names
-        assert 'title_de' in field_names
-        assert 'title_en' in field_names
-        assert 'text' in field_names
-        assert 'text_de' in field_names
-        assert 'text_en' in field_names
-        assert 'url' in field_names
-        assert 'url_de' in field_names
-        assert 'url_en' in field_names
-        assert 'email' in field_names
-        assert 'email_de' in field_names
-        assert 'email_en' in field_names
+        assert "id" in field_names
+        assert "title" in field_names
+        assert "title_de" in field_names
+        assert "title_en" in field_names
+        assert "text" in field_names
+        assert "text_de" in field_names
+        assert "text_en" in field_names
+        assert "url" in field_names
+        assert "url_de" in field_names
+        assert "url_en" in field_names
+        assert "email" in field_names
+        assert "email_de" in field_names
+        assert "email_en" in field_names
 
     def test_verbose_name(self):
-        verbose_name = models.TestModel._meta.get_field('title_de').verbose_name
-        assert verbose_name == 'title [de]'
+        verbose_name = models.TestModel._meta.get_field("title_de").verbose_name
+        assert verbose_name == "title [de]"
 
     def test_descriptor_introspection(self):
         # See Django #8248
         assert isinstance(
             models.TestModel.title.__doc__, str
-        ), 'Descriptor accessed on class should return itself.'
+        ), "Descriptor accessed on class should return itself."
 
     def test_fields_hashes(self):
         opts = models.TestModel._meta
-        orig = opts.get_field('title')
-        en = opts.get_field('title_en')
-        de = opts.get_field('title_de')
+        orig = opts.get_field("title")
+        en = opts.get_field("title_en")
+        de = opts.get_field("title_de")
         # Translation field retain creation_counters
         assert orig.creation_counter == en.creation_counter
         assert orig.creation_counter == de.creation_counter
@@ -300,16 +300,16 @@ class ModeltranslationTest(ModeltranslationTestBase):
         assert hash(en) != hash(de)
         assert 3 == len({orig, en, de})
         # TranslationFields can compare equal if they have the same language
-        de.language = 'en'
+        de.language = "en"
         assert orig != de
         assert en == de
         assert hash(en) == hash(de)
         assert 2 == len({orig, en, de})
-        de.language = 'de'
+        de.language = "de"
 
     def test_set_translation(self):
         """This test briefly shows main modeltranslation features."""
-        assert get_language() == 'de'
+        assert get_language() == "de"
         title_de = "title de"
         title_en = "title en"
 
@@ -321,7 +321,7 @@ class ModeltranslationTest(ModeltranslationTestBase):
         assert inst2.title_de == title_de
 
         # So creating object is language-aware
-        with override('en'):
+        with override("en"):
             inst2 = models.TestModel(title=title_en)
             assert inst2.title == title_en
             assert inst2.title_en == title_en
@@ -330,23 +330,23 @@ class ModeltranslationTest(ModeltranslationTestBase):
         # Value from original field is presented in current language:
         inst2 = models.TestModel(title_de=title_de, title_en=title_en)
         assert inst2.title == title_de
-        with override('en'):
+        with override("en"):
             assert inst2.title == title_en
 
         # Changes made via original field affect current language field:
-        inst2.title = 'foo'
-        assert inst2.title == 'foo'
+        inst2.title = "foo"
+        assert inst2.title == "foo"
         assert inst2.title_en == title_en
-        assert inst2.title_de == 'foo'
-        with override('en'):
-            inst2.title = 'bar'
-            assert inst2.title == 'bar'
-            assert inst2.title_en == 'bar'
-            assert inst2.title_de == 'foo'
-        assert inst2.title == 'foo'
+        assert inst2.title_de == "foo"
+        with override("en"):
+            inst2.title = "bar"
+            assert inst2.title == "bar"
+            assert inst2.title_en == "bar"
+            assert inst2.title_de == "foo"
+        assert inst2.title == "foo"
 
         # When conflict, language field wins with original field
-        inst2 = models.TestModel(title='foo', title_de=title_de, title_en=title_en)
+        inst2 = models.TestModel(title="foo", title_de=title_de, title_en=title_en)
         assert inst2.title == title_de
         assert inst2.title_en == title_en
         assert inst2.title_de == title_de
@@ -354,7 +354,7 @@ class ModeltranslationTest(ModeltranslationTestBase):
         # Creating model and assigning only one language
         inst1 = models.TestModel(title_en=title_en)
         # Please note: '' and not None, because descriptor falls back to field default value
-        assert inst1.title == ''
+        assert inst1.title == ""
         assert inst1.title_en == title_en
         assert inst1.title_de is None
         # Assign current language value - de
@@ -374,12 +374,12 @@ class ModeltranslationTest(ModeltranslationTestBase):
 
         # Queries are also language-aware:
         assert 1 == models.TestModel.objects.filter(title=title_de).count()
-        with override('en'):
+        with override("en"):
             assert 0 == models.TestModel.objects.filter(title=title_de).count()
 
     def test_fallback_language(self):
         # Present what happens if current language field is empty
-        assert get_language() == 'de'
+        assert get_language() == "de"
         title_de = "title de"
 
         # Create model with value in de only...
@@ -390,8 +390,8 @@ class ModeltranslationTest(ModeltranslationTestBase):
 
         # In this test environment, fallback language is not set. So return value for en
         # will be field's default: ''
-        with override('en'):
-            assert inst2.title == ''
+        with override("en"):
+            assert inst2.title == ""
             assert inst2.title_en is None  # Language field access returns real value
 
         # However, by default FALLBACK_LANGUAGES is set to DEFAULT_LANGUAGE
@@ -400,7 +400,7 @@ class ModeltranslationTest(ModeltranslationTestBase):
             assert inst2.title == title_de
 
             # ... but for empty en fall back to de
-            with override('en'):
+            with override("en"):
                 assert inst2.title == title_de
                 assert inst2.title_en is None  # Still real value
 
@@ -429,8 +429,8 @@ class ModeltranslationTest(ModeltranslationTestBase):
         n.save()
         n = models.FallbackModel2.objects.get(title=title1_de)
         trans_real.activate("en")
-        assert n.title == ''  # Falling back to default field value
-        assert n.text == translation.FallbackModel2TranslationOptions.fallback_values['text']
+        assert n.title == ""  # Falling back to default field value
+        assert n.text == translation.FallbackModel2TranslationOptions.fallback_values["text"]
 
     def _compare_instances(self, x, y, field):
         assert getattr(x, field) == getattr(y, field), "Constructor diff on field %s." % field
@@ -451,60 +451,60 @@ class ModeltranslationTest(ModeltranslationTestBase):
         # test different arguments compositions
         keywords = dict(
             # original only
-            title='title',
+            title="title",
             # both languages + original
-            email='q@q.qq',
-            email_de='d@d.dd',
-            email_en='e@e.ee',
+            email="q@q.qq",
+            email_de="d@d.dd",
+            email_en="e@e.ee",
             # both languages without original
-            text_en='text en',
-            text_de='text de',
+            text_en="text en",
+            text_de="text de",
         )
         self._test_constructor(keywords)
 
         keywords = dict(
             # only current language
-            title_de='title',
+            title_de="title",
             # only not current language
-            url_en='http://www.google.com',
+            url_en="http://www.google.com",
             # original + current
-            text='text def',
-            text_de='text de',
+            text="text def",
+            text_de="text de",
             # original + not current
-            email='q@q.qq',
-            email_en='e@e.ee',
+            email="q@q.qq",
+            email_en="e@e.ee",
         )
         self._test_constructor(keywords)
 
     @parameterized.expand(
         [
-            ({'title': 'DE'}, ['title'], {'title': 'DE', 'title_de': 'DE', 'title_en': None}),
-            ({'title_de': 'DE'}, ['title'], {'title': 'DE', 'title_de': 'DE', 'title_en': None}),
-            ({'title': 'DE'}, ['title_de'], {'title': 'old', 'title_de': 'DE', 'title_en': None}),
+            ({"title": "DE"}, ["title"], {"title": "DE", "title_de": "DE", "title_en": None}),
+            ({"title_de": "DE"}, ["title"], {"title": "DE", "title_de": "DE", "title_en": None}),
+            ({"title": "DE"}, ["title_de"], {"title": "old", "title_de": "DE", "title_en": None}),
             (
-                {'title_de': 'DE'},
-                ['title_de'],
-                {'title': 'old', 'title_de': 'DE', 'title_en': None},
+                {"title_de": "DE"},
+                ["title_de"],
+                {"title": "old", "title_de": "DE", "title_en": None},
             ),
             (
-                {'title': 'DE', 'title_en': 'EN'},
-                ['title', 'title_en'],
-                {'title': 'DE', 'title_de': 'DE', 'title_en': 'EN'},
+                {"title": "DE", "title_en": "EN"},
+                ["title", "title_en"],
+                {"title": "DE", "title_de": "DE", "title_en": "EN"},
             ),
             (
-                {'title_de': 'DE', 'title_en': 'EN'},
-                ['title_de', 'title_en'],
-                {'title': 'old', 'title_de': 'DE', 'title_en': 'EN'},
+                {"title_de": "DE", "title_en": "EN"},
+                ["title_de", "title_en"],
+                {"title": "old", "title_de": "DE", "title_en": "EN"},
             ),
             (
-                {'title_de': 'DE', 'title_en': 'EN'},
-                ['title', 'title_de', 'title_en'],
-                {'title': 'DE', 'title_de': 'DE', 'title_en': 'EN'},
+                {"title_de": "DE", "title_en": "EN"},
+                ["title", "title_de", "title_en"],
+                {"title": "DE", "title_de": "DE", "title_en": "EN"},
             ),
         ]
     )
     def test_save_original_translation_field(self, field_values, update_fields, expected_db_values):
-        obj = models.TestModel.objects.create(title='old')
+        obj = models.TestModel.objects.create(title="old")
 
         for field, value in field_values.items():
             setattr(obj, field, value)
@@ -514,34 +514,34 @@ class ModeltranslationTest(ModeltranslationTestBase):
 
     @parameterized.expand(
         [
-            ({'title': 'EN'}, ['title'], {'title': 'EN', 'title_de': None, 'title_en': 'EN'}),
-            ({'title_en': 'EN'}, ['title'], {'title': 'EN', 'title_de': None, 'title_en': 'EN'}),
-            ({'title': 'EN'}, ['title_en'], {'title': 'old', 'title_de': None, 'title_en': 'EN'}),
+            ({"title": "EN"}, ["title"], {"title": "EN", "title_de": None, "title_en": "EN"}),
+            ({"title_en": "EN"}, ["title"], {"title": "EN", "title_de": None, "title_en": "EN"}),
+            ({"title": "EN"}, ["title_en"], {"title": "old", "title_de": None, "title_en": "EN"}),
             (
-                {'title_en': 'EN'},
-                ['title_en'],
-                {'title': 'old', 'title_de': None, 'title_en': 'EN'},
+                {"title_en": "EN"},
+                ["title_en"],
+                {"title": "old", "title_de": None, "title_en": "EN"},
             ),
             (
-                {'title': 'EN', 'title_de': 'DE'},
-                ['title', 'title_de'],
-                {'title': 'EN', 'title_de': 'DE', 'title_en': 'EN'},
+                {"title": "EN", "title_de": "DE"},
+                ["title", "title_de"],
+                {"title": "EN", "title_de": "DE", "title_en": "EN"},
             ),
             (
-                {'title_de': 'DE', 'title_en': 'EN'},
-                ['title_de', 'title_en'],
-                {'title': 'old', 'title_de': 'DE', 'title_en': 'EN'},
+                {"title_de": "DE", "title_en": "EN"},
+                ["title_de", "title_en"],
+                {"title": "old", "title_de": "DE", "title_en": "EN"},
             ),
             (
-                {'title_de': 'DE', 'title_en': 'EN'},
-                ['title', 'title_de', 'title_en'],
-                {'title': 'EN', 'title_de': 'DE', 'title_en': 'EN'},
+                {"title_de": "DE", "title_en": "EN"},
+                ["title", "title_de", "title_en"],
+                {"title": "EN", "title_de": "DE", "title_en": "EN"},
             ),
         ]
     )
     def test_save_active_translation_field(self, field_values, update_fields, expected_db_values):
-        with override('en'):
-            obj = models.TestModel.objects.create(title='old')
+        with override("en"):
+            obj = models.TestModel.objects.create(title="old")
 
             for field, value in field_values.items():
                 setattr(obj, field, value)
@@ -550,82 +550,82 @@ class ModeltranslationTest(ModeltranslationTestBase):
             assert_db_record(obj, **expected_db_values)
 
     def test_save_non_original_translation_field(self):
-        obj = models.TestModel.objects.create(title='old')
+        obj = models.TestModel.objects.create(title="old")
 
-        obj.title_en = 'en value'
-        obj.save(update_fields=['title'])
-        assert_db_record(obj, title='old', title_de='old', title_en=None)
+        obj.title_en = "en value"
+        obj.save(update_fields=["title"])
+        assert_db_record(obj, title="old", title_de="old", title_en=None)
 
-        obj.save(update_fields=['title_en'])
-        assert_db_record(obj, title='old', title_de='old', title_en='en value')
+        obj.save(update_fields=["title_en"])
+        assert_db_record(obj, title="old", title_de="old", title_en="en value")
 
     def test_update_or_create_existing(self):
         """
         Test that update_or_create works as expected
         """
-        obj = models.TestModel.objects.create(title_de='old de', title_en='old en')
+        obj = models.TestModel.objects.create(title_de="old de", title_en="old en")
 
         instance, created = models.TestModel.objects.update_or_create(
-            pk=obj.pk, defaults={'title': 'NEW DE TITLE'}
+            pk=obj.pk, defaults={"title": "NEW DE TITLE"}
         )
 
         assert created is False
-        assert instance.title == 'NEW DE TITLE'
-        assert instance.title_en == 'old en'
-        assert instance.title_de == 'NEW DE TITLE'
+        assert instance.title == "NEW DE TITLE"
+        assert instance.title_en == "old en"
+        assert instance.title_de == "NEW DE TITLE"
         assert_db_record(
             instance,
-            title='NEW DE TITLE',
-            title_en='old en',
-            title_de='NEW DE TITLE',
+            title="NEW DE TITLE",
+            title_en="old en",
+            title_de="NEW DE TITLE",
         )
 
         instance, created = models.TestModel.objects.update_or_create(
-            pk=obj.pk, defaults={'title_de': 'NEW DE TITLE 2'}
+            pk=obj.pk, defaults={"title_de": "NEW DE TITLE 2"}
         )
 
         assert created is False
-        assert instance.title == 'NEW DE TITLE 2'
-        assert instance.title_en == 'old en'
-        assert instance.title_de == 'NEW DE TITLE 2'
+        assert instance.title == "NEW DE TITLE 2"
+        assert instance.title_en == "old en"
+        assert instance.title_de == "NEW DE TITLE 2"
         assert_db_record(
             instance,
             # title='NEW DE TITLE',  # TODO: django < 4.2 doesn't pass `"title"` into `.save(update_fields)`
-            title_en='old en',
-            title_de='NEW DE TITLE 2',
+            title_en="old en",
+            title_de="NEW DE TITLE 2",
         )
 
-        with override('en'):
+        with override("en"):
             instance, created = models.TestModel.objects.update_or_create(
-                pk=obj.pk, defaults={'title': 'NEW EN TITLE'}
+                pk=obj.pk, defaults={"title": "NEW EN TITLE"}
             )
 
             assert created is False
-            assert instance.title == 'NEW EN TITLE'
-            assert instance.title_en == 'NEW EN TITLE'
-            assert instance.title_de == 'NEW DE TITLE 2'
+            assert instance.title == "NEW EN TITLE"
+            assert instance.title_en == "NEW EN TITLE"
+            assert instance.title_de == "NEW DE TITLE 2"
             assert_db_record(
                 instance,
-                title='NEW EN TITLE',
-                title_en='NEW EN TITLE',
-                title_de='NEW DE TITLE 2',
+                title="NEW EN TITLE",
+                title_en="NEW EN TITLE",
+                title_de="NEW DE TITLE 2",
             )
 
     def test_update_or_create_new(self):
         instance, created = models.TestModel.objects.update_or_create(
             pk=1,
-            defaults={'title_de': 'old de', 'title_en': 'old en'},
+            defaults={"title_de": "old de", "title_en": "old en"},
         )
 
         assert created is True
-        assert instance.title == 'old de'
-        assert instance.title_en == 'old en'
-        assert instance.title_de == 'old de'
+        assert instance.title == "old de"
+        assert instance.title_en == "old en"
+        assert instance.title_de == "old de"
         assert_db_record(
             instance,
-            title='old de',
-            title_en='old en',
-            title_de='old de',
+            title="old de",
+            title_en="old en",
+            title_de="old de",
         )
 
     def test_callable_field_default_uses_field_language(self):
@@ -648,9 +648,9 @@ class ModeltranslationTest(ModeltranslationTestBase):
         assert instance.dynamic_default_de == "Passwort"
         assert_db_record(
             instance,
-            dynamic_default='Passwort',
-            dynamic_default_en='password',
-            dynamic_default_de='Passwort',
+            dynamic_default="Passwort",
+            dynamic_default_en="password",
+            dynamic_default_de="Passwort",
         )
 
 
@@ -663,30 +663,30 @@ class ModeltranslationTransactionTest(ModeltranslationTransactionTestBase):
         models.UniqueNullableModel.objects.create(title=None)
         models.UniqueNullableModel.objects.create(title=None)
 
-        models.UniqueNullableModel.objects.create(title='')
+        models.UniqueNullableModel.objects.create(title="")
         with pytest.raises(IntegrityError):
-            models.UniqueNullableModel.objects.create(title='')
+            models.UniqueNullableModel.objects.create(title="")
         transaction.rollback()  # Postgres
-        models.UniqueNullableModel.objects.create(title='foo')
+        models.UniqueNullableModel.objects.create(title="foo")
         with pytest.raises(IntegrityError):
-            models.UniqueNullableModel.objects.create(title='foo')
+            models.UniqueNullableModel.objects.create(title="foo")
         transaction.rollback()  # Postgres
 
 
 class FallbackTests(ModeltranslationTestBase):
-    test_fallback = {'default': ('de',), 'de': ('en',)}
+    test_fallback = {"default": ("de",), "de": ("en",)}
 
     def test_settings(self):
         # Initial
-        assert mt_settings.FALLBACK_LANGUAGES == {'default': ()}
+        assert mt_settings.FALLBACK_LANGUAGES == {"default": ()}
         # Tuple/list
-        with reload_override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=('de',)):
-            assert mt_settings.FALLBACK_LANGUAGES == {'default': ('de',)}
+        with reload_override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=("de",)):
+            assert mt_settings.FALLBACK_LANGUAGES == {"default": ("de",)}
         # Whole dict
         with reload_override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=self.test_fallback):
             assert mt_settings.FALLBACK_LANGUAGES == self.test_fallback
         # Improper language raises error
-        config = {'default': (), 'fr': ('en',)}
+        config = {"default": (), "fr": ("en",)}
         with override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=config):
             with pytest.raises(ImproperlyConfigured):
                 importlib.reload(mt_settings)
@@ -696,67 +696,67 @@ class FallbackTests(ModeltranslationTestBase):
         from modeltranslation.utils import resolution_order
 
         with reload_override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=self.test_fallback):
-            assert ('en', 'de') == resolution_order('en')
-            assert ('de', 'en') == resolution_order('de')
+            assert ("en", "de") == resolution_order("en")
+            assert ("de", "en") == resolution_order("de")
             # Overriding
-            config = {'default': ()}
-            assert ('en',) == resolution_order('en', config)
-            assert ('de', 'en') == resolution_order('de', config)
+            config = {"default": ()}
+            assert ("en",) == resolution_order("en", config)
+            assert ("de", "en") == resolution_order("de", config)
             # Uniqueness
-            config = {'de': ('en', 'de')}
-            assert ('en', 'de') == resolution_order('en', config)
-            assert ('de', 'en') == resolution_order('de', config)
+            config = {"de": ("en", "de")}
+            assert ("en", "de") == resolution_order("en", config)
+            assert ("de", "en") == resolution_order("de", config)
 
             # Default fallbacks are always used at the end
             # That's it: fallbacks specified for a language don't replace defaults,
             # but just are prepended
-            config = {'default': ('en', 'de'), 'de': ()}
-            assert ('en', 'de') == resolution_order('en', config)
-            assert ('de', 'en') == resolution_order('de', config)
+            config = {"default": ("en", "de"), "de": ()}
+            assert ("en", "de") == resolution_order("en", config)
+            assert ("de", "en") == resolution_order("de", config)
             # What one may have expected
-            assert ('de',) != resolution_order('de', config)
+            assert ("de",) != resolution_order("de", config)
 
             # To completely override settings, one should override all keys
-            config = {'default': (), 'de': ()}
-            assert ('en',) == resolution_order('en', config)
-            assert ('de',) == resolution_order('de', config)
+            config = {"default": (), "de": ()}
+            assert ("en",) == resolution_order("en", config)
+            assert ("de",) == resolution_order("de", config)
 
     def test_fallback_languages(self):
         with reload_override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=self.test_fallback):
-            title_de = 'title de'
-            title_en = 'title en'
+            title_de = "title de"
+            title_en = "title en"
             n = models.TestModel(title=title_de)
             assert n.title_de == title_de
             assert n.title_en is None
             assert n.title == title_de
-            trans_real.activate('en')
+            trans_real.activate("en")
             assert n.title == title_de  # since default fallback is de
 
             n = models.TestModel(title=title_en)
             assert n.title_de is None
             assert n.title_en == title_en
             assert n.title == title_en
-            trans_real.activate('de')
+            trans_real.activate("de")
             assert n.title == title_en  # since fallback for de is en
 
             n.title_en = None
-            assert n.title == ''  # if all fallbacks fail, return field.get_default()
+            assert n.title == ""  # if all fallbacks fail, return field.get_default()
 
     def test_fallbacks_toggle(self):
         with reload_override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=self.test_fallback):
-            m = models.TestModel(title='foo')
+            m = models.TestModel(title="foo")
             with fallbacks(True):
-                assert m.title_de == 'foo'
+                assert m.title_de == "foo"
                 assert m.title_en is None
-                assert m.title == 'foo'
-                with override('en'):
-                    assert m.title == 'foo'
+                assert m.title == "foo"
+                with override("en"):
+                    assert m.title == "foo"
             with fallbacks(False):
-                assert m.title_de == 'foo'
+                assert m.title_de == "foo"
                 assert m.title_en is None
-                assert m.title == 'foo'
-                with override('en'):
-                    assert m.title == ''  # '' is the default
+                assert m.title == "foo"
+                with override("en"):
+                    assert m.title == ""  # '' is the default
 
     def test_fallback_undefined(self):
         """
@@ -765,61 +765,61 @@ class FallbackTests(ModeltranslationTestBase):
         """
         with reload_override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=self.test_fallback):
             # Non-nullable CharField falls back on empty strings.
-            m = models.FallbackModel(title_en='value', title_de='')
-            with override('en'):
-                assert m.title == 'value'
-            with override('de'):
-                assert m.title == 'value'
+            m = models.FallbackModel(title_en="value", title_de="")
+            with override("en"):
+                assert m.title == "value"
+            with override("de"):
+                assert m.title == "value"
 
             # Nullable CharField does not fall back on empty strings.
-            m = models.FallbackModel(description_en='value', description_de='')
-            with override('en'):
-                assert m.description == 'value'
-            with override('de'):
-                assert m.description == ''
+            m = models.FallbackModel(description_en="value", description_de="")
+            with override("en"):
+                assert m.description == "value"
+            with override("de"):
+                assert m.description == ""
 
             # Nullable CharField does fall back on None.
-            m = models.FallbackModel(description_en='value', description_de=None)
-            with override('en'):
-                assert m.description == 'value'
-            with override('de'):
-                assert m.description == 'value'
+            m = models.FallbackModel(description_en="value", description_de=None)
+            with override("en"):
+                assert m.description == "value"
+            with override("de"):
+                assert m.description == "value"
 
             # The undefined value may be overridden.
-            m = models.FallbackModel2(title_en='value', title_de='')
-            with override('en'):
-                assert m.title == 'value'
-            with override('de'):
-                assert m.title == ''
-            m = models.FallbackModel2(title_en='value', title_de='no title')
-            with override('en'):
-                assert m.title == 'value'
-            with override('de'):
-                assert m.title == 'value'
+            m = models.FallbackModel2(title_en="value", title_de="")
+            with override("en"):
+                assert m.title == "value"
+            with override("de"):
+                assert m.title == ""
+            m = models.FallbackModel2(title_en="value", title_de="no title")
+            with override("en"):
+                assert m.title == "value"
+            with override("de"):
+                assert m.title == "value"
 
 
 class FileFieldsTest(ModeltranslationTestBase):
     def tearDown(self):
-        if default_storage.exists('modeltranslation_tests'):
+        if default_storage.exists("modeltranslation_tests"):
             # With FileSystemStorage uploading files creates a new directory,
             # that's not automatically removed upon their deletion.
-            tests_dir = default_storage.path('modeltranslation_tests')
+            tests_dir = default_storage.path("modeltranslation_tests")
             if os.path.isdir(tests_dir):
                 shutil.rmtree(tests_dir)
         super().tearDown()
 
     def test_translated_models(self):
         field_names = dir(models.FileFieldsModel())
-        assert 'id' in field_names
-        assert 'title' in field_names
-        assert 'title_de' in field_names
-        assert 'title_en' in field_names
-        assert 'file' in field_names
-        assert 'file_de' in field_names
-        assert 'file_en' in field_names
-        assert 'image' in field_names
-        assert 'image_de' in field_names
-        assert 'image_en' in field_names
+        assert "id" in field_names
+        assert "title" in field_names
+        assert "title_de" in field_names
+        assert "title_en" in field_names
+        assert "file" in field_names
+        assert "file_de" in field_names
+        assert "file_en" in field_names
+        assert "image" in field_names
+        assert "image_de" in field_names
+        assert "image_en" in field_names
 
     def _file_factory(self, name, content):
         try:
@@ -833,25 +833,25 @@ class FileFieldsTest(ModeltranslationTestBase):
         inst = models.FileFieldsModel(title="Testtitle")
 
         trans_real.activate("en")
-        inst.title = 'title_en'
-        inst.file = 'a_en'
-        inst.file.save('b_en', ContentFile('file in english'))
-        inst.image = self._file_factory('i_en.jpg', 'image in english')  # Direct assign
+        inst.title = "title_en"
+        inst.file = "a_en"
+        inst.file.save("b_en", ContentFile("file in english"))
+        inst.image = self._file_factory("i_en.jpg", "image in english")  # Direct assign
 
         trans_real.activate("de")
-        inst.title = 'title_de'
-        inst.file = 'a_de'
-        inst.file.save('b_de', ContentFile('file in german'))
-        inst.image = self._file_factory('i_de.jpg', 'image in german')
+        inst.title = "title_de"
+        inst.file = "a_de"
+        inst.file.save("b_de", ContentFile("file in german"))
+        inst.image = self._file_factory("i_de.jpg", "image in german")
 
         inst.save()
 
         trans_real.activate("en")
-        assert inst.title == 'title_en'
-        assert inst.file.name.count('b_en') > 0
-        assert inst.file.read() == b'file in english'
-        assert inst.image.name.count('i_en') > 0
-        assert inst.image.read() == b'image in english'
+        assert inst.title == "title_en"
+        assert inst.file.name.count("b_en") > 0
+        assert inst.file.read() == b"file in english"
+        assert inst.image.name.count("i_en") > 0
+        assert inst.image.read() == b"image in english"
 
         # Check if file was actually created in the global storage.
         assert default_storage.exists(inst.file.path)
@@ -860,11 +860,11 @@ class FileFieldsTest(ModeltranslationTestBase):
         assert inst.image.size > 0
 
         trans_real.activate("de")
-        assert inst.title == 'title_de'
-        assert inst.file.name.count('b_de') > 0
-        assert inst.file.read() == b'file in german'
-        assert inst.image.name.count('i_de') > 0
-        assert inst.image.read() == b'image in german'
+        assert inst.title == "title_de"
+        assert inst.file.name.count("b_de") > 0
+        assert inst.file.read() == b"file in german"
+        assert inst.image.name.count("i_de") > 0
+        assert inst.image.read() == b"image in german"
 
         inst.file_en.delete()
         inst.image_en.delete()
@@ -885,23 +885,23 @@ class FileFieldsTest(ModeltranslationTestBase):
     def test_fallback(self):
         from django.db.models.fields.files import FieldFile
 
-        with reload_override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=('en',)):
-            assert get_language() == 'de'
+        with reload_override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=("en",)):
+            assert get_language() == "de"
             inst = models.FileFieldsModel()
-            inst.file_de = ''
-            inst.file_en = 'foo'
-            inst.file2_de = ''
-            inst.file2_en = 'bar'
+            inst.file_de = ""
+            inst.file_en = "foo"
+            inst.file2_de = ""
+            inst.file2_en = "bar"
             assert isinstance(inst.file, FieldFile)
             assert isinstance(inst.file2, FieldFile)
-            assert inst.file.name == 'foo'
-            assert inst.file2.name == 'bar'
+            assert inst.file.name == "foo"
+            assert inst.file2.name == "bar"
             inst.save()
             inst = models.FileFieldsModel.objects.all()[0]
             assert isinstance(inst.file, FieldFile)
             assert isinstance(inst.file2, FieldFile)
-            assert inst.file.name == 'foo'
-            assert inst.file2.name == 'bar'
+            assert inst.file.name == "foo"
+            assert inst.file2.name == "bar"
 
 
 class ForeignKeyFieldsTest(ModeltranslationTestBase):
@@ -914,31 +914,31 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
 
     def test_translated_models(self):
         field_names = dir(self.model())
-        assert 'id' in field_names
-        for f in ('test', 'test_de', 'test_en', 'optional', 'optional_en', 'optional_de'):
+        assert "id" in field_names
+        for f in ("test", "test_de", "test_en", "optional", "optional_en", "optional_de"):
             assert f in field_names
-            assert '%s_id' % f in field_names
+            assert "%s_id" % f in field_names
 
     def test_db_column_names(self):
         meta = self.model._meta
 
         # Make sure the correct database columns always get used:
-        attname, col = meta.get_field('test').get_attname_column()
-        assert attname == 'test_id'
+        attname, col = meta.get_field("test").get_attname_column()
+        assert attname == "test_id"
         assert attname == col
 
-        attname, col = meta.get_field('test_en').get_attname_column()
-        assert attname == 'test_en_id'
+        attname, col = meta.get_field("test_en").get_attname_column()
+        assert attname == "test_en_id"
         assert attname == col
 
-        attname, col = meta.get_field('test_de').get_attname_column()
-        assert attname == 'test_de_id'
+        attname, col = meta.get_field("test_de").get_attname_column()
+        assert attname == "test_de_id"
         assert attname == col
 
     def test_translated_models_instance(self):
-        test_inst1 = models.TestModel(title_en='title1_en', title_de='title1_de')
+        test_inst1 = models.TestModel(title_en="title1_en", title_de="title1_de")
         test_inst1.save()
-        test_inst2 = models.TestModel(title_en='title2_en', title_de='title2_de')
+        test_inst2 = models.TestModel(title_en="title2_en", title_de="title2_de")
         test_inst2.save()
         inst = self.model()
 
@@ -953,9 +953,9 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
 
         trans_real.activate("de")
         assert inst.test_id == test_inst1.pk
-        assert inst.test.title == 'title1_de'
+        assert inst.test.title == "title1_de"
         assert inst.test_de_id == test_inst1.pk
-        assert inst.test_de.title == 'title1_de'
+        assert inst.test_de.title == "title1_de"
         assert inst.optional is None
 
         # Test fallbacks:
@@ -963,13 +963,13 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         with default_fallback():
             assert inst.test_id == test_inst1.pk
             assert inst.test.pk == test_inst1.pk
-            assert inst.test.title == 'title1_en'
+            assert inst.test.title == "title1_en"
 
         # Test English:
         assert inst.optional_id == test_inst2.pk
-        assert inst.optional.title == 'title2_en'
+        assert inst.optional.title == "title2_en"
         assert inst.optional_en_id == test_inst2.pk
-        assert inst.optional_en.title == 'title2_en'
+        assert inst.optional_en.title == "title2_en"
 
         # Test caching
         inst.test_en = test_inst2
@@ -988,9 +988,9 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         assert manager.filter(test=test_inst2).count() == 0
         assert manager.filter(test_en=test_inst2).count() == 1
         assert manager.filter(test_de=test_inst2).count() == 0
-        assert manager.filter(test__title='title1_de').count() == 1
-        assert manager.filter(test__title='title1_en').count() == 0
-        assert manager.filter(test__title_en='title1_en').count() == 1
+        assert manager.filter(test__title="title1_de").count() == 1
+        assert manager.filter(test__title="title1_en").count() == 0
+        assert manager.filter(test__title_en="title1_en").count() == 1
         trans_real.activate("en")
         assert manager.filter(test=test_inst1).count() == 0
         assert manager.filter(test_en=test_inst1).count() == 0
@@ -998,24 +998,24 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         assert manager.filter(test=test_inst2).count() == 1
         assert manager.filter(test_en=test_inst2).count() == 1
         assert manager.filter(test_de=test_inst2).count() == 0
-        assert manager.filter(test__title='title2_en').count() == 1
-        assert manager.filter(test__title='title2_de').count() == 0
-        assert manager.filter(test__title_de='title2_de').count() == 1
+        assert manager.filter(test__title="title2_en").count() == 1
+        assert manager.filter(test__title="title2_de").count() == 0
+        assert manager.filter(test__title_de="title2_de").count() == 1
 
     def test_reverse_relations(self):
-        test_inst = models.TestModel(title_en='title_en', title_de='title_de')
+        test_inst = models.TestModel(title_en="title_en", title_de="title_de")
         test_inst.save()
 
         # Instantiate many 'ForeignKeyModel' instances:
         fk_inst_both = self.model(
-            title_en='f_title_en', title_de='f_title_de', test_de=test_inst, test_en=test_inst
+            title_en="f_title_en", title_de="f_title_de", test_de=test_inst, test_en=test_inst
         )
         fk_inst_both.save()
         fk_inst_de = self.model(
-            title_en='f_title_en', title_de='f_title_de', test_de_id=test_inst.pk
+            title_en="f_title_en", title_de="f_title_de", test_de_id=test_inst.pk
         )
         fk_inst_de.save()
-        fk_inst_en = self.model(title_en='f_title_en', title_de='f_title_de', test_en=test_inst)
+        fk_inst_en = self.model(title_en="f_title_en", title_de="f_title_de", test_en=test_inst)
         fk_inst_en.save()
 
         fk_option_de = self.model.objects.create(optional_de=test_inst)
@@ -1025,19 +1025,19 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         # Explicit related_name
         testmodel_fields = get_field_names(models.TestModel)
         testmodel_methods = dir(models.TestModel)
-        assert 'test_fks' in testmodel_fields
-        assert 'test_fks_de' in testmodel_fields
-        assert 'test_fks_en' in testmodel_fields
-        assert 'test_fks' in testmodel_methods
-        assert 'test_fks_de' in testmodel_methods
-        assert 'test_fks_en' in testmodel_methods
+        assert "test_fks" in testmodel_fields
+        assert "test_fks_de" in testmodel_fields
+        assert "test_fks_en" in testmodel_fields
+        assert "test_fks" in testmodel_methods
+        assert "test_fks_de" in testmodel_methods
+        assert "test_fks_en" in testmodel_methods
         # Implicit related_name: manager descriptor name != query field name
-        assert 'foreignkeymodel' in testmodel_fields
-        assert 'foreignkeymodel_de' in testmodel_fields
-        assert 'foreignkeymodel_en' in testmodel_fields
-        assert 'foreignkeymodel_set' in testmodel_methods
-        assert 'foreignkeymodel_set_de' in testmodel_methods
-        assert 'foreignkeymodel_set_en' in testmodel_methods
+        assert "foreignkeymodel" in testmodel_fields
+        assert "foreignkeymodel_de" in testmodel_fields
+        assert "foreignkeymodel_en" in testmodel_fields
+        assert "foreignkeymodel_set" in testmodel_methods
+        assert "foreignkeymodel_set_de" in testmodel_methods
+        assert "foreignkeymodel_set_en" in testmodel_methods
 
         # Check the German reverse accessor:
         assert fk_inst_both in test_inst.test_fks_de.all()
@@ -1072,9 +1072,9 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         assert manager.filter(foreignkeymodel=fk_option_de).count() == 1
         assert manager.filter(foreignkeymodel=fk_option_en).count() == 0
         assert manager.filter(foreignkeymodel_en=fk_option_en).count() == 1
-        assert manager.filter(test_fks__title='f_title_de').distinct().count() == 1
-        assert manager.filter(test_fks__title='f_title_en').distinct().count() == 0
-        assert manager.filter(test_fks__title_en='f_title_en').distinct().count() == 1
+        assert manager.filter(test_fks__title="f_title_de").distinct().count() == 1
+        assert manager.filter(test_fks__title="f_title_en").distinct().count() == 0
+        assert manager.filter(test_fks__title_en="f_title_en").distinct().count() == 1
         trans_real.activate("en")
         assert manager.filter(test_fks=fk_inst_both).count() == 1
         assert manager.filter(test_fks=fk_inst_en).count() == 1
@@ -1084,13 +1084,13 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         assert manager.filter(foreignkeymodel=fk_option_en).count() == 1
         assert manager.filter(foreignkeymodel=fk_option_de).count() == 0
         assert manager.filter(foreignkeymodel_de=fk_option_de).count() == 1
-        assert manager.filter(test_fks__title='f_title_en').distinct().count() == 1
-        assert manager.filter(test_fks__title='f_title_de').distinct().count() == 0
-        assert manager.filter(test_fks__title_de='f_title_de').distinct().count() == 1
+        assert manager.filter(test_fks__title="f_title_en").distinct().count() == 1
+        assert manager.filter(test_fks__title="f_title_de").distinct().count() == 0
+        assert manager.filter(test_fks__title_de="f_title_de").distinct().count() == 1
 
         # Check assignment
         trans_real.activate("de")
-        test_inst2 = models.TestModel(title_en='title_en', title_de='title_de')
+        test_inst2 = models.TestModel(title_en="title_en", title_de="title_de")
         test_inst2.save()
         test_inst2.test_fks.set((fk_inst_de, fk_inst_both))
         test_inst2.test_fks_en.set((fk_inst_en, fk_inst_both))
@@ -1115,7 +1115,7 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         """
         from modeltranslation.tests.models import FilteredManager
 
-        test_inst = models.FilteredTestModel(title_en='title_en', title_de='title_de')
+        test_inst = models.FilteredTestModel(title_en="title_en", title_de="title_de")
         test_inst.save()
 
         assert not models.FilteredTestModel.objects.all().exists()
@@ -1124,7 +1124,7 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
 
         # # create objects with relations to test_inst
         fk_inst = models.ForeignKeyFilteredModel(
-            test=test_inst, title_en='f_title_en', title_de='f_title_de'
+            test=test_inst, title_en="f_title_en", title_de="f_title_de"
         )
         fk_inst.save()
         fk_inst.refresh_from_db()  # force to reset cached values
@@ -1134,11 +1134,11 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         assert fk_inst.test == test_inst
 
     def test_non_translated_relation(self):
-        non_de = models.NonTranslated.objects.create(title='title_de')
-        non_en = models.NonTranslated.objects.create(title='title_en')
+        non_de = models.NonTranslated.objects.create(title="title_de")
+        non_en = models.NonTranslated.objects.create(title="title_en")
 
         fk_inst_both = self.model.objects.create(
-            title_en='f_title_en', title_de='f_title_de', non_de=non_de, non_en=non_en
+            title_en="f_title_en", title_de="f_title_de", non_de=non_de, non_en=non_en
         )
         fk_inst_de = self.model.objects.create(non_de=non_de)
         fk_inst_en = self.model.objects.create(non_en=non_en)
@@ -1149,16 +1149,16 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         assert manager.filter(non=non_de).count() == 2
         assert manager.filter(non=non_en).count() == 0
         assert manager.filter(non_en=non_en).count() == 2
-        assert manager.filter(non__title='title_de').count() == 2
-        assert manager.filter(non__title='title_en').count() == 0
-        assert manager.filter(non_en__title='title_en').count() == 2
+        assert manager.filter(non__title="title_de").count() == 2
+        assert manager.filter(non__title="title_en").count() == 0
+        assert manager.filter(non_en__title="title_en").count() == 2
         trans_real.activate("en")
         assert manager.filter(non=non_en).count() == 2
         assert manager.filter(non=non_de).count() == 0
         assert manager.filter(non_de=non_de).count() == 2
-        assert manager.filter(non__title='title_en').count() == 2
-        assert manager.filter(non__title='title_de').count() == 0
-        assert manager.filter(non_de__title='title_de').count() == 2
+        assert manager.filter(non__title="title_en").count() == 2
+        assert manager.filter(non__title="title_de").count() == 0
+        assert manager.filter(non_de__title="title_de").count() == 2
 
         # Reverse relation + spanning
         manager = models.NonTranslated.objects
@@ -1167,21 +1167,21 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         assert manager.filter(test_fks=fk_inst_de).count() == 1
         assert manager.filter(test_fks=fk_inst_en).count() == 0
         assert manager.filter(test_fks_en=fk_inst_en).count() == 1
-        assert manager.filter(test_fks__title='f_title_de').count() == 1
-        assert manager.filter(test_fks__title='f_title_en').count() == 0
-        assert manager.filter(test_fks__title_en='f_title_en').count() == 1
+        assert manager.filter(test_fks__title="f_title_de").count() == 1
+        assert manager.filter(test_fks__title="f_title_en").count() == 0
+        assert manager.filter(test_fks__title_en="f_title_en").count() == 1
         trans_real.activate("en")
         assert manager.filter(test_fks=fk_inst_both).count() == 1
         assert manager.filter(test_fks=fk_inst_en).count() == 1
         assert manager.filter(test_fks=fk_inst_de).count() == 0
         assert manager.filter(test_fks_de=fk_inst_de).count() == 1
-        assert manager.filter(test_fks__title='f_title_en').count() == 1
-        assert manager.filter(test_fks__title='f_title_de').count() == 0
-        assert manager.filter(test_fks__title_de='f_title_de').count() == 1
+        assert manager.filter(test_fks__title="f_title_en").count() == 1
+        assert manager.filter(test_fks__title="f_title_de").count() == 0
+        assert manager.filter(test_fks__title_de="f_title_de").count() == 1
 
     def test_indonesian(self):
-        field = models.ForeignKeyModel._meta.get_field('test')
-        assert field.attname != build_localized_fieldname(field.name, 'id')
+        field = models.ForeignKeyModel._meta.get_field("test")
+        assert field.attname != build_localized_fieldname(field.name, "id")
 
 
 class ManyToManyFieldsTest(ModeltranslationTestBase):
@@ -1194,67 +1194,67 @@ class ManyToManyFieldsTest(ModeltranslationTestBase):
 
     def test_translated_models(self):
         field_names = dir(self.model())
-        assert 'id' in field_names
-        for f in ('test', 'test_de', 'test_en', 'self_call_1', 'self_call_1_en', 'self_call_1_de'):
+        assert "id" in field_names
+        for f in ("test", "test_de", "test_en", "self_call_1", "self_call_1_en", "self_call_1_de"):
             assert f in field_names
 
     def test_db_column_names(self):
         meta = self.model._meta
 
         # Make sure the correct database columns always get used:
-        field = meta.get_field('test')
+        field = meta.get_field("test")
         assert field.remote_field.through._meta.db_table == "tests_manytomanyfieldmodel_test"
 
-        field = meta.get_field('test_en')
+        field = meta.get_field("test_en")
         assert field.remote_field.through._meta.db_table == "tests_manytomanyfieldmodel_test_en"
 
-        field = meta.get_field('test_de')
+        field = meta.get_field("test_de")
         assert field.remote_field.through._meta.db_table == "tests_manytomanyfieldmodel_test_de"
 
-        field = meta.get_field('self_call_1')
+        field = meta.get_field("self_call_1")
         assert field.remote_field.through._meta.db_table == "tests_manytomanyfieldmodel_self_call_1"
 
-        field = meta.get_field('self_call_1_en')
+        field = meta.get_field("self_call_1_en")
         assert (
             field.remote_field.through._meta.db_table == "tests_manytomanyfieldmodel_self_call_1_en"
         )
 
-        field = meta.get_field('self_call_1_de')
+        field = meta.get_field("self_call_1_de")
         assert (
             field.remote_field.through._meta.db_table == "tests_manytomanyfieldmodel_self_call_1_de"
         )
 
-        field = meta.get_field('through_model')
+        field = meta.get_field("through_model")
         assert field.remote_field.through._meta.db_table == "tests_customthroughmodel"
 
-        field = meta.get_field('through_model_en')
+        field = meta.get_field("through_model_en")
         assert field.remote_field.through._meta.db_table == "tests_customthroughmodel_en"
 
-        field = meta.get_field('through_model_de')
+        field = meta.get_field("through_model_de")
         assert field.remote_field.through._meta.db_table == "tests_customthroughmodel_de"
 
     def test_translated_models_instance(self):
         models.TestModel.objects.bulk_create(
-            models.TestModel(title_en='m2m_test_%s_en' % i, title_de='m2m_test_%s_de' % i)
+            models.TestModel(title_en="m2m_test_%s_en" % i, title_de="m2m_test_%s_de" % i)
             for i in range(10)
         )
         self.model.objects.bulk_create(
-            self.model(title_en='m2m_test_%s_en' % i, title_de='m2m_test_%s_de' % i)
+            self.model(title_en="m2m_test_%s_en" % i, title_de="m2m_test_%s_de" % i)
             for i in range(10)
         )
         models.NonTranslated.objects.bulk_create(
-            models.NonTranslated(title='m2m_test_%s' % i) for i in range(10)
+            models.NonTranslated(title="m2m_test_%s" % i) for i in range(10)
         )
 
         testmodel_qs = models.TestModel.objects.all()
-        testmodel_qs_1 = testmodel_qs.filter(title_en__in=['m2m_test_%s_en' % i for i in range(4)])
+        testmodel_qs_1 = testmodel_qs.filter(title_en__in=["m2m_test_%s_en" % i for i in range(4)])
         testmodel_qs_2 = testmodel_qs.filter(
-            title_en__in=['m2m_test_%s_en' % i for i in range(4, 10)]
+            title_en__in=["m2m_test_%s_en" % i for i in range(4, 10)]
         )
         untranslated_qs = models.NonTranslated.objects.all()
         self_qs = self.model.objects.all()
-        self_qs_1 = self_qs.filter(title_en__in=['m2m_test_%s_en' % i for i in range(6)])
-        self_qs_2 = self_qs.filter(title_en__in=['m2m_test_%s_en' % i for i in range(6, 10)])
+        self_qs_1 = self_qs.filter(title_en__in=["m2m_test_%s_en" % i for i in range(6)])
+        self_qs_2 = self_qs.filter(title_en__in=["m2m_test_%s_en" % i for i in range(6, 10)])
 
         inst = self.model()
         inst.save()
@@ -1273,8 +1273,8 @@ class ManyToManyFieldsTest(ModeltranslationTestBase):
         inst.trans_through_model.through.objects.bulk_create(
             (
                 inst.trans_through_model.through(
-                    title_en='m2m_test_%s_en' % (i + 1),
-                    title_de='m2m_test_%s_de' % (i + 1),
+                    title_en="m2m_test_%s_en" % (i + 1),
+                    title_de="m2m_test_%s_de" % (i + 1),
                     rel_1_id=int(inst.pk),
                     rel_2_id=tst_model.pk,
                 )
@@ -1359,15 +1359,15 @@ class ManyToManyFieldsTest(ModeltranslationTestBase):
 
     def test_reverse_relations(self):
         models.TestModel.objects.bulk_create(
-            models.TestModel(title_en='m2m_test_%s_en' % i, title_de='m2m_test_%s_de' % i)
+            models.TestModel(title_en="m2m_test_%s_en" % i, title_de="m2m_test_%s_de" % i)
             for i in range(10)
         )
         self.model.objects.bulk_create(
-            self.model(title_en='m2m_test_%s_en' % i, title_de='m2m_test_%s_de' % i)
+            self.model(title_en="m2m_test_%s_en" % i, title_de="m2m_test_%s_de" % i)
             for i in range(10)
         )
         models.NonTranslated.objects.bulk_create(
-            models.NonTranslated(title='m2m_test_%s' % i) for i in range(10)
+            models.NonTranslated(title="m2m_test_%s" % i) for i in range(10)
         )
         inst_both = self.model(title_en="inst_both_en", title_de="inst_both_de")
         inst_both.save()
@@ -1386,19 +1386,19 @@ class ManyToManyFieldsTest(ModeltranslationTestBase):
         testmodel_fields = get_field_names(models.TestModel)
         testmodel_methods = dir(models.TestModel)
 
-        assert 'm2m_test_ref' in testmodel_fields
-        assert 'm2m_test_ref_de' in testmodel_fields
-        assert 'm2m_test_ref_en' in testmodel_fields
-        assert 'm2m_test_ref' in testmodel_methods
-        assert 'm2m_test_ref_de' in testmodel_methods
-        assert 'm2m_test_ref_en' in testmodel_methods
+        assert "m2m_test_ref" in testmodel_fields
+        assert "m2m_test_ref_de" in testmodel_fields
+        assert "m2m_test_ref_en" in testmodel_fields
+        assert "m2m_test_ref" in testmodel_methods
+        assert "m2m_test_ref_de" in testmodel_methods
+        assert "m2m_test_ref_en" in testmodel_methods
         # Implicit related_name: manager descriptor name != query field name
-        assert 'customthroughmodel' in testmodel_fields
-        assert 'customthroughmodel_en' in testmodel_fields
-        assert 'customthroughmodel_de' in testmodel_fields
-        assert 'manytomanyfieldmodel_set' in testmodel_methods
-        assert 'manytomanyfieldmodel_en_set' in testmodel_methods
-        assert 'manytomanyfieldmodel_de_set' in testmodel_methods
+        assert "customthroughmodel" in testmodel_fields
+        assert "customthroughmodel_en" in testmodel_fields
+        assert "customthroughmodel_de" in testmodel_fields
+        assert "manytomanyfieldmodel_set" in testmodel_methods
+        assert "manytomanyfieldmodel_en_set" in testmodel_methods
+        assert "manytomanyfieldmodel_de_set" in testmodel_methods
 
         test_inst = models.TestModel.objects.first()
         # Check the German reverse accessor:
@@ -1434,10 +1434,10 @@ class ManyToManyFieldsTest(ModeltranslationTestBase):
         assert manager.filter(m2m_test_ref_en__in=[inst_en]).count() == 10
         assert manager.filter(manytomanyfieldmodel__in=[inst_en]).count() == 0
         assert manager.filter(manytomanyfieldmodel_en__in=[inst_en]).count() == 10
-        assert manager.filter(m2m_test_ref__title='inst_de_de').distinct().count() == 10
-        assert manager.filter(m2m_test_ref__title='inst_de_en').distinct().count() == 0
-        assert manager.filter(m2m_test_ref__title_en='inst_de_en').distinct().count() == 10
-        assert manager.filter(m2m_test_ref_en__title='inst_en_de').distinct().count() == 10
+        assert manager.filter(m2m_test_ref__title="inst_de_de").distinct().count() == 10
+        assert manager.filter(m2m_test_ref__title="inst_de_en").distinct().count() == 0
+        assert manager.filter(m2m_test_ref__title_en="inst_de_en").distinct().count() == 10
+        assert manager.filter(m2m_test_ref_en__title="inst_en_de").distinct().count() == 10
 
         trans_real.activate("en")
         assert manager.filter(m2m_test_ref__in=[inst_both]).count() == 10
@@ -1448,10 +1448,10 @@ class ManyToManyFieldsTest(ModeltranslationTestBase):
         assert manager.filter(manytomanyfieldmodel__in=[inst_en]).count() == 10
         assert manager.filter(manytomanyfieldmodel__in=[inst_de]).count() == 0
         assert manager.filter(manytomanyfieldmodel_de__in=[inst_de]).count() == 0
-        assert manager.filter(m2m_test_ref__title='inst_en_en').distinct().count() == 10
-        assert manager.filter(m2m_test_ref__title='inst_en_de').distinct().count() == 0
-        assert manager.filter(m2m_test_ref__title_de='inst_en_de').distinct().count() == 10
-        assert manager.filter(m2m_test_ref_de__title='inst_de_en').distinct().count() == 10
+        assert manager.filter(m2m_test_ref__title="inst_en_en").distinct().count() == 10
+        assert manager.filter(m2m_test_ref__title="inst_en_de").distinct().count() == 0
+        assert manager.filter(m2m_test_ref__title_de="inst_en_de").distinct().count() == 10
+        assert manager.filter(m2m_test_ref_de__title="inst_de_en").distinct().count() == 10
 
 
 class OneToOneFieldsTest(ForeignKeyFieldsTest):
@@ -1463,7 +1463,7 @@ class OneToOneFieldsTest(ForeignKeyFieldsTest):
         cls.model = models.OneToOneFieldModel
 
     def test_uniqueness(self):
-        test_inst1 = models.TestModel(title_en='title1_en', title_de='title1_de')
+        test_inst1 = models.TestModel(title_en="title1_en", title_de="title1_de")
         test_inst1.save()
         inst = self.model()
 
@@ -1481,15 +1481,15 @@ class OneToOneFieldsTest(ForeignKeyFieldsTest):
             inst2.save()
 
     def test_reverse_relations(self):
-        test_inst = models.TestModel(title_en='title_en', title_de='title_de')
+        test_inst = models.TestModel(title_en="title_en", title_de="title_de")
         test_inst.save()
 
         # Instantiate many 'OneToOneFieldModel' instances:
         fk_inst_de = self.model(
-            title_en='f_title_en', title_de='f_title_de', test_de_id=test_inst.pk
+            title_en="f_title_en", title_de="f_title_de", test_de_id=test_inst.pk
         )
         fk_inst_de.save()
-        fk_inst_en = self.model(title_en='f_title_en', title_de='f_title_de', test_en=test_inst)
+        fk_inst_en = self.model(title_en="f_title_en", title_de="f_title_de", test_en=test_inst)
         fk_inst_en.save()
 
         fk_option_de = self.model.objects.create(optional_de=test_inst)
@@ -1499,19 +1499,19 @@ class OneToOneFieldsTest(ForeignKeyFieldsTest):
         # Explicit related_name
         testmodel_fields = get_field_names(models.TestModel)
         testmodel_methods = dir(models.TestModel)
-        assert 'test_o2o' in testmodel_fields
-        assert 'test_o2o_de' in testmodel_fields
-        assert 'test_o2o_en' in testmodel_fields
-        assert 'test_o2o' in testmodel_methods
-        assert 'test_o2o_de' in testmodel_methods
-        assert 'test_o2o_en' in testmodel_methods
+        assert "test_o2o" in testmodel_fields
+        assert "test_o2o_de" in testmodel_fields
+        assert "test_o2o_en" in testmodel_fields
+        assert "test_o2o" in testmodel_methods
+        assert "test_o2o_de" in testmodel_methods
+        assert "test_o2o_en" in testmodel_methods
         # Implicit related_name
-        assert 'onetoonefieldmodel' in testmodel_fields
-        assert 'onetoonefieldmodel_de' in testmodel_fields
-        assert 'onetoonefieldmodel_en' in testmodel_fields
-        assert 'onetoonefieldmodel' in testmodel_methods
-        assert 'onetoonefieldmodel_de' in testmodel_methods
-        assert 'onetoonefieldmodel_en' in testmodel_methods
+        assert "onetoonefieldmodel" in testmodel_fields
+        assert "onetoonefieldmodel_de" in testmodel_fields
+        assert "onetoonefieldmodel_en" in testmodel_fields
+        assert "onetoonefieldmodel" in testmodel_methods
+        assert "onetoonefieldmodel_de" in testmodel_methods
+        assert "onetoonefieldmodel_en" in testmodel_methods
 
         # Check the German reverse accessor:
         assert fk_inst_de == test_inst.test_o2o_de
@@ -1538,9 +1538,9 @@ class OneToOneFieldsTest(ForeignKeyFieldsTest):
         assert manager.filter(onetoonefieldmodel=fk_option_de).count() == 1
         assert manager.filter(onetoonefieldmodel=fk_option_en).count() == 0
         assert manager.filter(onetoonefieldmodel_en=fk_option_en).count() == 1
-        assert manager.filter(test_o2o__title='f_title_de').distinct().count() == 1
-        assert manager.filter(test_o2o__title='f_title_en').distinct().count() == 0
-        assert manager.filter(test_o2o__title_en='f_title_en').distinct().count() == 1
+        assert manager.filter(test_o2o__title="f_title_de").distinct().count() == 1
+        assert manager.filter(test_o2o__title="f_title_en").distinct().count() == 0
+        assert manager.filter(test_o2o__title_en="f_title_en").distinct().count() == 1
         trans_real.activate("en")
         assert manager.filter(test_o2o=fk_inst_en).count() == 1
         assert manager.filter(test_o2o__id=fk_inst_en.pk).count() == 1
@@ -1549,13 +1549,13 @@ class OneToOneFieldsTest(ForeignKeyFieldsTest):
         assert manager.filter(onetoonefieldmodel=fk_option_en).count() == 1
         assert manager.filter(onetoonefieldmodel=fk_option_de).count() == 0
         assert manager.filter(onetoonefieldmodel_de=fk_option_de).count() == 1
-        assert manager.filter(test_o2o__title='f_title_en').distinct().count() == 1
-        assert manager.filter(test_o2o__title='f_title_de').distinct().count() == 0
-        assert manager.filter(test_o2o__title_de='f_title_de').distinct().count() == 1
+        assert manager.filter(test_o2o__title="f_title_en").distinct().count() == 1
+        assert manager.filter(test_o2o__title="f_title_de").distinct().count() == 0
+        assert manager.filter(test_o2o__title_de="f_title_de").distinct().count() == 1
 
         # Check assignment
         trans_real.activate("de")
-        test_inst2 = models.TestModel(title_en='title_en', title_de='title_de')
+        test_inst2 = models.TestModel(title_en="title_en", title_de="title_de")
         test_inst2.save()
         test_inst2.test_o2o = fk_inst_de
         test_inst2.test_o2o_en = fk_inst_en
@@ -1573,14 +1573,14 @@ class OneToOneFieldsTest(ForeignKeyFieldsTest):
         assert fk_inst_en == test_inst2.test_o2o
 
     def test_non_translated_relation(self):
-        non_de = models.NonTranslated.objects.create(title='title_de')
-        non_en = models.NonTranslated.objects.create(title='title_en')
+        non_de = models.NonTranslated.objects.create(title="title_de")
+        non_en = models.NonTranslated.objects.create(title="title_en")
 
         fk_inst_de = self.model.objects.create(
-            title_en='f_title_en', title_de='f_title_de', non_de=non_de
+            title_en="f_title_en", title_de="f_title_de", non_de=non_de
         )
         fk_inst_en = self.model.objects.create(
-            title_en='f_title_en2', title_de='f_title_de2', non_en=non_en
+            title_en="f_title_en2", title_de="f_title_de2", non_en=non_en
         )
 
         # Forward relation + spanning
@@ -1589,16 +1589,16 @@ class OneToOneFieldsTest(ForeignKeyFieldsTest):
         assert manager.filter(non=non_de).count() == 1
         assert manager.filter(non=non_en).count() == 0
         assert manager.filter(non_en=non_en).count() == 1
-        assert manager.filter(non__title='title_de').count() == 1
-        assert manager.filter(non__title='title_en').count() == 0
-        assert manager.filter(non_en__title='title_en').count() == 1
+        assert manager.filter(non__title="title_de").count() == 1
+        assert manager.filter(non__title="title_en").count() == 0
+        assert manager.filter(non_en__title="title_en").count() == 1
         trans_real.activate("en")
         assert manager.filter(non=non_en).count() == 1
         assert manager.filter(non=non_de).count() == 0
         assert manager.filter(non_de=non_de).count() == 1
-        assert manager.filter(non__title='title_en').count() == 1
-        assert manager.filter(non__title='title_de').count() == 0
-        assert manager.filter(non_de__title='title_de').count() == 1
+        assert manager.filter(non__title="title_en").count() == 1
+        assert manager.filter(non__title="title_de").count() == 0
+        assert manager.filter(non_de__title="title_de").count() == 1
 
         # Reverse relation + spanning
         manager = models.NonTranslated.objects
@@ -1606,47 +1606,47 @@ class OneToOneFieldsTest(ForeignKeyFieldsTest):
         assert manager.filter(test_o2o=fk_inst_de).count() == 1
         assert manager.filter(test_o2o=fk_inst_en).count() == 0
         assert manager.filter(test_o2o_en=fk_inst_en).count() == 1
-        assert manager.filter(test_o2o__title='f_title_de').count() == 1
-        assert manager.filter(test_o2o__title='f_title_en').count() == 0
-        assert manager.filter(test_o2o__title_en='f_title_en').count() == 1
+        assert manager.filter(test_o2o__title="f_title_de").count() == 1
+        assert manager.filter(test_o2o__title="f_title_en").count() == 0
+        assert manager.filter(test_o2o__title_en="f_title_en").count() == 1
         trans_real.activate("en")
         assert manager.filter(test_o2o=fk_inst_en).count() == 1
         assert manager.filter(test_o2o=fk_inst_de).count() == 0
         assert manager.filter(test_o2o_de=fk_inst_de).count() == 1
-        assert manager.filter(test_o2o__title='f_title_en2').count() == 1
-        assert manager.filter(test_o2o__title='f_title_de2').count() == 0
-        assert manager.filter(test_o2o__title_de='f_title_de2').count() == 1
+        assert manager.filter(test_o2o__title="f_title_en2").count() == 1
+        assert manager.filter(test_o2o__title="f_title_de2").count() == 0
+        assert manager.filter(test_o2o__title_de="f_title_de2").count() == 1
 
 
 class OtherFieldsTest(ModeltranslationTestBase):
     def test_translated_models(self):
         inst = models.OtherFieldsModel.objects.create()
         field_names = dir(inst)
-        assert 'id' in field_names
-        assert 'int' in field_names
-        assert 'int_de' in field_names
-        assert 'int_en' in field_names
-        assert 'boolean' in field_names
-        assert 'boolean_de' in field_names
-        assert 'boolean_en' in field_names
-        assert 'genericip' in field_names
-        assert 'genericip_de' in field_names
-        assert 'genericip_en' in field_names
-        assert 'float' in field_names
-        assert 'float_de' in field_names
-        assert 'float_en' in field_names
-        assert 'decimal' in field_names
-        assert 'decimal_de' in field_names
-        assert 'decimal_en' in field_names
-        assert 'json' in field_names
-        assert 'json_de' in field_names
-        assert 'json_en' in field_names
+        assert "id" in field_names
+        assert "int" in field_names
+        assert "int_de" in field_names
+        assert "int_en" in field_names
+        assert "boolean" in field_names
+        assert "boolean_de" in field_names
+        assert "boolean_en" in field_names
+        assert "genericip" in field_names
+        assert "genericip_de" in field_names
+        assert "genericip_en" in field_names
+        assert "float" in field_names
+        assert "float_de" in field_names
+        assert "float_en" in field_names
+        assert "decimal" in field_names
+        assert "decimal_de" in field_names
+        assert "decimal_en" in field_names
+        assert "json" in field_names
+        assert "json_de" in field_names
+        assert "json_en" in field_names
         inst.delete()
 
     def test_translated_models_integer_instance(self):
         inst = models.OtherFieldsModel()
         inst.int = 7
-        assert 'de' == get_language()
+        assert "de" == get_language()
         assert 7 == inst.int
         assert 7 == inst.int_de
         assert 42 == inst.int_en  # default value is honored
@@ -1657,7 +1657,7 @@ class OtherFieldsTest(ModeltranslationTestBase):
         assert 9 == inst.int_de
         assert 42 == inst.int_en
 
-        trans_real.activate('en')
+        trans_real.activate("en")
         inst.int -= 1
         assert 41 == inst.int
         assert 9 == inst.int_de
@@ -1671,7 +1671,7 @@ class OtherFieldsTest(ModeltranslationTestBase):
     def test_translated_models_boolean_instance(self):
         inst = models.OtherFieldsModel()
         inst.boolean = True
-        assert 'de' == get_language()
+        assert "de" == get_language()
         assert inst.boolean is True
         assert inst.boolean_de is True
         assert inst.boolean_en is False
@@ -1682,7 +1682,7 @@ class OtherFieldsTest(ModeltranslationTestBase):
         assert inst.boolean_de is False
         assert inst.boolean_en is False
 
-        trans_real.activate('en')
+        trans_real.activate("en")
         inst.boolean = True
         assert inst.boolean is True
         assert inst.boolean_de is False
@@ -1690,33 +1690,33 @@ class OtherFieldsTest(ModeltranslationTestBase):
 
     def test_translated_models_genericipaddress_instance(self):
         inst = models.OtherFieldsModel()
-        inst.genericip = '2a02:42fe::4'
-        assert 'de' == get_language()
-        assert '2a02:42fe::4' == inst.genericip
-        assert '2a02:42fe::4' == inst.genericip_de
+        inst.genericip = "2a02:42fe::4"
+        assert "de" == get_language()
+        assert "2a02:42fe::4" == inst.genericip
+        assert "2a02:42fe::4" == inst.genericip_de
         assert inst.genericip_en is None
 
-        inst.genericip = '2a02:23fe::4'
+        inst.genericip = "2a02:23fe::4"
         inst.save()
-        assert '2a02:23fe::4' == inst.genericip
-        assert '2a02:23fe::4' == inst.genericip_de
+        assert "2a02:23fe::4" == inst.genericip
+        assert "2a02:23fe::4" == inst.genericip_de
         assert inst.genericip_en is None
 
-        trans_real.activate('en')
-        inst.genericip = '2a02:42fe::4'
-        assert '2a02:42fe::4' == inst.genericip
-        assert '2a02:23fe::4' == inst.genericip_de
-        assert '2a02:42fe::4' == inst.genericip_en
+        trans_real.activate("en")
+        inst.genericip = "2a02:42fe::4"
+        assert "2a02:42fe::4" == inst.genericip
+        assert "2a02:23fe::4" == inst.genericip_de
+        assert "2a02:42fe::4" == inst.genericip_en
 
         # Check if validation is preserved
-        inst.genericip = '1;2'
+        inst.genericip = "1;2"
         with pytest.raises(ValidationError):
             inst.full_clean()
 
     def test_translated_models_float_instance(self):
         inst = models.OtherFieldsModel()
         inst.float = 0.42
-        assert 'de' == get_language()
+        assert "de" == get_language()
         assert 0.42 == inst.float
         assert 0.42 == inst.float_de
         assert inst.float_en is None
@@ -1732,7 +1732,7 @@ class OtherFieldsTest(ModeltranslationTestBase):
         assert 0.31 == inst.float_de
         assert inst.float_en is None
 
-        trans_real.activate('en')
+        trans_real.activate("en")
         inst.float = 0.42
         assert 0.42 == inst.float
         assert 0.31 == inst.float_de
@@ -1740,34 +1740,34 @@ class OtherFieldsTest(ModeltranslationTestBase):
 
     def test_translated_models_decimal_instance(self):
         inst = models.OtherFieldsModel()
-        inst.decimal = Decimal('0.42')
-        assert 'de' == get_language()
-        assert Decimal('0.42') == inst.decimal
-        assert Decimal('0.42') == inst.decimal_de
+        inst.decimal = Decimal("0.42")
+        assert "de" == get_language()
+        assert Decimal("0.42") == inst.decimal
+        assert Decimal("0.42") == inst.decimal_de
         assert inst.decimal_en is None
 
-        inst.decimal = inst.decimal - Decimal('0.19')
+        inst.decimal = inst.decimal - Decimal("0.19")
         inst.save()
-        assert Decimal('0.23') == inst.decimal
-        assert Decimal('0.23') == inst.decimal_de
+        assert Decimal("0.23") == inst.decimal
+        assert Decimal("0.23") == inst.decimal_de
         assert inst.decimal_en is None
 
-        trans_real.activate('en')
+        trans_real.activate("en")
         with pytest.raises(TypeError):
-            inst.decimal + Decimal('0.19')
+            inst.decimal + Decimal("0.19")
         assert inst.decimal is None
-        assert Decimal('0.23') == inst.decimal_de
+        assert Decimal("0.23") == inst.decimal_de
         assert inst.decimal_en is None
 
-        inst.decimal = Decimal('0.42')
-        assert Decimal('0.42') == inst.decimal
-        assert Decimal('0.23') == inst.decimal_de
-        assert Decimal('0.42') == inst.decimal_en
+        inst.decimal = Decimal("0.42")
+        assert Decimal("0.42") == inst.decimal
+        assert Decimal("0.23") == inst.decimal_de
+        assert Decimal("0.42") == inst.decimal_en
 
     def test_translated_models_date_instance(self):
         inst = models.OtherFieldsModel()
         inst.date = datetime.date(2012, 12, 31)
-        assert 'de' == get_language()
+        assert "de" == get_language()
         assert datetime.date(2012, 12, 31) == inst.date
         assert datetime.date(2012, 12, 31) == inst.date_de
         assert inst.date_en is None
@@ -1778,11 +1778,11 @@ class OtherFieldsTest(ModeltranslationTestBase):
         assert datetime.date(1999, 1, 1) == inst.date_de
         assert inst.date_en is None
 
-        qs = models.OtherFieldsModel.objects.filter(date='1999-1-1')
+        qs = models.OtherFieldsModel.objects.filter(date="1999-1-1")
         assert len(qs) == 1
         assert qs[0].date == datetime.date(1999, 1, 1)
 
-        trans_real.activate('en')
+        trans_real.activate("en")
         inst.date = datetime.date(2012, 12, 31)
         assert datetime.date(2012, 12, 31) == inst.date
         assert datetime.date(1999, 1, 1) == inst.date_de
@@ -1791,7 +1791,7 @@ class OtherFieldsTest(ModeltranslationTestBase):
     def test_translated_models_datetime_instance(self):
         inst = models.OtherFieldsModel()
         inst.datetime = datetime.datetime(2012, 12, 31, 23, 42)
-        assert 'de' == get_language()
+        assert "de" == get_language()
         assert datetime.datetime(2012, 12, 31, 23, 42) == inst.datetime
         assert datetime.datetime(2012, 12, 31, 23, 42) == inst.datetime_de
         assert inst.datetime_en is None
@@ -1802,11 +1802,11 @@ class OtherFieldsTest(ModeltranslationTestBase):
         assert datetime.datetime(1999, 1, 1, 23, 42) == inst.datetime_de
         assert inst.datetime_en is None
 
-        qs = models.OtherFieldsModel.objects.filter(datetime='1999-1-1 23:42')
+        qs = models.OtherFieldsModel.objects.filter(datetime="1999-1-1 23:42")
         assert len(qs) == 1
         assert qs[0].datetime == datetime.datetime(1999, 1, 1, 23, 42)
 
-        trans_real.activate('en')
+        trans_real.activate("en")
         inst.datetime = datetime.datetime(2012, 12, 31, 23, 42)
         assert datetime.datetime(2012, 12, 31, 23, 42) == inst.datetime
         assert datetime.datetime(1999, 1, 1, 23, 42) == inst.datetime_de
@@ -1815,7 +1815,7 @@ class OtherFieldsTest(ModeltranslationTestBase):
     def test_translated_models_time_instance(self):
         inst = models.OtherFieldsModel()
         inst.time = datetime.time(23, 42, 0)
-        assert 'de' == get_language()
+        assert "de" == get_language()
         assert datetime.time(23, 42, 0) == inst.time
         assert datetime.time(23, 42, 0) == inst.time_de
         assert inst.time_en is None
@@ -1826,11 +1826,11 @@ class OtherFieldsTest(ModeltranslationTestBase):
         assert datetime.time(1, 2, 3) == inst.time_de
         assert inst.time_en is None
 
-        qs = models.OtherFieldsModel.objects.filter(time='01:02:03')
+        qs = models.OtherFieldsModel.objects.filter(time="01:02:03")
         assert len(qs) == 1
         assert qs[0].time == datetime.time(1, 2, 3)
 
-        trans_real.activate('en')
+        trans_real.activate("en")
         inst.time = datetime.time(23, 42, 0)
         assert datetime.time(23, 42, 0) == inst.time
         assert datetime.time(1, 2, 3) == inst.time_de
@@ -1843,7 +1843,7 @@ class OtherFieldsTest(ModeltranslationTestBase):
         Model.objects.create(datetime=datetime.datetime(2014, 8, 3, 0, 0))
         Model.objects.create(datetime=datetime.datetime(2013, 7, 4, 0, 0))
 
-        qs = Model.objects.dates('datetime', 'year', 'DESC')
+        qs = Model.objects.dates("datetime", "year", "DESC")
 
         assert list(qs) == [
             datetime.date(2015, 1, 1),
@@ -1856,40 +1856,40 @@ class OtherFieldsTest(ModeltranslationTestBase):
         inst = models.DescriptorModel()
         # Demonstrate desired behaviour
         inst.normal = 2
-        assert 'aa' == inst.normal
-        inst.normal = 'abc'
-        assert 'aaa' == inst.normal
+        assert "aa" == inst.normal
+        inst.normal = "abc"
+        assert "aaa" == inst.normal
 
         # Descriptor on translated field works too
-        assert 'de' == get_language()
+        assert "de" == get_language()
         inst.trans = 5
-        assert 'aaaaa' == inst.trans
+        assert "aaaaa" == inst.trans
 
         inst.save()
-        db_values = models.DescriptorModel.objects.raw_values('normal', 'trans_en', 'trans_de')[0]
-        assert 3 == db_values['normal']
-        assert 5 == db_values['trans_de']
-        assert 0 == db_values['trans_en']
+        db_values = models.DescriptorModel.objects.raw_values("normal", "trans_en", "trans_de")[0]
+        assert 3 == db_values["normal"]
+        assert 5 == db_values["trans_de"]
+        assert 0 == db_values["trans_en"]
 
         # Retrieval from db
         inst = models.DescriptorModel.objects.all()[0]
-        assert 'aaa' == inst.normal
-        assert 'aaaaa' == inst.trans
-        assert 'aaaaa' == inst.trans_de
-        assert '' == inst.trans_en
+        assert "aaa" == inst.normal
+        assert "aaaaa" == inst.trans
+        assert "aaaaa" == inst.trans_de
+        assert "" == inst.trans_en
 
         # Other language
-        trans_real.activate('en')
-        assert '' == inst.trans
-        inst.trans = 'q'
-        assert 'a' == inst.trans
+        trans_real.activate("en")
+        assert "" == inst.trans
+        inst.trans = "q"
+        assert "a" == inst.trans
         inst.trans_de = 4
-        assert 'aaaa' == inst.trans_de
+        assert "aaaa" == inst.trans_de
         inst.save()
-        db_values = models.DescriptorModel.objects.raw_values('normal', 'trans_en', 'trans_de')[0]
-        assert 3 == db_values['normal']
-        assert 4 == db_values['trans_de']
-        assert 1 == db_values['trans_en']
+        db_values = models.DescriptorModel.objects.raw_values("normal", "trans_en", "trans_de")[0]
+        assert 3 == db_values["normal"]
+        assert 4 == db_values["trans_de"]
+        assert 1 == db_values["trans_en"]
 
 
 class ModeltranslationTestRule1(ModeltranslationTestBase):
@@ -1899,13 +1899,13 @@ class ModeltranslationTestRule1(ModeltranslationTestBase):
     """
 
     def _test_field(self, field_name, value_de, value_en, deactivate=True):
-        field_name_de = '%s_de' % field_name
-        field_name_en = '%s_en' % field_name
+        field_name_de = "%s_de" % field_name
+        field_name_en = "%s_en" % field_name
         params = {field_name_de: value_de, field_name_en: value_en}
 
         n = models.TestModel.objects.create(**params)
         # Language is set to 'de' at this point
-        assert get_language() == 'de'
+        assert get_language() == "de"
         assert getattr(n, field_name) == value_de
         assert getattr(n, field_name_de) == value_de
         assert getattr(n, field_name_en) == value_en
@@ -1925,8 +1925,8 @@ class ModeltranslationTestRule1(ModeltranslationTestBase):
         assert getattr(n, field_name) == value_en
         assert getattr(n, field_name_de) == value_de
         assert getattr(n, field_name_en) == value_en
-        trans_real.activate('de')
-        assert get_language() == 'de'
+        trans_real.activate("de")
+        assert get_language() == "de"
         assert getattr(n, field_name) == value_de
 
         if deactivate:
@@ -1941,19 +1941,19 @@ class ModeltranslationTestRule1(ModeltranslationTestBase):
         text_de = "Dies ist ein deutscher Satz"
         text_en = "This is an english sentence"
 
-        self._test_field(field_name='title', value_de=title1_de, value_en=title1_en)
-        self._test_field(field_name='text', value_de=text_de, value_en=text_en)
+        self._test_field(field_name="title", value_de=title1_de, value_en=title1_en)
+        self._test_field(field_name="text", value_de=text_de, value_en=text_en)
 
     def test_rule1_url_field(self):
         self._test_field(
-            field_name='url', value_de='http://www.google.de', value_en='http://www.google.com'
+            field_name="url", value_de="http://www.google.de", value_en="http://www.google.com"
         )
 
     def test_rule1_email_field(self):
         self._test_field(
-            field_name='email',
-            value_de='django-modeltranslation@googlecode.de',
-            value_en='django-modeltranslation@googlecode.com',
+            field_name="email",
+            value_de="django-modeltranslation@googlecode.de",
+            value_en="django-modeltranslation@googlecode.com",
         )
 
 
@@ -1964,11 +1964,11 @@ class ModeltranslationTestRule2(ModeltranslationTestBase):
     """
 
     def _test_field(self, field_name, value1_de, value1_en, value2, value3, deactivate=True):
-        field_name_de = '%s_de' % field_name
-        field_name_en = '%s_en' % field_name
+        field_name_de = "%s_de" % field_name
+        field_name_en = "%s_en" % field_name
         params = {field_name_de: value1_de, field_name_en: value1_en}
 
-        assert get_language() == 'de'
+        assert get_language() == "de"
         n = models.TestModel.objects.create(**params)
         assert getattr(n, field_name) == value1_de
         assert getattr(n, field_name_de) == value1_de
@@ -1998,29 +1998,29 @@ class ModeltranslationTestRule2(ModeltranslationTestBase):
         Basic CharField/TextField test.
         """
         self._test_field(
-            field_name='title',
-            value1_de='title de',
-            value1_en='title en',
-            value2='Neuer Titel',
-            value3='new title',
+            field_name="title",
+            value1_de="title de",
+            value1_en="title en",
+            value2="Neuer Titel",
+            value3="new title",
         )
 
     def test_rule2_url_field(self):
         self._test_field(
-            field_name='url',
-            value1_de='http://www.google.de',
-            value1_en='http://www.google.com',
-            value2='http://www.google.at',
-            value3='http://www.google.co.uk',
+            field_name="url",
+            value1_de="http://www.google.de",
+            value1_en="http://www.google.com",
+            value2="http://www.google.at",
+            value3="http://www.google.co.uk",
         )
 
     def test_rule2_email_field(self):
         self._test_field(
-            field_name='email',
-            value1_de='django-modeltranslation@googlecode.de',
-            value1_en='django-modeltranslation@googlecode.com',
-            value2='django-modeltranslation@googlecode.at',
-            value3='django-modeltranslation@googlecode.co.uk',
+            field_name="email",
+            value1_de="django-modeltranslation@googlecode.de",
+            value1_en="django-modeltranslation@googlecode.com",
+            value2="django-modeltranslation@googlecode.at",
+            value3="django-modeltranslation@googlecode.co.uk",
         )
 
 
@@ -2032,23 +2032,23 @@ class ModeltranslationTestRule3(ModeltranslationTestBase):
     """
 
     def test_rule3(self):
-        assert get_language() == 'de'
-        title = 'title de'
+        assert get_language() == "de"
+        title = "title de"
 
         # Normal behaviour
-        n = models.TestModel(title='foo')
-        assert n.title == 'foo'
-        assert n.title_de == 'foo'
+        n = models.TestModel(title="foo")
+        assert n.title == "foo"
+        assert n.title_de == "foo"
         assert n.title_en is None
 
         # constructor
-        n = models.TestModel(title_de=title, title='foo')
+        n = models.TestModel(title_de=title, title="foo")
         assert n.title == title
         assert n.title_de == title
         assert n.title_en is None
 
         # object.create
-        n = models.TestModel.objects.create(title_de=title, title='foo')
+        n = models.TestModel.objects.create(title_de=title, title="foo")
         assert n.title == title
         assert n.title_de == title
         assert n.title_en is None
@@ -2062,9 +2062,9 @@ class ModeltranslationTestRule3(ModeltranslationTestBase):
         # This is not subject to Rule 3, because updates are not *at the ame time*
         n = models.TestModel()
         n.title_de = title
-        n.title = 'foo'
-        assert n.title == 'foo'
-        assert n.title_de == 'foo'
+        n.title = "foo"
+        assert n.title == "foo"
+        assert n.title_de == "foo"
         assert n.title_en is None
 
     @staticmethod
@@ -2077,9 +2077,9 @@ class ModeltranslationTestRule3(ModeltranslationTestBase):
     def test_rule3_internals(self):
         # Rule 3 work because translation fields are added to model field list
         # later than original field.
-        original = models.TestModel._meta.get_field('title')
-        translated_de = models.TestModel._meta.get_field('title_de')
-        translated_en = models.TestModel._meta.get_field('title_en')
+        original = models.TestModel._meta.get_field("title")
+        translated_de = models.TestModel._meta.get_field("title_de")
+        translated_en = models.TestModel._meta.get_field("title_en")
         fields = models.TestModel._meta.fields
         # Here we cannot use simple list.index, because Field has overloaded __cmp__
         assert self._index(fields, original) < self._index(fields, translated_de)
@@ -2096,16 +2096,16 @@ class ModelValidationTest(ModeltranslationTestBase):
             func()
         except ValidationError as e:
             return e.message_dict
-        self.fail('ValidationError not raised.')
+        self.fail("ValidationError not raised.")
 
     def _test_model_validation(self, field_name, invalid_value, valid_value):
         """
         Generic model field validation test.
         """
-        field_name_de = '%s_de' % field_name
-        field_name_en = '%s_en' % field_name
+        field_name_de = "%s_de" % field_name
+        field_name_en = "%s_en" % field_name
         # Title need to be passed here - otherwise it would not validate
-        params = {'title_de': 'title de', 'title_en': 'title en', field_name: invalid_value}
+        params = {"title_de": "title de", "title_en": "title en", field_name: invalid_value}
 
         n = models.TestModel.objects.create(**params)
 
@@ -2116,7 +2116,7 @@ class ModelValidationTest(ModeltranslationTestBase):
 
         # Set translation field to a valid value
         # Language is set to 'de' at this point
-        assert get_language() == 'de'
+        assert get_language() == "de"
         setattr(n, field_name_de, valid_value)
         n.full_clean()
 
@@ -2127,7 +2127,7 @@ class ModelValidationTest(ModeltranslationTestBase):
         assert field_name_en in errors
 
         # When language is changed to en, the original field also doesn't validate
-        with override('en'):
+        with override("en"):
             setattr(n, field_name_en, invalid_value)
             errors = self.assertRaisesValidation(n.full_clean)
             assert field_name in errors
@@ -2146,27 +2146,27 @@ class ModelValidationTest(ModeltranslationTestBase):
         General test for CharField: if required/blank is handled properly.
         """
         # Create an object without title (which is required)
-        n = models.TestModel.objects.create(text='Testtext')
+        n = models.TestModel.objects.create(text="Testtext")
 
         # First check the original field
         # Expect that the validation object contains an error for title
         errors = self.assertRaisesValidation(n.full_clean)
-        assert 'title' in errors
+        assert "title" in errors
         n.save()
 
         # Check the translation field
         # Language is set to 'de' at this point
-        assert get_language() == 'de'
+        assert get_language() == "de"
         # Set translation field to a valid title
-        n.title_de = 'Title'
+        n.title_de = "Title"
         n.full_clean()
 
         # Change language to en
         # Now validation fails, because current language (en) title is empty
         # So requirement validation depends on current language
-        with override('en'):
+        with override("en"):
             errors = self.assertRaisesValidation(n.full_clean)
-            assert 'title' in errors
+            assert "title" in errors
 
             # However, with fallback language (most cases), it validates (because empty title
             # falls back to title_de):
@@ -2180,21 +2180,21 @@ class ModelValidationTest(ModeltranslationTestBase):
         # object contains no error for title_de.
         # However, title still raises error, since it points to empty title_de
         errors = self.assertRaisesValidation(n.full_clean)
-        assert 'title_de' not in errors
-        assert 'title' in errors
+        assert "title_de" not in errors
+        assert "title" in errors
 
     def test_model_validation_url_field(self):
         self._test_model_validation(
-            field_name='url',
-            invalid_value='foo en',
-            valid_value='http://code.google.com/p/django-modeltranslation/',
+            field_name="url",
+            invalid_value="foo en",
+            valid_value="http://code.google.com/p/django-modeltranslation/",
         )
 
     def test_model_validation_email_field(self):
         self._test_model_validation(
-            field_name='email',
-            invalid_value='foo en',
-            valid_value='django-modeltranslation@googlecode.com',
+            field_name="email",
+            invalid_value="foo en",
+            valid_value="django-modeltranslation@googlecode.com",
         )
 
 
@@ -2203,49 +2203,49 @@ class ModelInheritanceTest(ModeltranslationTestBase):
 
     def test_abstract_inheritance(self):
         field_names_b = get_field_names(models.AbstractModelB)
-        assert 'titlea' in field_names_b
-        assert 'titlea_de' in field_names_b
-        assert 'titlea_en' in field_names_b
-        assert 'titleb' in field_names_b
-        assert 'titleb_de' in field_names_b
-        assert 'titleb_en' in field_names_b
-        assert 'titled' not in field_names_b
-        assert 'titled_de' not in field_names_b
-        assert 'titled_en' not in field_names_b
+        assert "titlea" in field_names_b
+        assert "titlea_de" in field_names_b
+        assert "titlea_en" in field_names_b
+        assert "titleb" in field_names_b
+        assert "titleb_de" in field_names_b
+        assert "titleb_en" in field_names_b
+        assert "titled" not in field_names_b
+        assert "titled_de" not in field_names_b
+        assert "titled_en" not in field_names_b
 
     def test_multitable_inheritance(self):
         field_names_a = get_field_names(models.MultitableModelA)
-        assert 'titlea' in field_names_a
-        assert 'titlea_de' in field_names_a
-        assert 'titlea_en' in field_names_a
+        assert "titlea" in field_names_a
+        assert "titlea_de" in field_names_a
+        assert "titlea_en" in field_names_a
 
         field_names_b = get_field_names(models.MultitableModelB)
-        assert 'titlea' in field_names_b
-        assert 'titlea_de' in field_names_b
-        assert 'titlea_en' in field_names_b
-        assert 'titleb' in field_names_b
-        assert 'titleb_de' in field_names_b
-        assert 'titleb_en' in field_names_b
+        assert "titlea" in field_names_b
+        assert "titlea_de" in field_names_b
+        assert "titlea_en" in field_names_b
+        assert "titleb" in field_names_b
+        assert "titleb_de" in field_names_b
+        assert "titleb_en" in field_names_b
 
         field_names_c = get_field_names(models.MultitableModelC)
-        assert 'titlea' in field_names_c
-        assert 'titlea_de' in field_names_c
-        assert 'titlea_en' in field_names_c
-        assert 'titleb' in field_names_c
-        assert 'titleb_de' in field_names_c
-        assert 'titleb_en' in field_names_c
-        assert 'titlec' in field_names_c
-        assert 'titlec_de' in field_names_c
-        assert 'titlec_en' in field_names_c
+        assert "titlea" in field_names_c
+        assert "titlea_de" in field_names_c
+        assert "titlea_en" in field_names_c
+        assert "titleb" in field_names_c
+        assert "titleb_de" in field_names_c
+        assert "titleb_en" in field_names_c
+        assert "titlec" in field_names_c
+        assert "titlec_de" in field_names_c
+        assert "titlec_en" in field_names_c
 
         field_names_d = get_field_names(models.MultitableModelD)
-        assert 'titlea' in field_names_d
-        assert 'titlea_de' in field_names_d
-        assert 'titlea_en' in field_names_d
-        assert 'titleb' in field_names_d
-        assert 'titleb_de' in field_names_d
-        assert 'titleb_en' in field_names_d
-        assert 'titled' in field_names_d
+        assert "titlea" in field_names_d
+        assert "titlea_de" in field_names_d
+        assert "titlea_en" in field_names_d
+        assert "titleb" in field_names_d
+        assert "titleb_de" in field_names_d
+        assert "titleb_en" in field_names_d
+        assert "titled" in field_names_d
 
     def test_inheritance(self):
         def assertLocalFields(model, local_fields):
@@ -2271,45 +2271,45 @@ class ModelInheritanceTest(ModeltranslationTestBase):
                     assert translation_field in model_fields
 
         # Translation fields can be declared on abstract classes.
-        assertLocalFields(models.Slugged, ('slug',))
-        assertLocalFields(models.MetaData, ('keywords',))
-        assertLocalFields(models.RichText, ('content',))
+        assertLocalFields(models.Slugged, ("slug",))
+        assertLocalFields(models.MetaData, ("keywords",))
+        assertLocalFields(models.RichText, ("content",))
         # Local fields are inherited from abstract superclasses.
         assertLocalFields(
             models.Displayable,
             (
-                'slug',
-                'keywords',
+                "slug",
+                "keywords",
             ),
         )
         assertLocalFields(
             models.Page,
             (
-                'slug',
-                'keywords',
-                'title',
+                "slug",
+                "keywords",
+                "title",
             ),
         )
         # But not from concrete superclasses.
-        assertLocalFields(models.RichTextPage, ('content',))
+        assertLocalFields(models.RichTextPage, ("content",))
 
         # Fields inherited from concrete models are also available.
-        assertFields(models.Slugged, ('slug',))
+        assertFields(models.Slugged, ("slug",))
         assertFields(
             models.Page,
             (
-                'slug',
-                'keywords',
-                'title',
+                "slug",
+                "keywords",
+                "title",
             ),
         )
         assertFields(
             models.RichTextPage,
             (
-                'slug',
-                'keywords',
-                'title',
-                'content',
+                "slug",
+                "keywords",
+                "title",
+                "content",
             ),
         )
 
@@ -2322,19 +2322,19 @@ class ModelInheritanceFieldAggregationTest(ModeltranslationTestBase):
 
     def test_field_aggregation(self):
         clsb = translation.FieldInheritanceCTranslationOptions
-        assert 'titlea' in clsb.fields
-        assert 'titleb' in clsb.fields
-        assert 'titlec' in clsb.fields
+        assert "titlea" in clsb.fields
+        assert "titleb" in clsb.fields
+        assert "titlec" in clsb.fields
         assert 3 == len(clsb.fields)
         assert isinstance(clsb.fields, tuple)
 
     def test_multi_inheritance(self):
         clsb = translation.FieldInheritanceETranslationOptions
-        assert 'titlea' in clsb.fields
-        assert 'titleb' in clsb.fields
-        assert 'titlec' in clsb.fields
-        assert 'titled' in clsb.fields
-        assert 'titlee' in clsb.fields
+        assert "titlea" in clsb.fields
+        assert "titleb" in clsb.fields
+        assert "titlec" in clsb.fields
+        assert "titled" in clsb.fields
+        assert "titlee" in clsb.fields
         assert 5 == len(clsb.fields)  # there are no repetitions
 
 
@@ -2344,72 +2344,72 @@ class UpdateCommandTest(ModeltranslationTestBase):
         # fixtures loader doesn't use raw sql but rather creates objects,
         # so translation descriptor affects result and we cannot set the
         # 'original' field value.
-        pk1 = models.TestModel.objects.create(title_de='').pk
-        pk2 = models.TestModel.objects.create(title_de='already').pk
+        pk1 = models.TestModel.objects.create(title_de="").pk
+        pk2 = models.TestModel.objects.create(title_de="already").pk
         # Due to ``rewrite(False)`` here, original field will be affected.
-        models.TestModel.objects.all().rewrite(False).update(title='initial')
+        models.TestModel.objects.all().rewrite(False).update(title="initial")
 
         # Check raw data using ``values``
         obj1 = models.TestModel.objects.filter(pk=pk1).raw_values()[0]
         obj2 = models.TestModel.objects.filter(pk=pk2).raw_values()[0]
-        assert '' == obj1['title_de']
-        assert 'initial' == obj1['title']
-        assert 'already' == obj2['title_de']
-        assert 'initial' == obj2['title']
+        assert "" == obj1["title_de"]
+        assert "initial" == obj1["title"]
+        assert "already" == obj2["title_de"]
+        assert "initial" == obj2["title"]
 
-        call_command('update_translation_fields', 'tests', verbosity=0)
+        call_command("update_translation_fields", "tests", verbosity=0)
 
         obj1 = models.TestModel.objects.get(pk=pk1)
         obj2 = models.TestModel.objects.get(pk=pk2)
-        assert 'initial' == obj1.title_de
-        assert 'already' == obj2.title_de
+        assert "initial" == obj1.title_de
+        assert "already" == obj2.title_de
 
     def test_update_command_language_param(self):
-        trans_real.activate('en')
-        pk1 = models.TestModel.objects.create(title_en='').pk
-        pk2 = models.TestModel.objects.create(title_en='already').pk
+        trans_real.activate("en")
+        pk1 = models.TestModel.objects.create(title_en="").pk
+        pk2 = models.TestModel.objects.create(title_en="already").pk
         # Due to ``rewrite(False)`` here, original field will be affected.
-        models.TestModel.objects.all().rewrite(False).update(title='initial')
+        models.TestModel.objects.all().rewrite(False).update(title="initial")
 
-        call_command('update_translation_fields', 'tests', language='en', verbosity=0)
+        call_command("update_translation_fields", "tests", language="en", verbosity=0)
 
         obj1 = models.TestModel.objects.get(pk=pk1)
         obj2 = models.TestModel.objects.get(pk=pk2)
-        assert 'initial' == obj1.title_en
-        assert 'already' == obj2.title_en
+        assert "initial" == obj1.title_en
+        assert "already" == obj2.title_en
 
     def test_update_command_invalid_language_param(self):
         with pytest.raises(CommandError):
-            call_command('update_translation_fields', language='xx', verbosity=0)
+            call_command("update_translation_fields", language="xx", verbosity=0)
 
     def test_update_command_with_json_field(self):
         """
         Test that the update_translation_fields command works with JSON fields.
         """
-        instance_pk = models.OtherFieldsModel.objects.create(json={'foo': 'bar'}).pk
+        instance_pk = models.OtherFieldsModel.objects.create(json={"foo": "bar"}).pk
         models.OtherFieldsModel.objects.all().rewrite(False).update(json_de=None)
 
         instance = models.OtherFieldsModel.objects.filter(pk=instance_pk).raw_values()[0]
 
-        assert instance['json'] == {'foo': 'bar'}
-        assert instance['json_de'] is None
-        assert instance['json_en'] is None
+        assert instance["json"] == {"foo": "bar"}
+        assert instance["json_de"] is None
+        assert instance["json_en"] is None
 
         call_command(
-            'update_translation_fields', 'tests', model_name='OtherFieldsModel', verbosity=0
+            "update_translation_fields", "tests", model_name="OtherFieldsModel", verbosity=0
         )
 
         instance = models.OtherFieldsModel.objects.filter(pk=instance_pk).raw_values()[0]
 
-        assert instance['json'] == {'foo': 'bar'}
-        assert instance['json_de'] == {'foo': 'bar'}
-        assert instance['json_en'] is None
+        assert instance["json"] == {"foo": "bar"}
+        assert instance["json_de"] == {"foo": "bar"}
+        assert instance["json_en"] is None
 
 
 class TranslationAdminTest(ModeltranslationTestBase):
     def setUp(self):
         super().setUp()
-        self.test_obj = models.TestModel.objects.create(title='Testtitle', text='Testtext')
+        self.test_obj = models.TestModel.objects.create(title="Testtitle", text="Testtext")
         self.site = AdminSite()
 
     def tearDown(self):
@@ -2422,16 +2422,16 @@ class TranslationAdminTest(ModeltranslationTestBase):
 
         ma = TestModelAdmin(models.TestModel, self.site)
         assert tuple(ma.get_form(request).base_fields.keys()) == (
-            'title_de',
-            'title_en',
-            'text_de',
-            'text_en',
-            'url_de',
-            'url_en',
-            'email_de',
-            'email_en',
-            'dynamic_default_de',
-            'dynamic_default_en',
+            "title_de",
+            "title_en",
+            "text_de",
+            "text_en",
+            "url_de",
+            "url_en",
+            "email_de",
+            "email_en",
+            "dynamic_default_de",
+            "dynamic_default_en",
         )
 
     def test_default_fieldsets(self):
@@ -2442,42 +2442,42 @@ class TranslationAdminTest(ModeltranslationTestBase):
         # We expect that the original field is excluded and only the
         # translation fields are included in fields
         fields = [
-            'title_de',
-            'title_en',
-            'text_de',
-            'text_en',
-            'url_de',
-            'url_en',
-            'email_de',
-            'email_en',
-            'dynamic_default_de',
-            'dynamic_default_en',
+            "title_de",
+            "title_en",
+            "text_de",
+            "text_en",
+            "url_de",
+            "url_en",
+            "email_de",
+            "email_en",
+            "dynamic_default_de",
+            "dynamic_default_en",
         ]
-        assert ma.get_fieldsets(request) == [(None, {'fields': fields})]
-        assert ma.get_fieldsets(request, self.test_obj) == [(None, {'fields': fields})]
+        assert ma.get_fieldsets(request) == [(None, {"fields": fields})]
+        assert ma.get_fieldsets(request, self.test_obj) == [(None, {"fields": fields})]
 
     def test_field_arguments(self):
         class TestModelAdmin(admin.TranslationAdmin):
-            fields = ['title']
+            fields = ["title"]
 
         ma = TestModelAdmin(models.TestModel, self.site)
-        fields = ['title_de', 'title_en']
+        fields = ["title_de", "title_en"]
         assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
         assert tuple(ma.get_form(request, self.test_obj).base_fields.keys()) == tuple(fields)
 
     def test_field_arguments_restricted_on_form(self):
         # Using `fields`.
         class TestModelAdmin(admin.TranslationAdmin):
-            fields = ['title']
+            fields = ["title"]
 
         ma = TestModelAdmin(models.TestModel, self.site)
-        fields = ['title_de', 'title_en']
+        fields = ["title_de", "title_en"]
         assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
         assert tuple(ma.get_form(request, self.test_obj).base_fields.keys()) == tuple(fields)
 
         # Using `fieldsets`.
         class TestModelAdmin(admin.TranslationAdmin):
-            fieldsets = [(None, {'fields': ['title']})]
+            fieldsets = [(None, {"fields": ["title"]})]
 
         ma = TestModelAdmin(models.TestModel, self.site)
         assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
@@ -2485,15 +2485,15 @@ class TranslationAdminTest(ModeltranslationTestBase):
 
         # Using `exclude`.
         class TestModelAdmin(admin.TranslationAdmin):
-            exclude = ['url', 'email', 'dynamic_default']
+            exclude = ["url", "email", "dynamic_default"]
 
         ma = TestModelAdmin(models.TestModel, self.site)
-        fields = ['title_de', 'title_en', 'text_de', 'text_en']
+        fields = ["title_de", "title_en", "text_de", "text_en"]
         assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
 
         # You can also pass a tuple to `exclude`.
         class TestModelAdmin(admin.TranslationAdmin):
-            exclude = ('url', 'email', 'dynamic_default')
+            exclude = ("url", "email", "dynamic_default")
 
         ma = TestModelAdmin(models.TestModel, self.site)
         assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
@@ -2501,61 +2501,61 @@ class TranslationAdminTest(ModeltranslationTestBase):
 
         # Using `fields` and `exclude`.
         class TestModelAdmin(admin.TranslationAdmin):
-            fields = ['title', 'url']
-            exclude = ['url']
+            fields = ["title", "url"]
+            exclude = ["url"]
 
         ma = TestModelAdmin(models.TestModel, self.site)
-        assert tuple(ma.get_form(request).base_fields.keys()) == ('title_de', 'title_en')
+        assert tuple(ma.get_form(request).base_fields.keys()) == ("title_de", "title_en")
 
         # Using `fields` and `readonly_fields`.
         class TestModelAdmin(admin.TranslationAdmin):
-            fields = ['title', 'url']
-            readonly_fields = ['url']
+            fields = ["title", "url"]
+            readonly_fields = ["url"]
 
         ma = TestModelAdmin(models.TestModel, self.site)
-        assert tuple(ma.get_form(request).base_fields.keys()) == ('title_de', 'title_en')
+        assert tuple(ma.get_form(request).base_fields.keys()) == ("title_de", "title_en")
 
         # Using `readonly_fields`.
         # Note: readonly fields are not included in the form.
         class TestModelAdmin(admin.TranslationAdmin):
-            readonly_fields = ['title']
+            readonly_fields = ["title"]
 
         ma = TestModelAdmin(models.TestModel, self.site)
         assert tuple(ma.get_form(request).base_fields.keys()) == (
-            'text_de',
-            'text_en',
-            'url_de',
-            'url_en',
-            'email_de',
-            'email_en',
-            'dynamic_default_de',
-            'dynamic_default_en',
+            "text_de",
+            "text_en",
+            "url_de",
+            "url_en",
+            "email_de",
+            "email_en",
+            "dynamic_default_de",
+            "dynamic_default_en",
         )
 
         # Using grouped fields.
         # Note: Current implementation flattens the nested fields.
         class TestModelAdmin(admin.TranslationAdmin):
             fields = (
-                ('title', 'url'),
-                'email',
+                ("title", "url"),
+                "email",
             )
 
         ma = TestModelAdmin(models.TestModel, self.site)
         assert tuple(ma.get_form(request).base_fields.keys()) == (
-            'title_de',
-            'title_en',
-            'url_de',
-            'url_en',
-            'email_de',
-            'email_en',
+            "title_de",
+            "title_en",
+            "url_de",
+            "url_en",
+            "email_de",
+            "email_en",
         )
 
         # Using grouped fields in `fieldsets`.
         class TestModelAdmin(admin.TranslationAdmin):
-            fieldsets = [(None, {'fields': ('email', ('title', 'url'))})]
+            fieldsets = [(None, {"fields": ("email", ("title", "url"))})]
 
         ma = TestModelAdmin(models.TestModel, self.site)
-        fields = ['email_de', 'email_en', 'title_de', 'title_en', 'url_de', 'url_en']
+        fields = ["email_de", "email_en", "title_de", "title_en", "url_de", "url_en"]
         assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
         assert tuple(ma.get_form(request, self.test_obj).base_fields.keys()) == tuple(fields)
 
@@ -2564,13 +2564,13 @@ class TranslationAdminTest(ModeltranslationTestBase):
         class TestModelForm(forms.ModelForm):
             class Meta:
                 model = models.TestModel
-                fields = ['url', 'email']
+                fields = ["url", "email"]
 
         class TestModelAdmin(admin.TranslationAdmin):
             form = TestModelForm
 
         ma = TestModelAdmin(models.TestModel, self.site)
-        fields = ['url_de', 'url_en', 'email_de', 'email_en']
+        fields = ["url_de", "url_en", "email_de", "email_en"]
         assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
         assert tuple(ma.get_form(request, self.test_obj).base_fields.keys()) == tuple(fields)
 
@@ -2578,13 +2578,13 @@ class TranslationAdminTest(ModeltranslationTestBase):
         class TestModelForm(forms.ModelForm):
             class Meta:
                 model = models.TestModel
-                exclude = ['url', 'email', 'dynamic_default']
+                exclude = ["url", "email", "dynamic_default"]
 
         class TestModelAdmin(admin.TranslationAdmin):
             form = TestModelForm
 
         ma = TestModelAdmin(models.TestModel, self.site)
-        fields = ['title_de', 'title_en', 'text_de', 'text_en']
+        fields = ["title_de", "title_en", "text_de", "text_en"]
         assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
         assert tuple(ma.get_form(request, self.test_obj).base_fields.keys()) == tuple(fields)
 
@@ -2592,10 +2592,10 @@ class TranslationAdminTest(ModeltranslationTestBase):
         # option, the ModelAdmin wins. This is Django behaviour.
         class TestModelAdmin(admin.TranslationAdmin):
             form = TestModelForm
-            exclude = ['url', 'dynamic_default']
+            exclude = ["url", "dynamic_default"]
 
         ma = TestModelAdmin(models.TestModel, self.site)
-        fields = ['title_de', 'title_en', 'text_de', 'text_en', 'email_de', 'email_en']
+        fields = ["title_de", "title_en", "text_de", "text_en", "email_de", "email_en"]
         assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
         assert tuple(ma.get_form(request, self.test_obj).base_fields.keys()) == tuple(fields)
 
@@ -2603,14 +2603,14 @@ class TranslationAdminTest(ModeltranslationTestBase):
         class TestModelForm(forms.ModelForm):
             class Meta:
                 model = models.TestModel
-                fields = ['text', 'title']
+                fields = ["text", "title"]
 
         class TestModelAdmin(admin.TranslationAdmin):
             form = TestModelForm
-            fields = ['email']
+            fields = ["email"]
 
         ma = TestModelAdmin(models.TestModel, self.site)
-        fields = ['email_de', 'email_en']
+        fields = ["email_de", "email_en"]
         assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
         assert tuple(ma.get_form(request, self.test_obj).base_fields.keys()) == tuple(fields)
 
@@ -2619,46 +2619,46 @@ class TranslationAdminTest(ModeltranslationTestBase):
             class Meta:
                 model = models.TestModel
                 fields = [
-                    'text',
+                    "text",
                 ]
                 widgets = {
-                    'text': forms.Textarea(attrs={'myprop': 'myval'}),
+                    "text": forms.Textarea(attrs={"myprop": "myval"}),
                 }
 
         class TestModelAdmin(admin.TranslationAdmin):
             form = TestModelForm
 
         ma = TestModelAdmin(models.TestModel, self.site)
-        fields = ['text_de', 'text_en']
+        fields = ["text_de", "text_en"]
         assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
         assert tuple(ma.get_form(request, self.test_obj).base_fields.keys()) == tuple(fields)
 
         for field in fields:
-            assert 'myprop' in ma.get_form(request).base_fields.get(field).widget.attrs.keys()
+            assert "myprop" in ma.get_form(request).base_fields.get(field).widget.attrs.keys()
             assert (
-                'myval'
+                "myval"
                 in ma.get_form(request, self.test_obj).base_fields.get(field).widget.attrs.values()
             )
 
     def test_widget_ordering_via_formfield_for_dbfield(self):
         class TestModelAdmin(admin.TranslationAdmin):
-            fields = ['text']
+            fields = ["text"]
 
             def formfield_for_dbfield(self, db_field, request, **kwargs):
                 if isinstance(db_field, TextField):
-                    kwargs["widget"] = forms.Textarea(attrs={'myprop': 'myval'})
+                    kwargs["widget"] = forms.Textarea(attrs={"myprop": "myval"})
                     return db_field.formfield(**kwargs)
                 return super().formfield_for_dbfield(db_field, request, **kwargs)
 
         ma = TestModelAdmin(models.TestModel, self.site)
-        fields = ['text_de', 'text_en']
+        fields = ["text_de", "text_en"]
         assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
         assert tuple(ma.get_form(request, self.test_obj).base_fields.keys()) == tuple(fields)
 
         for field in fields:
-            assert 'myprop' in ma.get_form(request).base_fields.get(field).widget.attrs.keys()
+            assert "myprop" in ma.get_form(request).base_fields.get(field).widget.attrs.keys()
             assert (
-                'myval'
+                "myval"
                 in ma.get_form(request, self.test_obj).base_fields.get(field).widget.attrs.values()
             )
 
@@ -2668,37 +2668,37 @@ class TranslationAdminTest(ModeltranslationTestBase):
         """
 
         class ForeignKeyModelModelAdmin(admin.TranslationAdmin):
-            fields = ['test']
+            fields = ["test"]
 
         class OneToOneFieldModelAdmin(admin.TranslationAdmin):
-            fields = ['test']
+            fields = ["test"]
 
         ma = ForeignKeyModelModelAdmin(models.ForeignKeyModel, self.site)
-        fields = ['test_de', 'test_en']
+        fields = ["test_de", "test_en"]
         for field in fields:
             assert {} == ma.get_form(request).base_fields.get(field).widget.attrs
-            assert 'class' in ma.get_form(request).base_fields.get(field).widget.widget.attrs.keys()
-            assert 'mt' in ma.get_form(request).base_fields.get(field).widget.widget.attrs['class']
+            assert "class" in ma.get_form(request).base_fields.get(field).widget.widget.attrs.keys()
+            assert "mt" in ma.get_form(request).base_fields.get(field).widget.widget.attrs["class"]
 
     def test_inline_fieldsets(self):
         class DataInline(admin.TranslationStackedInline):
             model = models.DataModel
-            fieldsets = [('Test', {'fields': ('data',)})]
+            fieldsets = [("Test", {"fields": ("data",)})]
 
         class TestModelAdmin(admin.TranslationAdmin):
             exclude = (
-                'title',
-                'text',
+                "title",
+                "text",
             )
             inlines = [DataInline]
 
         class DataTranslationOptions(translator.TranslationOptions):
-            fields = ('data',)
+            fields = ("data",)
 
         translator.translator.register(models.DataModel, DataTranslationOptions)
         ma = TestModelAdmin(models.TestModel, self.site)
 
-        fieldsets = [('Test', {'fields': ['data_de', 'data_en']})]
+        fieldsets = [("Test", {"fields": ["data_de", "data_en"]})]
 
         try:
             ma_fieldsets = ma.get_inline_instances(request)[0].get_fieldsets(request)
@@ -2719,35 +2719,35 @@ class TranslationAdminTest(ModeltranslationTestBase):
 
     def test_list_editable(self):
         class TestModelAdmin(admin.TranslationAdmin):
-            list_editable = ['title']
-            list_display = ['id', 'title']
-            list_display_links = ['id']
+            list_editable = ["title"]
+            list_display = ["id", "title"]
+            list_display_links = ["id"]
 
         ma = TestModelAdmin(models.TestModel, self.site)
-        list_editable = ['title_de', 'title_en']
-        list_display = ['id', 'title_de', 'title_en']
+        list_editable = ["title_de", "title_en"]
+        list_display = ["id", "title_de", "title_en"]
         assert tuple(ma.list_editable) == tuple(list_editable)
         assert tuple(ma.list_display) == tuple(list_display)
 
     def test_build_css_class(self):
         with reload_override_settings(
             LANGUAGES=(
-                ('de', 'German'),
-                ('en', 'English'),
-                ('es-ar', 'Argentinian Spanish'),
+                ("de", "German"),
+                ("en", "English"),
+                ("es-ar", "Argentinian Spanish"),
             )
         ):
             fields = {
-                'foo_en': 'foo-en',
-                'foo_es_ar': 'foo-es_ar',
-                'foo_en_us': 'foo-en_us',
-                'foo_bar_de': 'foo_bar-de',
-                '_foo_en': '_foo-en',
-                '_foo_es_ar': '_foo-es_ar',
-                '_foo_bar_de': '_foo_bar-de',
-                'foo__en': 'foo_-en',
-                'foo__es_ar': 'foo_-es_ar',
-                'foo_bar__de': 'foo_bar_-de',
+                "foo_en": "foo-en",
+                "foo_es_ar": "foo-es_ar",
+                "foo_en_us": "foo-en_us",
+                "foo_bar_de": "foo_bar-de",
+                "_foo_en": "_foo-en",
+                "_foo_es_ar": "_foo-es_ar",
+                "_foo_bar_de": "_foo_bar-de",
+                "foo__en": "foo_-en",
+                "foo__es_ar": "foo_-es_ar",
+                "foo_bar__de": "foo_bar_-de",
             }
             for field, css in fields.items():
                 assert build_css_class(field) == css
@@ -2762,22 +2762,22 @@ class TranslationAdminTest(ModeltranslationTestBase):
         maa = MultitableModelAAdmin(models.MultitableModelA, self.site)
         mab = MultitableModelBAdmin(models.MultitableModelB, self.site)
 
-        assert tuple(maa.get_form(request).base_fields.keys()) == ('titlea_de', 'titlea_en')
+        assert tuple(maa.get_form(request).base_fields.keys()) == ("titlea_de", "titlea_en")
         assert tuple(mab.get_form(request).base_fields.keys()) == (
-            'titlea_de',
-            'titlea_en',
-            'titleb_de',
-            'titleb_en',
+            "titlea_de",
+            "titlea_en",
+            "titleb_de",
+            "titleb_en",
         )
 
     def test_group_fieldsets(self):
         # Declared fieldsets take precedence over group_fieldsets
         class GroupFieldsetsModelAdmin(admin.TranslationAdmin):
-            fieldsets = [(None, {'fields': ['title']})]
+            fieldsets = [(None, {"fields": ["title"]})]
             group_fieldsets = True
 
         ma = GroupFieldsetsModelAdmin(models.GroupFieldsetsModel, self.site)
-        fields = ['title_de', 'title_en']
+        fields = ["title_de", "title_en"]
         assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
         assert tuple(ma.get_form(request, self.test_obj).base_fields.keys()) == tuple(fields)
 
@@ -2790,9 +2790,9 @@ class TranslationAdminTest(ModeltranslationTestBase):
         # three fieldsets. The first which gathers all untranslated field
         # (email only) and one for each translation field (text and title).
         fieldsets = [
-            ('', {'fields': ['email']}),
-            ('Title', {'classes': ('mt-fieldset',), 'fields': ['title_de', 'title_en']}),
-            ('Text', {'classes': ('mt-fieldset',), 'fields': ['text_de', 'text_en']}),
+            ("", {"fields": ["email"]}),
+            ("Title", {"classes": ("mt-fieldset",), "fields": ["title_de", "title_en"]}),
+            ("Text", {"classes": ("mt-fieldset",), "fields": ["text_de", "text_en"]}),
         ]
         assert ma.get_fieldsets(request) == fieldsets
         assert ma.get_fieldsets(request, self.test_obj) == fieldsets
@@ -2802,12 +2802,12 @@ class TranslationAdminTest(ModeltranslationTestBase):
         # Exclude an untranslated field
         class GroupFieldsetsModelAdmin(admin.TranslationAdmin):
             group_fieldsets = True
-            exclude = ('email',)
+            exclude = ("email",)
 
         ma = GroupFieldsetsModelAdmin(models.GroupFieldsetsModel, self.site)
         fieldsets = [
-            ('Title', {'classes': ('mt-fieldset',), 'fields': ['title_de', 'title_en']}),
-            ('Text', {'classes': ('mt-fieldset',), 'fields': ['text_de', 'text_en']}),
+            ("Title", {"classes": ("mt-fieldset",), "fields": ["title_de", "title_en"]}),
+            ("Text", {"classes": ("mt-fieldset",), "fields": ["text_de", "text_en"]}),
         ]
         assert ma.get_fieldsets(request) == fieldsets
         assert ma.get_fieldsets(request, self.test_obj) == fieldsets
@@ -2815,93 +2815,93 @@ class TranslationAdminTest(ModeltranslationTestBase):
         # Exclude a translation field
         class GroupFieldsetsModelAdmin(admin.TranslationAdmin):
             group_fieldsets = True
-            exclude = ('text',)
+            exclude = ("text",)
 
         ma = GroupFieldsetsModelAdmin(models.GroupFieldsetsModel, self.site)
         fieldsets = [
-            ('', {'fields': ['email']}),
-            ('Title', {'classes': ('mt-fieldset',), 'fields': ['title_de', 'title_en']}),
+            ("", {"fields": ["email"]}),
+            ("Title", {"classes": ("mt-fieldset",), "fields": ["title_de", "title_en"]}),
         ]
         assert ma.get_fieldsets(request) == fieldsets
         assert ma.get_fieldsets(request, self.test_obj) == fieldsets
 
     def test_prepopulated_fields(self):
-        trans_real.activate('de')
-        assert get_language() == 'de'
+        trans_real.activate("de")
+        assert get_language() == "de"
 
         # Non-translated slug based on translated field (using active language)
         class NameModelAdmin(admin.TranslationAdmin):
-            prepopulated_fields = {'slug': ('firstname',)}
+            prepopulated_fields = {"slug": ("firstname",)}
 
         ma = NameModelAdmin(models.NameModel, self.site)
-        assert ma.prepopulated_fields == {'slug': ('firstname_de',)}
+        assert ma.prepopulated_fields == {"slug": ("firstname_de",)}
 
         # Checking multi-field
         class NameModelAdmin(admin.TranslationAdmin):
             prepopulated_fields = {
-                'slug': (
-                    'firstname',
-                    'lastname',
+                "slug": (
+                    "firstname",
+                    "lastname",
                 )
             }
 
         ma = NameModelAdmin(models.NameModel, self.site)
         assert ma.prepopulated_fields == {
-            'slug': (
-                'firstname_de',
-                'lastname_de',
+            "slug": (
+                "firstname_de",
+                "lastname_de",
             )
         }
 
         # Non-translated slug based on non-translated field (no change)
         class NameModelAdmin(admin.TranslationAdmin):
-            prepopulated_fields = {'slug': ('age',)}
+            prepopulated_fields = {"slug": ("age",)}
 
         ma = NameModelAdmin(models.NameModel, self.site)
-        assert ma.prepopulated_fields == {'slug': ('age',)}
+        assert ma.prepopulated_fields == {"slug": ("age",)}
 
         # Translated slug based on non-translated field (all populated on the same value)
         class NameModelAdmin(admin.TranslationAdmin):
-            prepopulated_fields = {'slug2': ('age',)}
+            prepopulated_fields = {"slug2": ("age",)}
 
         ma = NameModelAdmin(models.NameModel, self.site)
-        assert ma.prepopulated_fields == {'slug2_en': ('age',), 'slug2_de': ('age',)}
+        assert ma.prepopulated_fields == {"slug2_en": ("age",), "slug2_de": ("age",)}
 
         # Translated slug based on translated field (corresponding)
         class NameModelAdmin(admin.TranslationAdmin):
-            prepopulated_fields = {'slug2': ('firstname',)}
+            prepopulated_fields = {"slug2": ("firstname",)}
 
         ma = NameModelAdmin(models.NameModel, self.site)
         assert ma.prepopulated_fields == {
-            'slug2_en': ('firstname_en',),
-            'slug2_de': ('firstname_de',),
+            "slug2_en": ("firstname_en",),
+            "slug2_de": ("firstname_de",),
         }
 
         # Check that current active language is used
-        trans_real.activate('en')
-        assert get_language() == 'en'
+        trans_real.activate("en")
+        assert get_language() == "en"
 
         class NameModelAdmin(admin.TranslationAdmin):
-            prepopulated_fields = {'slug': ('firstname',)}
+            prepopulated_fields = {"slug": ("firstname",)}
 
         ma = NameModelAdmin(models.NameModel, self.site)
-        assert ma.prepopulated_fields == {'slug': ('firstname_en',)}
+        assert ma.prepopulated_fields == {"slug": ("firstname_en",)}
 
         # Prepopulation language can be overriden by MODELTRANSLATION_PREPOPULATE_LANGUAGE
-        with reload_override_settings(MODELTRANSLATION_PREPOPULATE_LANGUAGE='de'):
+        with reload_override_settings(MODELTRANSLATION_PREPOPULATE_LANGUAGE="de"):
 
             class NameModelAdmin(admin.TranslationAdmin):
-                prepopulated_fields = {'slug': ('firstname',)}
+                prepopulated_fields = {"slug": ("firstname",)}
 
             ma = NameModelAdmin(models.NameModel, self.site)
-            assert ma.prepopulated_fields == {'slug': ('firstname_de',)}
+            assert ma.prepopulated_fields == {"slug": ("firstname_de",)}
 
     def test_proxymodel_field_argument(self):
         class ProxyTestModelAdmin(admin.TranslationAdmin):
-            fields = ['title']
+            fields = ["title"]
 
         ma = ProxyTestModelAdmin(models.ProxyTestModel, self.site)
-        fields = ['title_de', 'title_en']
+        fields = ["title_de", "title_en"]
         assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
         assert tuple(ma.get_form(request, self.test_obj).base_fields.keys()) == tuple(fields)
 
@@ -2926,12 +2926,12 @@ class ThirdPartyAppIntegrationTest(ModeltranslationTestBase):
         class CreationForm(forms.ModelForm):
             class Meta:
                 model = self.model
-                fields = '__all__'
+                fields = "__all__"
 
-        creation_form = CreationForm({'name': 'abc'})
+        creation_form = CreationForm({"name": "abc"})
         inst = creation_form.save()
-        assert 'de' == get_language()
-        assert 'abc' == inst.name
+        assert "de" == get_language()
+        assert "abc" == inst.name
         assert 1 == self.model.objects.count()
 
 
@@ -2948,76 +2948,76 @@ class TestManager(ModeltranslationTestBase):
     def setUp(self):
         # In this test case the default language is en, not de.
         super().setUp()
-        trans_real.activate('en')
+        trans_real.activate("en")
 
     def test_filter_update(self):
         """Test if filtering and updating is language-aware."""
-        n = models.ManagerTestModel(title='')
-        n.title_en = 'en'
-        n.title_de = 'de'
+        n = models.ManagerTestModel(title="")
+        n.title_en = "en"
+        n.title_de = "de"
         n.save()
 
-        m = models.ManagerTestModel(title='')
-        m.title_en = 'title en'
-        m.title_de = 'de'
+        m = models.ManagerTestModel(title="")
+        m.title_en = "title en"
+        m.title_de = "de"
         m.save()
 
-        assert 'en' == get_language()
+        assert "en" == get_language()
 
-        assert 0 == models.ManagerTestModel.objects.filter(title='de').count()
-        assert 1 == models.ManagerTestModel.objects.filter(title='en').count()
+        assert 0 == models.ManagerTestModel.objects.filter(title="de").count()
+        assert 1 == models.ManagerTestModel.objects.filter(title="en").count()
         # Spanning works
-        assert 2 == models.ManagerTestModel.objects.filter(title__contains='en').count()
+        assert 2 == models.ManagerTestModel.objects.filter(title__contains="en").count()
 
-        with override('de'):
-            assert 2 == models.ManagerTestModel.objects.filter(title='de').count()
-            assert 0 == models.ManagerTestModel.objects.filter(title='en').count()
+        with override("de"):
+            assert 2 == models.ManagerTestModel.objects.filter(title="de").count()
+            assert 0 == models.ManagerTestModel.objects.filter(title="en").count()
             # Spanning works
-            assert 2 == models.ManagerTestModel.objects.filter(title__endswith='e').count()
+            assert 2 == models.ManagerTestModel.objects.filter(title__endswith="e").count()
 
             # Still possible to use explicit language version
-            assert 1 == models.ManagerTestModel.objects.filter(title_en='en').count()
-            assert 2 == models.ManagerTestModel.objects.filter(title_en__contains='en').count()
+            assert 1 == models.ManagerTestModel.objects.filter(title_en="en").count()
+            assert 2 == models.ManagerTestModel.objects.filter(title_en__contains="en").count()
 
-            models.ManagerTestModel.objects.update(title='new')
-            assert 2 == models.ManagerTestModel.objects.filter(title='new').count()
+            models.ManagerTestModel.objects.update(title="new")
+            assert 2 == models.ManagerTestModel.objects.filter(title="new").count()
             n = models.ManagerTestModel.objects.get(pk=n.pk)
             m = models.ManagerTestModel.objects.get(pk=m.pk)
-            assert 'en' == n.title_en
-            assert 'new' == n.title_de
-            assert 'title en' == m.title_en
-            assert 'new' == m.title_de
+            assert "en" == n.title_en
+            assert "new" == n.title_de
+            assert "title en" == m.title_en
+            assert "new" == m.title_de
 
         # Test Python3 "dictionary changed size during iteration"
-        assert 1 == models.ManagerTestModel.objects.filter(title='en', title_en='en').count()
+        assert 1 == models.ManagerTestModel.objects.filter(title="en", title_en="en").count()
 
     def test_q(self):
         """Test if Q queries are rewritten."""
-        n = models.ManagerTestModel(title='')
-        n.title_en = 'en'
-        n.title_de = 'de'
+        n = models.ManagerTestModel(title="")
+        n.title_en = "en"
+        n.title_de = "de"
         n.save()
 
-        assert 'en' == get_language()
-        assert 0 == models.ManagerTestModel.objects.filter(Q(title='de') | Q(pk=42)).count()
-        assert 1 == models.ManagerTestModel.objects.filter(Q(title='en') | Q(pk=42)).count()
+        assert "en" == get_language()
+        assert 0 == models.ManagerTestModel.objects.filter(Q(title="de") | Q(pk=42)).count()
+        assert 1 == models.ManagerTestModel.objects.filter(Q(title="en") | Q(pk=42)).count()
 
-        with override('de'):
-            assert 1 == models.ManagerTestModel.objects.filter(Q(title='de') | Q(pk=42)).count()
-            assert 0 == models.ManagerTestModel.objects.filter(Q(title='en') | Q(pk=42)).count()
+        with override("de"):
+            assert 1 == models.ManagerTestModel.objects.filter(Q(title="de") | Q(pk=42)).count()
+            assert 0 == models.ManagerTestModel.objects.filter(Q(title="en") | Q(pk=42)).count()
 
     def test_f(self):
         """Test if F queries are rewritten."""
         n = models.ManagerTestModel.objects.create(visits_en=1, visits_de=2)
 
-        assert 'en' == get_language()
-        models.ManagerTestModel.objects.update(visits=F('visits') + 10)
+        assert "en" == get_language()
+        models.ManagerTestModel.objects.update(visits=F("visits") + 10)
         n = models.ManagerTestModel.objects.all()[0]
         assert n.visits_en == 11
         assert n.visits_de == 2
 
-        with override('de'):
-            models.ManagerTestModel.objects.update(visits=F('visits') + 20)
+        with override("de"):
+            models.ManagerTestModel.objects.update(visits=F("visits") + 20)
             n = models.ManagerTestModel.objects.all()[0]
             assert n.visits_en == 11
             assert n.visits_de == 22
@@ -3025,232 +3025,232 @@ class TestManager(ModeltranslationTestBase):
     def test_order_by(self):
         """Check that field names are rewritten in order_by keys."""
         manager = models.ManagerTestModel.objects
-        manager.create(title='a')
-        m = manager.create(title='b')
-        manager.create(title='c')
-        with override('de'):
+        manager.create(title="a")
+        m = manager.create(title="b")
+        manager.create(title="c")
+        with override("de"):
             # Make the order of the 'title' column different.
-            m.title = 'd'
+            m.title = "d"
             m.save()
-        titles_asc = tuple(m.title for m in manager.order_by('title'))
-        titles_desc = tuple(m.title for m in manager.order_by('-title'))
-        assert titles_asc == ('a', 'b', 'c')
-        assert titles_desc == ('c', 'b', 'a')
+        titles_asc = tuple(m.title for m in manager.order_by("title"))
+        titles_desc = tuple(m.title for m in manager.order_by("-title"))
+        assert titles_asc == ("a", "b", "c")
+        assert titles_desc == ("c", "b", "a")
 
     def test_order_by_meta(self):
         """Check that meta ordering is rewritten."""
         manager = models.ManagerTestModel.objects
-        manager.create(title='more_de', visits_en=1, visits_de=2)
-        manager.create(title='more_en', visits_en=2, visits_de=1)
-        manager.create(title='most', visits_en=3, visits_de=3)
-        manager.create(title='least', visits_en=0, visits_de=0)
+        manager.create(title="more_de", visits_en=1, visits_de=2)
+        manager.create(title="more_en", visits_en=2, visits_de=1)
+        manager.create(title="most", visits_en=3, visits_de=3)
+        manager.create(title="least", visits_en=0, visits_de=0)
 
         # Ordering descending with visits_en
         titles_for_en = tuple(m.title_en for m in manager.all())
-        with override('de'):
+        with override("de"):
             # Ordering descending with visits_de
             titles_for_de = tuple(m.title_en for m in manager.all())
 
-        assert titles_for_en == ('most', 'more_en', 'more_de', 'least')
-        assert titles_for_de == ('most', 'more_de', 'more_en', 'least')
+        assert titles_for_en == ("most", "more_en", "more_de", "least")
+        assert titles_for_de == ("most", "more_de", "more_en", "least")
 
     def test_order_by_reset(self):
         qs = models.ManagerTestModel.objects.all()
         assert qs.ordered
         assert not qs.order_by().ordered
-        assert not qs.values('title').order_by().ordered
-        assert not qs.order_by().values('title').ordered, "queryset is unexpectedly ordered"
+        assert not qs.values("title").order_by().ordered
+        assert not qs.order_by().values("title").ordered, "queryset is unexpectedly ordered"
 
     def test_latest(self):
         manager = models.ManagerTestModel.objects
-        manager.create(title='more_de', visits_en=1, visits_de=2)
-        instance_2 = manager.create(title='more_en', visits_en=2, visits_de=1)
+        manager.create(title="more_de", visits_en=1, visits_de=2)
+        instance_2 = manager.create(title="more_en", visits_en=2, visits_de=1)
         latest_instance = manager.latest("id")
         assert latest_instance == instance_2
 
     def assert_fallback(self, method, expected1, *args, **kwargs):
-        transform = kwargs.pop('transform', lambda x: x)
-        expected2 = kwargs.pop('expected_de', expected1)
+        transform = kwargs.pop("transform", lambda x: x)
+        expected2 = kwargs.pop("expected_de", expected1)
         with default_fallback():
             # Fallback is ('de',)
             obj = method(*args, **kwargs)[0]
-            with override('de'):
+            with override("de"):
                 obj2 = method(*args, **kwargs)[0]
         assert transform(obj) == expected1
         assert transform(obj2) == expected2
 
     def test_values_fallback(self):
         manager = models.ManagerTestModel.objects
-        manager.create(title_en='', title_de='de')
-        assert 'en' == get_language()
+        manager.create(title_en="", title_de="de")
+        assert "en" == get_language()
 
-        self.assert_fallback(manager.values, 'de', 'title', transform=lambda x: x['title'])
-        self.assert_fallback(manager.values_list, 'de', 'title', flat=True)
-        self.assert_fallback(manager.values_list, ('de', '', 'de'), 'title', 'title_en', 'title_de')
+        self.assert_fallback(manager.values, "de", "title", transform=lambda x: x["title"])
+        self.assert_fallback(manager.values_list, "de", "title", flat=True)
+        self.assert_fallback(manager.values_list, ("de", "", "de"), "title", "title_en", "title_de")
 
         # Settings are taken into account - fallback can be disabled
         with override_settings(MODELTRANSLATION_ENABLE_FALLBACKS=False):
             self.assert_fallback(
-                manager.values, '', 'title', expected_de='de', transform=lambda x: x['title']
+                manager.values, "", "title", expected_de="de", transform=lambda x: x["title"]
             )
 
         # Test fallback values
         manager = models.FallbackModel.objects
         manager.create()
 
-        self.assert_fallback(manager.values, 'fallback', 'title', transform=lambda x: x['title'])
-        self.assert_fallback(manager.values_list, ('fallback', 'fallback'), 'title', 'text')
+        self.assert_fallback(manager.values, "fallback", "title", transform=lambda x: x["title"])
+        self.assert_fallback(manager.values_list, ("fallback", "fallback"), "title", "text")
 
     def test_values(self):
         manager = models.ManagerTestModel.objects
-        id1 = manager.create(title_en='en', title_de='de').pk
+        id1 = manager.create(title_en="en", title_de="de").pk
 
-        raw_obj = manager.raw_values('title')[0]
-        obj = manager.values('title')[0]
-        with override('de'):
-            raw_obj2 = manager.raw_values('title')[0]
-            obj2 = manager.values('title')[0]
+        raw_obj = manager.raw_values("title")[0]
+        obj = manager.values("title")[0]
+        with override("de"):
+            raw_obj2 = manager.raw_values("title")[0]
+            obj2 = manager.values("title")[0]
 
         # Raw_values returns real database values regardless of current language
-        assert raw_obj['title'] == raw_obj2['title']
+        assert raw_obj["title"] == raw_obj2["title"]
         # Values present language-aware data, from the moment of retrieval
-        assert obj['title'] == 'en'
-        assert obj2['title'] == 'de'
+        assert obj["title"] == "en"
+        assert obj2["title"] == "de"
 
         # Values_list behave similarly
-        assert list(manager.values_list('title', flat=True)) == ['en']
-        with override('de'):
-            assert list(manager.values_list('title', flat=True)) == ['de']
+        assert list(manager.values_list("title", flat=True)) == ["en"]
+        with override("de"):
+            assert list(manager.values_list("title", flat=True)) == ["de"]
 
         # Values_list with named fields behave similarly.
         # Also, it should preserve requested ordering.
         (actual,) = manager.annotate(annotated=Value(True)).values_list(
-            'title', 'annotated', 'visits', named=True
+            "title", "annotated", "visits", named=True
         )
-        expected = ('en', True, 0)
+        expected = ("en", True, 0)
         assert actual == expected
         assert (actual.title, actual.annotated, actual.visits) == expected
-        with override('de'):
-            assert list(manager.values_list('title', 'visits', named=True)) == [('de', 0)]
+        with override("de"):
+            assert list(manager.values_list("title", "visits", named=True)) == [("de", 0)]
 
         # One can always turn rewrite off
-        a = list(manager.rewrite(False).values_list('title', flat=True))
-        with override('de'):
-            b = list(manager.rewrite(False).values_list('title', flat=True))
+        a = list(manager.rewrite(False).values_list("title", flat=True))
+        with override("de"):
+            b = list(manager.rewrite(False).values_list("title", flat=True))
         assert a == b
 
-        i2 = manager.create(title_en='en2', title_de='de2')
+        i2 = manager.create(title_en="en2", title_de="de2")
         id2 = i2.pk
 
         # This is somehow repetitive...
-        assert 'en' == get_language()
-        assert list(manager.values('title')) == [{'title': 'en'}, {'title': 'en2'}]
-        with override('de'):
-            assert list(manager.values('title')) == [{'title': 'de'}, {'title': 'de2'}]
+        assert "en" == get_language()
+        assert list(manager.values("title")) == [{"title": "en"}, {"title": "en2"}]
+        with override("de"):
+            assert list(manager.values("title")) == [{"title": "de"}, {"title": "de2"}]
 
         # When no fields are passed, list all fields in current language.
         actual = list(manager.annotate(annotated=Value(True)).values())
         assert actual == [
-            {'id': id1, 'title': 'en', 'visits': 0, 'description': None, 'annotated': True},
-            {'id': id2, 'title': 'en2', 'visits': 0, 'description': None, 'annotated': True},
+            {"id": id1, "title": "en", "visits": 0, "description": None, "annotated": True},
+            {"id": id2, "title": "en2", "visits": 0, "description": None, "annotated": True},
         ]
         # Similar for values_list
-        assert list(manager.values_list()) == [(id1, 'en', 0, None), (id2, 'en2', 0, None)]
-        with override('de'):
-            assert list(manager.values_list()) == [(id1, 'de', 0, None), (id2, 'de2', 0, None)]
+        assert list(manager.values_list()) == [(id1, "en", 0, None), (id2, "en2", 0, None)]
+        with override("de"):
+            assert list(manager.values_list()) == [(id1, "de", 0, None), (id2, "de2", 0, None)]
 
         # Raw_values
         assert list(manager.raw_values()) == list(manager.rewrite(False).values())
         i2.delete()
         assert list(manager.raw_values()) == [
             {
-                'id': id1,
-                'title': 'en',
-                'title_en': 'en',
-                'title_de': 'de',
-                'visits': 0,
-                'visits_en': 0,
-                'visits_de': 0,
-                'description': None,
-                'description_en': None,
-                'description_de': None,
+                "id": id1,
+                "title": "en",
+                "title_en": "en",
+                "title_de": "de",
+                "visits": 0,
+                "visits_en": 0,
+                "visits_de": 0,
+                "description": None,
+                "description_en": None,
+                "description_de": None,
             },
         ]
 
         # annotation issue (#374)
-        assert list(manager.values_list('title', flat=True).annotate(Count('title'))) == ['en']
+        assert list(manager.values_list("title", flat=True).annotate(Count("title"))) == ["en"]
 
         # custom annotation
-        assert list(manager.filter(id=id1).annotate(custom_id=F('id')).values_list())[0][-1] == id1
+        assert list(manager.filter(id=id1).annotate(custom_id=F("id")).values_list())[0][-1] == id1
         assert (
-            list(manager.filter(id=id1).annotate(custom_id=F('id')).values())[0].get('custom_id')
+            list(manager.filter(id=id1).annotate(custom_id=F("id")).values())[0].get("custom_id")
             == id1
         )
 
         # custom annotation with fields specified
-        assert list(manager.filter(id=id1).annotate(custom_id=F('id')).values_list('id'))[0] == (
+        assert list(manager.filter(id=id1).annotate(custom_id=F("id")).values_list("id"))[0] == (
             id1,
         )
         assert (
-            list(manager.filter(id=id1).annotate(custom_id=F('id')).values('id'))[0].get(
-                'custom_id'
+            list(manager.filter(id=id1).annotate(custom_id=F("id")).values("id"))[0].get(
+                "custom_id"
             )
             is None
         )
 
     def test_values_list_annotation(self):
-        models.TestModel(title='foo').save()
-        models.TestModel(title='foo').save()
-        assert list(models.TestModel.objects.all().values_list('title').annotate(Count('id'))) == [
-            ('foo', 2)
+        models.TestModel(title="foo").save()
+        models.TestModel(title="foo").save()
+        assert list(models.TestModel.objects.all().values_list("title").annotate(Count("id"))) == [
+            ("foo", 2)
         ]
 
     def test_values_with_expressions(self):
         manager = models.ManagerTestModel.objects
-        id1 = manager.create(title_en='en', title_de='de').pk
+        id1 = manager.create(title_en="en", title_de="de").pk
 
-        raw_obj = manager.raw_values('title', str_pk=Cast("pk", output_field=CharField()))[0]
-        obj = manager.values('title', str_pk=Cast("pk", output_field=CharField()))[0]
-        with override('de'):
-            raw_obj2 = manager.raw_values('title', str_pk=Cast("pk", output_field=CharField()))[0]
-            obj2 = manager.values('title', str_pk=Cast("pk", output_field=CharField()))[0]
+        raw_obj = manager.raw_values("title", str_pk=Cast("pk", output_field=CharField()))[0]
+        obj = manager.values("title", str_pk=Cast("pk", output_field=CharField()))[0]
+        with override("de"):
+            raw_obj2 = manager.raw_values("title", str_pk=Cast("pk", output_field=CharField()))[0]
+            obj2 = manager.values("title", str_pk=Cast("pk", output_field=CharField()))[0]
 
         # Raw_values returns real database values regardless of current language
-        assert raw_obj['title'] == raw_obj2['title']
-        assert raw_obj['str_pk'] == raw_obj2['str_pk']
+        assert raw_obj["title"] == raw_obj2["title"]
+        assert raw_obj["str_pk"] == raw_obj2["str_pk"]
         # Values present language-aware data, from the moment of retrieval
-        assert obj['title'] == 'en'
-        assert obj['str_pk'] == str(id1)
-        assert obj2['title'] == 'de'
+        assert obj["title"] == "en"
+        assert obj["str_pk"] == str(id1)
+        assert obj2["title"] == "de"
 
         # Values_list behave similarly
-        assert list(manager.values_list('title', Cast("pk", output_field=CharField()))) == [
-            ('en', str(id1))
+        assert list(manager.values_list("title", Cast("pk", output_field=CharField()))) == [
+            ("en", str(id1))
         ]
-        with override('de'):
-            assert list(manager.values_list('title', Cast("pk", output_field=CharField()))) == [
-                ('de', str(id1))
+        with override("de"):
+            assert list(manager.values_list("title", Cast("pk", output_field=CharField()))) == [
+                ("de", str(id1))
             ]
 
     def test_custom_manager(self):
         """Test if user-defined manager is still working"""
-        n = models.CustomManagerTestModel(title='')
-        n.title_en = 'enigma'
-        n.title_de = 'foo'
+        n = models.CustomManagerTestModel(title="")
+        n.title_en = "enigma"
+        n.title_de = "foo"
         n.save()
 
-        m = models.CustomManagerTestModel(title='')
-        m.title_en = 'enigma'
-        m.title_de = 'bar'
+        m = models.CustomManagerTestModel(title="")
+        m.title_en = "enigma"
+        m.title_de = "bar"
         m.save()
 
         # Custom method
-        assert 'bar' == models.CustomManagerTestModel.objects.foo()
+        assert "bar" == models.CustomManagerTestModel.objects.foo()
 
         # Ensure that get_queryset is working - filter objects to those with 'a' in title
-        assert 'en' == get_language()
+        assert "en" == get_language()
         assert 2 == models.CustomManagerTestModel.objects.count()
-        with override('de'):
+        with override("de"):
             assert 1 == models.CustomManagerTestModel.objects.count()
 
     def test_custom_manager_custom_method_name(self):
@@ -3266,14 +3266,14 @@ class TestManager(ModeltranslationTestBase):
         from modeltranslation.manager import MultilingualManager
 
         testmodel_fields = get_field_names(Group)
-        assert 'name' in testmodel_fields
-        assert 'name_de' in testmodel_fields
-        assert 'name_en' in testmodel_fields
-        assert 'name_en' in testmodel_fields
+        assert "name" in testmodel_fields
+        assert "name_de" in testmodel_fields
+        assert "name_en" in testmodel_fields
+        assert "name_en" in testmodel_fields
 
         assert isinstance(Group.objects, MultilingualManager)
         assert isinstance(Group.objects, GroupManager)
-        assert 'get_by_natural_key' in dir(Group.objects)
+        assert "get_by_natural_key" in dir(Group.objects)
 
     def test_multilingual_queryset_pickling(self):
         import pickle
@@ -3281,7 +3281,7 @@ class TestManager(ModeltranslationTestBase):
         from modeltranslation.manager import MultilingualQuerySet
 
         # typical
-        models.CustomManagerTestModel.objects.create(title='a')
+        models.CustomManagerTestModel.objects.create(title="a")
         qs = models.CustomManagerTestModel.objects.all()
         serialized = pickle.dumps(qs)
         deserialized = pickle.loads(serialized)
@@ -3307,13 +3307,13 @@ class TestManager(ModeltranslationTestBase):
     def test_default_manager_for_inherited_models_with_custom_manager(self):
         """Test if default manager is still set from local managers"""
         manager = models.CustomManagerChildTestModel._meta.default_manager
-        assert 'objects' == manager.name
+        assert "objects" == manager.name
         assert isinstance(manager, MultilingualManager)
         assert isinstance(models.CustomManagerChildTestModel.translations, MultilingualManager)
 
     def test_default_manager_for_inherited_models(self):
         manager = models.PlainChildTestModel._meta.default_manager
-        assert 'objects' == manager.name
+        assert "objects" == manager.name
         assert isinstance(models.PlainChildTestModel.translations, MultilingualManager)
 
     def test_custom_manager2(self):
@@ -3329,94 +3329,94 @@ class TestManager(ModeltranslationTestBase):
 
     def test_creation(self):
         """Test if field are rewritten in create."""
-        assert 'en' == get_language()
-        n = models.ManagerTestModel.objects.create(title='foo')
-        assert 'foo' == n.title_en
+        assert "en" == get_language()
+        n = models.ManagerTestModel.objects.create(title="foo")
+        assert "foo" == n.title_en
         assert n.title_de is None
-        assert 'foo' == n.title
+        assert "foo" == n.title
 
         # The same result
-        n = models.ManagerTestModel.objects.create(title_en='foo')
-        assert 'foo' == n.title_en
+        n = models.ManagerTestModel.objects.create(title_en="foo")
+        assert "foo" == n.title_en
         assert n.title_de is None
-        assert 'foo' == n.title
+        assert "foo" == n.title
 
         # Language suffixed version wins
-        n = models.ManagerTestModel.objects.create(title='bar', title_en='foo')
-        assert 'foo' == n.title_en
+        n = models.ManagerTestModel.objects.create(title="bar", title_en="foo")
+        assert "foo" == n.title_en
         assert n.title_de is None
-        assert 'foo' == n.title
+        assert "foo" == n.title
 
     def test_creation_population(self):
         """Test if language fields are populated with default value on creation."""
-        n = models.ManagerTestModel.objects.populate(True).create(title='foo')
-        assert 'foo' == n.title_en
-        assert 'foo' == n.title_de
-        assert 'foo' == n.title
+        n = models.ManagerTestModel.objects.populate(True).create(title="foo")
+        assert "foo" == n.title_en
+        assert "foo" == n.title_de
+        assert "foo" == n.title
 
         # You can specify some language...
-        n = models.ManagerTestModel.objects.populate(True).create(title='foo', title_de='bar')
-        assert 'foo' == n.title_en
-        assert 'bar' == n.title_de
-        assert 'foo' == n.title
+        n = models.ManagerTestModel.objects.populate(True).create(title="foo", title_de="bar")
+        assert "foo" == n.title_en
+        assert "bar" == n.title_de
+        assert "foo" == n.title
 
         # ... but remember that still original attribute points to current language
-        assert 'en' == get_language()
-        n = models.ManagerTestModel.objects.populate(True).create(title='foo', title_en='bar')
-        assert 'bar' == n.title_en
-        assert 'foo' == n.title_de
-        assert 'bar' == n.title  # points to en
-        with override('de'):
-            assert 'foo' == n.title  # points to de
-        assert 'en' == get_language()
+        assert "en" == get_language()
+        n = models.ManagerTestModel.objects.populate(True).create(title="foo", title_en="bar")
+        assert "bar" == n.title_en
+        assert "foo" == n.title_de
+        assert "bar" == n.title  # points to en
+        with override("de"):
+            assert "foo" == n.title  # points to de
+        assert "en" == get_language()
 
         # This feature (for backward-compatibility) require populate method...
-        n = models.ManagerTestModel.objects.create(title='foo')
-        assert 'foo' == n.title_en
+        n = models.ManagerTestModel.objects.create(title="foo")
+        assert "foo" == n.title_en
         assert n.title_de is None
-        assert 'foo' == n.title
+        assert "foo" == n.title
 
         # ... or MODELTRANSLATION_AUTO_POPULATE setting
         with reload_override_settings(MODELTRANSLATION_AUTO_POPULATE=True):
             assert mt_settings.AUTO_POPULATE is True
-            n = models.ManagerTestModel.objects.create(title='foo')
-            assert 'foo' == n.title_en
-            assert 'foo' == n.title_de
-            assert 'foo' == n.title
+            n = models.ManagerTestModel.objects.create(title="foo")
+            assert "foo" == n.title_en
+            assert "foo" == n.title_de
+            assert "foo" == n.title
 
             # populate method has highest priority
-            n = models.ManagerTestModel.objects.populate(False).create(title='foo')
-            assert 'foo' == n.title_en
+            n = models.ManagerTestModel.objects.populate(False).create(title="foo")
+            assert "foo" == n.title_en
             assert n.title_de is None
-            assert 'foo' == n.title
+            assert "foo" == n.title
 
         # Populate ``default`` fills just the default translation.
         # TODO: Having more languages would make these tests more meaningful.
         qs = models.ManagerTestModel.objects
-        m = qs.populate('default').create(title='foo', description='bar')
-        assert 'foo' == m.title_de
-        assert 'foo' == m.title_en
-        assert 'bar' == m.description_de
-        assert 'bar' == m.description_en
-        with override('de'):
-            m = qs.populate('default').create(title='foo', description='bar')
-            assert 'foo' == m.title_de
+        m = qs.populate("default").create(title="foo", description="bar")
+        assert "foo" == m.title_de
+        assert "foo" == m.title_en
+        assert "bar" == m.description_de
+        assert "bar" == m.description_en
+        with override("de"):
+            m = qs.populate("default").create(title="foo", description="bar")
+            assert "foo" == m.title_de
             assert m.title_en is None
-            assert 'bar' == m.description_de
+            assert "bar" == m.description_de
             assert m.description_en is None
 
         # Populate ``required`` fills just non-nullable default translations.
         qs = models.ManagerTestModel.objects
-        m = qs.populate('required').create(title='foo', description='bar')
-        assert 'foo' == m.title_de
-        assert 'foo' == m.title_en
+        m = qs.populate("required").create(title="foo", description="bar")
+        assert "foo" == m.title_de
+        assert "foo" == m.title_en
         assert m.description_de is None
-        assert 'bar' == m.description_en
-        with override('de'):
-            m = qs.populate('required').create(title='foo', description='bar')
-            assert 'foo' == m.title_de
+        assert "bar" == m.description_en
+        with override("de"):
+            m = qs.populate("required").create(title="foo", description="bar")
+            assert "foo" == m.title_de
             assert m.title_en is None
-            assert 'bar' == m.description_de
+            assert "bar" == m.description_de
             assert m.description_en is None
 
     def test_get_or_create_population(self):
@@ -3424,13 +3424,13 @@ class TestManager(ModeltranslationTestBase):
         Populate may be used with ``get_or_create``.
         """
         qs = models.ManagerTestModel.objects
-        m1, created1 = qs.populate(True).get_or_create(title='aaa')
-        m2, created2 = qs.populate(True).get_or_create(title='aaa')
+        m1, created1 = qs.populate(True).get_or_create(title="aaa")
+        m2, created2 = qs.populate(True).get_or_create(title="aaa")
         assert created1
         assert not created2
         assert m1 == m2
-        assert 'aaa' == m1.title_en
-        assert 'aaa' == m1.title_de
+        assert "aaa" == m1.title_en
+        assert "aaa" == m1.title_de
 
     def test_fixture_population(self):
         """
@@ -3438,51 +3438,51 @@ class TestManager(ModeltranslationTestBase):
         does not result in missing default translations for (original)
         non-nullable fields.
         """
-        with auto_populate('required'):
-            call_command('loaddata', 'fixture.json', verbosity=0)
+        with auto_populate("required"):
+            call_command("loaddata", "fixture.json", verbosity=0)
             m = models.TestModel.objects.get()
-            assert m.title_en == 'foo'
-            assert m.title_de == 'foo'
-            assert m.text_en == 'bar'
+            assert m.title_en == "foo"
+            assert m.title_de == "foo"
+            assert m.text_en == "bar"
             assert m.text_de is None
 
     def test_fixture_population_via_command(self):
         """
         Test that the loaddata command takes new option.
         """
-        call_command('loaddata', 'fixture.json', verbosity=0, populate='required')
+        call_command("loaddata", "fixture.json", verbosity=0, populate="required")
         m = models.TestModel.objects.get()
-        assert m.title_en == 'foo'
-        assert m.title_de == 'foo'
-        assert m.text_en == 'bar'
+        assert m.title_en == "foo"
+        assert m.title_de == "foo"
+        assert m.text_en == "bar"
         assert m.text_de is None
 
-        call_command('loaddata', 'fixture.json', verbosity=0, populate='all')
+        call_command("loaddata", "fixture.json", verbosity=0, populate="all")
         m = models.TestModel.objects.get()
-        assert m.title_en == 'foo'
-        assert m.title_de == 'foo'
-        assert m.text_en == 'bar'
-        assert m.text_de == 'bar'
+        assert m.title_en == "foo"
+        assert m.title_de == "foo"
+        assert m.text_en == "bar"
+        assert m.text_de == "bar"
 
         # Test if option overrides current context
-        with auto_populate('all'):
-            call_command('loaddata', 'fixture.json', verbosity=0, populate=False)
+        with auto_populate("all"):
+            call_command("loaddata", "fixture.json", verbosity=0, populate=False)
             m = models.TestModel.objects.get()
-            assert m.title_en == 'foo'
+            assert m.title_en == "foo"
             assert m.title_de is None
-            assert m.text_en == 'bar'
+            assert m.text_en == "bar"
             assert m.text_de is None
 
     def assertDeferred(self, use_defer, *fields):
         manager = models.TestModel.objects.defer if use_defer else models.TestModel.objects.only
         inst1 = manager(*fields)[0]
-        with override('de'):
+        with override("de"):
             inst2 = manager(*fields)[0]
-        assert 'title_en' == inst1.title
-        assert 'title_en' == inst2.title
-        with override('de'):
-            assert 'title_de' == inst1.title
-            assert 'title_de' == inst2.title
+        assert "title_en" == inst1.title
+        assert "title_en" == inst2.title
+        with override("de"):
+            assert "title_de" == inst1.title
+            assert "title_de" == inst2.title
 
     def assertDeferredClass(self, item):
         assert len(item.get_deferred_fields()) > 0
@@ -3491,178 +3491,178 @@ class TestManager(ModeltranslationTestBase):
         """
         Check if ``only`` and ``defer`` are working.
         """
-        models.TestModel.objects.create(title_de='title_de', title_en='title_en')
-        inst = models.TestModel.objects.only('title_en')[0]
+        models.TestModel.objects.create(title_de="title_de", title_en="title_en")
+        inst = models.TestModel.objects.only("title_en")[0]
         assert isinstance(inst, models.TestModel)
-        self.assertDeferred(False, 'title_en')
+        self.assertDeferred(False, "title_en")
 
-        with auto_populate('all'):
-            self.assertDeferred(False, 'title')
-            self.assertDeferred(False, 'title_de')
-            self.assertDeferred(False, 'title_en')
-            self.assertDeferred(False, 'title_en', 'title_de')
-            self.assertDeferred(False, 'title', 'title_en')
-            self.assertDeferred(False, 'title', 'title_de')
+        with auto_populate("all"):
+            self.assertDeferred(False, "title")
+            self.assertDeferred(False, "title_de")
+            self.assertDeferred(False, "title_en")
+            self.assertDeferred(False, "title_en", "title_de")
+            self.assertDeferred(False, "title", "title_en")
+            self.assertDeferred(False, "title", "title_de")
             # Check if fields are deferred properly with ``only``
-            self.assertDeferred(False, 'text')
+            self.assertDeferred(False, "text")
 
             # Defer
-            self.assertDeferred(True, 'title')
-            self.assertDeferred(True, 'title_de')
-            self.assertDeferred(True, 'title_en')
-            self.assertDeferred(True, 'title_en', 'title_de')
-            self.assertDeferred(True, 'title', 'title_en')
-            self.assertDeferred(True, 'title', 'title_de')
-            self.assertDeferred(True, 'text', 'email', 'url')
+            self.assertDeferred(True, "title")
+            self.assertDeferred(True, "title_de")
+            self.assertDeferred(True, "title_en")
+            self.assertDeferred(True, "title_en", "title_de")
+            self.assertDeferred(True, "title", "title_en")
+            self.assertDeferred(True, "title", "title_de")
+            self.assertDeferred(True, "text", "email", "url")
 
     def test_deferred_fk(self):
         """
         Check if ``select_related`` is rewritten and also
         if ``only`` and ``defer`` are working with deferred classes
         """
-        test = models.TestModel.objects.create(title_de='title_de', title_en='title_en')
-        with auto_populate('all'):
+        test = models.TestModel.objects.create(title_de="title_de", title_en="title_en")
+        with auto_populate("all"):
             models.ForeignKeyModel.objects.create(test=test)
 
         item = models.ForeignKeyModel.objects.select_related("test").defer("test__text")[0]
         self.assertDeferredClass(item.test)
-        assert 'title_en' == item.test.title
-        assert 'title_en' == item.test.__class__.objects.only('title')[0].title
-        with override('de'):
+        assert "title_en" == item.test.title
+        assert "title_en" == item.test.__class__.objects.only("title")[0].title
+        with override("de"):
             item = models.ForeignKeyModel.objects.select_related("test").defer("test__text")[0]
             self.assertDeferredClass(item.test)
-            assert 'title_de' == item.test.title
-            assert 'title_de' == item.test.__class__.objects.only('title')[0].title
+            assert "title_de" == item.test.title
+            assert "title_de" == item.test.__class__.objects.only("title")[0].title
 
     def test_deferred_spanning(self):
-        test = models.TestModel.objects.create(title_de='title_de', title_en='title_en')
-        with auto_populate('all'):
+        test = models.TestModel.objects.create(title_de="title_de", title_en="title_en")
+        with auto_populate("all"):
             models.ForeignKeyModel.objects.create(test=test)
 
         item1 = models.ForeignKeyModel.objects.select_related("test").defer("test__text")[0].test
         item2 = models.TestModel.objects.defer("text")[0]
         assert item1.__class__ is item2.__class__
         # DeferredAttribute descriptors are present
-        assert 'text_en' in dir(item1.__class__)
-        assert 'text_de' in dir(item1.__class__)
+        assert "text_en" in dir(item1.__class__)
+        assert "text_de" in dir(item1.__class__)
 
     def test_deferred_rule2(self):
-        models.TestModel.objects.create(title_de='title_de', title_en='title_en')
-        o = models.TestModel.objects.only('title')[0]
+        models.TestModel.objects.create(title_de="title_de", title_en="title_en")
+        o = models.TestModel.objects.only("title")[0]
         assert o.title == "title_en"
         o.title = "bla"
         assert o.title == "bla"
 
     def test_select_related(self):
-        test = models.TestModel.objects.create(title_de='title_de', title_en='title_en')
-        with auto_populate('all'):
+        test = models.TestModel.objects.create(title_de="title_de", title_en="title_en")
+        with auto_populate("all"):
             models.ForeignKeyModel.objects.create(untrans=test)
 
         fk_qs = models.ForeignKeyModel.objects.all()
-        assert 'untrans' not in fk_qs[0]._state.fields_cache
-        assert 'untrans' in fk_qs.select_related('untrans')[0]._state.fields_cache
+        assert "untrans" not in fk_qs[0]._state.fields_cache
+        assert "untrans" in fk_qs.select_related("untrans")[0]._state.fields_cache
         assert (
-            'untrans'
-            not in fk_qs.select_related('untrans').select_related(None)[0]._state.fields_cache
+            "untrans"
+            not in fk_qs.select_related("untrans").select_related(None)[0]._state.fields_cache
         )
         # untrans is nullable so not included when select_related=True
-        assert 'untrans' not in fk_qs.select_related()[0]._state.fields_cache
+        assert "untrans" not in fk_qs.select_related()[0]._state.fields_cache
 
     def test_translation_fields_appending(self):
         from modeltranslation.manager import append_lookup_key, append_lookup_keys
 
-        assert {'untrans'} == append_lookup_key(models.ForeignKeyModel, 'untrans')
-        assert {'title', 'title_en', 'title_de'} == append_lookup_key(
-            models.ForeignKeyModel, 'title'
+        assert {"untrans"} == append_lookup_key(models.ForeignKeyModel, "untrans")
+        assert {"title", "title_en", "title_de"} == append_lookup_key(
+            models.ForeignKeyModel, "title"
         )
-        assert {'test', 'test_en', 'test_de'} == append_lookup_key(models.ForeignKeyModel, 'test')
-        assert {'title__eq', 'title_en__eq', 'title_de__eq'} == append_lookup_key(
-            models.ForeignKeyModel, 'title__eq'
+        assert {"test", "test_en", "test_de"} == append_lookup_key(models.ForeignKeyModel, "test")
+        assert {"title__eq", "title_en__eq", "title_de__eq"} == append_lookup_key(
+            models.ForeignKeyModel, "title__eq"
         )
-        assert {'test__smt', 'test_en__smt', 'test_de__smt'} == append_lookup_key(
-            models.ForeignKeyModel, 'test__smt'
+        assert {"test__smt", "test_en__smt", "test_de__smt"} == append_lookup_key(
+            models.ForeignKeyModel, "test__smt"
         )
         big_set = {
-            'test__url',
-            'test__url_en',
-            'test__url_de',
-            'test_en__url',
-            'test_en__url_en',
-            'test_en__url_de',
-            'test_de__url',
-            'test_de__url_en',
-            'test_de__url_de',
+            "test__url",
+            "test__url_en",
+            "test__url_de",
+            "test_en__url",
+            "test_en__url_en",
+            "test_en__url_de",
+            "test_de__url",
+            "test_de__url_en",
+            "test_de__url_de",
         }
-        assert big_set == append_lookup_key(models.ForeignKeyModel, 'test__url')
-        assert {'untrans__url', 'untrans__url_en', 'untrans__url_de'} == append_lookup_key(
-            models.ForeignKeyModel, 'untrans__url'
+        assert big_set == append_lookup_key(models.ForeignKeyModel, "test__url")
+        assert {"untrans__url", "untrans__url_en", "untrans__url_de"} == append_lookup_key(
+            models.ForeignKeyModel, "untrans__url"
         )
 
-        assert big_set.union(['title', 'title_en', 'title_de']) == append_lookup_keys(
-            models.ForeignKeyModel, ['test__url', 'title']
+        assert big_set.union(["title", "title_en", "title_de"]) == append_lookup_keys(
+            models.ForeignKeyModel, ["test__url", "title"]
         )
 
     def test_constructor_inheritance(self):
         inst = models.AbstractModelB()
         # Check if fields assigned in constructor hasn't been ignored.
-        assert inst.titlea == 'title_a'
-        assert inst.titleb == 'title_b'
+        assert inst.titlea == "title_a"
+        assert inst.titleb == "title_b"
 
     def test_distinct(self):
         """Check that field names are rewritten in distinct keys."""
         manager = models.ManagerTestModel.objects
         manager.create(
-            title_en='title_1_en',
-            title_de='title_1_de',
-            description_en='desc_1_en',
-            description_de='desc_1_de',
+            title_en="title_1_en",
+            title_de="title_1_de",
+            description_en="desc_1_en",
+            description_de="desc_1_de",
         )
         manager.create(
-            title_en='title_1_en',
-            title_de='title_1_de',
-            description_en='desc_2_en',
-            description_de='desc_2_de',
+            title_en="title_1_en",
+            title_de="title_1_de",
+            description_en="desc_2_en",
+            description_de="desc_2_de",
         )
         manager.create(
-            title_en='title_2_en',
-            title_de='title_2_de',
-            description_en='desc_1_en',
-            description_de='desc_1_de',
+            title_en="title_2_en",
+            title_de="title_2_de",
+            description_en="desc_1_en",
+            description_de="desc_1_de",
         )
         manager.create(
-            title_en='title_2_en',
-            title_de='title_2_de',
-            description_en='desc_2_en',
-            description_de='desc_2_de',
+            title_en="title_2_en",
+            title_de="title_2_de",
+            description_en="desc_2_en",
+            description_de="desc_2_de",
         )
 
         # Without field arguments to distinct() all fields are used to determine
         # distinctness, therefore when only looking at a subset of fields in the
         # queryset it can appear that there are duplicates (the titles in this case)
-        titles_for_en = tuple(m.title for m in manager.order_by('title').distinct())
-        with override('de'):
-            titles_for_de = tuple(m.title for m in manager.order_by('title').distinct())
+        titles_for_en = tuple(m.title for m in manager.order_by("title").distinct())
+        with override("de"):
+            titles_for_de = tuple(m.title for m in manager.order_by("title").distinct())
 
-        assert titles_for_en == ('title_1_en', 'title_1_en', 'title_2_en', 'title_2_en')
-        assert titles_for_de == ('title_1_de', 'title_1_de', 'title_2_de', 'title_2_de')
+        assert titles_for_en == ("title_1_en", "title_1_en", "title_2_en", "title_2_en")
+        assert titles_for_de == ("title_1_de", "title_1_de", "title_2_de", "title_2_de")
 
         # On PostgreSQL only, distinct() can have field arguments (*fields) to specify which fields
         # the distinct applies to (this generates a DISTINCT ON (*fields) sql expression).
         # NB: DISTINCT ON expressions must be accompanied by an order_by() that starts with the
         # same fields in the same order
-        if django_settings.DATABASES['default']['ENGINE'] == 'django.db.backends.postgresql':
+        if django_settings.DATABASES["default"]["ENGINE"] == "django.db.backends.postgresql":
             titles_for_en = tuple(
                 (m.title, m.description)
-                for m in manager.order_by('title', 'description').distinct('title')
+                for m in manager.order_by("title", "description").distinct("title")
             )
-            with override('de'):
+            with override("de"):
                 titles_for_de = tuple(
                     (m.title, m.description)
-                    for m in manager.order_by('title', 'description').distinct('title')
+                    for m in manager.order_by("title", "description").distinct("title")
                 )
 
-            assert titles_for_en == (('title_1_en', 'desc_1_en'), ('title_2_en', 'desc_1_en'))
-            assert titles_for_de == (('title_1_de', 'desc_1_de'), ('title_2_de', 'desc_1_de'))
+            assert titles_for_en == (("title_1_en", "desc_1_en"), ("title_2_en", "desc_1_en"))
+            assert titles_for_de == (("title_1_de", "desc_1_de"), ("title_2_de", "desc_1_de"))
 
 
 class TranslationModelFormTest(ModeltranslationTestBase):
@@ -3670,27 +3670,27 @@ class TranslationModelFormTest(ModeltranslationTestBase):
         class TestModelForm(TranslationModelForm):
             class Meta:
                 model = models.TestModel
-                fields = '__all__'
+                fields = "__all__"
 
         form = TestModelForm()
         assert list(form.base_fields) == [
-            'title',
-            'title_de',
-            'title_en',
-            'text',
-            'text_de',
-            'text_en',
-            'url',
-            'url_de',
-            'url_en',
-            'email',
-            'email_de',
-            'email_en',
-            'dynamic_default',
-            'dynamic_default_de',
-            'dynamic_default_en',
+            "title",
+            "title_de",
+            "title_en",
+            "text",
+            "text_de",
+            "text_en",
+            "url",
+            "url_de",
+            "url_en",
+            "email",
+            "email_de",
+            "email_en",
+            "dynamic_default",
+            "dynamic_default_de",
+            "dynamic_default_en",
         ]
-        assert list(form.fields) == ['title', 'text', 'url', 'email', 'dynamic_default']
+        assert list(form.fields) == ["title", "text", "url", "email", "dynamic_default"]
 
     def test_updating_with_empty_value(self):
         """
@@ -3701,21 +3701,21 @@ class TranslationModelFormTest(ModeltranslationTestBase):
         class Form(forms.ModelForm):
             class Meta:
                 model = models.TestModel
-                exclude = ('text', 'dynamic_default')
+                exclude = ("text", "dynamic_default")
 
-        instance = models.TestModel.objects.create(text_de='something')
+        instance = models.TestModel.objects.create(text_de="something")
         form = Form(
-            {'text_de': '', 'title': 'a', 'email_de': '', 'email_en': ''}, instance=instance
+            {"text_de": "", "title": "a", "email_de": "", "email_en": ""}, instance=instance
         )
         instance = form.save()
-        assert 'de' == get_language()
-        assert '' == instance.text_de
+        assert "de" == get_language()
+        assert "" == instance.text_de
 
 
 class ProxyModelTest(ModeltranslationTestBase):
     def test_equality(self):
-        n = models.TestModel.objects.create(title='Title')
-        m = models.ProxyTestModel.objects.get(title='Title')
+        n = models.TestModel.objects.create(title="Title")
+        m = models.ProxyTestModel.objects.get(title="Title")
         assert n.title == m.title
         assert n.title_de == m.title_de
         assert n.title_en == m.title_en
@@ -3732,36 +3732,36 @@ class TestRequired(ModeltranslationTestBase):
         self.opts = models.RequiredModel._meta
 
         # All non required
-        self.assertNotRequired('non_req')
-        self.assertNotRequired('non_req_en')
-        self.assertNotRequired('non_req_de')
+        self.assertNotRequired("non_req")
+        self.assertNotRequired("non_req_en")
+        self.assertNotRequired("non_req_de")
 
         # Original required, but translated fields not - default behaviour
-        self.assertRequired('req')
-        self.assertNotRequired('req_en')
-        self.assertNotRequired('req_de')
+        self.assertRequired("req")
+        self.assertNotRequired("req_en")
+        self.assertNotRequired("req_de")
 
         # Set all translated field required
-        self.assertRequired('req_reg')
-        self.assertRequired('req_reg_en')
-        self.assertRequired('req_reg_de')
+        self.assertRequired("req_reg")
+        self.assertRequired("req_reg_en")
+        self.assertRequired("req_reg_de")
 
         # Set some translated field required
-        self.assertRequired('req_en_reg')
-        self.assertRequired('req_en_reg_en')
-        self.assertNotRequired('req_en_reg_de')
+        self.assertRequired("req_en_reg")
+        self.assertRequired("req_en_reg_en")
+        self.assertNotRequired("req_en_reg_de")
 
         # Test validation
         inst = models.RequiredModel()
-        inst.req = 'abc'
-        inst.req_reg = 'def'
+        inst.req = "abc"
+        inst.req_reg = "def"
         try:
             inst.full_clean()
         except ValidationError as e:
             error_fields = set(e.message_dict.keys())
-            assert {'req_reg_en', 'req_en_reg', 'req_en_reg_en'} == error_fields
+            assert {"req_reg_en", "req_en_reg", "req_en_reg_en"} == error_fields
         else:
-            self.fail('ValidationError not raised!')
+            self.fail("ValidationError not raised!")
 
 
 class M2MTest(ModeltranslationTestBase):
@@ -3770,7 +3770,7 @@ class M2MTest(ModeltranslationTestBase):
         # English and German names.
         x1 = models.ModelX.objects.create(name_en="foo", name_de="bar")
         x2 = models.ModelX.objects.create(name_en="bar", name_de="baz")
-        y = models.ModelY.objects.create(title='y1')
+        y = models.ModelY.objects.create(title="y1")
         models.ModelXY.objects.create(model_x=x1, model_y=y)
         models.ModelXY.objects.create(model_x=x2, model_y=y)
 
@@ -3815,5 +3815,5 @@ class InheritedPermissionTestCase(ModeltranslationTestBase):
         assert not isinstance(
             Permission.objects, MultilingualManager
         ), "Permission is using MultilingualManager"
-        user = User.objects.create(username='123', is_active=True)
-        user.has_perm('test_perm')
+        user = User.objects.create(username="123", is_active=True)
+        user.has_perm("test_perm")

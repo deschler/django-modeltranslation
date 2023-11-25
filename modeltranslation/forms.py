@@ -42,7 +42,7 @@ class NullableField(forms.Field):
         if (initial is None and data is not None) or (initial is not None and data is None):
             return True
         obj = super()
-        if hasattr(obj, 'has_changed'):
+        if hasattr(obj, "has_changed"):
             return obj.has_changed(initial, data)
         else:  # Django < 1.9 compat
             return obj._has_changed(initial, data)

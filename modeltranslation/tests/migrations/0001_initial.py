@@ -11,486 +11,486 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('auth', '0001_initial'),
+        ("auth", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='AbstractConflictModelB',
+            name="AbstractConflictModelB",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                ('title_de', models.IntegerField()),
-                ('title', models.CharField(max_length=255, verbose_name='title')),
+                ("title_de", models.IntegerField()),
+                ("title", models.CharField(max_length=255, verbose_name="title")),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='AbstractModelB',
+            name="AbstractModelB",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                ('titlea', models.CharField(max_length=255, verbose_name='title a')),
-                ('titlea_de', models.CharField(max_length=255, null=True, verbose_name='title a')),
-                ('titlea_en', models.CharField(max_length=255, null=True, verbose_name='title a')),
-                ('titleb', models.CharField(max_length=255, verbose_name='title b')),
-                ('titleb_de', models.CharField(max_length=255, null=True, verbose_name='title b')),
-                ('titleb_en', models.CharField(max_length=255, null=True, verbose_name='title b')),
+                ("titlea", models.CharField(max_length=255, verbose_name="title a")),
+                ("titlea_de", models.CharField(max_length=255, null=True, verbose_name="title a")),
+                ("titlea_en", models.CharField(max_length=255, null=True, verbose_name="title a")),
+                ("titleb", models.CharField(max_length=255, verbose_name="title b")),
+                ("titleb_de", models.CharField(max_length=255, null=True, verbose_name="title b")),
+                ("titleb_en", models.CharField(max_length=255, null=True, verbose_name="title b")),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='ConflictModel',
+            name="ConflictModel",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                ('title', models.CharField(max_length=255, verbose_name='title')),
-                ('title_de', models.IntegerField()),
+                ("title", models.CharField(max_length=255, verbose_name="title")),
+                ("title_de", models.IntegerField()),
             ],
         ),
         migrations.CreateModel(
-            name='CustomManager2TestModel',
+            name="CustomManager2TestModel",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                ('title', models.CharField(max_length=255, verbose_name='title')),
-                ('title_de', models.CharField(max_length=255, null=True, verbose_name='title')),
-                ('title_en', models.CharField(max_length=255, null=True, verbose_name='title')),
+                ("title", models.CharField(max_length=255, verbose_name="title")),
+                ("title_de", models.CharField(max_length=255, null=True, verbose_name="title")),
+                ("title_en", models.CharField(max_length=255, null=True, verbose_name="title")),
             ],
         ),
         migrations.CreateModel(
-            name='CustomManagerChildTestModel',
+            name="CustomManagerChildTestModel",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                ('needs_translation', models.BooleanField(default=False)),
-                ('title', models.CharField(max_length=255, verbose_name='title')),
-                ('title_de', models.CharField(max_length=255, null=True, verbose_name='title')),
-                ('title_en', models.CharField(max_length=255, null=True, verbose_name='title')),
+                ("needs_translation", models.BooleanField(default=False)),
+                ("title", models.CharField(max_length=255, verbose_name="title")),
+                ("title_de", models.CharField(max_length=255, null=True, verbose_name="title")),
+                ("title_en", models.CharField(max_length=255, null=True, verbose_name="title")),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='CustomManagerTestModel',
+            name="CustomManagerTestModel",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                ('title', models.CharField(max_length=255, verbose_name='title')),
-                ('title_de', models.CharField(max_length=255, null=True, verbose_name='title')),
-                ('title_en', models.CharField(max_length=255, null=True, verbose_name='title')),
-                ('description', models.CharField(db_column='xyz', max_length=255, null=True)),
+                ("title", models.CharField(max_length=255, verbose_name="title")),
+                ("title_de", models.CharField(max_length=255, null=True, verbose_name="title")),
+                ("title_en", models.CharField(max_length=255, null=True, verbose_name="title")),
+                ("description", models.CharField(db_column="xyz", max_length=255, null=True)),
             ],
         ),
         migrations.CreateModel(
-            name='CustomThroughModel',
+            name="CustomThroughModel",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
-                ),
-            ],
-        ),
-        migrations.CreateModel(
-            name='DataModel',
-            fields=[
-                (
-                    'id',
-                    models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
-                    ),
-                ),
-                ('data', models.TextField(blank=True, null=True)),
-            ],
-        ),
-        migrations.CreateModel(
-            name='DescriptorModel',
-            fields=[
-                (
-                    'id',
-                    models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
-                    ),
-                ),
-                ('normal', modeltranslation.tests.models.FancyField(default='')),
-                ('trans', modeltranslation.tests.models.FancyField(default='')),
-                ('trans_de', modeltranslation.tests.models.FancyField(default='', null=True)),
-                ('trans_en', modeltranslation.tests.models.FancyField(default='', null=True)),
-            ],
-        ),
-        migrations.CreateModel(
-            name='FallbackModel',
-            fields=[
-                (
-                    'id',
-                    models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
-                    ),
-                ),
-                ('title', models.CharField(max_length=255, verbose_name='title')),
-                ('title_de', models.CharField(max_length=255, null=True, verbose_name='title')),
-                ('title_en', models.CharField(max_length=255, null=True, verbose_name='title')),
-                ('text', models.TextField(blank=True, null=True)),
-                ('text_de', models.TextField(blank=True, null=True)),
-                ('text_en', models.TextField(blank=True, null=True)),
-                ('url', models.URLField(blank=True, null=True)),
-                ('url_de', models.URLField(blank=True, null=True)),
-                ('url_en', models.URLField(blank=True, null=True)),
-                ('email', models.EmailField(blank=True, max_length=254, null=True)),
-                ('email_de', models.EmailField(blank=True, max_length=254, null=True)),
-                ('email_en', models.EmailField(blank=True, max_length=254, null=True)),
-                ('description', models.CharField(max_length=255, null=True)),
-                ('description_de', models.CharField(max_length=255, null=True)),
-                ('description_en', models.CharField(max_length=255, null=True)),
-            ],
-        ),
-        migrations.CreateModel(
-            name='FallbackModel2',
-            fields=[
-                (
-                    'id',
-                    models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
-                    ),
-                ),
-                ('title', models.CharField(max_length=255, verbose_name='title')),
-                ('title_de', models.CharField(max_length=255, null=True, verbose_name='title')),
-                ('title_en', models.CharField(max_length=255, null=True, verbose_name='title')),
-                ('text', models.TextField(blank=True, null=True)),
-                ('text_de', models.TextField(blank=True, null=True)),
-                ('text_en', models.TextField(blank=True, null=True)),
-                ('url', models.URLField(blank=True, null=True)),
-                ('url_de', models.URLField(blank=True, null=True)),
-                ('url_en', models.URLField(blank=True, null=True)),
-                ('email', models.EmailField(blank=True, max_length=254, null=True)),
-                ('email_de', models.EmailField(blank=True, max_length=254, null=True)),
-                ('email_en', models.EmailField(blank=True, max_length=254, null=True)),
-            ],
-        ),
-        migrations.CreateModel(
-            name='FileFieldsModel',
-            fields=[
-                (
-                    'id',
-                    models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
-                    ),
-                ),
-                ('title', models.CharField(max_length=255, verbose_name='title')),
-                ('title_de', models.CharField(max_length=255, null=True, verbose_name='title')),
-                ('title_en', models.CharField(max_length=255, null=True, verbose_name='title')),
-                (
-                    'file',
-                    models.FileField(blank=True, null=True, upload_to='modeltranslation_tests'),
-                ),
-                (
-                    'file_de',
-                    models.FileField(blank=True, null=True, upload_to='modeltranslation_tests'),
-                ),
-                (
-                    'file_en',
-                    models.FileField(blank=True, null=True, upload_to='modeltranslation_tests'),
-                ),
-                ('file2', models.FileField(upload_to='modeltranslation_tests')),
-                ('file2_de', models.FileField(null=True, upload_to='modeltranslation_tests')),
-                ('file2_en', models.FileField(null=True, upload_to='modeltranslation_tests')),
-                (
-                    'image',
-                    models.ImageField(blank=True, null=True, upload_to='modeltranslation_tests'),
-                ),
-                (
-                    'image_de',
-                    models.ImageField(blank=True, null=True, upload_to='modeltranslation_tests'),
-                ),
-                (
-                    'image_en',
-                    models.ImageField(blank=True, null=True, upload_to='modeltranslation_tests'),
                 ),
             ],
         ),
         migrations.CreateModel(
-            name='FilteredTestModel',
+            name="DataModel",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                ('title', models.CharField(max_length=255, verbose_name='title')),
-                ('title_de', models.CharField(max_length=255, null=True, verbose_name='title')),
-                ('title_en', models.CharField(max_length=255, null=True, verbose_name='title')),
+                ("data", models.TextField(blank=True, null=True)),
             ],
         ),
         migrations.CreateModel(
-            name='GroupFieldsetsModel',
+            name="DescriptorModel",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                ('title', models.CharField(max_length=255)),
-                ('title_de', models.CharField(max_length=255, null=True)),
-                ('title_en', models.CharField(max_length=255, null=True)),
-                ('text', models.TextField(blank=True, null=True)),
-                ('text_de', models.TextField(blank=True, null=True)),
-                ('text_en', models.TextField(blank=True, null=True)),
-                ('email', models.EmailField(blank=True, max_length=254, null=True)),
+                ("normal", modeltranslation.tests.models.FancyField(default="")),
+                ("trans", modeltranslation.tests.models.FancyField(default="")),
+                ("trans_de", modeltranslation.tests.models.FancyField(default="", null=True)),
+                ("trans_en", modeltranslation.tests.models.FancyField(default="", null=True)),
             ],
         ),
         migrations.CreateModel(
-            name='InheritedPermission',
+            name="FallbackModel",
             fields=[
                 (
-                    'permission_ptr',
+                    "id",
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("title", models.CharField(max_length=255, verbose_name="title")),
+                ("title_de", models.CharField(max_length=255, null=True, verbose_name="title")),
+                ("title_en", models.CharField(max_length=255, null=True, verbose_name="title")),
+                ("text", models.TextField(blank=True, null=True)),
+                ("text_de", models.TextField(blank=True, null=True)),
+                ("text_en", models.TextField(blank=True, null=True)),
+                ("url", models.URLField(blank=True, null=True)),
+                ("url_de", models.URLField(blank=True, null=True)),
+                ("url_en", models.URLField(blank=True, null=True)),
+                ("email", models.EmailField(blank=True, max_length=254, null=True)),
+                ("email_de", models.EmailField(blank=True, max_length=254, null=True)),
+                ("email_en", models.EmailField(blank=True, max_length=254, null=True)),
+                ("description", models.CharField(max_length=255, null=True)),
+                ("description_de", models.CharField(max_length=255, null=True)),
+                ("description_en", models.CharField(max_length=255, null=True)),
+            ],
+        ),
+        migrations.CreateModel(
+            name="FallbackModel2",
+            fields=[
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("title", models.CharField(max_length=255, verbose_name="title")),
+                ("title_de", models.CharField(max_length=255, null=True, verbose_name="title")),
+                ("title_en", models.CharField(max_length=255, null=True, verbose_name="title")),
+                ("text", models.TextField(blank=True, null=True)),
+                ("text_de", models.TextField(blank=True, null=True)),
+                ("text_en", models.TextField(blank=True, null=True)),
+                ("url", models.URLField(blank=True, null=True)),
+                ("url_de", models.URLField(blank=True, null=True)),
+                ("url_en", models.URLField(blank=True, null=True)),
+                ("email", models.EmailField(blank=True, max_length=254, null=True)),
+                ("email_de", models.EmailField(blank=True, max_length=254, null=True)),
+                ("email_en", models.EmailField(blank=True, max_length=254, null=True)),
+            ],
+        ),
+        migrations.CreateModel(
+            name="FileFieldsModel",
+            fields=[
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("title", models.CharField(max_length=255, verbose_name="title")),
+                ("title_de", models.CharField(max_length=255, null=True, verbose_name="title")),
+                ("title_en", models.CharField(max_length=255, null=True, verbose_name="title")),
+                (
+                    "file",
+                    models.FileField(blank=True, null=True, upload_to="modeltranslation_tests"),
+                ),
+                (
+                    "file_de",
+                    models.FileField(blank=True, null=True, upload_to="modeltranslation_tests"),
+                ),
+                (
+                    "file_en",
+                    models.FileField(blank=True, null=True, upload_to="modeltranslation_tests"),
+                ),
+                ("file2", models.FileField(upload_to="modeltranslation_tests")),
+                ("file2_de", models.FileField(null=True, upload_to="modeltranslation_tests")),
+                ("file2_en", models.FileField(null=True, upload_to="modeltranslation_tests")),
+                (
+                    "image",
+                    models.ImageField(blank=True, null=True, upload_to="modeltranslation_tests"),
+                ),
+                (
+                    "image_de",
+                    models.ImageField(blank=True, null=True, upload_to="modeltranslation_tests"),
+                ),
+                (
+                    "image_en",
+                    models.ImageField(blank=True, null=True, upload_to="modeltranslation_tests"),
+                ),
+            ],
+        ),
+        migrations.CreateModel(
+            name="FilteredTestModel",
+            fields=[
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("title", models.CharField(max_length=255, verbose_name="title")),
+                ("title_de", models.CharField(max_length=255, null=True, verbose_name="title")),
+                ("title_en", models.CharField(max_length=255, null=True, verbose_name="title")),
+            ],
+        ),
+        migrations.CreateModel(
+            name="GroupFieldsetsModel",
+            fields=[
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("title", models.CharField(max_length=255)),
+                ("title_de", models.CharField(max_length=255, null=True)),
+                ("title_en", models.CharField(max_length=255, null=True)),
+                ("text", models.TextField(blank=True, null=True)),
+                ("text_de", models.TextField(blank=True, null=True)),
+                ("text_en", models.TextField(blank=True, null=True)),
+                ("email", models.EmailField(blank=True, max_length=254, null=True)),
+            ],
+        ),
+        migrations.CreateModel(
+            name="InheritedPermission",
+            fields=[
+                (
+                    "permission_ptr",
                     models.OneToOneField(
                         auto_created=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         parent_link=True,
                         primary_key=True,
                         serialize=False,
-                        to='auth.permission',
+                        to="auth.permission",
                     ),
                 ),
-                ('translated_var', models.CharField(max_length=255)),
-                ('translated_var_de', models.CharField(max_length=255, null=True)),
-                ('translated_var_en', models.CharField(max_length=255, null=True)),
+                ("translated_var", models.CharField(max_length=255)),
+                ("translated_var_de", models.CharField(max_length=255, null=True)),
+                ("translated_var_en", models.CharField(max_length=255, null=True)),
             ],
-            bases=('auth.permission',),
+            bases=("auth.permission",),
             managers=[
-                ('objects', django.contrib.auth.models.PermissionManager()),
+                ("objects", django.contrib.auth.models.PermissionManager()),
             ],
         ),
         migrations.CreateModel(
-            name='ManagerTestModel',
+            name="ManagerTestModel",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                ('title', models.CharField(max_length=255, verbose_name='title')),
-                ('title_de', models.CharField(max_length=255, null=True, verbose_name='title')),
-                ('title_en', models.CharField(max_length=255, null=True, verbose_name='title')),
-                ('visits', models.IntegerField(default=0, verbose_name='visits')),
-                ('visits_de', models.IntegerField(default=0, null=True, verbose_name='visits')),
-                ('visits_en', models.IntegerField(default=0, null=True, verbose_name='visits')),
-                ('description', models.CharField(max_length=255, null=True)),
-                ('description_de', models.CharField(max_length=255, null=True)),
-                ('description_en', models.CharField(max_length=255, null=True)),
+                ("title", models.CharField(max_length=255, verbose_name="title")),
+                ("title_de", models.CharField(max_length=255, null=True, verbose_name="title")),
+                ("title_en", models.CharField(max_length=255, null=True, verbose_name="title")),
+                ("visits", models.IntegerField(default=0, verbose_name="visits")),
+                ("visits_de", models.IntegerField(default=0, null=True, verbose_name="visits")),
+                ("visits_en", models.IntegerField(default=0, null=True, verbose_name="visits")),
+                ("description", models.CharField(max_length=255, null=True)),
+                ("description_de", models.CharField(max_length=255, null=True)),
+                ("description_en", models.CharField(max_length=255, null=True)),
             ],
             options={
-                'ordering': ('-visits',),
+                "ordering": ("-visits",),
             },
         ),
         migrations.CreateModel(
-            name='ManyToManyFieldModel',
+            name="ManyToManyFieldModel",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                ('title', models.CharField(max_length=255, verbose_name='title')),
-                ('title_de', models.CharField(max_length=255, null=True, verbose_name='title')),
-                ('title_en', models.CharField(max_length=255, null=True, verbose_name='title')),
+                ("title", models.CharField(max_length=255, verbose_name="title")),
+                ("title_de", models.CharField(max_length=255, null=True, verbose_name="title")),
+                ("title_en", models.CharField(max_length=255, null=True, verbose_name="title")),
                 (
-                    'self_call_1',
+                    "self_call_1",
                     models.ManyToManyField(
-                        related_name='_tests_manytomanyfieldmodel_self_call_1_+',
-                        to='tests.ManyToManyFieldModel',
+                        related_name="_tests_manytomanyfieldmodel_self_call_1_+",
+                        to="tests.ManyToManyFieldModel",
                     ),
                 ),
                 (
-                    'self_call_1_de',
-                    models.ManyToManyField(
-                        null=True,
-                        related_name='_tests_manytomanyfieldmodel_self_call_1_de_+',
-                        to='tests.ManyToManyFieldModel',
-                    ),
-                ),
-                (
-                    'self_call_1_en',
+                    "self_call_1_de",
                     models.ManyToManyField(
                         null=True,
-                        related_name='_tests_manytomanyfieldmodel_self_call_1_en_+',
-                        to='tests.ManyToManyFieldModel',
+                        related_name="_tests_manytomanyfieldmodel_self_call_1_de_+",
+                        to="tests.ManyToManyFieldModel",
                     ),
                 ),
                 (
-                    'self_call_2',
-                    models.ManyToManyField(
-                        related_name='_tests_manytomanyfieldmodel_self_call_2_+',
-                        to='tests.ManyToManyFieldModel',
-                    ),
-                ),
-                (
-                    'self_call_2_de',
+                    "self_call_1_en",
                     models.ManyToManyField(
                         null=True,
-                        related_name='_tests_manytomanyfieldmodel_self_call_2_de_+',
-                        to='tests.ManyToManyFieldModel',
+                        related_name="_tests_manytomanyfieldmodel_self_call_1_en_+",
+                        to="tests.ManyToManyFieldModel",
                     ),
                 ),
                 (
-                    'self_call_2_en',
+                    "self_call_2",
+                    models.ManyToManyField(
+                        related_name="_tests_manytomanyfieldmodel_self_call_2_+",
+                        to="tests.ManyToManyFieldModel",
+                    ),
+                ),
+                (
+                    "self_call_2_de",
                     models.ManyToManyField(
                         null=True,
-                        related_name='_tests_manytomanyfieldmodel_self_call_2_en_+',
-                        to='tests.ManyToManyFieldModel',
+                        related_name="_tests_manytomanyfieldmodel_self_call_2_de_+",
+                        to="tests.ManyToManyFieldModel",
+                    ),
+                ),
+                (
+                    "self_call_2_en",
+                    models.ManyToManyField(
+                        null=True,
+                        related_name="_tests_manytomanyfieldmodel_self_call_2_en_+",
+                        to="tests.ManyToManyFieldModel",
                     ),
                 ),
             ],
         ),
         migrations.CreateModel(
-            name='ModelX',
+            name="ModelX",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                ('name', models.CharField(max_length=255)),
-                ('name_de', models.CharField(max_length=255, null=True)),
-                ('name_en', models.CharField(max_length=255, null=True)),
+                ("name", models.CharField(max_length=255)),
+                ("name_de", models.CharField(max_length=255, null=True)),
+                ("name_en", models.CharField(max_length=255, null=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='ModelXY',
+            name="ModelXY",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
                 (
-                    'model_x',
+                    "model_x",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, to='tests.modelx'
+                        on_delete=django.db.models.deletion.CASCADE, to="tests.modelx"
                     ),
                 ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='MultitableConflictModelA',
+            name="MultitableConflictModelA",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                ('title_de', models.IntegerField()),
+                ("title_de", models.IntegerField()),
             ],
         ),
         migrations.CreateModel(
-            name='MultitableModelA',
+            name="MultitableModelA",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                ('titlea', models.CharField(max_length=255, verbose_name='title a')),
-                ('titlea_de', models.CharField(max_length=255, null=True, verbose_name='title a')),
-                ('titlea_en', models.CharField(max_length=255, null=True, verbose_name='title a')),
+                ("titlea", models.CharField(max_length=255, verbose_name="title a")),
+                ("titlea_de", models.CharField(max_length=255, null=True, verbose_name="title a")),
+                ("titlea_en", models.CharField(max_length=255, null=True, verbose_name="title a")),
             ],
         ),
         migrations.CreateModel(
-            name='NameModel',
+            name="NameModel",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                ('firstname', models.CharField(max_length=50)),
-                ('firstname_de', models.CharField(max_length=50, null=True)),
-                ('firstname_en', models.CharField(max_length=50, null=True)),
-                ('lastname', models.CharField(max_length=50)),
-                ('lastname_de', models.CharField(max_length=50, null=True)),
-                ('lastname_en', models.CharField(max_length=50, null=True)),
-                ('age', models.CharField(max_length=50)),
-                ('slug', models.SlugField(max_length=100)),
-                ('slug2', models.SlugField(max_length=100)),
-                ('slug2_de', models.SlugField(max_length=100, null=True)),
-                ('slug2_en', models.SlugField(max_length=100, null=True)),
+                ("firstname", models.CharField(max_length=50)),
+                ("firstname_de", models.CharField(max_length=50, null=True)),
+                ("firstname_en", models.CharField(max_length=50, null=True)),
+                ("lastname", models.CharField(max_length=50)),
+                ("lastname_de", models.CharField(max_length=50, null=True)),
+                ("lastname_en", models.CharField(max_length=50, null=True)),
+                ("age", models.CharField(max_length=50)),
+                ("slug", models.SlugField(max_length=100)),
+                ("slug2", models.SlugField(max_length=100)),
+                ("slug2_de", models.SlugField(max_length=100, null=True)),
+                ("slug2_en", models.SlugField(max_length=100, null=True)),
             ],
         ),
         migrations.CreateModel(
-            name='NonTranslated',
+            name="NonTranslated",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                ('title', models.CharField(max_length=255, verbose_name='title')),
+                ("title", models.CharField(max_length=255, verbose_name="title")),
             ],
         ),
         migrations.CreateModel(
-            name='OtherFieldsModel',
+            name="OtherFieldsModel",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
                 (
-                    'int',
+                    "int",
                     models.PositiveIntegerField(
                         default=42, validators=[django.core.validators.MinValueValidator(0)]
                     ),
                 ),
                 (
-                    'int_de',
+                    "int_de",
                     models.PositiveIntegerField(
                         default=42,
                         null=True,
@@ -498,825 +498,825 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    'int_en',
+                    "int_en",
                     models.PositiveIntegerField(
                         default=42,
                         null=True,
                         validators=[django.core.validators.MinValueValidator(0)],
                     ),
                 ),
-                ('boolean', models.BooleanField(default=False)),
-                ('boolean_de', models.BooleanField(default=False)),
-                ('boolean_en', models.BooleanField(default=False)),
-                ('float', models.FloatField(blank=True, null=True)),
-                ('float_de', models.FloatField(blank=True, null=True)),
-                ('float_en', models.FloatField(blank=True, null=True)),
+                ("boolean", models.BooleanField(default=False)),
+                ("boolean_de", models.BooleanField(default=False)),
+                ("boolean_en", models.BooleanField(default=False)),
+                ("float", models.FloatField(blank=True, null=True)),
+                ("float_de", models.FloatField(blank=True, null=True)),
+                ("float_en", models.FloatField(blank=True, null=True)),
                 (
-                    'decimal',
+                    "decimal",
                     models.DecimalField(blank=True, decimal_places=2, max_digits=5, null=True),
                 ),
                 (
-                    'decimal_de',
+                    "decimal_de",
                     models.DecimalField(blank=True, decimal_places=2, max_digits=5, null=True),
                 ),
                 (
-                    'decimal_en',
+                    "decimal_en",
                     models.DecimalField(blank=True, decimal_places=2, max_digits=5, null=True),
                 ),
-                ('date', models.DateField(blank=True, null=True)),
-                ('date_de', models.DateField(blank=True, null=True)),
-                ('date_en', models.DateField(blank=True, null=True)),
-                ('datetime', models.DateTimeField(blank=True, null=True)),
-                ('datetime_de', models.DateTimeField(blank=True, null=True)),
-                ('datetime_en', models.DateTimeField(blank=True, null=True)),
-                ('time', models.TimeField(blank=True, null=True)),
-                ('time_de', models.TimeField(blank=True, null=True)),
-                ('time_en', models.TimeField(blank=True, null=True)),
-                ('genericip', models.GenericIPAddressField(blank=True, null=True)),
-                ('genericip_de', models.GenericIPAddressField(blank=True, null=True)),
-                ('genericip_en', models.GenericIPAddressField(blank=True, null=True)),
-                ('json', models.JSONField(blank=True, null=True)),
-                ('json_de', models.JSONField(blank=True, null=True)),
-                ('json_en', models.JSONField(blank=True, null=True)),
+                ("date", models.DateField(blank=True, null=True)),
+                ("date_de", models.DateField(blank=True, null=True)),
+                ("date_en", models.DateField(blank=True, null=True)),
+                ("datetime", models.DateTimeField(blank=True, null=True)),
+                ("datetime_de", models.DateTimeField(blank=True, null=True)),
+                ("datetime_en", models.DateTimeField(blank=True, null=True)),
+                ("time", models.TimeField(blank=True, null=True)),
+                ("time_de", models.TimeField(blank=True, null=True)),
+                ("time_en", models.TimeField(blank=True, null=True)),
+                ("genericip", models.GenericIPAddressField(blank=True, null=True)),
+                ("genericip_de", models.GenericIPAddressField(blank=True, null=True)),
+                ("genericip_en", models.GenericIPAddressField(blank=True, null=True)),
+                ("json", models.JSONField(blank=True, null=True)),
+                ("json_de", models.JSONField(blank=True, null=True)),
+                ("json_en", models.JSONField(blank=True, null=True)),
             ],
         ),
         migrations.CreateModel(
-            name='Page',
+            name="Page",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                ('slug', models.CharField(max_length=255)),
-                ('slug_de', models.CharField(max_length=255, null=True)),
-                ('slug_en', models.CharField(max_length=255, null=True)),
-                ('keywords', models.CharField(max_length=255)),
-                ('keywords_de', models.CharField(max_length=255, null=True)),
-                ('keywords_en', models.CharField(max_length=255, null=True)),
-                ('title', models.CharField(max_length=255)),
-                ('title_de', models.CharField(max_length=255, null=True)),
-                ('title_en', models.CharField(max_length=255, null=True)),
+                ("slug", models.CharField(max_length=255)),
+                ("slug_de", models.CharField(max_length=255, null=True)),
+                ("slug_en", models.CharField(max_length=255, null=True)),
+                ("keywords", models.CharField(max_length=255)),
+                ("keywords_de", models.CharField(max_length=255, null=True)),
+                ("keywords_en", models.CharField(max_length=255, null=True)),
+                ("title", models.CharField(max_length=255)),
+                ("title_de", models.CharField(max_length=255, null=True)),
+                ("title_en", models.CharField(max_length=255, null=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='PlainChildTestModel',
+            name="PlainChildTestModel",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                ('needs_translation', models.BooleanField(default=False)),
-                ('title', models.CharField(max_length=255, verbose_name='title')),
-                ('title_de', models.CharField(max_length=255, null=True, verbose_name='title')),
-                ('title_en', models.CharField(max_length=255, null=True, verbose_name='title')),
+                ("needs_translation", models.BooleanField(default=False)),
+                ("title", models.CharField(max_length=255, verbose_name="title")),
+                ("title_de", models.CharField(max_length=255, null=True, verbose_name="title")),
+                ("title_en", models.CharField(max_length=255, null=True, verbose_name="title")),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='RequiredModel',
+            name="RequiredModel",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                ('non_req', models.CharField(blank=True, max_length=10)),
-                ('non_req_de', models.CharField(blank=True, max_length=10, null=True)),
-                ('non_req_en', models.CharField(blank=True, max_length=10, null=True)),
-                ('req', models.CharField(max_length=10)),
-                ('req_de', models.CharField(max_length=10, null=True)),
-                ('req_en', models.CharField(max_length=10, null=True)),
-                ('req_reg', models.CharField(max_length=10)),
-                ('req_reg_de', models.CharField(max_length=10, null=True)),
-                ('req_reg_en', models.CharField(max_length=10, null=True)),
-                ('req_en_reg', models.CharField(max_length=10)),
-                ('req_en_reg_de', models.CharField(max_length=10, null=True)),
-                ('req_en_reg_en', models.CharField(max_length=10, null=True)),
+                ("non_req", models.CharField(blank=True, max_length=10)),
+                ("non_req_de", models.CharField(blank=True, max_length=10, null=True)),
+                ("non_req_en", models.CharField(blank=True, max_length=10, null=True)),
+                ("req", models.CharField(max_length=10)),
+                ("req_de", models.CharField(max_length=10, null=True)),
+                ("req_en", models.CharField(max_length=10, null=True)),
+                ("req_reg", models.CharField(max_length=10)),
+                ("req_reg_de", models.CharField(max_length=10, null=True)),
+                ("req_reg_en", models.CharField(max_length=10, null=True)),
+                ("req_en_reg", models.CharField(max_length=10)),
+                ("req_en_reg_de", models.CharField(max_length=10, null=True)),
+                ("req_en_reg_en", models.CharField(max_length=10, null=True)),
             ],
         ),
         migrations.CreateModel(
-            name='TestModel',
+            name="TestModel",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                ('title', models.CharField(max_length=255, verbose_name='title')),
-                ('title_de', models.CharField(max_length=255, null=True, verbose_name='title')),
-                ('title_en', models.CharField(max_length=255, null=True, verbose_name='title')),
-                ('text', models.TextField(blank=True, null=True)),
-                ('text_de', models.TextField(blank=True, null=True)),
-                ('text_en', models.TextField(blank=True, null=True)),
-                ('url', models.URLField(blank=True, null=True)),
-                ('url_de', models.URLField(blank=True, null=True)),
-                ('url_en', models.URLField(blank=True, null=True)),
-                ('email', models.EmailField(blank=True, max_length=254, null=True)),
-                ('email_de', models.EmailField(blank=True, max_length=254, null=True)),
-                ('email_en', models.EmailField(blank=True, max_length=254, null=True)),
-                ('dynamic_default', models.CharField(default='password', max_length=255)),
+                ("title", models.CharField(max_length=255, verbose_name="title")),
+                ("title_de", models.CharField(max_length=255, null=True, verbose_name="title")),
+                ("title_en", models.CharField(max_length=255, null=True, verbose_name="title")),
+                ("text", models.TextField(blank=True, null=True)),
+                ("text_de", models.TextField(blank=True, null=True)),
+                ("text_en", models.TextField(blank=True, null=True)),
+                ("url", models.URLField(blank=True, null=True)),
+                ("url_de", models.URLField(blank=True, null=True)),
+                ("url_en", models.URLField(blank=True, null=True)),
+                ("email", models.EmailField(blank=True, max_length=254, null=True)),
+                ("email_de", models.EmailField(blank=True, max_length=254, null=True)),
+                ("email_en", models.EmailField(blank=True, max_length=254, null=True)),
+                ("dynamic_default", models.CharField(default="password", max_length=255)),
                 (
-                    'dynamic_default_de',
-                    models.CharField(default='password', max_length=255, null=True),
+                    "dynamic_default_de",
+                    models.CharField(default="password", max_length=255, null=True),
                 ),
                 (
-                    'dynamic_default_en',
-                    models.CharField(default='password', max_length=255, null=True),
+                    "dynamic_default_en",
+                    models.CharField(default="password", max_length=255, null=True),
                 ),
             ],
         ),
         migrations.CreateModel(
-            name='ThirdPartyModel',
+            name="ThirdPartyModel",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                ('name', models.CharField(max_length=20)),
+                ("name", models.CharField(max_length=20)),
             ],
         ),
         migrations.CreateModel(
-            name='ThirdPartyRegisteredModel',
+            name="ThirdPartyRegisteredModel",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                ('name', models.CharField(max_length=20)),
-                ('name_de', models.CharField(max_length=20, null=True)),
-                ('name_en', models.CharField(max_length=20, null=True)),
+                ("name", models.CharField(max_length=20)),
+                ("name_de", models.CharField(max_length=20, null=True)),
+                ("name_en", models.CharField(max_length=20, null=True)),
             ],
         ),
         migrations.CreateModel(
-            name='UniqueNullableModel',
+            name="UniqueNullableModel",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                ('title', models.CharField(max_length=255, null=True, unique=True)),
-                ('title_de', models.CharField(max_length=255, null=True, unique=True)),
-                ('title_en', models.CharField(max_length=255, null=True, unique=True)),
+                ("title", models.CharField(max_length=255, null=True, unique=True)),
+                ("title_de", models.CharField(max_length=255, null=True, unique=True)),
+                ("title_en", models.CharField(max_length=255, null=True, unique=True)),
             ],
         ),
         migrations.CreateModel(
-            name='MultitableConflictModelB',
+            name="MultitableConflictModelB",
             fields=[
                 (
-                    'multitableconflictmodela_ptr',
+                    "multitableconflictmodela_ptr",
                     models.OneToOneField(
                         auto_created=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         parent_link=True,
                         primary_key=True,
                         serialize=False,
-                        to='tests.multitableconflictmodela',
+                        to="tests.multitableconflictmodela",
                     ),
                 ),
-                ('title', models.CharField(max_length=255, verbose_name='title')),
+                ("title", models.CharField(max_length=255, verbose_name="title")),
             ],
-            bases=('tests.multitableconflictmodela',),
+            bases=("tests.multitableconflictmodela",),
         ),
         migrations.CreateModel(
-            name='MultitableModelB',
+            name="MultitableModelB",
             fields=[
                 (
-                    'multitablemodela_ptr',
+                    "multitablemodela_ptr",
                     models.OneToOneField(
                         auto_created=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         parent_link=True,
                         primary_key=True,
                         serialize=False,
-                        to='tests.multitablemodela',
+                        to="tests.multitablemodela",
                     ),
                 ),
-                ('titleb', models.CharField(max_length=255, verbose_name='title b')),
-                ('titleb_de', models.CharField(max_length=255, null=True, verbose_name='title b')),
-                ('titleb_en', models.CharField(max_length=255, null=True, verbose_name='title b')),
+                ("titleb", models.CharField(max_length=255, verbose_name="title b")),
+                ("titleb_de", models.CharField(max_length=255, null=True, verbose_name="title b")),
+                ("titleb_en", models.CharField(max_length=255, null=True, verbose_name="title b")),
             ],
-            bases=('tests.multitablemodela',),
+            bases=("tests.multitablemodela",),
         ),
         migrations.CreateModel(
-            name='RichTextPage',
+            name="RichTextPage",
             fields=[
                 (
-                    'page_ptr',
+                    "page_ptr",
                     models.OneToOneField(
                         auto_created=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         parent_link=True,
                         primary_key=True,
                         serialize=False,
-                        to='tests.page',
+                        to="tests.page",
                     ),
                 ),
-                ('content', models.CharField(max_length=255)),
-                ('content_de', models.CharField(max_length=255, null=True)),
-                ('content_en', models.CharField(max_length=255, null=True)),
+                ("content", models.CharField(max_length=255)),
+                ("content_de", models.CharField(max_length=255, null=True)),
+                ("content_en", models.CharField(max_length=255, null=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
-            bases=('tests.page', models.Model),
+            bases=("tests.page", models.Model),
         ),
         migrations.CreateModel(
-            name='RegisteredThroughModel_en',
+            name="RegisteredThroughModel_en",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                ('title', models.CharField(max_length=255)),
-                ('title_de', models.CharField(max_length=255, null=True)),
-                ('title_en', models.CharField(max_length=255, null=True)),
+                ("title", models.CharField(max_length=255)),
+                ("title_de", models.CharField(max_length=255, null=True)),
+                ("title_en", models.CharField(max_length=255, null=True)),
                 (
-                    'rel_1',
+                    "rel_1",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, to='tests.manytomanyfieldmodel'
+                        on_delete=django.db.models.deletion.CASCADE, to="tests.manytomanyfieldmodel"
                     ),
                 ),
                 (
-                    'rel_2',
+                    "rel_2",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, to='tests.testmodel'
-                    ),
-                ),
-            ],
-            options={
-                'verbose_name': 'registered through model [en]',
-                'verbose_name_plural': 'registered through models [en]',
-                'db_table': 'tests_registeredthroughmodel_en',
-                'db_tablespace': '',
-                'auto_created': False,
-            },
-        ),
-        migrations.CreateModel(
-            name='RegisteredThroughModel_de',
-            fields=[
-                (
-                    'id',
-                    models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
-                    ),
-                ),
-                ('title', models.CharField(max_length=255)),
-                ('title_de', models.CharField(max_length=255, null=True)),
-                ('title_en', models.CharField(max_length=255, null=True)),
-                (
-                    'rel_1',
-                    models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, to='tests.manytomanyfieldmodel'
-                    ),
-                ),
-                (
-                    'rel_2',
-                    models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, to='tests.testmodel'
+                        on_delete=django.db.models.deletion.CASCADE, to="tests.testmodel"
                     ),
                 ),
             ],
             options={
-                'verbose_name': 'registered through model [de]',
-                'verbose_name_plural': 'registered through models [de]',
-                'db_table': 'tests_registeredthroughmodel_de',
-                'db_tablespace': '',
-                'auto_created': False,
+                "verbose_name": "registered through model [en]",
+                "verbose_name_plural": "registered through models [en]",
+                "db_table": "tests_registeredthroughmodel_en",
+                "db_tablespace": "",
+                "auto_created": False,
             },
         ),
         migrations.CreateModel(
-            name='RegisteredThroughModel',
+            name="RegisteredThroughModel_de",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                ('title', models.CharField(max_length=255)),
-                ('title_de', models.CharField(max_length=255, null=True)),
-                ('title_en', models.CharField(max_length=255, null=True)),
+                ("title", models.CharField(max_length=255)),
+                ("title_de", models.CharField(max_length=255, null=True)),
+                ("title_en", models.CharField(max_length=255, null=True)),
                 (
-                    'rel_1',
+                    "rel_1",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, to='tests.manytomanyfieldmodel'
+                        on_delete=django.db.models.deletion.CASCADE, to="tests.manytomanyfieldmodel"
                     ),
                 ),
                 (
-                    'rel_2',
+                    "rel_2",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, to='tests.testmodel'
+                        on_delete=django.db.models.deletion.CASCADE, to="tests.testmodel"
                     ),
                 ),
-            ],
-        ),
-        migrations.CreateModel(
-            name='OneToOneFieldModel',
-            fields=[
-                (
-                    'id',
-                    models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
-                    ),
-                ),
-                ('title', models.CharField(max_length=255, verbose_name='title')),
-                ('title_de', models.CharField(max_length=255, null=True, verbose_name='title')),
-                ('title_en', models.CharField(max_length=255, null=True, verbose_name='title')),
-                (
-                    'non',
-                    models.OneToOneField(
-                        blank=True,
-                        null=True,
-                        on_delete=django.db.models.deletion.CASCADE,
-                        related_name='test_o2o',
-                        to='tests.nontranslated',
-                    ),
-                ),
-                (
-                    'non_de',
-                    models.OneToOneField(
-                        blank=True,
-                        null=True,
-                        on_delete=django.db.models.deletion.CASCADE,
-                        related_name='test_o2o',
-                        to='tests.nontranslated',
-                    ),
-                ),
-                (
-                    'non_en',
-                    models.OneToOneField(
-                        blank=True,
-                        null=True,
-                        on_delete=django.db.models.deletion.CASCADE,
-                        related_name='test_o2o',
-                        to='tests.nontranslated',
-                    ),
-                ),
-                (
-                    'optional',
-                    models.OneToOneField(
-                        blank=True,
-                        null=True,
-                        on_delete=django.db.models.deletion.CASCADE,
-                        to='tests.testmodel',
-                    ),
-                ),
-                (
-                    'optional_de',
-                    models.OneToOneField(
-                        blank=True,
-                        null=True,
-                        on_delete=django.db.models.deletion.CASCADE,
-                        to='tests.testmodel',
-                    ),
-                ),
-                (
-                    'optional_en',
-                    models.OneToOneField(
-                        blank=True,
-                        null=True,
-                        on_delete=django.db.models.deletion.CASCADE,
-                        to='tests.testmodel',
-                    ),
-                ),
-                (
-                    'test',
-                    models.OneToOneField(
-                        null=True,
-                        on_delete=django.db.models.deletion.CASCADE,
-                        related_name='test_o2o',
-                        to='tests.testmodel',
-                    ),
-                ),
-                (
-                    'test_de',
-                    models.OneToOneField(
-                        null=True,
-                        on_delete=django.db.models.deletion.CASCADE,
-                        related_name='test_o2o',
-                        to='tests.testmodel',
-                    ),
-                ),
-                (
-                    'test_en',
-                    models.OneToOneField(
-                        null=True,
-                        on_delete=django.db.models.deletion.CASCADE,
-                        related_name='test_o2o',
-                        to='tests.testmodel',
-                    ),
-                ),
-            ],
-        ),
-        migrations.CreateModel(
-            name='ModelY',
-            fields=[
-                (
-                    'id',
-                    models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
-                    ),
-                ),
-                ('title', models.CharField(max_length=255)),
-                ('title_de', models.CharField(max_length=255, null=True)),
-                ('title_en', models.CharField(max_length=255, null=True)),
-                ('xs', models.ManyToManyField(through='tests.ModelXY', to='tests.ModelX')),
             ],
             options={
-                'abstract': False,
+                "verbose_name": "registered through model [de]",
+                "verbose_name_plural": "registered through models [de]",
+                "db_table": "tests_registeredthroughmodel_de",
+                "db_tablespace": "",
+                "auto_created": False,
+            },
+        ),
+        migrations.CreateModel(
+            name="RegisteredThroughModel",
+            fields=[
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("title", models.CharField(max_length=255)),
+                ("title_de", models.CharField(max_length=255, null=True)),
+                ("title_en", models.CharField(max_length=255, null=True)),
+                (
+                    "rel_1",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="tests.manytomanyfieldmodel"
+                    ),
+                ),
+                (
+                    "rel_2",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="tests.testmodel"
+                    ),
+                ),
+            ],
+        ),
+        migrations.CreateModel(
+            name="OneToOneFieldModel",
+            fields=[
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("title", models.CharField(max_length=255, verbose_name="title")),
+                ("title_de", models.CharField(max_length=255, null=True, verbose_name="title")),
+                ("title_en", models.CharField(max_length=255, null=True, verbose_name="title")),
+                (
+                    "non",
+                    models.OneToOneField(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="test_o2o",
+                        to="tests.nontranslated",
+                    ),
+                ),
+                (
+                    "non_de",
+                    models.OneToOneField(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="test_o2o",
+                        to="tests.nontranslated",
+                    ),
+                ),
+                (
+                    "non_en",
+                    models.OneToOneField(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="test_o2o",
+                        to="tests.nontranslated",
+                    ),
+                ),
+                (
+                    "optional",
+                    models.OneToOneField(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="tests.testmodel",
+                    ),
+                ),
+                (
+                    "optional_de",
+                    models.OneToOneField(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="tests.testmodel",
+                    ),
+                ),
+                (
+                    "optional_en",
+                    models.OneToOneField(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="tests.testmodel",
+                    ),
+                ),
+                (
+                    "test",
+                    models.OneToOneField(
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="test_o2o",
+                        to="tests.testmodel",
+                    ),
+                ),
+                (
+                    "test_de",
+                    models.OneToOneField(
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="test_o2o",
+                        to="tests.testmodel",
+                    ),
+                ),
+                (
+                    "test_en",
+                    models.OneToOneField(
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="test_o2o",
+                        to="tests.testmodel",
+                    ),
+                ),
+            ],
+        ),
+        migrations.CreateModel(
+            name="ModelY",
+            fields=[
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("title", models.CharField(max_length=255)),
+                ("title_de", models.CharField(max_length=255, null=True)),
+                ("title_en", models.CharField(max_length=255, null=True)),
+                ("xs", models.ManyToManyField(through="tests.ModelXY", to="tests.ModelX")),
+            ],
+            options={
+                "abstract": False,
             },
         ),
         migrations.AddField(
-            model_name='modelxy',
-            name='model_y',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='tests.modely'),
+            model_name="modelxy",
+            name="model_y",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="tests.modely"),
         ),
         migrations.AddField(
-            model_name='manytomanyfieldmodel',
-            name='test',
-            field=models.ManyToManyField(related_name='m2m_test_ref', to='tests.TestModel'),
+            model_name="manytomanyfieldmodel",
+            name="test",
+            field=models.ManyToManyField(related_name="m2m_test_ref", to="tests.TestModel"),
         ),
         migrations.AddField(
-            model_name='manytomanyfieldmodel',
-            name='test_de',
+            model_name="manytomanyfieldmodel",
+            name="test_de",
             field=models.ManyToManyField(
-                null=True, related_name='m2m_test_ref', to='tests.TestModel'
+                null=True, related_name="m2m_test_ref", to="tests.TestModel"
             ),
         ),
         migrations.AddField(
-            model_name='manytomanyfieldmodel',
-            name='test_en',
+            model_name="manytomanyfieldmodel",
+            name="test_en",
             field=models.ManyToManyField(
-                null=True, related_name='m2m_test_ref', to='tests.TestModel'
+                null=True, related_name="m2m_test_ref", to="tests.TestModel"
             ),
         ),
         migrations.AddField(
-            model_name='manytomanyfieldmodel',
-            name='through_model',
-            field=models.ManyToManyField(through='tests.CustomThroughModel', to='tests.TestModel'),
+            model_name="manytomanyfieldmodel",
+            name="through_model",
+            field=models.ManyToManyField(through="tests.CustomThroughModel", to="tests.TestModel"),
         ),
         migrations.AddField(
-            model_name='manytomanyfieldmodel',
-            name='through_model_de',
+            model_name="manytomanyfieldmodel",
+            name="through_model_de",
             field=models.ManyToManyField(
-                null=True, through='tests.CustomThroughModel', to='tests.TestModel'
+                null=True, through="tests.CustomThroughModel", to="tests.TestModel"
             ),
         ),
         migrations.AddField(
-            model_name='manytomanyfieldmodel',
-            name='through_model_en',
+            model_name="manytomanyfieldmodel",
+            name="through_model_en",
             field=models.ManyToManyField(
-                null=True, through='tests.CustomThroughModel', to='tests.TestModel'
+                null=True, through="tests.CustomThroughModel", to="tests.TestModel"
             ),
         ),
         migrations.AddField(
-            model_name='manytomanyfieldmodel',
-            name='trans_through_model',
+            model_name="manytomanyfieldmodel",
+            name="trans_through_model",
             field=models.ManyToManyField(
-                related_name='m2m_trans_through_model_ref',
-                through='tests.RegisteredThroughModel',
-                to='tests.TestModel',
+                related_name="m2m_trans_through_model_ref",
+                through="tests.RegisteredThroughModel",
+                to="tests.TestModel",
             ),
         ),
         migrations.AddField(
-            model_name='manytomanyfieldmodel',
-            name='trans_through_model_de',
+            model_name="manytomanyfieldmodel",
+            name="trans_through_model_de",
             field=models.ManyToManyField(
                 null=True,
-                related_name='m2m_trans_through_model_ref',
-                through='tests.RegisteredThroughModel',
-                to='tests.TestModel',
+                related_name="m2m_trans_through_model_ref",
+                through="tests.RegisteredThroughModel",
+                to="tests.TestModel",
             ),
         ),
         migrations.AddField(
-            model_name='manytomanyfieldmodel',
-            name='trans_through_model_en',
+            model_name="manytomanyfieldmodel",
+            name="trans_through_model_en",
             field=models.ManyToManyField(
                 null=True,
-                related_name='m2m_trans_through_model_ref',
-                through='tests.RegisteredThroughModel',
-                to='tests.TestModel',
+                related_name="m2m_trans_through_model_ref",
+                through="tests.RegisteredThroughModel",
+                to="tests.TestModel",
             ),
         ),
         migrations.AddField(
-            model_name='manytomanyfieldmodel',
-            name='untrans',
-            field=models.ManyToManyField(related_name='m2m_untrans_ref', to='tests.NonTranslated'),
+            model_name="manytomanyfieldmodel",
+            name="untrans",
+            field=models.ManyToManyField(related_name="m2m_untrans_ref", to="tests.NonTranslated"),
         ),
         migrations.AddField(
-            model_name='manytomanyfieldmodel',
-            name='untrans_de',
+            model_name="manytomanyfieldmodel",
+            name="untrans_de",
             field=models.ManyToManyField(
-                null=True, related_name='m2m_untrans_ref', to='tests.NonTranslated'
+                null=True, related_name="m2m_untrans_ref", to="tests.NonTranslated"
             ),
         ),
         migrations.AddField(
-            model_name='manytomanyfieldmodel',
-            name='untrans_en',
+            model_name="manytomanyfieldmodel",
+            name="untrans_en",
             field=models.ManyToManyField(
-                null=True, related_name='m2m_untrans_ref', to='tests.NonTranslated'
+                null=True, related_name="m2m_untrans_ref", to="tests.NonTranslated"
             ),
         ),
         migrations.CreateModel(
-            name='ForeignKeyModel',
+            name="ForeignKeyModel",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                ('title', models.CharField(max_length=255, verbose_name='title')),
-                ('title_de', models.CharField(max_length=255, null=True, verbose_name='title')),
-                ('title_en', models.CharField(max_length=255, null=True, verbose_name='title')),
+                ("title", models.CharField(max_length=255, verbose_name="title")),
+                ("title_de", models.CharField(max_length=255, null=True, verbose_name="title")),
+                ("title_en", models.CharField(max_length=255, null=True, verbose_name="title")),
                 (
-                    'hidden',
+                    "hidden",
                     models.ForeignKey(
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name='+',
-                        to='tests.testmodel',
+                        related_name="+",
+                        to="tests.testmodel",
                     ),
                 ),
                 (
-                    'hidden_de',
+                    "hidden_de",
                     models.ForeignKey(
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name='+',
-                        to='tests.testmodel',
+                        related_name="+",
+                        to="tests.testmodel",
                     ),
                 ),
                 (
-                    'hidden_en',
+                    "hidden_en",
                     models.ForeignKey(
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name='+',
-                        to='tests.testmodel',
+                        related_name="+",
+                        to="tests.testmodel",
                     ),
                 ),
                 (
-                    'non',
+                    "non",
                     models.ForeignKey(
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name='test_fks',
-                        to='tests.nontranslated',
+                        related_name="test_fks",
+                        to="tests.nontranslated",
                     ),
                 ),
                 (
-                    'non_de',
+                    "non_de",
                     models.ForeignKey(
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name='test_fks',
-                        to='tests.nontranslated',
+                        related_name="test_fks",
+                        to="tests.nontranslated",
                     ),
                 ),
                 (
-                    'non_en',
+                    "non_en",
                     models.ForeignKey(
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name='test_fks',
-                        to='tests.nontranslated',
+                        related_name="test_fks",
+                        to="tests.nontranslated",
                     ),
                 ),
                 (
-                    'optional',
+                    "optional",
                     models.ForeignKey(
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        to='tests.testmodel',
+                        to="tests.testmodel",
                     ),
                 ),
                 (
-                    'optional_de',
+                    "optional_de",
                     models.ForeignKey(
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        to='tests.testmodel',
+                        to="tests.testmodel",
                     ),
                 ),
                 (
-                    'optional_en',
+                    "optional_en",
                     models.ForeignKey(
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        to='tests.testmodel',
+                        to="tests.testmodel",
                     ),
                 ),
                 (
-                    'test',
+                    "test",
                     models.ForeignKey(
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name='test_fks',
-                        to='tests.testmodel',
+                        related_name="test_fks",
+                        to="tests.testmodel",
                     ),
                 ),
                 (
-                    'test_de',
+                    "test_de",
                     models.ForeignKey(
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name='test_fks',
-                        to='tests.testmodel',
+                        related_name="test_fks",
+                        to="tests.testmodel",
                     ),
                 ),
                 (
-                    'test_en',
+                    "test_en",
                     models.ForeignKey(
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name='test_fks',
-                        to='tests.testmodel',
+                        related_name="test_fks",
+                        to="tests.testmodel",
                     ),
                 ),
                 (
-                    'untrans',
+                    "untrans",
                     models.ForeignKey(
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name='test_fks_un',
-                        to='tests.testmodel',
+                        related_name="test_fks_un",
+                        to="tests.testmodel",
                     ),
                 ),
             ],
         ),
         migrations.CreateModel(
-            name='ForeignKeyFilteredModel',
+            name="ForeignKeyFilteredModel",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                ('title', models.CharField(max_length=255, verbose_name='title')),
-                ('title_de', models.CharField(max_length=255, null=True, verbose_name='title')),
-                ('title_en', models.CharField(max_length=255, null=True, verbose_name='title')),
+                ("title", models.CharField(max_length=255, verbose_name="title")),
+                ("title_de", models.CharField(max_length=255, null=True, verbose_name="title")),
+                ("title_en", models.CharField(max_length=255, null=True, verbose_name="title")),
                 (
-                    'test',
+                    "test",
                     models.ForeignKey(
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name='test_fks',
-                        to='tests.filteredtestmodel',
+                        related_name="test_fks",
+                        to="tests.filteredtestmodel",
                     ),
                 ),
             ],
         ),
         migrations.CreateModel(
-            name='CustomThroughModel_en',
+            name="CustomThroughModel_en",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
                 (
-                    'rel_1',
+                    "rel_1",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, to='tests.manytomanyfieldmodel'
+                        on_delete=django.db.models.deletion.CASCADE, to="tests.manytomanyfieldmodel"
                     ),
                 ),
                 (
-                    'rel_2',
+                    "rel_2",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, to='tests.testmodel'
+                        on_delete=django.db.models.deletion.CASCADE, to="tests.testmodel"
                     ),
                 ),
             ],
             options={
-                'verbose_name': 'custom through model [en]',
-                'verbose_name_plural': 'custom through models [en]',
-                'db_table': 'tests_customthroughmodel_en',
-                'db_tablespace': '',
-                'auto_created': False,
+                "verbose_name": "custom through model [en]",
+                "verbose_name_plural": "custom through models [en]",
+                "db_table": "tests_customthroughmodel_en",
+                "db_tablespace": "",
+                "auto_created": False,
             },
         ),
         migrations.CreateModel(
-            name='CustomThroughModel_de',
+            name="CustomThroughModel_de",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
                 (
-                    'rel_1',
+                    "rel_1",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, to='tests.manytomanyfieldmodel'
+                        on_delete=django.db.models.deletion.CASCADE, to="tests.manytomanyfieldmodel"
                     ),
                 ),
                 (
-                    'rel_2',
+                    "rel_2",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, to='tests.testmodel'
+                        on_delete=django.db.models.deletion.CASCADE, to="tests.testmodel"
                     ),
                 ),
             ],
             options={
-                'verbose_name': 'custom through model [de]',
-                'verbose_name_plural': 'custom through models [de]',
-                'db_table': 'tests_customthroughmodel_de',
-                'db_tablespace': '',
-                'auto_created': False,
+                "verbose_name": "custom through model [de]",
+                "verbose_name_plural": "custom through models [de]",
+                "db_table": "tests_customthroughmodel_de",
+                "db_tablespace": "",
+                "auto_created": False,
             },
         ),
         migrations.AddField(
-            model_name='customthroughmodel',
-            name='rel_1',
+            model_name="customthroughmodel",
+            name="rel_1",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to='tests.manytomanyfieldmodel'
+                on_delete=django.db.models.deletion.CASCADE, to="tests.manytomanyfieldmodel"
             ),
         ),
         migrations.AddField(
-            model_name='customthroughmodel',
-            name='rel_2',
+            model_name="customthroughmodel",
+            name="rel_2",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to='tests.testmodel'
+                on_delete=django.db.models.deletion.CASCADE, to="tests.testmodel"
             ),
         ),
         migrations.CreateModel(
-            name='ProxyTestModel',
+            name="ProxyTestModel",
             fields=[],
             options={
-                'proxy': True,
-                'indexes': [],
-                'constraints': [],
+                "proxy": True,
+                "indexes": [],
+                "constraints": [],
             },
-            bases=('tests.testmodel',),
+            bases=("tests.testmodel",),
         ),
         migrations.CreateModel(
-            name='MultitableModelC',
+            name="MultitableModelC",
             fields=[
                 (
-                    'multitablemodelb_ptr',
+                    "multitablemodelb_ptr",
                     models.OneToOneField(
                         auto_created=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         parent_link=True,
                         primary_key=True,
                         serialize=False,
-                        to='tests.multitablemodelb',
+                        to="tests.multitablemodelb",
                     ),
                 ),
-                ('titlec', models.CharField(max_length=255, verbose_name='title c')),
-                ('titlec_de', models.CharField(max_length=255, null=True, verbose_name='title c')),
-                ('titlec_en', models.CharField(max_length=255, null=True, verbose_name='title c')),
+                ("titlec", models.CharField(max_length=255, verbose_name="title c")),
+                ("titlec_de", models.CharField(max_length=255, null=True, verbose_name="title c")),
+                ("titlec_en", models.CharField(max_length=255, null=True, verbose_name="title c")),
             ],
-            bases=('tests.multitablemodelb',),
+            bases=("tests.multitablemodelb",),
         ),
         migrations.CreateModel(
-            name='MultitableModelD',
+            name="MultitableModelD",
             fields=[
                 (
-                    'multitablemodelb_ptr',
+                    "multitablemodelb_ptr",
                     models.OneToOneField(
                         auto_created=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         parent_link=True,
                         primary_key=True,
                         serialize=False,
-                        to='tests.multitablemodelb',
+                        to="tests.multitablemodelb",
                     ),
                 ),
-                ('titled', models.CharField(max_length=255, verbose_name='title d')),
+                ("titled", models.CharField(max_length=255, verbose_name="title d")),
             ],
-            bases=('tests.multitablemodelb',),
+            bases=("tests.multitablemodelb",),
         ),
     ]

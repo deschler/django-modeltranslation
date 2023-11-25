@@ -22,8 +22,8 @@ def get_language():
     lang = _get_language()
     if lang is None:  # Django >= 1.8
         return settings.DEFAULT_LANGUAGE
-    if lang not in settings.AVAILABLE_LANGUAGES and '-' in lang:
-        lang = lang.split('-')[0]
+    if lang not in settings.AVAILABLE_LANGUAGES and "-" in lang:
+        lang = lang.split("-")[0]
     if lang in settings.AVAILABLE_LANGUAGES:
         return lang
     return settings.DEFAULT_LANGUAGE
@@ -34,7 +34,7 @@ def get_language_bidi(lang):
     Check if a language is bi-directional.
     """
     lang_info = get_language_info(lang)
-    return lang_info['bidi']
+    return lang_info["bidi"]
 
 
 def get_translation_fields(field):
@@ -45,37 +45,37 @@ def get_translation_fields(field):
 
 
 def build_localized_fieldname(field_name, lang):
-    if lang == 'id':
+    if lang == "id":
         # The 2-letter Indonesian language code is problematic with the
         # current naming scheme as Django foreign keys also add "id" suffix.
-        lang = 'ind'
-    return str('%s_%s' % (field_name, lang.replace('-', '_')))
+        lang = "ind"
+    return str("%s_%s" % (field_name, lang.replace("-", "_")))
 
 
 def _build_localized_verbose_name(verbose_name, lang):
-    if lang == 'id':
-        lang = 'ind'
-    return force_str('%s [%s]') % (force_str(verbose_name), lang)
+    if lang == "id":
+        lang = "ind"
+    return force_str("%s [%s]") % (force_str(verbose_name), lang)
 
 
 build_localized_verbose_name = lazy(_build_localized_verbose_name, str)
 
 
 def _join_css_class(bits, offset):
-    if '-'.join(bits[-offset:]) in settings.AVAILABLE_LANGUAGES + ['en-us']:
-        return '%s-%s' % ('_'.join(bits[: len(bits) - offset]), '_'.join(bits[-offset:]))
-    return ''
+    if "-".join(bits[-offset:]) in settings.AVAILABLE_LANGUAGES + ["en-us"]:
+        return "%s-%s" % ("_".join(bits[: len(bits) - offset]), "_".join(bits[-offset:]))
+    return ""
 
 
-def build_css_class(localized_fieldname, prefix=''):
+def build_css_class(localized_fieldname, prefix=""):
     """
     Returns a css class based on ``localized_fieldname`` which is easily
     splittable and capable of regionalized language codes.
 
     Takes an optional ``prefix`` which is prepended to the returned string.
     """
-    bits = localized_fieldname.split('_')
-    css_class = ''
+    bits = localized_fieldname.split("_")
+    css_class = ""
     if len(bits) == 1:
         css_class = str(localized_fieldname)
     elif len(bits) == 2:
@@ -83,7 +83,7 @@ def build_css_class(localized_fieldname, prefix=''):
         # Examples:
         # 'foo_de' --> 'foo-de',
         # 'bar_en' --> 'bar-en'
-        css_class = '-'.join(bits)
+        css_class = "-".join(bits)
     elif len(bits) > 2:
         # Try regionalized language code
         # Examples:
@@ -96,7 +96,7 @@ def build_css_class(localized_fieldname, prefix=''):
             # 'foo_bar_de' --> 'foo_bar-de',
             # 'foo_bar_baz_de' --> 'foo_bar_baz-de'
             css_class = _join_css_class(bits, 1)
-    return '%s-%s' % (prefix, css_class) if prefix else css_class
+    return "%s-%s" % (prefix, css_class) if prefix else css_class
 
 
 def unique(seq):
@@ -124,13 +124,13 @@ def resolution_order(lang, override=None):
     if override is None:
         override = {}
     fallback_for_lang = override.get(lang, settings.FALLBACK_LANGUAGES.get(lang, ()))
-    fallback_def = override.get('default', settings.FALLBACK_LANGUAGES['default'])
+    fallback_def = override.get("default", settings.FALLBACK_LANGUAGES["default"])
     order = (lang,) + fallback_for_lang + fallback_def
     return tuple(unique(order))
 
 
 @contextmanager
-def auto_populate(mode='all'):
+def auto_populate(mode="all"):
     """
     Overrides translation fields population mode (population mode decides which
     unprovided translations will be filled during model construction / loading).
