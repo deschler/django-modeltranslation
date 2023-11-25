@@ -45,11 +45,11 @@ class FieldsAggregationMetaClass(type):
     """
 
     def __new__(cls, name, bases, attrs):
-        attrs['fields'] = set(attrs.get('fields', ()))
+        attrs["fields"] = set(attrs.get("fields", ()))
         for base in bases:
             if isinstance(base, FieldsAggregationMetaClass):
-                attrs['fields'].update(base.fields)
-        attrs['fields'] = tuple(attrs['fields'])
+                attrs["fields"].update(base.fields)
+        attrs["fields"] = tuple(attrs["fields"])
         return super().__new__(cls, name, bases, attrs)
 
 
@@ -97,18 +97,18 @@ class TranslationOptions(metaclass=FieldsAggregationMetaClass):
             if isinstance(self.required_languages, (tuple, list)):
                 self._check_languages(self.required_languages)
             else:
-                self._check_languages(self.required_languages.keys(), extra=('default',))
+                self._check_languages(self.required_languages.keys(), extra=("default",))
                 for fieldnames in self.required_languages.values():
                     if any(f not in self.fields for f in fieldnames):
                         raise ImproperlyConfigured(
-                            'Fieldname in required_languages which is not in fields option.'
+                            "Fieldname in required_languages which is not in fields option."
                         )
 
     def _check_languages(self, languages, extra=()):
         correct = list(mt_settings.AVAILABLE_LANGUAGES) + list(extra)
         if any(lang not in correct for lang in languages):
             raise ImproperlyConfigured(
-                'Language in required_languages which is not in AVAILABLE_LANGUAGES.'
+                "Language in required_languages which is not in AVAILABLE_LANGUAGES."
             )
 
     def update(self, other):
@@ -135,7 +135,7 @@ class TranslationOptions(metaclass=FieldsAggregationMetaClass):
     def __str__(self):
         local = tuple(self.local_fields.keys())
         inherited = tuple(set(self.fields.keys()) - set(local))
-        return '%s: %s + %s' % (self.__class__.__name__, local, inherited)
+        return "%s: %s + %s" % (self.__class__.__name__, local, inherited)
 
 
 class MultilingualOptions(options.Options):
@@ -153,7 +153,7 @@ def add_translation_fields(model, opts):
 
     Adds newly created translation fields to the given translation options.
     """
-    model_empty_values = getattr(opts, 'empty_values', NONE)
+    model_empty_values = getattr(opts, "empty_values", NONE)
     for field_name in opts.local_fields.keys():
         field_empty_value = parse_field(model_empty_values, field_name, NONE)
         for lang in mt_settings.AVAILABLE_LANGUAGES:
@@ -168,7 +168,7 @@ def add_translation_fields(model, opts):
             if hasattr(model, localized_field_name):
                 # Check if are not dealing with abstract field inherited.
                 for cls in model.__mro__:
-                    if hasattr(cls, '_meta') and cls.__dict__.get(localized_field_name, None):
+                    if hasattr(cls, "_meta") and cls.__dict__.get(localized_field_name, None):
                         cls_opts = translator._get_options_for_model(cls)
                         if not cls._meta.abstract or field_name not in cls_opts.local_fields:
                             raise ValueError(
@@ -204,7 +204,7 @@ def patch_manager_class(manager):
             def deconstruct(self):
                 return (
                     False,  # as_manager
-                    '%s.%s' % (self._old_module, self._old_class),  # manager_class
+                    "%s.%s" % (self._old_module, self._old_class),  # manager_class
                     None,  # qs_class
                     self._constructor_args[0],  # args
                     self._constructor_args[1],  # kwargs
@@ -281,7 +281,7 @@ def patch_constructor(model):
 
 
 def delete_mt_init(sender, instance, **kwargs):
-    if hasattr(instance, '_mt_init'):
+    if hasattr(instance, "_mt_init"):
         del instance._mt_init
 
 
@@ -292,7 +292,7 @@ def patch_clean_fields(model):
     old_clean_fields = model.clean_fields
 
     def new_clean_fields(self, exclude=None):
-        if hasattr(self, '_mt_form_pending_clear'):
+        if hasattr(self, "_mt_form_pending_clear"):
             # Some form translation fields has been marked as clearing value.
             # Check if corresponding translated field was also saved (not excluded):
             # - if yes, it seems like form for MT-unaware app. Ignore clearing (left value from
@@ -303,12 +303,12 @@ def patch_clean_fields(model):
                 orig_field_name = field.translated_field.name
                 if orig_field_name in exclude:
                     field.save_form_data(self, value, check=False)
-            delattr(self, '_mt_form_pending_clear')
+            delattr(self, "_mt_form_pending_clear")
         try:
-            setattr(self, '_mt_disable', True)
+            setattr(self, "_mt_disable", True)
             old_clean_fields(self, exclude)
         finally:
-            setattr(self, '_mt_disable', False)
+            setattr(self, "_mt_disable", False)
 
     model.clean_fields = new_clean_fields
 
@@ -317,13 +317,13 @@ def patch_get_deferred_fields(model):
     """
     Django >= 1.8: patch detecting deferred fields. Crucial for only/defer to work.
     """
-    if not hasattr(model, 'get_deferred_fields'):
+    if not hasattr(model, "get_deferred_fields"):
         return
     old_get_deferred_fields = model.get_deferred_fields
 
     def new_get_deferred_fields(self):
         sup = old_get_deferred_fields(self)
-        if hasattr(self, '_fields_were_deferred'):
+        if hasattr(self, "_fields_were_deferred"):
             sup.update(self._fields_were_deferred)
         return sup
 
@@ -334,7 +334,7 @@ def patch_refresh_from_db(model):
     """
     Django >= 1.10: patch refreshing deferred fields. Crucial for only/defer to work.
     """
-    if not hasattr(model, 'refresh_from_db'):
+    if not hasattr(model, "refresh_from_db"):
         return
     old_refresh_from_db = model.refresh_from_db
 
@@ -349,12 +349,12 @@ def patch_refresh_from_db(model):
 def delete_cache_fields(model):
     opts = model._meta
     cached_attrs = (
-        '_field_cache',
-        '_field_name_cache',
-        '_name_map',
-        'fields',
-        'concrete_fields',
-        'local_concrete_fields',
+        "_field_cache",
+        "_field_name_cache",
+        "_name_map",
+        "fields",
+        "concrete_fields",
+        "local_concrete_fields",
     )
     for attr in cached_attrs:
         try:
@@ -362,7 +362,7 @@ def delete_cache_fields(model):
         except AttributeError:
             pass
 
-    if hasattr(model._meta, '_expire_cache'):
+    if hasattr(model._meta, "_expire_cache"):
         model._meta._expire_cache()
 
 
@@ -396,19 +396,19 @@ def populate_translation_fields(sender, kwargs):
         return
     if populate is True:
         # What was meant by ``True`` is now called ``all``.
-        populate = 'all'
+        populate = "all"
 
     opts = translator.get_options_for_model(sender)
     for key, val in list(kwargs.items()):
         if key in opts.fields:
-            if populate == 'all':
+            if populate == "all":
                 # Set the value for every language.
                 for translation_field in opts.fields[key]:
                     kwargs.setdefault(translation_field.name, val)
-            elif populate == 'default':
+            elif populate == "default":
                 default = build_localized_fieldname(key, mt_settings.DEFAULT_LANGUAGE)
                 kwargs.setdefault(default, val)
-            elif populate == 'required':
+            elif populate == "required":
                 default = build_localized_fieldname(key, mt_settings.DEFAULT_LANGUAGE)
                 if not sender._meta.get_field(key).null:
                     kwargs.setdefault(default, val)
@@ -532,9 +532,9 @@ class Translator:
         patch_refresh_from_db(model)
 
         # Substitute original field with descriptor
-        model_fallback_languages = getattr(opts, 'fallback_languages', None)
-        model_fallback_values = getattr(opts, 'fallback_values', NONE)
-        model_fallback_undefined = getattr(opts, 'fallback_undefined', NONE)
+        model_fallback_languages = getattr(opts, "fallback_languages", None)
+        model_fallback_values = getattr(opts, "fallback_values", NONE)
+        model_fallback_undefined = getattr(opts, "fallback_undefined", NONE)
         for field_name in opts.local_fields.keys():
             field = model._meta.get_field(field_name)
             field_fallback_value = parse_field(model_fallback_values, field_name, NONE)
@@ -628,7 +628,7 @@ class Translator:
             # Fields for translation may be inherited from abstract
             # superclasses, so we need to look at all parents.
             for base in model.__bases__:
-                if not hasattr(base, '_meta'):
+                if not hasattr(base, "_meta"):
                     # Things without _meta aren't functional models, so they're
                     # uninteresting parents.
                     continue
@@ -648,7 +648,7 @@ class Translator:
         opts = self._get_options_for_model(model)
         if not opts.registered and not opts.related:
             raise NotRegistered(
-                'The model "%s" is not registered for ' 'translation' % model.__name__
+                'The model "%s" is not registered for ' "translation" % model.__name__
             )
         return opts
 

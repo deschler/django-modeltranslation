@@ -28,7 +28,7 @@ class ClearableWidgetWrapper(Widget):
     # template = '<span class="clearable-input">{} <label for="{}">{}</label> {}</span>'
 
     class Media:
-        js = ('modeltranslation/js/clearable_inputs.js',)
+        js = ("modeltranslation/js/clearable_inputs.js",)
 
     def __init__(self, widget, empty_value=None):
         """
@@ -36,7 +36,7 @@ class ClearableWidgetWrapper(Widget):
         Allows overriding the empty value.
         """
         self.widget = widget
-        self.checkbox = CheckboxInput(attrs={'tabindex': '-1'})
+        self.checkbox = CheckboxInput(attrs={"tabindex": "-1"})
         self.empty_value = empty_value
 
     def __getattr__(self, name):
@@ -44,7 +44,7 @@ class ClearableWidgetWrapper(Widget):
         If we don't have a property or a method, chances are the wrapped
         widget does.
         """
-        if name != 'widget':
+        if name != "widget":
             return getattr(self.widget, name)
         raise AttributeError
 
@@ -66,7 +66,7 @@ class ClearableWidgetWrapper(Widget):
         checkbox_id = self.clear_checkbox_id(checkbox_name)
         checkbox_label = self.clear_checkbox_label
         checkbox = self.checkbox.render(
-            checkbox_name, value == self.empty_value, attrs={'id': checkbox_id}, renderer=renderer
+            checkbox_name, value == self.empty_value, attrs={"id": checkbox_id}, renderer=renderer
         )
         return mark_safe(
             self.template.format(
@@ -91,10 +91,10 @@ class ClearableWidgetWrapper(Widget):
         """
         Given the name of the input, returns the name of the clear checkbox.
         """
-        return name + '-clear'
+        return name + "-clear"
 
     def clear_checkbox_id(self, name):
         """
         Given the name of the clear checkbox input, returns the HTML id for it.
         """
-        return name + '_id'
+        return name + "_id"

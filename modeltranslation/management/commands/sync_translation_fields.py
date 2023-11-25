@@ -21,18 +21,18 @@ from modeltranslation.utils import build_localized_fieldname
 def ask_for_confirmation(sql_sentences, model_full_name, interactive):
     print('\nSQL to synchronize "%s" schema:' % model_full_name)
     for sentence in sql_sentences:
-        print('   %s' % sentence)
+        print("   %s" % sentence)
     while True:
-        prompt = '\nAre you sure that you want to execute the previous SQL: (y/n) [n]: '
+        prompt = "\nAre you sure that you want to execute the previous SQL: (y/n) [n]: "
         if interactive:
             answer = input(prompt).strip()
         else:
-            answer = 'y'
-        if answer == '':
+            answer = "y"
+        if answer == "":
             return False
-        elif answer not in ('y', 'n', 'yes', 'no'):
-            print('Please answer yes or no')
-        elif answer == 'y' or answer == 'yes':
+        elif answer not in ("y", "n", "yes", "no"):
+            print("Please answer yes or no")
+        elif answer == "y" or answer == "yes":
             return True
         else:
             return False
@@ -47,9 +47,9 @@ def print_missing_langs(missing_langs, field_name, model_name):
 
 class Command(BaseCommand):
     help = (
-        'Detect new translatable fields or new available languages and'
-        ' sync database structure. Does not remove columns of removed'
-        ' languages or undeclared fields.'
+        "Detect new translatable fields or new available languages and"
+        " sync database structure. Does not remove columns of removed"
+        " languages or undeclared fields."
     )
 
     if VERSION < (1, 8):
@@ -57,23 +57,25 @@ class Command(BaseCommand):
 
         option_list = BaseCommand.option_list + (
             make_option(
-                '--noinput',
-                action='store_false',
-                dest='interactive',
+                "--noinput",
+                action="store_false",
+                dest="interactive",
                 default=True,
-                help='Do NOT prompt the user for input of any kind.',
+                help="Do NOT prompt the user for input of any kind.",
             ),
         )
     else:
 
         def add_arguments(self, parser):
-            parser.add_argument(
-                '--noinput',
-                action='store_false',
-                dest='interactive',
-                default=True,
-                help='Do NOT prompt the user for input of any kind.',
-            ),
+            (
+                parser.add_argument(
+                    "--noinput",
+                    action="store_false",
+                    dest="interactive",
+                    default=True,
+                    help="Do NOT prompt the user for input of any kind.",
+                ),
+            )
 
     def handle(self, *args, **options):
         """
@@ -81,14 +83,14 @@ class Command(BaseCommand):
         """
         self.cursor = connection.cursor()
         self.introspection = connection.introspection
-        self.interactive = options['interactive']
+        self.interactive = options["interactive"]
 
         found_missing_fields = False
         models = translator.get_registered_models(abstract=False)
         for model in models:
             db_table = model._meta.db_table
             model_name = model._meta.model_name
-            model_full_name = '%s.%s' % (model._meta.app_label, model_name)
+            model_full_name = "%s.%s" % (model._meta.app_label, model_name)
             opts = translator.get_options_for_model(model)
             for field_name, fields in opts.local_fields.items():
                 # Take `db_column` attribute into account
@@ -108,15 +110,15 @@ class Command(BaseCommand):
                         sql_sentences, model_full_name, self.interactive
                     )
                     if execute_sql:
-                        print('Executing SQL...')
+                        print("Executing SQL...")
                         for sentence in sql_sentences:
                             self.cursor.execute(sentence)
-                        print('Done')
+                        print("Done")
                     else:
-                        print('SQL not executed')
+                        print("SQL not executed")
 
         if not found_missing_fields:
-            print('No new translatable fields detected')
+            print("No new translatable fields detected")
 
     def get_table_fields(self, db_table):
         """
@@ -148,8 +150,8 @@ class Command(BaseCommand):
             col_type = f.db_type(connection=connection)
             field_sql = [style.SQL_FIELD(qn(f.column)), style.SQL_COLTYPE(col_type)]
             # column creation
-            stmt = "ALTER TABLE %s ADD COLUMN %s" % (qn(db_table), ' '.join(field_sql))
+            stmt = "ALTER TABLE %s ADD COLUMN %s" % (qn(db_table), " ".join(field_sql))
             if not f.null:
-                stmt += " " + style.SQL_KEYWORD('NOT NULL')
+                stmt += " " + style.SQL_KEYWORD("NOT NULL")
             sql_output.append(stmt + ";")
         return sql_output

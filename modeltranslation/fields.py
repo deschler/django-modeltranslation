@@ -70,12 +70,12 @@ def create_translation_field(model, field_name, lang, empty_value):
     If the class is neither a subclass of fields in ``SUPPORTED_FIELDS``, nor
     in ``CUSTOM_FIELDS`` an ``ImproperlyConfigured`` exception will be raised.
     """
-    if empty_value not in ('', 'both', None, NONE):
-        raise ImproperlyConfigured('%s is not a valid empty_value.' % empty_value)
+    if empty_value not in ("", "both", None, NONE):
+        raise ImproperlyConfigured("%s is not a valid empty_value." % empty_value)
     field = model._meta.get_field(field_name)
     cls_name = field.__class__.__name__
     if not (isinstance(field, SUPPORTED_FIELDS) or cls_name in mt_settings.CUSTOM_FIELDS):
-        raise ImproperlyConfigured('%s is not supported by modeltranslation.' % cls_name)
+        raise ImproperlyConfigured("%s is not supported by modeltranslation." % cls_name)
     translation_class = field_factory(field.__class__)
     return translation_class(translated_field=field, language=lang, empty_value=empty_value)
 
@@ -85,7 +85,7 @@ def field_factory(baseclass):
         pass
 
     # Reflect baseclass name of returned subclass
-    TranslationFieldSpecific.__name__ = 'Translation%s' % baseclass.__name__
+    TranslationFieldSpecific.__name__ = "Translation%s" % baseclass.__name__
 
     return TranslationFieldSpecific
 
@@ -121,7 +121,7 @@ class TranslationField:
         self.language = language
         self.empty_value = empty_value
         if empty_value is NONE:
-            self.empty_value = None if translated_field.null else ''
+            self.empty_value = None if translated_field.null else ""
 
         # Default behaviour is that all translations are optional
         if not isinstance(self, fields.BooleanField):
@@ -145,7 +145,7 @@ class TranslationField:
                 try:
                     req_fields = required_languages[self.language]
                 except KeyError:
-                    req_fields = required_languages.get('default', ())
+                    req_fields = required_languages.get("default", ())
                 if self.name in req_fields:
                     # TODO: We might have to handle the whole thing through the
                     # FieldsAggregationMetaClass, as fields can be inherited.
@@ -205,7 +205,7 @@ class TranslationField:
             )
             self.remote_field.field = self
 
-            if hasattr(self.remote_field.model._meta, '_related_objects_cache'):
+            if hasattr(self.remote_field.model._meta, "_related_objects_cache"):
                 del self.remote_field.model._meta._related_objects_cache
 
         # ForeignKey support - rewrite related_name
@@ -223,7 +223,7 @@ class TranslationField:
                 self.related_query_name = lambda: loc_related_query_name
             self.rel.related_name = build_localized_fieldname(current, self.language)
             self.rel.field = self
-            if hasattr(self.rel.to._meta, '_related_objects_cache'):
+            if hasattr(self.rel.to._meta, "_related_objects_cache"):
                 del self.rel.to._meta._related_objects_cache
         elif NEW_RELATED_API and self.remote_field and not self.remote_field.is_hidden():
             current = self.remote_field.get_accessor_name()
@@ -238,7 +238,7 @@ class TranslationField:
                 self.related_query_name = lambda: loc_related_query_name
             self.remote_field.related_name = build_localized_fieldname(current, self.language)
             self.remote_field.field = self
-            if hasattr(self.remote_field.model._meta, '_related_objects_cache'):
+            if hasattr(self.remote_field.model._meta, "_related_objects_cache"):
                 del self.remote_field.model._meta._related_objects_cache
 
     # Django 1.5 changed definition of __hash__ for fields to be fine with hash requirements.
@@ -249,7 +249,7 @@ class TranslationField:
     def __eq__(self, other):
         if isinstance(other, fields.Field):
             return self.creation_counter == other.creation_counter and self.language == getattr(
-                other, 'language', None
+                other, "language", None
             )
         return super().__eq__(other)
 
@@ -301,16 +301,16 @@ class TranslationField:
                 from modeltranslation.forms import NullCharField
 
                 form_class = formfield.__class__
-                kwargs['form_class'] = type(
-                    'Null%s' % form_class.__name__, (NullCharField, form_class), {}
+                kwargs["form_class"] = type(
+                    "Null%s" % form_class.__name__, (NullCharField, form_class), {}
                 )
                 formfield = super().formfield(*args, **kwargs)
-            elif self.empty_value == 'both':
+            elif self.empty_value == "both":
                 from modeltranslation.forms import NullableField
 
                 form_class = formfield.__class__
-                kwargs['form_class'] = type(
-                    'Nullable%s' % form_class.__name__, (NullableField, form_class), {}
+                kwargs["form_class"] = type(
+                    "Nullable%s" % form_class.__name__, (NullableField, form_class), {}
                 )
                 formfield = super().formfield(*args, **kwargs)
                 if isinstance(formfield.widget, (forms.TextInput, forms.Textarea)):
@@ -328,7 +328,7 @@ class TranslationField:
         # Questionable fields are stored in special variable, which is later handled by clean_fields
         # method on the model.
         if check and self.language == get_language() and getattr(instance, self.name) and not data:
-            if not hasattr(instance, '_mt_form_pending_clear'):
+            if not hasattr(instance, "_mt_form_pending_clear"):
                 instance._mt_form_pending_clear = {}
             instance._mt_form_pending_clear[self.name] = data
         else:
@@ -337,9 +337,9 @@ class TranslationField:
     def deconstruct(self):
         name, path, args, kwargs = self.translated_field.deconstruct()
         if self.null is True:
-            kwargs.update({'null': True})
-        if 'db_column' in kwargs:
-            kwargs['db_column'] = self.db_column
+            kwargs.update({"null": True})
+        if "db_column" in kwargs:
+            kwargs["db_column"] = self.db_column
         return self.name, path, args, kwargs
 
     def clone(self):
@@ -375,7 +375,7 @@ class TranslationFieldDescriptor:
         instance.__dict__[self.field.name] = value
         if isinstance(self.field, fields.related.ForeignKey):
             instance.__dict__[self.field.get_attname()] = None if value is None else value.pk
-        if getattr(instance, '_mt_init', False) or getattr(instance, '_mt_disable', False):
+        if getattr(instance, "_mt_init", False) or getattr(instance, "_mt_disable", False):
             # When assignment takes place in model instance constructor, don't set value.
             # This is essential for only/defer to work, but I think it's sensible anyway.
             # Setting the localized field may also be disabled by setting _mt_disable.

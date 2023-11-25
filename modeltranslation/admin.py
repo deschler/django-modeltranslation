@@ -29,18 +29,18 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
 
     def _get_declared_fieldsets(self, request, obj=None):
         # Take custom modelform fields option into account
-        if not self.fields and hasattr(self.form, '_meta') and self.form._meta.fields:
+        if not self.fields and hasattr(self.form, "_meta") and self.form._meta.fields:
             self.fields = self.form._meta.fields
         # takes into account non-standard add_fieldsets attribute used by UserAdmin
         fieldsets = (
             self.add_fieldsets
-            if getattr(self, 'add_fieldsets', None) and obj is None
+            if getattr(self, "add_fieldsets", None) and obj is None
             else self.fieldsets
         )
         if fieldsets:
             return self._patch_fieldsets(fieldsets)
         elif self.fields:
-            return [(None, {'fields': self.replace_orig_field(self.get_fields(request, obj))})]
+            return [(None, {"fields": self.replace_orig_field(self.get_fields(request, obj))})]
         return None
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
@@ -53,7 +53,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
             if field.required:
                 field.required = False
                 field.blank = True
-                self._orig_was_required['%s.%s' % (db_field.model._meta, db_field.name)] = True
+                self._orig_was_required["%s.%s" % (db_field.model._meta, db_field.name)] = True
 
         # For every localized field copy the widget from the original field
         # and add a css class to identify a modeltranslation widget.
@@ -83,24 +83,24 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
                         b for b in form_class.__bases__ if b != NullCharField
                     )
                 field.__class__ = type(
-                    'Nullable%s' % form_class.__name__, (NullableField, form_class), {}
+                    "Nullable%s" % form_class.__name__, (NullableField, form_class), {}
                 )
             if (
-                db_field.empty_value == 'both' or orig_field.name in self.both_empty_values_fields
+                db_field.empty_value == "both" or orig_field.name in self.both_empty_values_fields
             ) and isinstance(field.widget, (forms.TextInput, forms.Textarea)):
                 field.widget = ClearableWidgetWrapper(field.widget)
-            css_classes = self._get_widget_from_field(field).attrs.get('class', '').split(' ')
-            css_classes.append('mt')
+            css_classes = self._get_widget_from_field(field).attrs.get("class", "").split(" ")
+            css_classes.append("mt")
             # Add localized fieldname css class
-            css_classes.append(build_css_class(db_field.name, 'mt-field'))
+            css_classes.append(build_css_class(db_field.name, "mt-field"))
             # Add mt-bidi css class if language is bidirectional
             if get_language_bidi(db_field.language):
-                css_classes.append('mt-bidi')
+                css_classes.append("mt-bidi")
             if db_field.language == mt_settings.DEFAULT_LANGUAGE:
                 # Add another css class to identify a default modeltranslation widget
-                css_classes.append('mt-default')
+                css_classes.append("mt-default")
                 if orig_formfield.required or self._orig_was_required.get(
-                    '%s.%s' % (orig_field.model._meta, orig_field.name)
+                    "%s.%s" % (orig_field.model._meta, orig_field.name)
                 ):
                     # In case the original form field was required, make the
                     # default translation field required instead.
@@ -111,7 +111,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
                     # Hide clearable widget for required fields
                     if isinstance(field.widget, ClearableWidgetWrapper):
                         field.widget = field.widget.widget
-            self._get_widget_from_field(field).attrs['class'] = ' '.join(css_classes)
+            self._get_widget_from_field(field).attrs["class"] = " ".join(css_classes)
 
     def _get_widget_from_field(self, field):
         # retrieve "nested" widget in case of related field
@@ -171,8 +171,8 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         if fieldsets:
             fieldsets_new = list(fieldsets)
             for name, dct in fieldsets:
-                if 'fields' in dct:
-                    dct['fields'] = self.replace_orig_field(dct['fields'])
+                if "fields" in dct:
+                    dct["fields"] = self.replace_orig_field(dct["fields"])
             fieldsets = fieldsets_new
         return fieldsets
 
@@ -208,7 +208,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         else:
             exclude = list(exclude)
         exclude.extend(self.get_readonly_fields(request, obj))
-        if not exclude and hasattr(self.form, '_meta') and self.form._meta.exclude:
+        if not exclude and hasattr(self.form, "_meta") and self.form._meta.exclude:
             # Take the custom ModelForm's Meta.exclude into account only if the
             # ModelAdmin doesn't define its own.
             exclude.extend(self.form._meta.exclude)
@@ -216,7 +216,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         # default on modelform_factory
         exclude = self.replace_orig_field(exclude) or None
         exclude = self._exclude_original_fields(exclude)
-        kwargs.update({'exclude': exclude})
+        kwargs.update({"exclude": exclude})
 
         return kwargs
 
@@ -234,7 +234,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         """
         base_fields = self.replace_orig_field(form.base_fields.keys())
         fields = list(base_fields) + list(self.get_readonly_fields(request, obj))
-        return [(None, {'fields': self.replace_orig_field(fields)})]
+        return [(None, {"fields": self.replace_orig_field(fields)})]
 
     def get_translation_field_excludes(self, exclude_languages=None):
         """
@@ -296,13 +296,14 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
             untranslated_fields = [
                 f.name
                 for f in fields
-                if (
+                if
+                (
                     # Exclude the primary key field
                     f is not self.opts.auto_field
                     # Exclude non-editable fields
                     and f.editable
                     # Exclude the translation fields
-                    and not hasattr(f, 'translated_field')
+                    and not hasattr(f, "translated_field")
                     # Honour field arguments. We rely on the fact that the
                     # passed fieldsets argument is already fully filtered
                     # and takes options like exclude into account.
@@ -313,8 +314,8 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
             fieldsets = (
                 [
                     (
-                        '',
-                        {'fields': untranslated_fields},
+                        "",
+                        {"fields": untranslated_fields},
                     )
                 ]
                 if untranslated_fields
@@ -331,13 +332,13 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
                     label = self.model._meta.get_field(orig_field).verbose_name.capitalize()
                     temp_fieldsets[orig_field] = (
                         label,
-                        {'fields': trans_fieldnames, 'classes': ('mt-fieldset',)},
+                        {"fields": trans_fieldnames, "classes": ("mt-fieldset",)},
                     )
 
             fields_order = unique(
                 f.translated_field.name
                 for f in self.opts.fields
-                if hasattr(f, 'translated_field') and f.name in flattened_fieldsets
+                if hasattr(f, "translated_field") and f.name in flattened_fieldsets
             )
             for field_name in fields_order:
                 fieldsets.append(temp_fieldsets.pop(field_name))
@@ -397,13 +398,13 @@ class TabbedDjangoJqueryTranslationAdmin(TranslationAdmin):
 
     class Media:
         js = (
-            'admin/js/jquery.init.js',
-            'modeltranslation/js/force_jquery.js',
+            "admin/js/jquery.init.js",
+            "modeltranslation/js/force_jquery.js",
             mt_settings.JQUERY_UI_URL,
-            'modeltranslation/js/tabbed_translation_fields.js',
+            "modeltranslation/js/tabbed_translation_fields.js",
         )
         css = {
-            'all': ('modeltranslation/css/tabbed_translation_fields.css',),
+            "all": ("modeltranslation/css/tabbed_translation_fields.css",),
         }
 
 
@@ -417,10 +418,10 @@ class TabbedExternalJqueryTranslationAdmin(TranslationAdmin):
         js = (
             mt_settings.JQUERY_URL,
             mt_settings.JQUERY_UI_URL,
-            'modeltranslation/js/tabbed_translation_fields.js',
+            "modeltranslation/js/tabbed_translation_fields.js",
         )
         css = {
-            'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
+            "screen": ("modeltranslation/css/tabbed_translation_fields.css",),
         }
 
 
