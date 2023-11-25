@@ -26,15 +26,14 @@ Coding Style
 
 Please make sure that your code follows the `PEP 8`_ style guide. The only
 exception we make is to allow a maximum line length of 100. Furthermore
-your code has to validate against `pyflakes`_. It is recommended to use
-`flake8`_ which combines all the checks, and black for code formatting.
+your code has to validate against `ruff`_. It is recommended to use
+`ruff`_ which combines all the checks, and `ruff format` for code formatting.
 
 .. code-block:: console
 
-    $ flake8 modeltranslation
-    $ black modeltranslation *.py
+    $ make lint
 
-The ``#NOQA`` mark added by `flake8`_ should be used sparsely.
+The ``# noqa`` marks for `ruff`_ should be used sparsely.
 
 
 Django and Python Versions
@@ -123,8 +122,7 @@ Please do not use the issue tracker for general questions, we run a dedicated
 
 .. _help.github.com: https://help.github.com/articles/why-are-my-commits-linked-to-the-wrong-user
 .. _PEP 8: http://www.python.org/dev/peps/pep-0008/
-.. _pyflakes: https://pypi.python.org/pypi/pyflakes
-.. _flake8: https://pypi.python.org/pypi/flake8
+.. _ruff: https://pypi.python.org/pypi/ruff
 .. _Github: https://github.com/deschler/django-modeltranslation
 .. _Github Actions: https://travis-ci.org/deschler/django-modeltranslation
 .. _Github Actions Workflows: https://github.com/deschler/django-modeltranslation/blob/master/.github/workflows

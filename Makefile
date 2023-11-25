@@ -8,3 +8,7 @@ publish: clean
 
 clean:
 	rm -rf dist
+
+lint:
+	ruff check modeltranslation
+	ruff format --check modeltranslation *.py
