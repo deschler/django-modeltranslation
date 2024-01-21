@@ -1,27 +1,28 @@
+from __future__ import annotations
+
 import threading
-from typing import Literal, Union
 
 from modeltranslation import settings
 
-AutoPopulate = Union[bool, Literal["all", "default", "required"]]
+from ._typing import AutoPopulate
 
 
 class ModelTranslationThreadLocal(threading.local):
     """Holds thread-local data for modeltranslation."""
 
-    auto_populate: Union[AutoPopulate, None] = None
-    enable_fallbacks: Union[bool, None] = None
+    auto_populate: AutoPopulate | None = None
+    enable_fallbacks: bool | None = None
 
 
 _mt_thread_context = ModelTranslationThreadLocal()
 
 
-def set_auto_populate(value: Union[AutoPopulate, None]) -> None:
+def set_auto_populate(value: AutoPopulate | None) -> None:
     """Set the auto_populate for the current thread."""
     _mt_thread_context.auto_populate = value
 
 
-def set_enable_fallbacks(value: Union[bool, None]) -> None:
+def set_enable_fallbacks(value: bool | None) -> None:
     """Set the enable_fallbacks for the current thread."""
     _mt_thread_context.enable_fallbacks = value
 

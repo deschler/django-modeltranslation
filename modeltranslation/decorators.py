@@ -1,4 +1,18 @@
-def register(model_or_iterable, **options):
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Callable, Iterable, TypeVar
+
+from django.db.models import Model
+
+if TYPE_CHECKING:
+    from modeltranslation.translator import TranslationOptions
+
+    _TranslationOptionsTypeT = TypeVar("_TranslationOptionsTypeT", bound=type[TranslationOptions])
+
+
+def register(
+    model_or_iterable: type[Model] | Iterable[type[Model]], **options: Any
+) -> Callable[[_TranslationOptionsTypeT], _TranslationOptionsTypeT]:
     """
     Registers the given model(s) with the given translation options.
 
@@ -14,7 +28,7 @@ def register(model_or_iterable, **options):
     """
     from modeltranslation.translator import TranslationOptions, translator
 
-    def wrapper(opts_class):
+    def wrapper(opts_class: _TranslationOptionsTypeT) -> _TranslationOptionsTypeT:
         if not issubclass(opts_class, TranslationOptions):
             raise ValueError("Wrapped class must subclass TranslationOptions.")
         translator.register(model_or_iterable, opts_class, **options)

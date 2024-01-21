@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import Any
+
 from django import forms
 from django.core import validators
 
@@ -5,7 +9,7 @@ from modeltranslation.fields import TranslationField
 
 
 class TranslationModelForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         for f in self._meta.model._meta.fields:
             if f.name in self.fields and isinstance(f, TranslationField):
@@ -17,7 +21,7 @@ class NullCharField(forms.CharField):
     CharField subclass that returns ``None`` when ``CharField`` would return empty string.
     """
 
-    def to_python(self, value):
+    def to_python(self, value: Any | None) -> str | None:
         if value in validators.EMPTY_VALUES:
             return None
         return super().to_python(value)
@@ -29,7 +33,7 @@ class NullableField(forms.Field):
     the empty string with ``CharField`` and its derivatives).
     """
 
-    def to_python(self, value):
+    def to_python(self, value: Any | None) -> Any | None:
         if value is None:
             return value
         return super().to_python(value)
