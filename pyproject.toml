@@ -12,6 +12,7 @@ packages = [
 python = ">=3.8,<4"
 django = ">=4.2"
 ruff = "^0.0.292"
+typing-extensions = {version = ">=4.0.1", python = "3.11"}
 
 [tool.poetry.dev-dependencies]
 pdbpp = "*"

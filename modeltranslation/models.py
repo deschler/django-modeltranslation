@@ -1,4 +1,7 @@
-def autodiscover():
+from typing import Any
+
+
+def autodiscover() -> None:
     """
     Auto-discover INSTALLED_APPS translation.py modules and fail silently when
     not present. This forces an import on them to register.
@@ -57,7 +60,7 @@ def autodiscover():
             pass
 
 
-def handle_translation_registrations(*args, **kwargs):
+def handle_translation_registrations(*args: Any, **kwargs: Any) -> None:
     """
     Ensures that any configuration of the TranslationOption(s) are handled when
     importing modeltranslation.

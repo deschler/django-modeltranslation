@@ -6,7 +6,7 @@ https://github.com/zmathew/django-linguo
 """
 import itertools
 from functools import reduce
-from typing import List, Tuple, Type, Any, Optional
+from typing import Any, List, Optional, Tuple, Type
 
 from django import VERSION
 from django.contrib.admin.utils import get_model_from_relation
