@@ -17,6 +17,7 @@ from modeltranslation.fields import (
     TranslatedManyToManyDescriptor,
     TranslatedRelationIdDescriptor,
     TranslationFieldDescriptor,
+    TranslationField,
     create_translation_field,
 )
 from modeltranslation.manager import (
@@ -87,8 +88,8 @@ class TranslationOptions(metaclass=FieldsAggregationMetaClass):
         self.model = model
         self.registered = False
         self.related = False
-        self.local_fields: dict[str, set[str]] = {f: set() for f in self.fields}
-        self.fields: dict[str, set[str]] = {f: set() for f in self.fields}
+        self.local_fields: dict[str, set[TranslationField]] = {f: set() for f in self.fields}
+        self.fields: dict[str, set[TranslationField]] = {f: set() for f in self.fields}
         self.related_fields: list[str] = []
 
     def validate(self) -> None:

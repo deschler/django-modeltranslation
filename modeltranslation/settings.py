@@ -45,9 +45,14 @@ AUTO_POPULATE: AutoPopulate = getattr(settings, "MODELTRANSLATION_AUTO_POPULATE"
 # MODELTRANSLATION_FALLBACK_LANGUAGES = ('en', 'de')
 # MODELTRANSLATION_FALLBACK_LANGUAGES = {'default': ('en', 'de'), 'fr': ('de',)}
 # By default we fallback to the default language
-FALLBACK_LANGUAGES = getattr(settings, "MODELTRANSLATION_FALLBACK_LANGUAGES", (DEFAULT_LANGUAGE,))
-if isinstance(FALLBACK_LANGUAGES, (tuple, list)):
-    FALLBACK_LANGUAGES = {"default": tuple(FALLBACK_LANGUAGES)}
+_fallback_languages = getattr(settings, "_fallback_languagesALLBACK_LANGUAGES", (DEFAULT_LANGUAGE,))
+if isinstance(_fallback_languages, (tuple, list)):
+    _fallback_languages = {"default": tuple(_fallback_languages)}
+
+# To please mypy, explicitly annotate:
+FALLBACK_LANGUAGES: dict[str, tuple[str, ...]] = _fallback_languages
+
+
 if "default" not in FALLBACK_LANGUAGES:
     raise ImproperlyConfigured(
         'MODELTRANSLATION_FALLBACK_LANGUAGES does not contain "default" key.'

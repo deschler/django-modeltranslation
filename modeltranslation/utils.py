@@ -27,6 +27,8 @@ def get_language() -> str | None:
     settings.LANGUAGES (Django does not seem to guarantee this for us).
     """
     lang = _get_language()
+    if lang is None: # Django >= 1.8
+        return settings.DEFAULT_LANGUAGE
     if lang not in settings.AVAILABLE_LANGUAGES and "-" in lang:
         lang = lang.split("-")[0]
     if lang in settings.AVAILABLE_LANGUAGES:
@@ -54,7 +56,7 @@ def build_localized_fieldname(field_name: str, lang: str) -> str:
         # The 2-letter Indonesian language code is problematic with the
         # current naming scheme as Django foreign keys also add "id" suffix.
         lang = "ind"
-    return f"{field_name}_{lang.replace('-', '_')}"
+    return str("%s_%s" % (field_name, lang.replace("-", "_")))
 
 
 def _build_localized_verbose_name(verbose_name: Any, lang: str) -> str:
@@ -114,7 +116,7 @@ def unique(seq: Iterable[_T]) -> Generator[_T, None, None]:
     [1, 2, 3, 4]
     """
     seen = set()
-    return (x for x in seq if x not in seen and not seen.add(x))
+    return (x for x in seq if x not in seen and not seen.add(x))  # type: ignore[func-returns-value]
 
 
 def resolution_order(
@@ -163,7 +165,7 @@ def auto_populate(mode: AutoPopulate = "all") -> Iterator[None]:
 
 
 @contextmanager
-def fallbacks(enable: bool | None = True) -> rator[None]:
+def fallbacks(enable: bool | None = True) -> Iterator[None]:
     """
     Temporarily switch all language fallbacks on or off.
 
@@ -221,7 +223,7 @@ def build_localized_intermediary_model(
         (models.Model,),
         {
             **{k: v for k, v in dict(intermediary_model.__dict__).items() if k != "_meta"},
-            **{f.name: f.clone() for f in intermediary_model._meta.fields},
+            **{f.name: f.clone() for f in intermediary_model._meta.fields},  # type: ignore[attr-defined]
             "Meta": meta,
         },
     )

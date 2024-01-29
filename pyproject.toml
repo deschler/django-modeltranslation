@@ -29,3 +29,13 @@ target-version = "py38"
 ignore = [
     "E501",   # line length is handled by formatter
 ]
+
+[tool.mypy]
+python_version = "3.8"
+exclude = [
+    'tests/'
+]
+
+[[tool.mypy.overrides]]
+module  = ["modeltranslation.fields"]
+disable_error_code = ["attr-defined", "has-type", "misc"]
