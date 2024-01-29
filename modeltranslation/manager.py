@@ -4,9 +4,11 @@ django-linguo by Zach Mathew
 
 https://github.com/zmathew/django-linguo
 """
+from __future__ import annotations
+
 import itertools
 from functools import reduce
-from typing import Any, List, Optional, Tuple, Type
+from typing import Any, TypeVar, Literal, overload
 
 from django import VERSION
 from django.contrib.admin.utils import get_model_from_relation
@@ -27,12 +29,13 @@ from modeltranslation.utils import (
     get_language,
     resolution_order,
 )
+from modeltranslation._typing import Self, AutoPopulate
 
-_C2F_CACHE = {}
-_F2TM_CACHE = {}
+_C2F_CACHE: dict[tuple[type[Model], str], Field] = {}
+_F2TM_CACHE: dict[type[Model], dict[str, type[Model]]] = {}
 
 
-def get_translatable_fields_for_model(model):
+def get_translatable_fields_for_model(model: type[Model]) -> list[str] | None:
     from modeltranslation.translator import NotRegistered, translator
 
     try:
@@ -41,7 +44,7 @@ def get_translatable_fields_for_model(model):
         return None
 
 
-def rewrite_lookup_key(model, lookup_key):
+def rewrite_lookup_key(model: type[Model], lookup_key: str) -> str:
     try:
         pieces = lookup_key.split("__", 1)
         original_key = pieces[0]
@@ -66,38 +69,38 @@ def rewrite_lookup_key(model, lookup_key):
         return lookup_key
 
 
-def append_fallback(model, fields):
+def append_fallback(model: type[Model], fields: tuple[str, ...]) -> tuple[set[str], set[str]]:
     """
     If translated field is encountered, add also all its fallback fields.
     Returns tuple: (set_of_new_fields_to_use, set_of_translated_field_names)
     """
-    fields = set(fields)
-    trans = set()
+    fields_set = set(fields)
+    trans: set[str] = set()
     from modeltranslation.translator import translator
 
     opts = translator.get_options_for_model(model)
     for key, _ in opts.fields.items():
-        if key in fields:
+        if key in fields_set:
             langs = resolution_order(get_language(), getattr(model, key).fallback_languages)
-            fields = fields.union(build_localized_fieldname(key, lang) for lang in langs)
-            fields.remove(key)
+            fields_set = fields_set.union(build_localized_fieldname(key, lang) for lang in langs)
+            fields_set.remove(key)
             trans.add(key)
-    return fields, trans
+    return fields_set, trans
 
 
-def append_translated(model, fields):
+def append_translated(model: type[Model], fields: tuple[str, ...]) -> set[str]:
     "If translated field is encountered, add also all its translation fields."
-    fields = set(fields)
+    fields_set = set(fields)
     from modeltranslation.translator import translator
 
     opts = translator.get_options_for_model(model)
-    for key, translated in opts.fields.items():
-        if key in fields:
-            fields = fields.union(f.name for f in translated)
-    return fields
+    for key, translated in opts.fields_set.items():
+        if key in fields_set:
+            fields_set = fields_set.union(f.name for f in translated)
+    return fields_set
 
 
-def append_lookup_key(model, lookup_key):
+def append_lookup_key(model: type[Model], lookup_key: str) -> set[str]:
     "Transform spanned__lookup__key into all possible translation versions, on all levels"
     pieces = lookup_key.split("__", 1)
 
@@ -115,7 +118,7 @@ def append_lookup_key(model, lookup_key):
     return fields
 
 
-def append_lookup_keys(model, fields):
+def append_lookup_keys(model: type[Model], fields: tuple[str, ...]):
     new_fields = []
     for field in fields:
         try:
@@ -127,7 +130,7 @@ def append_lookup_keys(model, fields):
     return reduce(set.union, new_fields, set())
 
 
-def rewrite_order_lookup_key(model, lookup_key):
+def rewrite_order_lookup_key(model: type[Model], lookup_key: str) -> str:
     try:
         if lookup_key.startswith("-"):
             return "-" + rewrite_lookup_key(model, lookup_key[1:])
@@ -137,11 +140,11 @@ def rewrite_order_lookup_key(model, lookup_key):
         return lookup_key
 
 
-def get_fields_to_translatable_models(model):
+def get_fields_to_translatable_models(model: type[Model]) -> dict[str, type[Model]]:
     if model in _F2TM_CACHE:
         return _F2TM_CACHE[model]
 
-    results = []
+    results: list[tuple[str, type[Model]]] = []
     for f in model._meta.get_fields():
         if f.is_relation and f.related_model:
             # The new get_field() will find GenericForeignKey relations.
@@ -155,7 +158,7 @@ def get_fields_to_translatable_models(model):
     return _F2TM_CACHE[model]
 
 
-def get_field_by_colum_name(model, col):
+def get_field_by_colum_name(model: type[Model], col: str) -> Field:
     # First, try field with the column name
     try:
         field = model._meta.get_field(col)
@@ -173,13 +176,14 @@ def get_field_by_colum_name(model, col):
             return field
     assert False, "No field found for column %s" % col
 
+_T = TypeVar("_T", bound=Model, covariant=True)
 
-class MultilingualQuerySet(QuerySet):
-    def __init__(self, *args, **kwargs):
+class MultilingualQuerySet(QuerySet[_T]):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self._post_init()
 
-    def _post_init(self):
+    def _post_init(self) -> None:
         self._rewrite = True
         self._populate = None
         if self.model and self.query.default_ordering and (not self.query.order_by):
@@ -194,10 +198,10 @@ class MultilingualQuerySet(QuerySet):
     def __reduce__(self):
         return multilingual_queryset_factory, (self.__class__.__bases__[0],), self.__getstate__()
 
-    def _clone(self):
+    def _clone(self) -> Self:
         return self.__clone()
 
-    def __clone(self, **kwargs):
+    def __clone(self, **kwargs: Any) -> Self:
         # This method is private, so outside code can use default _clone without `kwargs`,
         # and we're here can use private version with `kwargs`.
         # Refs: https://github.com/deschler/django-modeltranslation/issues/483
@@ -211,16 +215,16 @@ class MultilingualQuerySet(QuerySet):
         cloned.__dict__.update(kwargs)
         return cloned
 
-    def rewrite(self, mode=True):
+    def rewrite(self, mode: bool = True) -> Self:
         return self.__clone(_rewrite=mode)
 
-    def populate(self, mode="all"):
+    def populate(self, mode: AutoPopulate = "all") -> Self:
         """
         Overrides the translation fields population mode for this query set.
         """
         return self.__clone(_populate=mode)
 
-    def _rewrite_applied_operations(self):
+    def _rewrite_applied_operations(self) -> None:
         """
         Rewrite fields in already applied filters/ordering.
         Useful when converting any QuerySet into MultilingualQuerySet.
@@ -230,7 +234,7 @@ class MultilingualQuerySet(QuerySet):
         self._rewrite_select_related()
 
     # This method was not present in django-linguo
-    def select_related(self, *fields, **kwargs):
+    def select_related(self, *fields: Any, **kwargs: Any) -> Self:
         if not self._rewrite:
             return super().select_related(*fields, **kwargs)
         # TO CONSIDER: whether this should rewrite only current language, or all languages?
@@ -246,7 +250,7 @@ class MultilingualQuerySet(QuerySet):
         return super().select_related(*new_args, **kwargs)
 
     # This method was not present in django-linguo
-    def _rewrite_col(self, col):
+    def _rewrite_col(self, col: Col) -> None:
         """Django >= 1.7 column name rewriting"""
         if isinstance(col, Col):
             new_name = rewrite_lookup_key(self.model, col.target.name)
@@ -260,7 +264,7 @@ class MultilingualQuerySet(QuerySet):
         elif hasattr(col, "lhs"):
             self._rewrite_col(col.lhs)
 
-    def _rewrite_where(self, q):
+    def _rewrite_where(self, q: Lookup | Node) -> None:
         """
         Rewrite field names inside WHERE tree.
         """
@@ -270,12 +274,12 @@ class MultilingualQuerySet(QuerySet):
             for child in q.children:
                 self._rewrite_where(child)
 
-    def _rewrite_order(self):
+    def _rewrite_order(self) -> None:
         self.query.order_by = [
             rewrite_order_lookup_key(self.model, field_name) for field_name in self.query.order_by
         ]
 
-    def _rewrite_select_related(self):
+    def _rewrite_select_related(self) -> None:
         if isinstance(self.query.select_related, dict):
             new = {}
             for field_name, value in self.query.select_related.items():
@@ -283,7 +287,7 @@ class MultilingualQuerySet(QuerySet):
             self.query.select_related = new
 
     # This method was not present in django-linguo
-    def _rewrite_q(self, q):
+    def _rewrite_q(self, q: Node | tuple[str, Any]) -> Any:
         """Rewrite field names inside Q call."""
         if isinstance(q, tuple) and len(q) == 2:
             return rewrite_lookup_key(self.model, q[0]), q[1]
@@ -292,7 +296,7 @@ class MultilingualQuerySet(QuerySet):
         return q
 
     # This method was not present in django-linguo
-    def _rewrite_f(self, q):
+    def _rewrite_f(self, q: models.F | Node) -> models.F | Node:
         """
         Rewrite field names inside F call.
         """
@@ -373,7 +377,7 @@ class MultilingualQuerySet(QuerySet):
 
     update.alters_data = True
 
-    def _update(self, values: List[Tuple[Field, Optional[Type[Model]], Any]]):
+    def _update(self, values: list[tuple[Field, type[Model] | None, Any]]):
         """
         This method is called in .save() method to update an existing record.
         Here we force to update translation fields as well if the original
@@ -547,7 +551,14 @@ class FallbackFlatValuesListIterable(FallbackValuesListIterable):
             yield row[0]
 
 
-def multilingual_queryset_factory(old_cls, instantiate=True):
+@overload
+def multilingual_queryset_factory(old_cls: type[Any], instantiate: Literal[False]) -> type[MultilingualQuerySet]: ...
+
+@overload
+def multilingual_queryset_factory(old_cls: type[Any], instantiate: Literal[True] = ...) -> MultilingualQuerySet: ...
+
+
+def multilingual_queryset_factory(old_cls: type[Any], instantiate: bool = True) -> type[MultilingualQuerySet] | MultilingualQuerySet:
     if old_cls == models.query.QuerySet:
         NewClass = MultilingualQuerySet
     else:
@@ -559,34 +570,34 @@ def multilingual_queryset_factory(old_cls, instantiate=True):
     return NewClass() if instantiate else NewClass
 
 
-class MultilingualQuerysetManager(models.Manager):
+class MultilingualQuerysetManager(models.Manager[_T]):
     """
     This class gets hooked in MRO just before plain Manager, so that every call to
     get_queryset returns MultilingualQuerySet.
     """
 
-    def get_queryset(self):
+    def get_queryset(self) -> MultilingualQuerySet[_T]:
         qs = super().get_queryset()
         return self._patch_queryset(qs)
 
-    def _patch_queryset(self, qs):
+    def _patch_queryset(self, qs: QuerySet[_T]) -> MultilingualQuerySet[_T]:
         qs.__class__ = multilingual_queryset_factory(qs.__class__, instantiate=False)
         qs._post_init()
         qs._rewrite_applied_operations()
         return qs
 
 
-class MultilingualManager(MultilingualQuerysetManager):
-    def rewrite(self, *args, **kwargs):
+class MultilingualManager(MultilingualQuerysetManager[_T]):
+    def rewrite(self, *args: Any, **kwargs: Any):
         return self.get_queryset().rewrite(*args, **kwargs)
 
-    def populate(self, *args, **kwargs):
+    def populate(self, *args: Any, **kwargs: Any):
         return self.get_queryset().populate(*args, **kwargs)
 
-    def raw_values(self, *args, **kwargs):
+    def raw_values(self, *args: Any, **kwargs: Any):
         return self.get_queryset().raw_values(*args, **kwargs)
 
-    def get_queryset(self):
+    def get_queryset(self) -> MultilingualQuerySet[_T]:
         """
         This method is repeated because some managers that don't use super() or alter queryset class
         may return queryset that is not subclass of MultilingualQuerySet.

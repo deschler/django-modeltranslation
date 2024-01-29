@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import copy
-from typing import Any, Sequence
+from typing import Any, Sequence, cast
 
 from django import VERSION, forms
 from django.core.exceptions import ImproperlyConfigured
@@ -76,7 +76,7 @@ def create_translation_field(model: type[Model], field_name: str, lang: str, emp
     """
     if empty_value not in ("", "both", None, NONE):
         raise ImproperlyConfigured("%s is not a valid empty_value." % empty_value)
-    field = model._meta.get_field(field_name)
+    field = cast(fields.Field, model._meta.get_field(field_name))
     cls_name = field.__class__.__name__
     if not (isinstance(field, SUPPORTED_FIELDS) or cls_name in mt_settings.CUSTOM_FIELDS):
         raise ImproperlyConfigured("%s is not supported by modeltranslation." % cls_name)
@@ -85,7 +85,7 @@ def create_translation_field(model: type[Model], field_name: str, lang: str, emp
 
 
 def field_factory(baseclass: type[fields.Field]) -> type[TranslationField]:
-    class TranslationFieldSpecific(TranslationField, baseclass):
+    class TranslationFieldSpecific(TranslationField, baseclass):  # type: ignore[valid-type, misc]
         pass
 
     # Reflect baseclass name of returned subclass
@@ -145,7 +145,7 @@ class TranslationField:
         trans_opts = translator.get_options_for_model(self.model)
         if trans_opts.required_languages:
             required_languages = trans_opts.required_languages
-            if isinstance(trans_opts.required_languages, (tuple, list)):
+            if isinstance(required_languages, (tuple, list)):
                 # All fields
                 if self.language in required_languages:
                     # self.null = False
@@ -514,11 +514,11 @@ class LanguageCacheSingleObjectDescriptor:
         Used in django 1.x
         """
         lang = get_language()
-        cache = build_localized_fieldname(self.accessor, lang)
+        cache = build_localized_fieldname(self.accessor, lang)  # type: ignore[arg-type]
         return "_%s_cache" % cache
 
     def get_cache_name(self) -> str:
         """
         Used in django > 2.x
         """
-        return build_localized_fieldname(self.accessor, get_language())
+        return build_localized_fieldname(self.accessor, get_language())  # type: ignore[arg-type]
