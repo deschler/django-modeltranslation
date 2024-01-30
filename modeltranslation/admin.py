@@ -1,9 +1,15 @@
+from __future__ import annotations
+
 from copy import deepcopy
+from typing import Any
 
 from django import forms
+from django.db.models import Field as DbField
 from django.contrib import admin
 from django.contrib.admin.options import BaseModelAdmin, InlineModelAdmin, flatten_fieldsets
 from django.contrib.contenttypes.admin import GenericStackedInline, GenericTabularInline
+from django.forms.models import BaseInlineFormSet
+from django.http.request import HttpRequest
 
 from modeltranslation import settings as mt_settings
 from modeltranslation.translator import translator
@@ -22,12 +28,12 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
     _orig_was_required = {}
     both_empty_values_fields = ()
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.trans_opts = translator.get_options_for_model(self.model)
         self._patch_prepopulated_fields()
 
-    def _get_declared_fieldsets(self, request, obj=None):
+    def _get_declared_fieldsets(self, request: HttpRequest, obj: Any | None = None) -> list | None:
         # Take custom modelform fields option into account
         if not self.fields and hasattr(self.form, "_meta") and self.form._meta.fields:
             self.fields = self.form._meta.fields
@@ -43,12 +49,12 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
             return [(None, {"fields": self.replace_orig_field(self.get_fields(request, obj))})]
         return None
 
-    def formfield_for_dbfield(self, db_field, request, **kwargs):
+    def formfield_for_dbfield(self, db_field: DbField, request: HttpRequest, **kwargs: Any) -> forms.Field | None:
         field = super().formfield_for_dbfield(db_field, request, **kwargs)
         self.patch_translation_field(db_field, field, request, **kwargs)
         return field
 
-    def patch_translation_field(self, db_field, field, request, **kwargs):
+    def patch_translation_field(self, db_field: DbField, field: forms.Field, request: HttpRequest, **kwargs: Any) -> None:
         if db_field.name in self.trans_opts.fields:
             if field.required:
                 field.required = False
@@ -113,7 +119,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
                         field.widget = field.widget.widget
             self._get_widget_from_field(field).attrs["class"] = " ".join(css_classes)
 
-    def _get_widget_from_field(self, field):
+    def _get_widget_from_field(self, field: forms.Field) -> Any:
         # retrieve "nested" widget in case of related field
         if isinstance(field.widget, admin.widgets.RelatedFieldWidgetWrapper):
             return field.widget.widget
@@ -359,11 +365,11 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
 
 
 class TranslationInlineModelAdmin(TranslationBaseModelAdmin, InlineModelAdmin):
-    def get_formset(self, request, obj=None, **kwargs):
+    def get_formset(self, request: HttpRequest, obj: Any | None = None, **kwargs: Any) -> type[BaseInlineFormSet]:
         kwargs = self._get_form_or_formset(request, obj, **kwargs)
         return super().get_formset(request, obj, **kwargs)
 
-    def get_fieldsets(self, request, obj=None):
+    def get_fieldsets(self, request: HttpRequest, obj: Any | None = None):
         # FIXME: If fieldsets are declared on an inline some kind of ghost
         # fieldset line with just the original model verbose_name of the model
         # is displayed above the new fieldsets.
