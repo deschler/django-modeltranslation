@@ -8,12 +8,13 @@ from __future__ import annotations
 
 import itertools
 from functools import reduce
-from typing import Any, TypeVar, Literal, overload
+from typing import Any, Iterator, TypeVar, Literal, overload
 
 from django import VERSION
 from django.contrib.admin.utils import get_model_from_relation
 from django.core.exceptions import FieldDoesNotExist
 from django.db import models
+from django.db.backends.utils import CursorWrapper
 from django.db.models import Field, Model
 from django.db.models.expressions import Col
 from django.db.models.lookups import Lookup
@@ -312,7 +313,7 @@ class MultilingualQuerySet(QuerySet[_T]):
             q.rhs = self._rewrite_f(q.rhs)
         return q
 
-    def _rewrite_filter_or_exclude(self, args, kwargs):
+    def _rewrite_filter_or_exclude(self, args: Any, kwargs: Any) -> tuple[Any, Any]:
         if not self._rewrite:
             return args, kwargs
         args = tuple(map(self._rewrite_q, args))
@@ -324,17 +325,17 @@ class MultilingualQuerySet(QuerySet[_T]):
 
     if VERSION >= (3, 2):
 
-        def _filter_or_exclude(self, negate, args, kwargs):
+        def _filter_or_exclude(self, negate: bool, args: Any, kwargs: Any) -> Self:
             args, kwargs = self._rewrite_filter_or_exclude(args, kwargs)
             return super()._filter_or_exclude(negate, args, kwargs)
 
     else:
 
-        def _filter_or_exclude(self, negate, *args, **kwargs):
+        def _filter_or_exclude(self, negate: bool, *args: Any, **kwargs: Any) -> Self:
             args, kwargs = self._rewrite_filter_or_exclude(args, kwargs)
             return super()._filter_or_exclude(negate, *args, **kwargs)
 
-    def _get_original_fields(self):
+    def _get_original_fields(self) -> list[str]:
         source = (
             self.model._meta.concrete_fields
             if hasattr(self.model._meta, "concrete_fields")
@@ -342,7 +343,7 @@ class MultilingualQuerySet(QuerySet[_T]):
         )
         return [f.attname for f in source if not isinstance(f, TranslationField)]
 
-    def order_by(self, *field_names):
+    def order_by(self, *field_names: Any) -> Self:
         """
         Change translatable field names in an ``order_by`` argument
         to translation fields for the current language.
@@ -354,7 +355,7 @@ class MultilingualQuerySet(QuerySet[_T]):
             new_args.append(rewrite_order_lookup_key(self.model, key))
         return super().order_by(*new_args)
 
-    def distinct(self, *field_names):
+    def distinct(self, *field_names: Any) -> Self:
         """
         Change translatable field names in an ``distinct`` argument
         to translation fields for the current language.
@@ -366,7 +367,7 @@ class MultilingualQuerySet(QuerySet[_T]):
             new_args.append(rewrite_order_lookup_key(self.model, key))
         return super().distinct(*new_args)
 
-    def update(self, **kwargs):
+    def update(self, **kwargs: Any) -> int:
         if not self._rewrite:
             return super().update(**kwargs)
         for key, val in list(kwargs.items()):
@@ -377,7 +378,7 @@ class MultilingualQuerySet(QuerySet[_T]):
 
     update.alters_data = True
 
-    def _update(self, values: list[tuple[Field, type[Model] | None, Any]]):
+    def _update(self, values: list[tuple[Field, type[Model] | None, Any]]) -> CursorWrapper:
         """
         This method is called in .save() method to update an existing record.
         Here we force to update translation fields as well if the original
@@ -400,14 +401,14 @@ class MultilingualQuerySet(QuerySet[_T]):
 
     # This method was not present in django-linguo
     @property
-    def _populate_mode(self):
+    def _populate_mode(self) -> AutoPopulate:
         # Populate can be set using a global setting or a manager method.
         if self._populate is None:
             return auto_populate_mode()
         return self._populate
 
     # This method was not present in django-linguo
-    def create(self, **kwargs):
+    def create(self, **kwargs: Any) -> _T:
         """
         Allows to override population mode with a ``populate`` method.
         """
@@ -415,7 +416,7 @@ class MultilingualQuerySet(QuerySet[_T]):
             return super().create(**kwargs)
 
     # This method was not present in django-linguo
-    def get_or_create(self, *args, **kwargs):
+    def get_or_create(self, *args: Any, **kwargs: Any) -> tuple[_T, bool]:
         """
         Allows to override population mode with a ``populate`` method.
         """
@@ -423,20 +424,20 @@ class MultilingualQuerySet(QuerySet[_T]):
             return super().get_or_create(*args, **kwargs)
 
     # This method was not present in django-linguo
-    def defer(self, *fields):
+    def defer(self, *fields: Any) -> Self:
         fields = append_lookup_keys(self.model, fields)
         return super().defer(*fields)
 
     # This method was not present in django-linguo
-    def only(self, *fields):
+    def only(self, *fields: Any) -> Self:
         fields = append_lookup_keys(self.model, fields)
         return super().only(*fields)
 
     # This method was not present in django-linguo
-    def raw_values(self, *fields, **expressions):
+    def raw_values(self, *fields: str, **expressions: Any) -> Self:
         return super().values(*fields, **expressions)
 
-    def _values(self, *original, **kwargs):
+    def _values(self, *original: str, **kwargs: Any) -> Self:
         selects_all = kwargs.pop("selects_all", False)
         if not kwargs.pop("prepare", False):
             return super()._values(*original, **kwargs)
@@ -449,7 +450,7 @@ class MultilingualQuerySet(QuerySet[_T]):
         return clone
 
     # This method was not present in django-linguo
-    def values(self, *fields, **expressions):
+    def values(self, *fields: str, **expressions: Any) -> Self:
         if not self._rewrite:
             return super().values(*fields, **expressions)
         selects_all = not fields
@@ -462,7 +463,7 @@ class MultilingualQuerySet(QuerySet[_T]):
         return clone
 
     # This method was not present in django-linguo
-    def values_list(self, *fields, flat=False, named=False):
+    def values_list(self, *fields: str, flat: bool = False, named: bool = False) -> Self:
         if not self._rewrite:
             return super().values_list(*fields, flat=flat, named=named)
         if flat and named:
@@ -504,7 +505,7 @@ class MultilingualQuerySet(QuerySet[_T]):
         return clone
 
     # This method was not present in django-linguo
-    def dates(self, field_name, *args, **kwargs):
+    def dates(self, field_name: str, *args: Any, **kwargs: Any) -> Self:
         if not self._rewrite:
             return super().dates(field_name, *args, **kwargs)
         new_key = rewrite_lookup_key(self.model, field_name)
@@ -516,7 +517,7 @@ class FallbackValuesIterable(ValuesIterable):
         # This stupid class is needed as object use __slots__ and has no __dict__.
         pass
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[dict[str, Any]]:
         instance = self.X()
 
         fields = self.queryset.original_fields
@@ -531,13 +532,13 @@ class FallbackValuesIterable(ValuesIterable):
 
 
 class FallbackValuesListIterable(FallbackValuesIterable):
-    def __iter__(self):
+    def __iter__(self) -> Iterator[tuple[Any, ...]]:
         for row in super().__iter__():
             yield tuple(row.values())
 
 
 class FallbackNamedValuesListIterable(FallbackValuesIterable):
-    def __iter__(self):
+    def __iter__(self) -> Iterator[tuple[Any, ...]]:
         for row in super().__iter__():
             names, values = row.keys(), row.values()
             tuple_class = create_namedtuple_class(*names)
@@ -546,7 +547,7 @@ class FallbackNamedValuesListIterable(FallbackValuesIterable):
 
 
 class FallbackFlatValuesListIterable(FallbackValuesListIterable):
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Any]:
         for row in super().__iter__():
             yield row[0]
 
