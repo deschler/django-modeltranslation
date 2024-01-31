@@ -21,7 +21,7 @@ from ._typing import AutoPopulate
 _T = TypeVar("_T")
 
 
-def get_language() -> str | None:
+def get_language() -> str:
     """
     Return an active language code that is guaranteed to be in
     settings.LANGUAGES (Django does not seem to guarantee this for us).
@@ -33,7 +33,7 @@ def get_language() -> str | None:
         lang = lang.split("-")[0]
     if lang in settings.AVAILABLE_LANGUAGES:
         return lang
-    return settings.DEFAULT_LANGUAGE
+    return settings.DEFAULT_LANGUAGE  # type: ignore[return-value] # TODO can it really be None?
 
 
 def get_language_bidi(lang: str) -> bool:
