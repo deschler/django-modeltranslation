@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import itertools
 from functools import reduce
-from typing import Any, Iterator, TypeVar, Literal, overload
+from typing import Any, Container, Iterator, TypeVar, Literal, overload
 
 from django import VERSION
 from django.contrib.admin.utils import get_model_from_relation
@@ -95,7 +95,7 @@ def append_translated(model: type[Model], fields: tuple[str, ...]) -> set[str]:
     from modeltranslation.translator import translator
 
     opts = translator.get_options_for_model(model)
-    for key, translated in opts.fields_set.items():
+    for key, translated in opts.fields_set.items():  # type: ignore[attr-defined] # TODO `fields` instead?
         if key in fields_set:
             fields_set = fields_set.union(f.name for f in translated)
     return fields_set
@@ -119,16 +119,16 @@ def append_lookup_key(model: type[Model], lookup_key: str) -> set[str]:
     return fields
 
 
-def append_lookup_keys(model: type[Model], fields: tuple[str, ...]):
+def append_lookup_keys(model: type[Model], fields: tuple[str, ...]) -> set[str]:
     new_fields = []
     for field in fields:
         try:
-            new_field = append_lookup_key(model, field)
+            new_field: Container[str] = append_lookup_key(model, field)
         except AttributeError:
             new_field = (field,)
         new_fields.append(new_field)
 
-    return reduce(set.union, new_fields, set())
+    return reduce(set.union, new_fields, set())  # type: ignore[arg-type]
 
 
 def rewrite_order_lookup_key(model: type[Model], lookup_key: str) -> str:

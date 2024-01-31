@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import Any
+from typing import Any, Iterable, Sequence, cast
 
 from django import forms
 from django.db.models import Field as DbField
@@ -12,6 +12,7 @@ from django.forms.models import BaseInlineFormSet
 from django.http.request import HttpRequest
 
 from modeltranslation import settings as mt_settings
+from modeltranslation.fields import TranslationField
 from modeltranslation.translator import translator
 from modeltranslation.utils import (
     build_css_class,
@@ -22,6 +23,7 @@ from modeltranslation.utils import (
     unique,
 )
 from modeltranslation.widgets import ClearableWidgetWrapper
+from modeltranslation._typing import _ListOrTuple
 
 
 class TranslationBaseModelAdmin(BaseModelAdmin):
@@ -68,7 +70,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         except AttributeError:
             pass
         else:
-            orig_formfield = self.formfield_for_dbfield(orig_field, request, **kwargs)
+            orig_formfield = cast(forms.Field, self.formfield_for_dbfield(orig_field, request, **kwargs))
             field.widget = deepcopy(orig_formfield.widget)
             attrs = field.widget.attrs
             # if any widget attrs are defined on the form they should be copied
@@ -126,7 +128,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         else:
             return field.widget
 
-    def _exclude_original_fields(self, exclude=None):
+    def _exclude_original_fields(self, exclude: _ListOrTuple[str] | None = None) -> tuple[str, ...]:
         if exclude is None:
             exclude = tuple()
         if exclude:
@@ -134,7 +136,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
             return exclude_new + tuple(self.trans_opts.fields.keys())
         return tuple(self.trans_opts.fields.keys())
 
-    def replace_orig_field(self, option):
+    def replace_orig_field(self, option: Iterable[str]) -> _ListOrTuple[str]:
         """
         Replaces each original field in `option` that is registered for
         translation by its translation fields.
@@ -171,9 +173,9 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
                     index = option_new.index(opt)
                     option_new[index : index + 1] = self.replace_orig_field(opt)
             option = option_new
-        return option
+        return option  # type: ignore[return-value]
 
-    def _patch_fieldsets(self, fieldsets):
+    def _patch_fieldsets(self, fieldsets: _ListOrTuple[tuple[str, dict[str, Any]]]) -> _ListOrTuple[tuple[str, dict[str, Any]]]:
         if fieldsets:
             fieldsets_new = list(fieldsets)
             for name, dct in fieldsets:
@@ -182,18 +184,18 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
             fieldsets = fieldsets_new
         return fieldsets
 
-    def _patch_prepopulated_fields(self):
-        def localize(sources, lang):
+    def _patch_prepopulated_fields(self) -> None:
+        def localize(sources: Sequence[str], lang: str)  -> tuple[str, ...]:
             "Append lang suffix (if applicable) to field list"
 
-            def append_lang(source):
+            def append_lang(source: str) -> str:
                 if source in self.trans_opts.fields:
                     return build_localized_fieldname(source, lang)
                 return source
 
             return tuple(map(append_lang, sources))
 
-        prepopulated_fields = {}
+        prepopulated_fields: dict[str, Sequence[str]] = {}
         for dest, sources in self.prepopulated_fields.items():
             if dest in self.trans_opts.fields:
                 for lang in mt_settings.AVAILABLE_LANGUAGES:
@@ -204,7 +206,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
                 prepopulated_fields[dest] = localize(sources, lang)
         self.prepopulated_fields = prepopulated_fields
 
-    def _get_form_or_formset(self, request, obj, **kwargs):
+    def _get_form_or_formset(self, request: HttpRequest, obj: Any | None, **kwargs: Any) -> dict[str, Any]:
         """
         Generic code shared by get_form and get_formset.
         """
@@ -226,14 +228,14 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
 
         return kwargs
 
-    def _get_fieldsets_pre_form_or_formset(self, request, obj=None):
+    def _get_fieldsets_pre_form_or_formset(self, request: HttpRequest, obj: Any | None = None) -> list | None:
         """
         Generic get_fieldsets code, shared by
         TranslationAdmin and TranslationInlineModelAdmin.
         """
         return self._get_declared_fieldsets(request, obj)
 
-    def _get_fieldsets_post_form_or_formset(self, request, form, obj=None):
+    def _get_fieldsets_post_form_or_formset(self, request: HttpRequest, form: type[forms.ModelForm], obj: Any | None = None) -> list:
         """
         Generic get_fieldsets code, shared by
         TranslationAdmin and TranslationInlineModelAdmin.
@@ -242,7 +244,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         fields = list(base_fields) + list(self.get_readonly_fields(request, obj))
         return [(None, {"fields": self.replace_orig_field(fields)})]
 
-    def get_translation_field_excludes(self, exclude_languages=None):
+    def get_translation_field_excludes(self, exclude_languages: list[str] | None = None) -> tuple[TranslationField, ...]:
         """
         Returns a tuple of translation field names to exclude based on
         `exclude_languages` arg.
@@ -260,7 +262,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
                     exclude.append(tfield)
         return tuple(exclude)
 
-    def get_readonly_fields(self, request, obj=None):
+    def get_readonly_fields(self, request: HttpRequest, obj: Any | None = None) -> _ListOrTuple[str]:
         """
         Hook to specify custom readonly fields.
         """
@@ -271,11 +273,11 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
     # TODO: Consider addition of a setting which allows to override the fallback to True
     group_fieldsets = False
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self._patch_list_editable()
 
-    def _patch_list_editable(self):
+    def _patch_list_editable(self) -> None:
         if self.list_editable:
             editable_new = list(self.list_editable)
             display_new = list(self.list_display)
@@ -289,7 +291,7 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
             self.list_editable = editable_new
             self.list_display = display_new
 
-    def _group_fieldsets(self, fieldsets):
+    def _group_fieldsets(self, fieldsets: list) -> list:
         # Fieldsets are not grouped by default. The function is activated by
         # setting TranslationAdmin.group_fieldsets to True. If the admin class
         # already defines a fieldset, we leave it alone and assume the author
@@ -298,7 +300,7 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
             flattened_fieldsets = flatten_fieldsets(fieldsets)
 
             # Create a fieldset to group each translated field's localized fields
-            fields = sorted(f for f in self.opts.get_fields() if f.concrete)
+            fields = sorted(f for f in self.opts.get_fields() if f.concrete)  # type: ignore[type-var]
             untranslated_fields = [
                 f.name
                 for f in fields
@@ -352,11 +354,11 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
 
         return fieldsets
 
-    def get_form(self, request, obj=None, **kwargs):
+    def get_form(self, request: HttpRequest, obj: Any | None = None, **kwargs: Any) -> type[forms.ModelForm]:
         kwargs = self._get_form_or_formset(request, obj, **kwargs)
         return super().get_form(request, obj, **kwargs)
 
-    def get_fieldsets(self, request, obj=None):
+    def get_fieldsets(self, request: HttpRequest, obj: Any | None = None) -> list:
         return self._get_fieldsets_pre_form_or_formset(request, obj) or self._group_fieldsets(
             self._get_fieldsets_post_form_or_formset(
                 request, self.get_form(request, obj, fields=None), obj
