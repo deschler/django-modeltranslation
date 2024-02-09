@@ -16,11 +16,10 @@ AVAILABLE_LANGUAGES: list[str] = list(
         (val for val, label in settings.LANGUAGES),
     )
 )
-DEFAULT_LANGUAGE: str | None = getattr(settings, "MODELTRANSLATION_DEFAULT_LANGUAGE", None)
-if DEFAULT_LANGUAGE and DEFAULT_LANGUAGE not in AVAILABLE_LANGUAGES:
+_default_language: str | None = getattr(settings, "MODELTRANSLATION_DEFAULT_LANGUAGE", None)
+if _default_language and _default_language not in AVAILABLE_LANGUAGES:
     raise ImproperlyConfigured("MODELTRANSLATION_DEFAULT_LANGUAGE not in LANGUAGES setting.")
-elif not DEFAULT_LANGUAGE:
-    DEFAULT_LANGUAGE = AVAILABLE_LANGUAGES[0]
+DEFAULT_LANGUAGE = _default_language or AVAILABLE_LANGUAGES[0]
 
 # Fixed base language for prepopulated fields (slugs)
 # (If not set, the current request language will be used)

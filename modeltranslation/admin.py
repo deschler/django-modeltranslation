@@ -27,7 +27,7 @@ from modeltranslation._typing import _ListOrTuple
 
 
 class TranslationBaseModelAdmin(BaseModelAdmin):
-    _orig_was_required = {}
+    _orig_was_required: dict[str, bool] = {}
     both_empty_values_fields = ()
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
@@ -35,7 +35,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         self.trans_opts = translator.get_options_for_model(self.model)
         self._patch_prepopulated_fields()
 
-    def _get_declared_fieldsets(self, request: HttpRequest, obj: Any | None = None) -> list | None:
+    def _get_declared_fieldsets(self, request: HttpRequest, obj: Any | None = None) -> _ListOrTuple[tuple[str | None, dict[str, Any]]] | None:
         # Take custom modelform fields option into account
         if not self.fields and hasattr(self.form, "_meta") and self.form._meta.fields:
             self.fields = self.form._meta.fields
@@ -51,10 +51,10 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
             return [(None, {"fields": self.replace_orig_field(self.get_fields(request, obj))})]
         return None
 
-    def formfield_for_dbfield(self, db_field: DbField, request: HttpRequest, **kwargs: Any) -> forms.Field | None:
+    def formfield_for_dbfield(self, db_field: DbField, request: HttpRequest, **kwargs: Any) -> forms.Field:  # type: ignore[return-value]
         field = super().formfield_for_dbfield(db_field, request, **kwargs)
-        self.patch_translation_field(db_field, field, request, **kwargs)
-        return field
+        self.patch_translation_field(db_field, field, request, **kwargs)  # type: ignore[arg-type]
+        return field  # type: ignore[return-value]
 
     def patch_translation_field(self, db_field: DbField, field: forms.Field, request: HttpRequest, **kwargs: Any) -> None:
         if db_field.name in self.trans_opts.fields:
@@ -75,7 +75,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
             attrs = field.widget.attrs
             # if any widget attrs are defined on the form they should be copied
             try:
-                field.widget = deepcopy(self.form._meta.widgets[orig_field.name])  # this is a class
+                field.widget = deepcopy(self.form._meta.widgets[orig_field.name])  # type: ignore[index]
                 if isinstance(field.widget, type):  # if not initialized
                     field.widget = field.widget(attrs)  # initialize form widget with attrs
             except (AttributeError, TypeError, KeyError):
@@ -175,7 +175,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
             option = option_new
         return option  # type: ignore[return-value]
 
-    def _patch_fieldsets(self, fieldsets: _ListOrTuple[tuple[str, dict[str, Any]]]) -> _ListOrTuple[tuple[str, dict[str, Any]]]:
+    def _patch_fieldsets(self, fieldsets: _ListOrTuple[tuple[str | None, dict[str, Any]]]) -> _ListOrTuple[tuple[str | None, dict[str, Any]]]:
         if fieldsets:
             fieldsets_new = list(fieldsets)
             for name, dct in fieldsets:
@@ -228,7 +228,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
 
         return kwargs
 
-    def _get_fieldsets_pre_form_or_formset(self, request: HttpRequest, obj: Any | None = None) -> list | None:
+    def _get_fieldsets_pre_form_or_formset(self, request: HttpRequest, obj: Any | None = None) -> _ListOrTuple[tuple[str | None, dict[str, Any]]] | None:
         """
         Generic get_fieldsets code, shared by
         TranslationAdmin and TranslationInlineModelAdmin.
@@ -358,7 +358,7 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
         kwargs = self._get_form_or_formset(request, obj, **kwargs)
         return super().get_form(request, obj, **kwargs)
 
-    def get_fieldsets(self, request: HttpRequest, obj: Any | None = None) -> list:
+    def get_fieldsets(self, request: HttpRequest, obj: Any | None = None) -> _ListOrTuple[tuple[str | None, dict[str, Any]]]:
         return self._get_fieldsets_pre_form_or_formset(request, obj) or self._group_fieldsets(
             self._get_fieldsets_post_form_or_formset(
                 request, self.get_form(request, obj, fields=None), obj

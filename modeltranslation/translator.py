@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 from functools import partial
-from typing import Any, Callable, ClassVar, Collection, Iterable, Sequence
+from typing import Any, Callable, ClassVar, Collection, Iterable, Sequence, cast
 
 import django
 from django.core.exceptions import ImproperlyConfigured
-from django.db.models import ForeignKey, Manager, ManyToManyField, Model, OneToOneField, options
+from django.db.models import Field, ForeignKey, Manager, ManyToManyField, Model, OneToOneField, options
 from django.db.models.base import ModelBase
 from django.db.models.signals import post_init
 from django.utils.functional import cached_property
@@ -111,7 +111,7 @@ class TranslationOptions(metaclass=FieldsAggregationMetaClass):
 
     def _check_languages(
         self,
-        languages: _ListOrTuple[str] | dict[str, _ListOrTuple[str]],
+        languages: Collection[str],
         extra: tuple[str, ...] = (),
     ) -> None:
         correct = list(mt_settings.AVAILABLE_LANGUAGES) + list(extra)
@@ -249,7 +249,7 @@ def add_manager(model: type[Model]) -> None:
         return
     # Make all managers local for this model to fix patching parent model managers
     added = set(model._meta.managers) - set(model._meta.local_managers)
-    model._meta.local_managers = model._meta.managers
+    model._meta.local_managers = model._meta.managers  # type: ignore[assignment]
 
     for current_manager in model._meta.local_managers:
         prev_class = current_manager.__class__
@@ -301,7 +301,7 @@ def patch_clean_fields(model: type[Model]):
     old_clean_fields = model.clean_fields
 
     def new_clean_fields(self, exclude: Collection[str] | None = None) -> None:
-        if hasattr(self, "_mt_form_pending_clear"):
+        if hasattr(self, "_mt_form_pending_clear") and exclude is not None:
             # Some form translation fields has been marked as clearing value.
             # Check if corresponding translated field was also saved (not excluded):
             # - if yes, it seems like form for MT-unaware app. Ignore clearing (left value from
@@ -351,7 +351,7 @@ def patch_refresh_from_db(model: type[Model]) -> None:
         self, using: str | None = None, fields: Sequence[str] | None = None
     ) -> None:
         if fields is not None:
-            fields = append_translated(self.__class__, fields)
+            fields = append_translated(self.__class__, fields)  # type: ignore[assignment]
         return old_refresh_from_db(self, using, fields)
 
     model.refresh_from_db = new_refresh_from_db
@@ -421,7 +421,7 @@ def populate_translation_fields(sender: type[Model], kwargs: Any):
                 kwargs.setdefault(default, val)
             elif populate == "required":
                 default = build_localized_fieldname(key, mt_settings.DEFAULT_LANGUAGE)
-                if not sender._meta.get_field(key).null:
+                if not sender._meta.get_field(key).null:  # type: ignore[union-attr]
                     kwargs.setdefault(default, val)
             else:
                 raise AttributeError("Unknown population mode '%s'." % populate)
@@ -552,7 +552,7 @@ class Translator:
         model_fallback_values = getattr(opts, "fallback_values", NONE)
         model_fallback_undefined = getattr(opts, "fallback_undefined", NONE)
         for field_name in opts.local_fields.keys():
-            field = model._meta.get_field(field_name)
+            field = cast(Field, model._meta.get_field(field_name))
             field_fallback_value = parse_field(model_fallback_values, field_name, NONE)
             field_fallback_undefined = parse_field(model_fallback_undefined, field_name, NONE)
             descriptor = TranslationFieldDescriptor(
@@ -585,7 +585,7 @@ class Translator:
             if isinstance(field, OneToOneField):
                 # Fix translated_field caching for SingleRelatedObjectDescriptor
                 sro_descriptor = getattr(
-                    field.remote_field.model, field.remote_field.get_accessor_name()
+                    field.remote_field.model, field.remote_field.get_accessor_name()  # type: ignore[arg-type]
                 )
                 patch_related_object_descriptor_caching(sro_descriptor)
 
