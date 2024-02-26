@@ -10,7 +10,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.8,<4"
-django = ">=3.2"
+django = ">=4.2"
 ruff = "^0.0.292"
 
 [tool.poetry.dev-dependencies]
