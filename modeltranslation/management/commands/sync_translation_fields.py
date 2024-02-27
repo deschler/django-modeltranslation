@@ -23,7 +23,7 @@ from modeltranslation.translator import translator
 from modeltranslation.utils import build_localized_fieldname
 
 
-def ask_for_confirmation(sql_sentences, model_full_name, interactive):
+def ask_for_confirmation(sql_sentences: list[str], model_full_name: str, interactive: bool) -> bool:
     print('\nSQL to synchronize "%s" schema:' % model_full_name)
     for sentence in sql_sentences:
         print("   %s" % sentence)
@@ -43,7 +43,7 @@ def ask_for_confirmation(sql_sentences, model_full_name, interactive):
             return False
 
 
-def print_missing_langs(missing_langs, field_name, model_name):
+def print_missing_langs(missing_langs: list[str], field_name: str, model_name: str) -> None:
     print(
         'Missing languages in "%s" field from "%s" model: %s'
         % (field_name, model_name, ", ".join(missing_langs))
