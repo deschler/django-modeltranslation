@@ -33,7 +33,7 @@ def get_language() -> str:
         lang = lang.split("-")[0]
     if lang in settings.AVAILABLE_LANGUAGES:
         return lang
-    return settings.DEFAULT_LANGUAGE  # type: ignore[return-value] # TODO can it really be None?
+    return settings.DEFAULT_LANGUAGE
 
 
 def get_language_bidi(lang: str) -> bool:

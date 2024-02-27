@@ -4,7 +4,7 @@ from copy import deepcopy
 from typing import Any, Iterable, Sequence, cast
 
 from django import forms
-from django.db.models import Field as DbField
+from django.db.models import Field
 from django.contrib import admin
 from django.contrib.admin.options import BaseModelAdmin, InlineModelAdmin, flatten_fieldsets
 from django.contrib.contenttypes.admin import GenericStackedInline, GenericTabularInline
@@ -51,12 +51,12 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
             return [(None, {"fields": self.replace_orig_field(self.get_fields(request, obj))})]
         return None
 
-    def formfield_for_dbfield(self, db_field: DbField, request: HttpRequest, **kwargs: Any) -> forms.Field:  # type: ignore[return-value]
+    def formfield_for_dbfield(self, db_field: Field, request: HttpRequest, **kwargs: Any) -> forms.Field:
         field = super().formfield_for_dbfield(db_field, request, **kwargs)
         self.patch_translation_field(db_field, field, request, **kwargs)  # type: ignore[arg-type]
         return field  # type: ignore[return-value]
 
-    def patch_translation_field(self, db_field: DbField, field: forms.Field, request: HttpRequest, **kwargs: Any) -> None:
+    def patch_translation_field(self, db_field: Field, field: forms.Field, request: HttpRequest, **kwargs: Any) -> None:
         if db_field.name in self.trans_opts.fields:
             if field.required:
                 field.required = False
@@ -70,11 +70,12 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         except AttributeError:
             pass
         else:
-            orig_formfield = cast(forms.Field, self.formfield_for_dbfield(orig_field, request, **kwargs))
+            orig_formfield = self.formfield_for_dbfield(orig_field, request, **kwargs)
             field.widget = deepcopy(orig_formfield.widget)
             attrs = field.widget.attrs
             # if any widget attrs are defined on the form they should be copied
             try:
+                # this is a class:
                 field.widget = deepcopy(self.form._meta.widgets[orig_field.name])  # type: ignore[index]
                 if isinstance(field.widget, type):  # if not initialized
                     field.widget = field.widget(attrs)  # initialize form widget with attrs
