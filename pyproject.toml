@@ -33,6 +33,12 @@ ignore = [
 
 [tool.mypy]
 python_version = "3.8"
+incremental = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unused_configs = true
+pretty = true
+show_error_context = true
 exclude = [
     'tests/'
 ]
