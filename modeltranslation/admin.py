@@ -137,7 +137,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
             return exclude_new + tuple(self.trans_opts.fields.keys())
         return tuple(self.trans_opts.fields.keys())
 
-    def replace_orig_field(self, option: Iterable[str]) -> _ListOrTuple[str]:
+    def replace_orig_field(self, option: Iterable[str | Sequence[str]]) -> _ListOrTuple[str]:
         """
         Replaces each original field in `option` that is registered for
         translation by its translation fields.
@@ -167,7 +167,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
             for opt in option:
                 if opt in self.trans_opts.fields:
                     index = option_new.index(opt)
-                    option_new[index : index + 1] = get_translation_fields(opt)
+                    option_new[index : index + 1] = get_translation_fields(opt)  # type: ignore[arg-type]
                 elif isinstance(opt, (tuple, list)) and (
                     [o for o in opt if o in self.trans_opts.fields]
                 ):
