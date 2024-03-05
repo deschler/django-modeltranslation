@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import Any, Iterable, Sequence, cast
+from typing import Any, Iterable, Sequence
 
 from django import forms
 from django.db.models import Field
