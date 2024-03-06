@@ -1,4 +1,6 @@
-from django.core.management.base import BaseCommand, CommandError
+from typing import Any
+
+from django.core.management.base import BaseCommand, CommandParser, CommandError
 from django.db.models import F, ManyToManyField, Q
 
 from modeltranslation.settings import AVAILABLE_LANGUAGES, DEFAULT_LANGUAGE
@@ -14,7 +16,7 @@ class Command(BaseCommand):
         " values from original fields (in all translated models)."
     )
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: CommandParser) -> None:
         parser.add_argument(
             "app_label",
             nargs="?",
@@ -34,8 +36,8 @@ class Command(BaseCommand):
             ),
         )
 
-    def handle(self, *args, **options):
-        verbosity = options["verbosity"]
+    def handle(self, *args: Any, **options: Any) -> None:
+        verbosity: int = options["verbosity"]
         if verbosity > 0:
             self.stdout.write("Using default language: %s" % DEFAULT_LANGUAGE)
 
@@ -94,9 +96,9 @@ class Command(BaseCommand):
                             for inst in getattr(model, field_name).through.objects.all()
                         )
                     continue
-                if field.empty_strings_allowed:
+                if field.empty_strings_allowed:  # type: ignore[union-attr]
                     q |= Q(**{def_lang_fieldname: ""})
 
-                model._default_manager.filter(q).rewrite(False).order_by().update(
+                model._default_manager.filter(q).rewrite(False).order_by().update(  # type: ignore[attr-defined]
                     **{def_lang_fieldname: F(field_name)}
                 )
