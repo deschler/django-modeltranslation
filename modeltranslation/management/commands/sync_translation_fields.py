@@ -141,7 +141,9 @@ class Command(BaseCommand):
             if build_localized_fieldname(field_name, lang_code) not in db_table_fields:
                 yield lang_code
 
-    def get_sync_sql(self, field_name: str, missing_langs: list[str], model: type[Model]) -> list[str]:
+    def get_sync_sql(
+        self, field_name: str, missing_langs: list[str], model: type[Model]
+    ) -> list[str]:
         """
         Returns SQL needed for sync schema for a new translatable field.
         """

@@ -1,0 +1,12 @@
+{
+  "include": ["."],
+  "pythonVersion": "3.7",
+  "pythonPlatform": "Linux",
+  "useLibraryCodeForTypes": true,
+  "strictListInference": true,
+  "reportMissingImports": "error",
+  "reportUnusedImport": "error",
+  "reportUnusedExpression": "error",
+  "reportOptionalMemberAccess": "information"
+}
+

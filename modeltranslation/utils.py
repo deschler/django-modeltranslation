@@ -27,7 +27,7 @@ def get_language() -> str:
     settings.LANGUAGES (Django does not seem to guarantee this for us).
     """
     lang = _get_language()
-    if lang is None: # Django >= 1.8
+    if lang is None:  # Django >= 1.8
         return settings.DEFAULT_LANGUAGE
     if lang not in settings.AVAILABLE_LANGUAGES and "-" in lang:
         lang = lang.split("-")[0]
