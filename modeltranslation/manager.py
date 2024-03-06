@@ -95,7 +95,7 @@ def append_translated(model: type[Model], fields: Sequence[str]) -> set[str]:
     from modeltranslation.translator import translator
 
     opts = translator.get_options_for_model(model)
-    for key, translated in opts.fields_set.items():  # type: ignore[attr-defined] # TODO `fields` instead?
+    for key, translated in opts.fields.items():
         if key in fields_set:
             fields_set = fields_set.union(f.name for f in translated)
     return fields_set
