@@ -177,7 +177,9 @@ def get_field_by_colum_name(model: type[Model], col: str) -> Field:
             return field
     assert False, "No field found for column %s" % col
 
+
 _T = TypeVar("_T", bound=Model, covariant=True)
+
 
 class MultilingualQuerySet(QuerySet[_T]):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
@@ -514,6 +516,7 @@ class MultilingualQuerySet(QuerySet[_T]):
 
 class FallbackValuesIterable(ValuesIterable):
     queryset: MultilingualQuerySet[Model]
+
     class X:
         # This stupid class is needed as object use __slots__ and has no __dict__.
         pass
@@ -554,13 +557,22 @@ class FallbackFlatValuesListIterable(FallbackValuesListIterable):
 
 
 @overload
-def multilingual_queryset_factory(old_cls: type[Any], instantiate: Literal[False]) -> type[MultilingualQuerySet]: ...
+def multilingual_queryset_factory(
+    old_cls: type[Any], instantiate: Literal[False]
+) -> type[MultilingualQuerySet]:
+    ...
+
 
 @overload
-def multilingual_queryset_factory(old_cls: type[Any], instantiate: Literal[True] = ...) -> MultilingualQuerySet: ...
+def multilingual_queryset_factory(
+    old_cls: type[Any], instantiate: Literal[True] = ...
+) -> MultilingualQuerySet:
+    ...
 
 
-def multilingual_queryset_factory(old_cls: type[Any], instantiate: bool = True) -> type[MultilingualQuerySet] | MultilingualQuerySet:
+def multilingual_queryset_factory(
+    old_cls: type[Any], instantiate: bool = True
+) -> type[MultilingualQuerySet] | MultilingualQuerySet:
     if old_cls == models.query.QuerySet:
         NewClass = MultilingualQuerySet
     else:

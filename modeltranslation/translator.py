@@ -5,7 +5,15 @@ from typing import Any, Callable, ClassVar, Collection, Iterable, Sequence, cast
 
 import django
 from django.core.exceptions import ImproperlyConfigured
-from django.db.models import Field, ForeignKey, Manager, ManyToManyField, Model, OneToOneField, options
+from django.db.models import (
+    Field,
+    ForeignKey,
+    Manager,
+    ManyToManyField,
+    Model,
+    OneToOneField,
+    options,
+)
 from django.db.models.base import ModelBase
 from django.db.models.signals import post_init
 from django.utils.functional import cached_property
@@ -585,7 +593,8 @@ class Translator:
             if isinstance(field, OneToOneField):
                 # Fix translated_field caching for SingleRelatedObjectDescriptor
                 sro_descriptor = getattr(
-                    field.remote_field.model, field.remote_field.get_accessor_name()  # type: ignore[arg-type]
+                    field.remote_field.model,
+                    field.remote_field.get_accessor_name(),  # type: ignore[arg-type]
                 )
                 patch_related_object_descriptor_caching(sro_descriptor)
 

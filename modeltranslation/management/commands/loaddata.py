@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 from typing import Any
@@ -41,7 +40,7 @@ class Command(LoadDataCommand):
             parser: CommandParser,  # type: ignore[override]
             namespace: Namespace,
             value: str,  # type: ignore[override]
-            option_string: str | None = None
+            option_string: str | None = None,
         ) -> None:
             check_mode(self, option_string, value, parser, namespace)
 
