@@ -1,6 +1,6 @@
 {
   "include": ["."],
-  "pythonVersion": "3.7",
+  "pythonVersion": "3.8",
   "pythonPlatform": "Linux",
   "useLibraryCodeForTypes": true,
   "strictListInference": true,
@@ -9,4 +9,3 @@
   "reportUnusedExpression": "error",
   "reportOptionalMemberAccess": "information"
 }
-
