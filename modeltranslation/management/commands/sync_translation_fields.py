@@ -8,17 +8,22 @@ You will need to execute this command in two cases:
 
 Credits: Heavily inspired by django-transmeta's sync_transmeta_db command.
 """
+from __future__ import annotations
+
+from typing import Any, Iterator, cast
+
 from django import VERSION
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandParser
 from django.core.management.color import no_style
 from django.db import connection
+from django.db.models import Model, Field
 
 from modeltranslation.settings import AVAILABLE_LANGUAGES
 from modeltranslation.translator import translator
 from modeltranslation.utils import build_localized_fieldname
 
 
-def ask_for_confirmation(sql_sentences, model_full_name, interactive):
+def ask_for_confirmation(sql_sentences: list[str], model_full_name: str, interactive: bool) -> bool:
     print('\nSQL to synchronize "%s" schema:' % model_full_name)
     for sentence in sql_sentences:
         print("   %s" % sentence)
@@ -38,7 +43,7 @@ def ask_for_confirmation(sql_sentences, model_full_name, interactive):
             return False
 
 
-def print_missing_langs(missing_langs, field_name, model_name):
+def print_missing_langs(missing_langs: list[str], field_name: str, model_name: str) -> None:
     print(
         'Missing languages in "%s" field from "%s" model: %s'
         % (field_name, model_name, ", ".join(missing_langs))
@@ -55,7 +60,7 @@ class Command(BaseCommand):
     if VERSION < (1, 8):
         from optparse import make_option
 
-        option_list = BaseCommand.option_list + (
+        option_list = BaseCommand.option_list + (  # type: ignore
             make_option(
                 "--noinput",
                 action="store_false",
@@ -66,7 +71,7 @@ class Command(BaseCommand):
         )
     else:
 
-        def add_arguments(self, parser):
+        def add_arguments(self, parser: CommandParser) -> None:
             (
                 parser.add_argument(
                     "--noinput",
@@ -77,7 +82,7 @@ class Command(BaseCommand):
                 ),
             )
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         """
         Command execution.
         """
@@ -120,14 +125,14 @@ class Command(BaseCommand):
         if not found_missing_fields:
             print("No new translatable fields detected")
 
-    def get_table_fields(self, db_table):
+    def get_table_fields(self, db_table: str) -> list[str]:
         """
         Gets table fields from schema.
         """
         db_table_desc = self.introspection.get_table_description(self.cursor, db_table)
         return [t[0] for t in db_table_desc]
 
-    def get_missing_languages(self, field_name, db_table):
+    def get_missing_languages(self, field_name: str, db_table: str) -> Iterator[str]:
         """
         Gets only missing fields.
         """
@@ -136,19 +141,21 @@ class Command(BaseCommand):
             if build_localized_fieldname(field_name, lang_code) not in db_table_fields:
                 yield lang_code
 
-    def get_sync_sql(self, field_name, missing_langs, model):
+    def get_sync_sql(
+        self, field_name: str, missing_langs: list[str], model: type[Model]
+    ) -> list[str]:
         """
         Returns SQL needed for sync schema for a new translatable field.
         """
         qn = connection.ops.quote_name
         style = no_style()
-        sql_output = []
+        sql_output: list[str] = []
         db_table = model._meta.db_table
         for lang in missing_langs:
             new_field = build_localized_fieldname(field_name, lang)
-            f = model._meta.get_field(new_field)
+            f = cast(Field, model._meta.get_field(new_field))
             col_type = f.db_type(connection=connection)
-            field_sql = [style.SQL_FIELD(qn(f.column)), style.SQL_COLTYPE(col_type)]
+            field_sql = [style.SQL_FIELD(qn(f.column)), style.SQL_COLTYPE(col_type)]  # type: ignore[arg-type]
             # column creation
             stmt = "ALTER TABLE %s ADD COLUMN %s" % (qn(db_table), " ".join(field_sql))
             if not f.null:

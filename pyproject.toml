@@ -12,15 +12,17 @@ packages = [
 python = ">=3.8,<4"
 django = ">=4.2"
 ruff = "^0.0.292"
+typing-extensions = {version = ">=4.0.1", python = "<3.11"}
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 pdbpp = "*"
 parameterized = "*"
 pytest-cov = "*"
 pytest = "*"
 pytest-sugar = "*"
 pytest-django = "*"
-django-types = "*"
+django-stubs = "^4.2.7"
+mypy = "^1.8.0"
 
 [tool.ruff]
 line-length = 100
@@ -28,3 +30,32 @@ target-version = "py38"
 ignore = [
     "E501",   # line length is handled by formatter
 ]
+
+[tool.mypy]
+python_version = "3.8"
+incremental = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unused_configs = true
+pretty = true
+show_error_context = true
+exclude = [
+    'tests/'
+]
+disable_error_code = ["method-assign"]
+
+[[tool.mypy.overrides]]
+module  = ["modeltranslation.fields"]
+disable_error_code = ["attr-defined", "has-type", "misc"]
+
+[[tool.mypy.overrides]]
+module  = ["modeltranslation.admin"]
+disable_error_code = ["override", "attr-defined"]
+
+[[tool.mypy.overrides]]
+module  = ["modeltranslation.translator"]
+disable_error_code = ["override", "attr-defined"]
+
+[[tool.mypy.overrides]]
+module = ["modeltranslation.manager"]
+disable_error_code = ["override", "attr-defined", "return-value", "misc"]

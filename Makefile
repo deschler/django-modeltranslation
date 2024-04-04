@@ -12,3 +12,6 @@ clean:
 lint:
 	ruff check modeltranslation
 	ruff format --check modeltranslation *.py
+
+typecheck:
+	mypy modeltranslation

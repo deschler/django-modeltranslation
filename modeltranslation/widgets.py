@@ -1,6 +1,13 @@
+from __future__ import annotations
+
+from typing import Any, Mapping
+
+from django.core.files.uploadedfile import UploadedFile
+from django.forms.renderers import BaseRenderer
 from django.forms.widgets import CheckboxInput, Media, Widget
+from django.utils.datastructures import MultiValueDict
 from django.utils.html import conditional_escape
-from django.utils.safestring import mark_safe
+from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import gettext_lazy as _
 
 
@@ -30,7 +37,7 @@ class ClearableWidgetWrapper(Widget):
     class Media:
         js = ("modeltranslation/js/clearable_inputs.js",)
 
-    def __init__(self, widget, empty_value=None):
+    def __init__(self, widget: Widget, empty_value: Any | None = None) -> None:
         """
         Remebers the widget we are wrapping and precreates a checkbox input.
         Allows overriding the empty value.
@@ -39,7 +46,7 @@ class ClearableWidgetWrapper(Widget):
         self.checkbox = CheckboxInput(attrs={"tabindex": "-1"})
         self.empty_value = empty_value
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         """
         If we don't have a property or a method, chances are the wrapped
         widget does.
@@ -56,7 +63,13 @@ class ClearableWidgetWrapper(Widget):
         """
         return self.widget.media + self.checkbox.media + Media(self.Media)
 
-    def render(self, name, value, attrs=None, renderer=None):
+    def render(
+        self,
+        name: str,
+        value: Any,
+        attrs: dict[str, Any] | None = None,
+        renderer: BaseRenderer | None = None,
+    ) -> SafeString:
         """
         Appends a checkbox for clearing the value (that is, setting the field
         with the ``empty_value``).
@@ -77,7 +90,9 @@ class ClearableWidgetWrapper(Widget):
             )
         )
 
-    def value_from_datadict(self, data, files, name):
+    def value_from_datadict(
+        self, data: Mapping[str, Any], files: MultiValueDict[str, UploadedFile], name: str
+    ) -> Any:
         """
         If the clear checkbox is checked returns the configured empty value,
         completely ignoring the original input.
@@ -87,13 +102,13 @@ class ClearableWidgetWrapper(Widget):
             return self.empty_value
         return self.widget.value_from_datadict(data, files, name)
 
-    def clear_checkbox_name(self, name):
+    def clear_checkbox_name(self, name: str) -> str:
         """
         Given the name of the input, returns the name of the clear checkbox.
         """
         return name + "-clear"
 
-    def clear_checkbox_id(self, name):
+    def clear_checkbox_id(self, name: str) -> str:
         """
         Given the name of the clear checkbox input, returns the HTML id for it.
         """
