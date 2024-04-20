@@ -100,7 +100,7 @@ class SetNullForeignKeyBaseModel(models.Model):
         TestModel,
         null=True,
         related_name="test_fks",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
     )
 
     class Meta:
