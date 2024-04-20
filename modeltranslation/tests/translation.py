@@ -85,6 +85,22 @@ class ForeignKeyModelTranslationOptions(TranslationOptions):
     )
 
 
+@register(models.FirstSetNullForeignKeyModel)
+class FirstSetNullForeignKeyModelTranslationOptions(TranslationOptions):
+    fields = (
+        "test",
+    )
+
+
+@register(models.SecondSetNullForeignKeyModel)
+class SecondSetNullForeignKeyModel(TranslationOptions):
+    fields = (
+        "test",
+    )
+
+
+
+
 @register(models.OneToOneFieldModel)
 class OneToOneFieldModelTranslationOptions(TranslationOptions):
     fields = (

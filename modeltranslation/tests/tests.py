@@ -1182,6 +1182,10 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         field = models.ForeignKeyModel._meta.get_field("test")
         assert field.attname != build_localized_fieldname(field.name, "id")
 
+    def test_multiple_translated_foreign_keys_delete_foreign_obj(self):
+        test = TestModel.objects.create(name="test")
+        test.delete()
+
 
 class ManyToManyFieldsTest(ModeltranslationTestBase):
     @classmethod
