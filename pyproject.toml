@@ -23,6 +23,7 @@ pytest-sugar = "*"
 pytest-django = "*"
 django-stubs = "^4.2.7"
 mypy = "^1.8.0"
+pillow = "^10.3.0"
 
 [tool.ruff]
 line-length = 100

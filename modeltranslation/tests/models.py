@@ -99,8 +99,8 @@ class SetNullForeignKeyBaseModel(models.Model):
     test = models.ForeignKey(
         TestModel,
         null=True,
-        related_name="test_fks",
         on_delete=models.SET_NULL,
+        related_name="%(app_label)s_%(class)s_set",
     )
 
     class Meta:
