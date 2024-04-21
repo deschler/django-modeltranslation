@@ -98,7 +98,7 @@ class FirstSetNullForeignKeyModelTranslationOptions(SetNullForeignKeyBaseModelTr
     ]
 
 @register(models.SecondSetNullForeignKeyModel)
-class SecondSetNullForeignKeyModel(SetNullForeignKeyBaseModelTranslationOptions, TranslationOptions):
+class SecondSetNullForeignKeyModelTranslationOptions(SetNullForeignKeyBaseModelTranslationOptions, TranslationOptions):
     fields = [
         "translated22",
     ]
