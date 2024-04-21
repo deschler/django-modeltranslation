@@ -108,11 +108,11 @@ class SetNullForeignKeyBaseModel(models.Model):
 
 
 class FirstSetNullForeignKeyModel(SetNullForeignKeyBaseModel):
-    pass
+    translated = models.TextField(default="", blank=True)
 
 
 class SecondSetNullForeignKeyModel(SetNullForeignKeyBaseModel):
-    pass
+    translated22 = models.TextField(default="", blank=True)
 
 
 class OneToOneFieldModel(models.Model):
