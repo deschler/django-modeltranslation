@@ -79,14 +79,14 @@ class AbstractWithForeignKeyModel(models.Model):
 class ForeignKeyModel(AbstractWithForeignKeyModel, models.Model):
     title = models.CharField(gettext_lazy("title"), max_length=255)
     test = models.ForeignKey(
-        "tests.TestModel",
+        TestModel,
         null=True,
         related_name="test_fks",
         on_delete=models.CASCADE,
     )
     optional = models.ForeignKey("tests.TestModel", blank=True, null=True, on_delete=models.CASCADE)
     hidden = models.ForeignKey(
-        "tests.TestModel",
+        TestModel,
         blank=True,
         null=True,
         related_name="+",
@@ -100,7 +100,7 @@ class ForeignKeyModel(AbstractWithForeignKeyModel, models.Model):
         on_delete=models.CASCADE,
     )
     untrans = models.ForeignKey(
-        "tests.TestModel",
+        TestModel,
         blank=True,
         null=True,
         related_name="test_fks_un",
