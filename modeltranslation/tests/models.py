@@ -95,6 +95,25 @@ class ForeignKeyModel(models.Model):
         on_delete=models.CASCADE,
     )
 
+class SetNullForeignKeyBaseModel(models.Model):
+    test = models.ForeignKey(
+        TestModel,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="%(app_label)s_%(class)s_set",
+    )
+
+    class Meta:
+        abstract = True
+
+
+class FirstSetNullForeignKeyModel(SetNullForeignKeyBaseModel):
+    translated = models.TextField(default="", blank=True)
+
+
+class SecondSetNullForeignKeyModel(SetNullForeignKeyBaseModel):
+    translated22 = models.TextField(default="", blank=True)
+
 
 class OneToOneFieldModel(models.Model):
     title = models.CharField(gettext_lazy("title"), max_length=255)
