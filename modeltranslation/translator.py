@@ -57,6 +57,8 @@ class FieldsAggregationMetaClass(type):
     Metaclass to handle custom inheritance of fields between classes.
     """
 
+    fields: Iterable[str]
+
     def __new__(cls, name: str, bases: tuple[type, ...], attrs: dict[str, Any]) -> type:
         attrs["fields"] = set(attrs.get("fields", ()))
         for base in bases:
