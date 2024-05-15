@@ -50,6 +50,7 @@ Contributors
 * PetrDlouhy
 * dmarcelino
 * GreyZmeem
+* Hugo Defrance
 * And many more ... (if you miss your name here, please let us know!)
 
 .. _django-linguo: https://github.com/zmathew/django-linguo

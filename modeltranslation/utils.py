@@ -51,12 +51,16 @@ def get_translation_fields(field: str) -> list[str]:
     return [build_localized_fieldname(field, lang) for lang in settings.AVAILABLE_LANGUAGES]
 
 
-def build_localized_fieldname(field_name: str, lang: str) -> str:
+def build_lang(lang: str) -> str:
     if lang == "id":
         # The 2-letter Indonesian language code is problematic with the
         # current naming scheme as Django foreign keys also add "id" suffix.
         lang = "ind"
-    return str("%s_%s" % (field_name, lang.replace("-", "_")))
+    return lang.replace("-", "_")
+
+
+def build_localized_fieldname(field_name: str, lang: str) -> str:
+    return str("%s_%s" % (field_name, build_lang(lang)))
 
 
 def _build_localized_verbose_name(verbose_name: Any, lang: str) -> str:

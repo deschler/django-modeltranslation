@@ -33,6 +33,7 @@ from modeltranslation.tests import models, translation
 from modeltranslation.utils import (
     auto_populate,
     build_css_class,
+    build_lang,
     build_localized_fieldname,
     fallbacks,
 )
@@ -1181,6 +1182,12 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
     def test_indonesian(self):
         field = models.ForeignKeyModel._meta.get_field("test")
         assert field.attname != build_localized_fieldname(field.name, "id")
+
+    def test_build_lang(self):
+        assert build_lang("en") == "en"
+        assert build_lang("en_en") == "en_en"
+        assert build_lang("en-en") == "en_en"
+        assert build_lang("id") == "ind"
 
 
 class ManyToManyFieldsTest(ModeltranslationTestBase):
