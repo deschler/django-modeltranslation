@@ -10,9 +10,6 @@ def _get_database_config():
     conf = {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": ":memory:",
-        "TEST": {
-            "SERIALIZE": False,
-        },
     }
     if db == "mysql":
         conf.update(
@@ -60,3 +57,7 @@ MODELTRANSLATION_FALLBACK_LANGUAGES = ()
 ROOT_URLCONF = "modeltranslation.tests.urls"
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+
+TEST_NON_SERIALIZED_APPS = (
+    "django.contrib.auth",
+)
