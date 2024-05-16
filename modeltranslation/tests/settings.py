@@ -58,6 +58,4 @@ ROOT_URLCONF = "modeltranslation.tests.urls"
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
-TEST_NON_SERIALIZED_APPS = (
-    "django.contrib.auth",
-)
+TEST_NON_SERIALIZED_APPS = ("django.contrib.auth",)
