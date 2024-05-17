@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.18.13](https://github.com/deschler/django-modeltranslation/compare/v0.18.13-beta1.1...v0.18.13) (2024-05-17)
+
+
+### Features
+
+* Add build_lang helper in utils ([bdee9ff](https://github.com/deschler/django-modeltranslation/commit/bdee9ff5b906f682cfc8c4a774074a8b2aacf463))
+* Add types ([a9e95e8](https://github.com/deschler/django-modeltranslation/commit/a9e95e8c78550aba70712e524fb289b87bdf1b48)), closes [#716](https://github.com/deschler/django-modeltranslation/issues/716)
+
+
+### Bug Fixes
+
+* Remove deprecated test config starting from Django 5.0 ([b016af5](https://github.com/deschler/django-modeltranslation/commit/b016af5d4a2bdb9a0dfebf1492d6997f2aa9861d))
+
 ### [0.18.13-beta1.1](https://github.com/deschler/django-modeltranslation/compare/v0.18.13-beta.0...v0.18.13-beta1.1) (2023-11-17)
 
 
