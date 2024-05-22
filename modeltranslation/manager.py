@@ -514,7 +514,7 @@ class MultilingualQuerySet(QuerySet[_T]):
         new_key = rewrite_lookup_key(self.model, field_name)
         return super().dates(new_key, *args, **kwargs)
 
-    def _rewrite_concat(self, concat: Concat):
+    def _rewrite_concat(self, concat: Concat | ConcatPair):
         new_source_expressions = []
         for exp in concat.source_expressions:
             if isinstance(exp, (Concat, ConcatPair)):
@@ -525,7 +525,7 @@ class MultilingualQuerySet(QuerySet[_T]):
         concat.set_source_expressions(new_source_expressions)
         return concat
 
-    def annotate(self, *args: Any, **kwargs: Any):
+    def annotate(self, *args: Any, **kwargs: Any) -> Self:
         if not self._rewrite:
             return super().annotate(*args, **kwargs)
         for key, val in list(kwargs.items()):

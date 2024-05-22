@@ -3671,37 +3671,41 @@ class TestManager(ModeltranslationTestBase):
             assert titles_for_de == (("title_1_de", "desc_1_de"), ("title_2_de", "desc_1_de"))
 
     def test_annotate(self):
-        """Test if F queries are rewritten."""
-        test = models.TestModel.objects.create(title_en='title_en', title_de='title_de')
+        """Test if annotating is language-aware."""
+        test = models.TestModel.objects.create(title_en="title_en", title_de="title_de")
 
         assert "en" == get_language()
         assert (
-            models.TestModel.objects.annotate(
-                custom_title=F("title")).values_list("custom_title", flat=True)[0]
-            == 'title_en'
+            models.TestModel.objects.annotate(custom_title=F("title")).values_list(
+                "custom_title", flat=True
+            )[0]
+            == "title_en"
         )
         with override("de"):
             assert (
+                models.TestModel.objects.annotate(custom_title=F("title")).values_list(
+                    "custom_title", flat=True
+                )[0]
+                == "title_de"
+            )
+            assert (
                 models.TestModel.objects.annotate(
-                    custom_title=F("title")).values_list("custom_title", flat=True)[0]
-                == 'title_de'
+                    custom_title=Concat(F("title"), Value("value1"), Value("value2"))
+                ).values_list("custom_title", flat=True)[0]
+                == "title_devalue1value2"
             )
             assert (
-                models.TestModel.objects
-                .annotate(custom_title=Concat(F("title"), Value("value1"), Value("value2")))
-                .values_list("custom_title", flat=True)[0]
-                == 'title_devalue1value2'
-            )
-            assert (
-                models.TestModel.objects
-                .annotate(custom_title=Concat(F("title"), Concat(F("title"), Value("value"))))
-                .values_list("custom_title", flat=True)[0]
-                == 'title_detitle_devalue'
+                models.TestModel.objects.annotate(
+                    custom_title=Concat(F("title"), Concat(F("title"), Value("value")))
+                ).values_list("custom_title", flat=True)[0]
+                == "title_detitle_devalue"
             )
         models.ForeignKeyModel.objects.create(test=test)
         models.ForeignKeyModel.objects.create(test=test)
         assert (
-            models.TestModel.objects.annotate(Count("test_fks")).values_list("test_fks__count", flat=True)[0]
+            models.TestModel.objects.annotate(Count("test_fks")).values_list(
+                "test_fks__count", flat=True
+            )[0]
             == 2
         )
 
