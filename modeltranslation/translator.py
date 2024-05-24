@@ -37,7 +37,20 @@ from modeltranslation.manager import (
 from modeltranslation.thread_context import auto_populate_mode
 from modeltranslation.utils import build_localized_fieldname, parse_field
 
+# Re-export the decorator for convenience
+from modeltranslation.decorators import register
+
 from ._typing import _ListOrTuple
+
+__all__ = [
+    "AlreadyRegistered",
+    "DescendantRegistered",
+    "NotRegistered",
+    "TranslationOptions",
+    "Translator",
+    "register",
+    "translator",
+]
 
 
 class AlreadyRegistered(Exception):
@@ -691,7 +704,3 @@ class Translator:
 
 # This global object represents the singleton translator object
 translator = Translator()
-
-
-# Re-export the decorator for convenience
-from modeltranslation.decorators import register  # NOQA re-export
