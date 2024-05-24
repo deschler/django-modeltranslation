@@ -15,13 +15,15 @@ from django.contrib.admin.utils import get_model_from_relation
 from django.core.exceptions import FieldDoesNotExist
 from django.db import models
 from django.db.backends.utils import CursorWrapper
-from django.db.models import Field, Model
+from django.db.models import Field, Model, F
 from django.db.models.expressions import Col
+from django.db.models.functions import Concat, ConcatPair
 from django.db.models.lookups import Lookup
 from django.db.models.query import QuerySet, ValuesIterable
 from django.db.models.utils import create_namedtuple_class
 from django.utils.tree import Node
 
+from modeltranslation._typing import Self, AutoPopulate
 from modeltranslation.fields import TranslationField
 from modeltranslation.thread_context import auto_populate_mode
 from modeltranslation.utils import (
@@ -30,7 +32,6 @@ from modeltranslation.utils import (
     get_language,
     resolution_order,
 )
-from modeltranslation._typing import Self, AutoPopulate
 
 _C2F_CACHE: dict[tuple[type[Model], str], Field] = {}
 _F2TM_CACHE: dict[type[Model], dict[str, type[Model]]] = {}
@@ -512,6 +513,27 @@ class MultilingualQuerySet(QuerySet[_T]):
             return super().dates(field_name, *args, **kwargs)
         new_key = rewrite_lookup_key(self.model, field_name)
         return super().dates(new_key, *args, **kwargs)
+
+    def _rewrite_concat(self, concat: Concat | ConcatPair):
+        new_source_expressions = []
+        for exp in concat.source_expressions:
+            if isinstance(exp, (Concat, ConcatPair)):
+                exp = self._rewrite_concat(exp)
+            if isinstance(exp, F):
+                exp = self._rewrite_f(exp)
+            new_source_expressions.append(exp)
+        concat.set_source_expressions(new_source_expressions)
+        return concat
+
+    def annotate(self, *args: Any, **kwargs: Any) -> Self:
+        if not self._rewrite:
+            return super().annotate(*args, **kwargs)
+        for key, val in list(kwargs.items()):
+            if isinstance(val, models.F):
+                kwargs[key] = self._rewrite_f(val)
+            if isinstance(val, Concat):
+                kwargs[key] = self._rewrite_concat(val)
+        return super().annotate(*args, **kwargs)
 
 
 class FallbackValuesIterable(ValuesIterable):

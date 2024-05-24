@@ -18,7 +18,7 @@ from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.db import IntegrityError
 from django.db.models import CharField, Count, F, Q, TextField, Value
-from django.db.models.functions import Cast
+from django.db.models.functions import Cast, Concat
 from django.test import TestCase, TransactionTestCase
 from django.test.utils import override_settings
 from django.utils.translation import get_language, override, trans_real
@@ -3669,6 +3669,45 @@ class TestManager(ModeltranslationTestBase):
 
             assert titles_for_en == (("title_1_en", "desc_1_en"), ("title_2_en", "desc_1_en"))
             assert titles_for_de == (("title_1_de", "desc_1_de"), ("title_2_de", "desc_1_de"))
+
+    def test_annotate(self):
+        """Test if annotating is language-aware."""
+        test = models.TestModel.objects.create(title_en="title_en", title_de="title_de")
+
+        assert "en" == get_language()
+        assert (
+            models.TestModel.objects.annotate(custom_title=F("title")).values_list(
+                "custom_title", flat=True
+            )[0]
+            == "title_en"
+        )
+        with override("de"):
+            assert (
+                models.TestModel.objects.annotate(custom_title=F("title")).values_list(
+                    "custom_title", flat=True
+                )[0]
+                == "title_de"
+            )
+            assert (
+                models.TestModel.objects.annotate(
+                    custom_title=Concat(F("title"), Value("value1"), Value("value2"))
+                ).values_list("custom_title", flat=True)[0]
+                == "title_devalue1value2"
+            )
+            assert (
+                models.TestModel.objects.annotate(
+                    custom_title=Concat(F("title"), Concat(F("title"), Value("value")))
+                ).values_list("custom_title", flat=True)[0]
+                == "title_detitle_devalue"
+            )
+        models.ForeignKeyModel.objects.create(test=test)
+        models.ForeignKeyModel.objects.create(test=test)
+        assert (
+            models.TestModel.objects.annotate(Count("test_fks")).values_list(
+                "test_fks__count", flat=True
+            )[0]
+            == 2
+        )
 
 
 class TranslationModelFormTest(ModeltranslationTestBase):
