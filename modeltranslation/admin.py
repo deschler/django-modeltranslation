@@ -417,11 +417,15 @@ class TranslationStackedInline(TranslationInlineModelAdmin[_ModelT], admin.Stack
     pass
 
 
-class TranslationGenericTabularInline(TranslationInlineModelAdmin[_ModelT], GenericTabularInline[_ModelT]):
+class TranslationGenericTabularInline(
+    TranslationInlineModelAdmin[_ModelT], GenericTabularInline[_ModelT]
+):
     pass
 
 
-class TranslationGenericStackedInline(TranslationInlineModelAdmin[_ModelT], GenericStackedInline[_ModelT]):
+class TranslationGenericStackedInline(
+    TranslationInlineModelAdmin[_ModelT], GenericStackedInline[_ModelT]
+):
     pass
 
 
