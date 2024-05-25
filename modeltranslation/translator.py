@@ -69,8 +69,8 @@ class FieldsAggregationMetaClass(type):
     """
     Metaclass to handle custom inheritance of fields between classes.
     """
-
-    fields: ClassVar[Iterable[str]]
+    # Tags: instance-class-var-difference
+    fields: ClassVar[Iterable[str | Any]]
 
     def __new__(cls, name: str, bases: tuple[type, ...], attrs: dict[str, Any]) -> type:
         attrs["fields"] = set(attrs.get("fields", ()))
@@ -112,7 +112,12 @@ class TranslationOptions(metaclass=FieldsAggregationMetaClass):
         self.registered = False
         self.related = False
         self.local_fields: dict[str, set[TranslationField]] = {f: set() for f in self.fields}
-        self.fields: dict[str, set[TranslationField]] = {f: set() for f in self.fields}
+        # We need `Iterable[Any]` here, to allow assignment to class variable.
+        # Refs:
+        # * https://github.com/deschler/django-modeltranslation/issues/736
+        # * https://discuss.python.org/t/support-different-type-for-class-variable-and-instance-variable/54198
+        # Tags: instance-class-var-difference
+        self.fields: dict[str, set[TranslationField]] | Iterable[Any] = {f: set() for f in self.fields}
         self.related_fields: list[str] = []
 
     def validate(self) -> None:
