@@ -63,7 +63,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
     def patch_translation_field(
         self, db_field: Field, field: forms.Field, request: HttpRequest, **kwargs: Any
     ) -> None:
-        if db_field.name in self.trans_opts.fields:
+        if db_field.name in self.trans_opts.all_fields:
             if field.required:
                 field.required = False
                 field.blank = True
@@ -140,8 +140,8 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
             exclude = tuple()
         if exclude:
             exclude_new = tuple(exclude)
-            return exclude_new + tuple(self.trans_opts.fields.keys())
-        return tuple(self.trans_opts.fields.keys())
+            return exclude_new + tuple(self.trans_opts.all_fields.keys())
+        return tuple(self.trans_opts.all_fields.keys())
 
     def replace_orig_field(self, option: Iterable[str | Sequence[str]]) -> _ListOrTuple[str]:
         """
@@ -171,11 +171,11 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         if option:
             option_new = list(option)
             for opt in option:
-                if opt in self.trans_opts.fields:
+                if opt in self.trans_opts.all_fields:
                     index = option_new.index(opt)
                     option_new[index : index + 1] = get_translation_fields(opt)  # type: ignore[arg-type]
                 elif isinstance(opt, (tuple, list)) and (
-                    [o for o in opt if o in self.trans_opts.fields]
+                    [o for o in opt if o in self.trans_opts.all_fields]
                 ):
                     index = option_new.index(opt)
                     option_new[index : index + 1] = self.replace_orig_field(opt)
@@ -198,7 +198,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
             "Append lang suffix (if applicable) to field list"
 
             def append_lang(source: str) -> str:
-                if source in self.trans_opts.fields:
+                if source in self.trans_opts.all_fields:
                     return build_localized_fieldname(source, lang)
                 return source
 
@@ -206,7 +206,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
 
         prepopulated_fields: dict[str, Sequence[str]] = {}
         for dest, sources in self.prepopulated_fields.items():
-            if dest in self.trans_opts.fields:
+            if dest in self.trans_opts.all_fields:
                 for lang in mt_settings.AVAILABLE_LANGUAGES:
                     key = build_localized_fieldname(dest, lang)
                     prepopulated_fields[key] = localize(sources, lang)
@@ -273,7 +273,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         if exclude_languages:
             excl_languages = exclude_languages
         exclude = []
-        for orig_fieldname, translation_fields in self.trans_opts.fields.items():
+        for orig_fieldname, translation_fields in self.trans_opts.all_fields.items():
             for tfield in translation_fields:
                 if tfield.language in excl_languages and tfield not in exclude:
                     exclude.append(tfield)
@@ -301,7 +301,7 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
             editable_new = list(self.list_editable)
             display_new = list(self.list_display)
             for field in self.list_editable:
-                if field in self.trans_opts.fields:
+                if field in self.trans_opts.all_fields:
                     index = editable_new.index(field)
                     display_index = display_new.index(field)
                     translation_fields = get_translation_fields(field)
@@ -350,7 +350,7 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
             )
 
             temp_fieldsets = {}
-            for orig_field, trans_fields in self.trans_opts.fields.items():
+            for orig_field, trans_fields in self.trans_opts.all_fields.items():
                 trans_fieldnames = [f.name for f in sorted(trans_fields, key=lambda x: x.name)]
                 if any(f in trans_fieldnames for f in flattened_fieldsets):
                     # Extract the original field's verbose_name for use as this
