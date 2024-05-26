@@ -81,7 +81,7 @@ def append_fallback(model: type[Model], fields: Sequence[str]) -> tuple[set[str]
     from modeltranslation.translator import translator
 
     opts = translator.get_options_for_model(model)
-    for key, _ in opts.fields.items():
+    for key, _ in opts.all_fields.items():
         if key in fields_set:
             langs = resolution_order(get_language(), getattr(model, key).fallback_languages)
             fields_set = fields_set.union(build_localized_fieldname(key, lang) for lang in langs)
@@ -96,7 +96,7 @@ def append_translated(model: type[Model], fields: Sequence[str]) -> set[str]:
     from modeltranslation.translator import translator
 
     opts = translator.get_options_for_model(model)
-    for key, translated in opts.fields.items():
+    for key, translated in opts.all_fields.items():
         if key in fields_set:
             fields_set = fields_set.union(f.name for f in translated)
     return fields_set

@@ -439,7 +439,7 @@ class ModeltranslationTest(ModeltranslationTestBase):
         n = models.TestModel(**keywords)
         m = models.TestModel.objects.create(**keywords)
         opts = translator.translator.get_options_for_model(models.TestModel)
-        for base_field, trans_fields in opts.fields.items():
+        for base_field, trans_fields in opts.all_fields.items():
             self._compare_instances(n, m, base_field)
             for lang_field in trans_fields:
                 self._compare_instances(n, m, lang_field.name)
@@ -2268,7 +2268,7 @@ class ModelInheritanceTest(ModeltranslationTestBase):
         def assertFields(model, fields):
             # The given fields are inherited.
             opts = translator.translator.get_options_for_model(model)
-            assert set(opts.fields.keys()) == set(fields)
+            assert set(opts.all_fields.keys()) == set(fields)
             # Inherited translation fields are available on the model.
             model_fields = get_field_names(model)
             for field in fields:

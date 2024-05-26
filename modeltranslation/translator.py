@@ -70,8 +70,7 @@ class FieldsAggregationMetaClass(type):
     Metaclass to handle custom inheritance of fields between classes.
     """
 
-    # Tags: instance-class-var-difference
-    fields: ClassVar[Iterable[str | Any]]
+    fields: Sequence[str]
 
     def __new__(cls, name: str, bases: tuple[type, ...], attrs: dict[str, Any]) -> type:
         attrs["fields"] = set(attrs.get("fields", ()))
@@ -90,11 +89,11 @@ class TranslationOptions(metaclass=FieldsAggregationMetaClass):
     attributes.
 
     Options instances hold info about translatable fields for a model and its
-    superclasses. The ``local_fields`` and ``fields`` attributes are mappings
+    superclasses. The ``local_fields`` and ``all_fields`` attributes are mappings
     from fields to sets of their translation fields; ``local_fields`` contains
     only those fields that are handled in the model's database table (those
     inherited from abstract superclasses, unless there is a concrete superclass
-    in between in the inheritance chain), while ``fields`` also includes fields
+    in between in the inheritance chain), while ``all_fields`` also includes fields
     inherited from concrete supermodels (giving all translated fields available
     on a model).
 
@@ -113,14 +112,7 @@ class TranslationOptions(metaclass=FieldsAggregationMetaClass):
         self.registered = False
         self.related = False
         self.local_fields: dict[str, set[TranslationField]] = {f: set() for f in self.fields}
-        # We need `Iterable[Any]` here, to allow assignment to class variable.
-        # Refs:
-        # * https://github.com/deschler/django-modeltranslation/issues/736
-        # * https://discuss.python.org/t/support-different-type-for-class-variable-and-instance-variable/54198
-        # Tags: instance-class-var-difference
-        self.fields: dict[str, set[TranslationField]] | Iterable[Any] = {
-            f: set() for f in self.fields
-        }
+        self.all_fields: dict[str, set[TranslationField]] = {f: set() for f in self.fields}
         self.related_fields: list[str] = []
 
     def validate(self) -> None:
@@ -135,7 +127,7 @@ class TranslationOptions(metaclass=FieldsAggregationMetaClass):
             else:
                 self._check_languages(self.required_languages.keys(), extra=("default",))
                 for fieldnames in self.required_languages.values():
-                    if any(f not in self.fields for f in fieldnames):
+                    if any(f not in self.all_fields for f in fieldnames):
                         raise ImproperlyConfigured(
                             "Fieldname in required_languages which is not in fields option."
                         )
@@ -157,24 +149,24 @@ class TranslationOptions(metaclass=FieldsAggregationMetaClass):
         """
         if other.model._meta.abstract:
             self.local_fields.update(other.local_fields)
-        self.fields.update(other.fields)
+        self.all_fields.update(other.all_fields)
 
     def add_translation_field(self, field: str, translation_field):
         """
         Add a new translation field to both fields dicts.
         """
         self.local_fields[field].add(translation_field)
-        self.fields[field].add(translation_field)
+        self.all_fields[field].add(translation_field)
 
     def get_field_names(self) -> list[str]:
         """
         Return name of all fields that can be used in filtering.
         """
-        return list(self.fields.keys()) + self.related_fields
+        return list(self.all_fields.keys()) + self.related_fields
 
     def __str__(self) -> str:
         local = tuple(self.local_fields.keys())
-        inherited = tuple(set(self.fields.keys()) - set(local))
+        inherited = tuple(set(self.all_fields.keys()) - set(local))
         return "%s: %s + %s" % (self.__class__.__name__, local, inherited)
 
 
@@ -442,10 +434,10 @@ def populate_translation_fields(sender: type[Model], kwargs: Any):
 
     opts = translator.get_options_for_model(sender)
     for key, val in list(kwargs.items()):
-        if key in opts.fields:
+        if key in opts.all_fields:
             if populate == "all":
                 # Set the value for every language.
-                for translation_field in opts.fields[key]:
+                for translation_field in opts.all_fields[key]:
                     kwargs.setdefault(translation_field.name, val)
             elif populate == "default":
                 default = build_localized_fieldname(key, mt_settings.DEFAULT_LANGUAGE)
