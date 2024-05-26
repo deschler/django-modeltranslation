@@ -21,8 +21,9 @@ pytest-cov = "*"
 pytest = "*"
 pytest-sugar = "*"
 pytest-django = "*"
-django-stubs = "^4.2.7"
-mypy = "^1.8.0"
+django-stubs = "*"
+mypy = "*"
+build = "*"
 
 [tool.ruff]
 line-length = 100
