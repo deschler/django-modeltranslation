@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.19.1](https://github.com/deschler/django-modeltranslation/compare/v0.19.0...v0.19.1) (2024-05-27)
+
+
+### Bug Fixes
+
+* Removed protocol from admin javascript links. ([ed8f2bc](https://github.com/deschler/django-modeltranslation/commit/ed8f2bcf747435e242ce5e0b01287b5162d59476)), closes [#740](https://github.com/deschler/django-modeltranslation/issues/740)
+
 ## [0.19.0](https://github.com/deschler/django-modeltranslation/compare/v0.18.13...v0.19.0) (2024-05-26)
 
 
