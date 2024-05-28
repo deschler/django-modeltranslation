@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "django-modeltranslation"
-version = "0.18.10"
+version = "0.19.0"
 description = "Translates Django models using a registration approach."
 authors = ["Peter Eschler <peschler@gmail.com>"]
 maintainers = ["Serhii Tereshchenko <serg.partizan@gmail.com>"]
@@ -11,22 +11,24 @@ packages = [
 [tool.poetry.dependencies]
 python = ">=3.8,<4"
 django = ">=4.2"
-ruff = "^0.0.292"
 typing-extensions = {version = ">=4.0.1", python = "<3.11"}
 
 [tool.poetry.group.dev.dependencies]
+ruff = "*"
 pdbpp = "*"
 parameterized = "*"
 pytest-cov = "*"
 pytest = "*"
 pytest-sugar = "*"
 pytest-django = "*"
-django-stubs = "^4.2.7"
-mypy = "^1.8.0"
+django-stubs = "*"
+mypy = "*"
+build = "*"
 
 [tool.ruff]
 line-length = 100
 target-version = "py38"
+[tool.ruff.lint]
 ignore = [
     "E501",   # line length is handled by formatter
 ]

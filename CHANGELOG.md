@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.19.2](https://github.com/deschler/django-modeltranslation/compare/v0.19.1...v0.19.2) (2024-05-27)
+
+### [0.19.1](https://github.com/deschler/django-modeltranslation/compare/v0.19.0...v0.19.1) (2024-05-27)
+
+
+### Bug Fixes
+
+* Removed protocol from admin javascript links. ([ed8f2bc](https://github.com/deschler/django-modeltranslation/commit/ed8f2bcf747435e242ce5e0b01287b5162d59476)), closes [#740](https://github.com/deschler/django-modeltranslation/issues/740)
+
+## [0.19.0](https://github.com/deschler/django-modeltranslation/compare/v0.18.13...v0.19.0) (2024-05-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* **types:** Rename `fields` (dict with set of TranslationField) to `all_fields`, on the TranslationOptions instance.
+
+### Features
+
+* Support F and Concat expressions in annotate() ([a0aeb58](https://github.com/deschler/django-modeltranslation/commit/a0aeb58b470d7b0607bf7e3a4e9dd49e1862dcc3)), closes [#735](https://github.com/deschler/django-modeltranslation/issues/735)
+
+
+### Bug Fixes
+
+* **types:** Export public variables ([47f8083](https://github.com/deschler/django-modeltranslation/commit/47f80835764be1607ec7463b55c7de8496bc0152))
+* **types:** Fix `fields` type ([#739](https://github.com/deschler/django-modeltranslation/issues/739)) ([b97c22c](https://github.com/deschler/django-modeltranslation/commit/b97c22c197686379be5d6237cfd61a92c10aefb5))
+
 ### [0.18.13](https://github.com/deschler/django-modeltranslation/compare/v0.18.13-beta1.1...v0.18.13) (2024-05-17)
 
 

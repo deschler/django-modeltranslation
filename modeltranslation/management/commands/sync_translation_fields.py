@@ -8,6 +8,7 @@ You will need to execute this command in two cases:
 
 Credits: Heavily inspired by django-transmeta's sync_transmeta_db command.
 """
+
 from __future__ import annotations
 
 from typing import Any, Iterator, cast

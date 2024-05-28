@@ -4,6 +4,7 @@ django-linguo by Zach Mathew
 
 https://github.com/zmathew/django-linguo
 """
+
 from __future__ import annotations
 
 import itertools
@@ -15,13 +16,15 @@ from django.contrib.admin.utils import get_model_from_relation
 from django.core.exceptions import FieldDoesNotExist
 from django.db import models
 from django.db.backends.utils import CursorWrapper
-from django.db.models import Field, Model
+from django.db.models import Field, Model, F
 from django.db.models.expressions import Col
+from django.db.models.functions import Concat, ConcatPair
 from django.db.models.lookups import Lookup
 from django.db.models.query import QuerySet, ValuesIterable
 from django.db.models.utils import create_namedtuple_class
 from django.utils.tree import Node
 
+from modeltranslation._typing import Self, AutoPopulate
 from modeltranslation.fields import TranslationField
 from modeltranslation.thread_context import auto_populate_mode
 from modeltranslation.utils import (
@@ -30,7 +33,6 @@ from modeltranslation.utils import (
     get_language,
     resolution_order,
 )
-from modeltranslation._typing import Self, AutoPopulate
 
 _C2F_CACHE: dict[tuple[type[Model], str], Field] = {}
 _F2TM_CACHE: dict[type[Model], dict[str, type[Model]]] = {}
@@ -80,7 +82,7 @@ def append_fallback(model: type[Model], fields: Sequence[str]) -> tuple[set[str]
     from modeltranslation.translator import translator
 
     opts = translator.get_options_for_model(model)
-    for key, _ in opts.fields.items():
+    for key, _ in opts.all_fields.items():
         if key in fields_set:
             langs = resolution_order(get_language(), getattr(model, key).fallback_languages)
             fields_set = fields_set.union(build_localized_fieldname(key, lang) for lang in langs)
@@ -95,7 +97,7 @@ def append_translated(model: type[Model], fields: Sequence[str]) -> set[str]:
     from modeltranslation.translator import translator
 
     opts = translator.get_options_for_model(model)
-    for key, translated in opts.fields.items():
+    for key, translated in opts.all_fields.items():
         if key in fields_set:
             fields_set = fields_set.union(f.name for f in translated)
     return fields_set
@@ -513,6 +515,27 @@ class MultilingualQuerySet(QuerySet[_T]):
         new_key = rewrite_lookup_key(self.model, field_name)
         return super().dates(new_key, *args, **kwargs)
 
+    def _rewrite_concat(self, concat: Concat | ConcatPair):
+        new_source_expressions = []
+        for exp in concat.source_expressions:
+            if isinstance(exp, (Concat, ConcatPair)):
+                exp = self._rewrite_concat(exp)
+            if isinstance(exp, F):
+                exp = self._rewrite_f(exp)
+            new_source_expressions.append(exp)
+        concat.set_source_expressions(new_source_expressions)
+        return concat
+
+    def annotate(self, *args: Any, **kwargs: Any) -> Self:
+        if not self._rewrite:
+            return super().annotate(*args, **kwargs)
+        for key, val in list(kwargs.items()):
+            if isinstance(val, models.F):
+                kwargs[key] = self._rewrite_f(val)
+            if isinstance(val, Concat):
+                kwargs[key] = self._rewrite_concat(val)
+        return super().annotate(*args, **kwargs)
+
 
 class FallbackValuesIterable(ValuesIterable):
     queryset: MultilingualQuerySet[Model]
@@ -559,15 +582,13 @@ class FallbackFlatValuesListIterable(FallbackValuesListIterable):
 @overload
 def multilingual_queryset_factory(
     old_cls: type[Any], instantiate: Literal[False]
-) -> type[MultilingualQuerySet]:
-    ...
+) -> type[MultilingualQuerySet]: ...
 
 
 @overload
 def multilingual_queryset_factory(
     old_cls: type[Any], instantiate: Literal[True] = ...
-) -> MultilingualQuerySet:
-    ...
+) -> MultilingualQuerySet: ...
 
 
 def multilingual_queryset_factory(
