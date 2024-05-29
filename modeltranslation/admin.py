@@ -391,14 +391,20 @@ class TranslationAdmin(TranslationBaseModelAdmin[_ModelT], admin.ModelAdmin[_Mod
         )
 
 
-class TranslationInlineModelAdmin(TranslationBaseModelAdmin[_ModelT], InlineModelAdmin[_ModelT]):
+_ChildModelT = TypeVar("_ChildModelT", bound=Model)
+_ParentModelT = TypeVar("_ParentModelT", bound=Model)
+
+
+class TranslationInlineModelAdmin(
+    TranslationBaseModelAdmin[_ChildModelT], InlineModelAdmin[_ChildModelT, _ParentModelT]
+):
     def get_formset(
-        self, request: HttpRequest, obj: _ModelT | None = None, **kwargs: Any
+        self, request: HttpRequest, obj: _ParentModelT | None = None, **kwargs: Any
     ) -> type[BaseInlineFormSet]:
         kwargs = self._get_form_or_formset(request, obj, **kwargs)
         return super().get_formset(request, obj, **kwargs)
 
-    def get_fieldsets(self, request: HttpRequest, obj: _ModelT | None = None):
+    def get_fieldsets(self, request: HttpRequest, obj: _ChildModelT | None = None):
         # FIXME: If fieldsets are declared on an inline some kind of ghost
         # fieldset line with just the original model verbose_name of the model
         # is displayed above the new fieldsets.
@@ -409,22 +415,28 @@ class TranslationInlineModelAdmin(TranslationBaseModelAdmin[_ModelT], InlineMode
         return self._get_fieldsets_post_form_or_formset(request, form, obj)
 
 
-class TranslationTabularInline(TranslationInlineModelAdmin[_ModelT], admin.TabularInline[_ModelT]):
+class TranslationTabularInline(
+    TranslationInlineModelAdmin[_ChildModelT, _ParentModelT],
+    admin.TabularInline[_ChildModelT, _ParentModelT],
+):
     pass
 
 
-class TranslationStackedInline(TranslationInlineModelAdmin[_ModelT], admin.StackedInline[_ModelT]):
+class TranslationStackedInline(
+    TranslationInlineModelAdmin[_ChildModelT, _ParentModelT],
+    admin.StackedInline[_ChildModelT, _ParentModelT],
+):
     pass
 
 
 class TranslationGenericTabularInline(
-    TranslationInlineModelAdmin[_ModelT], GenericTabularInline[_ModelT]
+    TranslationInlineModelAdmin[_ChildModelT, _ParentModelT], GenericTabularInline
 ):
     pass
 
 
 class TranslationGenericStackedInline(
-    TranslationInlineModelAdmin[_ModelT], GenericStackedInline[_ModelT]
+    TranslationInlineModelAdmin[_ChildModelT, _ParentModelT], GenericStackedInline
 ):
     pass
 
