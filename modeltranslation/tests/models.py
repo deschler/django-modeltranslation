@@ -1,9 +1,13 @@
+# mypy: disable-error-code="django-manager-missing"
+from __future__ import annotations
+
 from django.contrib.auth.models import Permission
 from django.core import validators
 from django.db import models
 from django.utils.translation import gettext_lazy
 
 from modeltranslation.manager import MultilingualManager
+from typing import Any
 
 
 class TestModel(models.Model):
@@ -124,8 +128,10 @@ class ManyToManyFieldModel(models.Model):
     self_call_1 = models.ManyToManyField("self")
     # test multiple self m2m
     self_call_2 = models.ManyToManyField("self")
-    through_model = models.ManyToManyField(TestModel, through="CustomThroughModel")
-    trans_through_model = models.ManyToManyField(
+    through_model = models.ManyToManyField[TestModel, "CustomThroughModel"](
+        TestModel, through="CustomThroughModel"
+    )
+    trans_through_model = models.ManyToManyField[TestModel, Any](
         TestModel, related_name="m2m_trans_through_model_ref", through="RegisteredThroughModel"
     )
     untrans = models.ManyToManyField(
@@ -414,7 +420,7 @@ class CustomManagerBaseModel(models.Model):
 class CustomManagerChildTestModel(CustomManagerBaseModel):
     title = models.CharField(gettext_lazy("title"), max_length=255)
 
-    objects = CustomManager2()
+    objects = CustomManager2()  # type: ignore[misc]
 
 
 class PlainChildTestModel(CustomManagerBaseModel):
@@ -505,7 +511,7 @@ class CustomManagerY(models.Manager):
 
 class AbstractModelY(models.Model):
     title = models.CharField(max_length=255)
-    xs = models.ManyToManyField("ModelX", through="ModelXY")
+    xs = models.ManyToManyField[ModelX, ModelXY]("ModelX", through="ModelXY")
     objects = CustomManagerY()
 
     class Meta:

@@ -22,7 +22,7 @@ from django.db.models.functions import Cast, Concat
 from django.test import TestCase, TransactionTestCase
 from django.test.utils import override_settings
 from django.utils.translation import get_language, override, trans_real
-from parameterized import parameterized
+from parameterized import parameterized  # type: ignore[import-untyped]
 
 from modeltranslation import admin, translator
 from modeltranslation import settings as mt_settings

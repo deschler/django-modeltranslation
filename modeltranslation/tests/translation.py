@@ -241,13 +241,13 @@ class FieldInheritanceCTranslationOptions(FieldInheritanceBTranslationOptions):
 
 
 class FieldInheritanceDTranslationOptions(FieldInheritanceBTranslationOptions):
-    fields = ("titled",)
+    fields = ["titled"]
 
 
 class FieldInheritanceETranslationOptions(
     FieldInheritanceCTranslationOptions, FieldInheritanceDTranslationOptions
 ):
-    fields = ("titlee",)
+    fields = ["titlee"]
 
 
 # ######### Integration testing
