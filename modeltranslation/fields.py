@@ -4,7 +4,7 @@ import copy
 from typing import Any, cast
 from collections.abc import Sequence
 
-from django import VERSION, forms
+from django import forms
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Model, fields
 from django.utils.encoding import force_str
@@ -48,8 +48,6 @@ SUPPORTED_FIELDS = (
     # Above implies also OneToOneField
     fields.related.ManyToManyField,
 )
-
-NEW_RELATED_API = VERSION >= (1, 9)
 
 
 class NONE:
@@ -220,24 +218,7 @@ class TranslationField:
             if hasattr(self.remote_field.model._meta, "_related_objects_cache"):
                 del self.remote_field.model._meta._related_objects_cache
 
-        # ForeignKey support - rewrite related_name
-        elif not NEW_RELATED_API and self.rel and self.related and not self.rel.is_hidden():
-            current = self.related.get_accessor_name()
-            self.rel = copy.copy(self.rel)  # Since fields cannot share the same rel object.
-            # self.related doesn't need to be copied, as it will be recreated in
-            # ``RelatedField.do_related_class``
-
-            if self.rel.related_name is None:
-                # For implicit related_name use different query field name
-                loc_related_query_name = build_localized_fieldname(
-                    self.related_query_name(), self.language
-                )
-                self.related_query_name = lambda: loc_related_query_name
-            self.rel.related_name = build_localized_fieldname(current, self.language)
-            self.rel.field = self
-            if hasattr(self.rel.to._meta, "_related_objects_cache"):
-                del self.rel.to._meta._related_objects_cache
-        elif NEW_RELATED_API and self.remote_field and not self.remote_field.is_hidden():
+        elif self.remote_field and not self.remote_field.is_hidden():
             current = self.remote_field.get_accessor_name()
             # Since fields cannot share the same rel object:
             self.remote_field = copy.copy(self.remote_field)
