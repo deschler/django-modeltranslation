@@ -21,9 +21,16 @@ pytest-cov = "*"
 pytest = "*"
 pytest-sugar = "*"
 pytest-django = "*"
-django-stubs = "*"
+django-stubs = "^5.0.2"
 mypy = "*"
 build = "*"
+
+[tool.poetry.group.lsp]
+optional = true
+
+[tool.poetry.group.lsp.dependencies]
+python-lsp-server = {extras = ["rope"], version = "^1.11.0"}
+pylsp-mypy = "^0.6.8"
 
 [tool.ruff]
 line-length = 100

@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import itertools
 from functools import reduce
-from typing import Any, Container, Iterator, Literal, Sequence, TypeVar, cast, overload
+from typing import Any, Container, Iterator, Literal, Sequence, Iterable, TypeVar, cast, overload
 
 from django import VERSION
 from django.contrib.admin.utils import get_model_from_relation
@@ -91,7 +91,7 @@ def append_fallback(model: type[Model], fields: Sequence[str]) -> tuple[set[str]
     return fields_set, trans
 
 
-def append_translated(model: type[Model], fields: Sequence[str]) -> set[str]:
+def append_translated(model: type[Model], fields: Iterable[str]) -> set[str]:
     "If translated field is encountered, add also all its translation fields."
     fields_set = set(fields)
     from modeltranslation.translator import translator
