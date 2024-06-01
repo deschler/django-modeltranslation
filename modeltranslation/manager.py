@@ -9,7 +9,8 @@ from __future__ import annotations
 
 import itertools
 from functools import reduce
-from typing import Any, Container, Iterator, Literal, Sequence, Iterable, TypeVar, cast, overload
+from typing import Any, Literal, TypeVar, cast, overload
+from collections.abc import Container, Iterator, Sequence, Iterable
 
 from django import VERSION
 from django.contrib.admin.utils import get_model_from_relation

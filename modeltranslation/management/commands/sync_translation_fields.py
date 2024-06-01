@@ -11,7 +11,8 @@ Credits: Heavily inspired by django-transmeta's sync_transmeta_db command.
 
 from __future__ import annotations
 
-from typing import Any, Iterator, cast
+from typing import Any, cast
+from collections.abc import Iterator
 
 from django import VERSION
 from django.core.management.base import BaseCommand, CommandParser

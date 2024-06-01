@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import copy
-from typing import Any, Sequence, cast
+from typing import Any, cast
+from collections.abc import Sequence
 
 from django import VERSION, forms
 from django.core.exceptions import ImproperlyConfigured

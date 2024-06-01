@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from contextlib import contextmanager
-from typing import Any, Generator, Iterable, Iterator, TypeVar
+from typing import Any, TypeVar
+from collections.abc import Generator, Iterable, Iterator
 
 from django.db import models
 from django.utils.encoding import force_str

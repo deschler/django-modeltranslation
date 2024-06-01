@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from functools import partial
-from typing import Any, Callable, ClassVar, Collection, Iterable, Sequence, cast
+from typing import Any, Callable, ClassVar, cast
+from collections.abc import Collection, Iterable, Sequence
 
 import django
 from django.core.exceptions import ImproperlyConfigured
