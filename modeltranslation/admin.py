@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import Any, Iterable, Sequence, TypeVar
+from typing import Any, TypeVar
+from collections.abc import Iterable, Sequence
 
 from django import forms
 from django.db.models import Field, Model

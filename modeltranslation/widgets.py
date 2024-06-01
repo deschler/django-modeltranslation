@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Any, Mapping
+from typing import Any
+from collections.abc import Mapping
 
 from django.core.files.uploadedfile import UploadedFile
 from django.forms.renderers import BaseRenderer

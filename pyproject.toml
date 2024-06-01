@@ -9,7 +9,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.8,<4"
+python = ">=3.9,<4"
 django = ">=4.2"
 typing-extensions = {version = ">=4.0.1", python = "<3.11"}
 
@@ -34,7 +34,7 @@ pylsp-mypy = "^0.6.8"
 
 [tool.ruff]
 line-length = 100
-target-version = "py38"
+target-version = "py39"
 [tool.ruff.lint]
 ignore = [
     "E501",   # line length is handled by formatter
@@ -50,7 +50,7 @@ extend-generics = [
 ]
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.9"
 incremental = true
 warn_unused_ignores = true
 warn_redundant_casts = true
