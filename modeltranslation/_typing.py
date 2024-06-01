@@ -23,8 +23,6 @@ _ListOrTuple: TypeAlias = "list[_K] | tuple[_K, ...]"
 # For generic classes to work at runtime we need to define `__class_getitem__`.
 # We're defining it here, instead of relying on django_stubs_ext, because
 # we don't want every user setting up django_stubs_ext just for this feature.
-# In theory, this can be replaced with `if TYPE_CHECKING` clause for base class,
-# but mypy does not support it at the time of writing.
 def monkeypatch() -> None:
     classes = [
         admin.ModelAdmin,
