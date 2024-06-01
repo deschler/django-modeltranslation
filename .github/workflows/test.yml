@@ -17,28 +17,27 @@ jobs:
       matrix:
         python: ["3.10"]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+      - name: Install poetry
+        run: pipx install 'poetry~=1.8'
       - name: Set up Python ${{ matrix.python }}
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python }}
-      - name: Install linters
-        run: |
-          python -m pip install --upgrade pip
-          pip install ruff==0.4.5
+          cache: 'poetry'
+          cache-dependency-path: 'poetry.lock'
+      - name: Install deps
+        run: poetry install --sync --no-root
       - name: Run linters
         run: |
+          source $(poetry env info --path)/bin/activate
           make lint
-      - name: Install type checking dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install django==4.2.10 django-stubs==4.2.7 mypy==1.8.0
       - name: Run type checking
         run: |
+          source $(poetry env info --path)/bin/activate
           make typecheck
       - name: Test package install
         run: |
-          python -m pip install --upgrade pip
           python setup.py sdist
           pip install dist/*
 
@@ -84,9 +83,9 @@ jobs:
           POSTGRES_USER: "modeltranslation"
           POSTGRES_PASSWORD: "modeltranslation"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python }}
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
       - name: Set up env

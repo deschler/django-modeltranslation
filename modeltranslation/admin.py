@@ -40,7 +40,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
     ) -> _ListOrTuple[tuple[str | None, dict[str, Any]]] | None:
         # Take custom modelform fields option into account
         if not self.fields and hasattr(self.form, "_meta") and self.form._meta.fields:
-            self.fields = self.form._meta.fields
+            self.fields = self.form._meta.fields  # type: ignore[assignment]
         # takes into account non-standard add_fieldsets attribute used by UserAdmin
         fieldsets = (
             self.add_fieldsets
@@ -57,8 +57,8 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         self, db_field: Field, request: HttpRequest, **kwargs: Any
     ) -> forms.Field:
         field = super().formfield_for_dbfield(db_field, request, **kwargs)
-        self.patch_translation_field(db_field, field, request, **kwargs)  # type: ignore[arg-type]
-        return field  # type: ignore[return-value]
+        self.patch_translation_field(db_field, field, request, **kwargs)
+        return field
 
     def patch_translation_field(
         self, db_field: Field, field: forms.Field, request: HttpRequest, **kwargs: Any

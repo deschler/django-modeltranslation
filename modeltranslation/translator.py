@@ -371,10 +371,10 @@ def patch_refresh_from_db(model: type[Model]) -> None:
     old_refresh_from_db = model.refresh_from_db
 
     def new_refresh_from_db(
-        self, using: str | None = None, fields: Sequence[str] | None = None
+        self, using: str | None = None, fields: Iterable[str] | None = None
     ) -> None:
         if fields is not None:
-            fields = append_translated(self.__class__, fields)  # type: ignore[assignment]
+            fields = append_translated(self.__class__, fields)
         return old_refresh_from_db(self, using, fields)
 
     model.refresh_from_db = new_refresh_from_db
@@ -609,7 +609,7 @@ class Translator:
                 # Fix translated_field caching for SingleRelatedObjectDescriptor
                 sro_descriptor = getattr(
                     field.remote_field.model,
-                    field.remote_field.get_accessor_name(),  # type: ignore[arg-type]
+                    field.remote_field.get_accessor_name(),
                 )
                 patch_related_object_descriptor_caching(sro_descriptor)
 
