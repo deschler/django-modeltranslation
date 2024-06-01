@@ -17,20 +17,22 @@ jobs:
       matrix:
         python: ["3.10"]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python }}
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python }}
       - name: Install deps
         run: |
-          python -m pip install --upgrade poetry pip
+          python -m pip install --upgrade poetry
           poetry install --sync --no-root
       - name: Run linters
         run: |
+          source $(poetry env info --path)/bin/activate
           make lint
       - name: Run type checking
         run: |
+          source $(poetry env info --path)/bin/activate
           make typecheck
       - name: Test package install
         run: |
