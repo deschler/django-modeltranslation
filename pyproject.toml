@@ -40,18 +40,28 @@ ignore = [
     "E501",   # line length is handled by formatter
 ]
 
+[tool.ruff.lint.pyflakes]
+extend-generics = [
+    "django.db.models.ForeignKey",
+    "django.db.models.OneToOneField",
+    "django.db.models.ManyToManyField",
+    "django.db.models.Manager",
+    "django.db.models.manager.RelatedManager",
+]
+
 [tool.mypy]
 python_version = "3.8"
 incremental = true
 warn_unused_ignores = true
 warn_redundant_casts = true
 warn_unused_configs = true
-pretty = true
 show_error_context = true
 exclude = [
-    'tests/'
+    'tests/migrations/',
+    'tests/urls.py',
 ]
 disable_error_code = ["method-assign"]
+plugins = ["mypy_django_plugin.main"]
 
 [[tool.mypy.overrides]]
 module  = ["modeltranslation.fields"]
@@ -68,3 +78,6 @@ disable_error_code = ["override", "attr-defined"]
 [[tool.mypy.overrides]]
 module = ["modeltranslation.manager"]
 disable_error_code = ["override", "attr-defined", "return-value", "misc"]
+
+[tool.django-stubs]
+django_settings_module = "modeltranslation.tests.settings"
