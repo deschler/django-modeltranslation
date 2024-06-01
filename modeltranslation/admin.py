@@ -218,17 +218,17 @@ class TranslationBaseModelAdmin(BaseModelAdmin[_ModelT]):
         self.prepopulated_fields = prepopulated_fields
 
     def _get_form_or_formset(
-        self, request: HttpRequest, obj: _ModelT | None, **kwargs: Any
+        self, request: HttpRequest, obj: Model | None, **kwargs: Any
     ) -> dict[str, Any]:
         """
         Generic code shared by get_form and get_formset.
         """
-        exclude = self.get_exclude(request, obj)
+        exclude = self.get_exclude(request, obj)  # type: ignore[arg-type]
         if exclude is None:
             exclude = []
         else:
             exclude = list(exclude)
-        exclude.extend(self.get_readonly_fields(request, obj))
+        exclude.extend(self.get_readonly_fields(request, obj))  # type: ignore[arg-type]
         if not exclude and hasattr(self.form, "_meta") and self.form._meta.exclude:
             # Take the custom ModelForm's Meta.exclude into account only if the
             # ModelAdmin doesn't define its own.
@@ -358,7 +358,7 @@ class TranslationAdmin(TranslationBaseModelAdmin[_ModelT], admin.ModelAdmin[_Mod
                     # Extract the original field's verbose_name for use as this
                     # fieldset's label - using gettext_lazy in your model
                     # declaration can make that translatable.
-                    label = self.model._meta.get_field(orig_field).verbose_name.capitalize()
+                    label = self.model._meta.get_field(orig_field).verbose_name.capitalize()  # type: ignore[union-attr]
                     temp_fieldsets[orig_field] = (
                         label,
                         {"fields": trans_fieldnames, "classes": ("mt-fieldset",)},
@@ -411,7 +411,7 @@ class TranslationInlineModelAdmin(
         declared_fieldsets = self._get_fieldsets_pre_form_or_formset(request, obj)
         if declared_fieldsets:
             return declared_fieldsets
-        form = self.get_formset(request, obj, fields=None).form
+        form = self.get_formset(request, obj, fields=None).form  # type: ignore[arg-type]
         return self._get_fieldsets_post_form_or_formset(request, form, obj)
 
 
