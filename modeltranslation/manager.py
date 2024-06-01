@@ -12,7 +12,6 @@ from functools import reduce
 from typing import Any, Literal, TypeVar, cast, overload
 from collections.abc import Container, Iterator, Sequence, Iterable
 
-from django import VERSION
 from django.contrib.admin.utils import get_model_from_relation
 from django.core.exceptions import FieldDoesNotExist
 from django.db import models
@@ -328,17 +327,9 @@ class MultilingualQuerySet(QuerySet[_T]):
             kwargs[new_key] = self._rewrite_f(val)
         return args, kwargs
 
-    if VERSION >= (3, 2):
-
-        def _filter_or_exclude(self, negate: bool, args: Any, kwargs: Any) -> Self:
-            args, kwargs = self._rewrite_filter_or_exclude(args, kwargs)
-            return super()._filter_or_exclude(negate, args, kwargs)
-
-    else:
-
-        def _filter_or_exclude(self, negate: bool, *args: Any, **kwargs: Any) -> Self:
-            args, kwargs = self._rewrite_filter_or_exclude(args, kwargs)
-            return super()._filter_or_exclude(negate, *args, **kwargs)
+    def _filter_or_exclude(self, negate: bool, args: Any, kwargs: Any) -> Self:
+        args, kwargs = self._rewrite_filter_or_exclude(args, kwargs)
+        return super()._filter_or_exclude(negate, args, kwargs)
 
     def _get_original_fields(self) -> list[str]:
         source = (

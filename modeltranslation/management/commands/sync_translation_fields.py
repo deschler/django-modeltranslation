@@ -14,7 +14,6 @@ from __future__ import annotations
 from typing import Any, cast
 from collections.abc import Iterator
 
-from django import VERSION
 from django.core.management.base import BaseCommand, CommandParser
 from django.core.management.color import no_style
 from django.db import connection
@@ -59,11 +58,9 @@ class Command(BaseCommand):
         " languages or undeclared fields."
     )
 
-    if VERSION < (1, 8):
-        from optparse import make_option
-
-        option_list = BaseCommand.option_list + (  # type: ignore
-            make_option(
+    def add_arguments(self, parser: CommandParser) -> None:
+        (
+            parser.add_argument(
                 "--noinput",
                 action="store_false",
                 dest="interactive",
@@ -71,18 +68,6 @@ class Command(BaseCommand):
                 help="Do NOT prompt the user for input of any kind.",
             ),
         )
-    else:
-
-        def add_arguments(self, parser: CommandParser) -> None:
-            (
-                parser.add_argument(
-                    "--noinput",
-                    action="store_false",
-                    dest="interactive",
-                    default=True,
-                    help="Do NOT prompt the user for input of any kind.",
-                ),
-            )
 
     def handle(self, *args: Any, **options: Any) -> None:
         """
