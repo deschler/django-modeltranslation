@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import Any, Iterable, Sequence
+from typing import Any, Iterable, Sequence, TypeVar
 
 from django import forms
-from django.db.models import Field
+from django.db.models import Field, Model
 from django.contrib import admin
 from django.contrib.admin.options import BaseModelAdmin, InlineModelAdmin, flatten_fieldsets
 from django.contrib.contenttypes.admin import GenericStackedInline, GenericTabularInline
@@ -25,8 +25,10 @@ from modeltranslation.utils import (
 from modeltranslation.widgets import ClearableWidgetWrapper
 from modeltranslation._typing import _ListOrTuple
 
+_ModelT = TypeVar("_ModelT", bound=Model)
 
-class TranslationBaseModelAdmin(BaseModelAdmin):
+
+class TranslationBaseModelAdmin(BaseModelAdmin[_ModelT]):
     _orig_was_required: dict[str, bool] = {}
     both_empty_values_fields = ()
 
@@ -36,7 +38,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         self._patch_prepopulated_fields()
 
     def _get_declared_fieldsets(
-        self, request: HttpRequest, obj: Any | None = None
+        self, request: HttpRequest, obj: _ModelT | None = None
     ) -> _ListOrTuple[tuple[str | None, dict[str, Any]]] | None:
         # Take custom modelform fields option into account
         if not self.fields and hasattr(self.form, "_meta") and self.form._meta.fields:
@@ -216,17 +218,17 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         self.prepopulated_fields = prepopulated_fields
 
     def _get_form_or_formset(
-        self, request: HttpRequest, obj: Any | None, **kwargs: Any
+        self, request: HttpRequest, obj: Model | None, **kwargs: Any
     ) -> dict[str, Any]:
         """
         Generic code shared by get_form and get_formset.
         """
-        exclude = self.get_exclude(request, obj)
+        exclude = self.get_exclude(request, obj)  # type: ignore[arg-type]
         if exclude is None:
             exclude = []
         else:
             exclude = list(exclude)
-        exclude.extend(self.get_readonly_fields(request, obj))
+        exclude.extend(self.get_readonly_fields(request, obj))  # type: ignore[arg-type]
         if not exclude and hasattr(self.form, "_meta") and self.form._meta.exclude:
             # Take the custom ModelForm's Meta.exclude into account only if the
             # ModelAdmin doesn't define its own.
@@ -240,7 +242,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         return kwargs
 
     def _get_fieldsets_pre_form_or_formset(
-        self, request: HttpRequest, obj: Any | None = None
+        self, request: HttpRequest, obj: _ModelT | None = None
     ) -> _ListOrTuple[tuple[str | None, dict[str, Any]]] | None:
         """
         Generic get_fieldsets code, shared by
@@ -249,7 +251,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         return self._get_declared_fieldsets(request, obj)
 
     def _get_fieldsets_post_form_or_formset(
-        self, request: HttpRequest, form: type[forms.ModelForm], obj: Any | None = None
+        self, request: HttpRequest, form: type[forms.ModelForm], obj: _ModelT | None = None
     ) -> list:
         """
         Generic get_fieldsets code, shared by
@@ -280,7 +282,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         return tuple(exclude)
 
     def get_readonly_fields(
-        self, request: HttpRequest, obj: Any | None = None
+        self, request: HttpRequest, obj: _ModelT | None = None
     ) -> _ListOrTuple[str]:
         """
         Hook to specify custom readonly fields.
@@ -288,7 +290,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
         return self.replace_orig_field(self.readonly_fields)
 
 
-class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
+class TranslationAdmin(TranslationBaseModelAdmin[_ModelT], admin.ModelAdmin[_ModelT]):
     # TODO: Consider addition of a setting which allows to override the fallback to True
     group_fieldsets = False
 
@@ -356,7 +358,7 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
                     # Extract the original field's verbose_name for use as this
                     # fieldset's label - using gettext_lazy in your model
                     # declaration can make that translatable.
-                    label = self.model._meta.get_field(orig_field).verbose_name.capitalize()
+                    label = self.model._meta.get_field(orig_field).verbose_name.capitalize()  # type: ignore[union-attr]
                     temp_fieldsets[orig_field] = (
                         label,
                         {"fields": trans_fieldnames, "classes": ("mt-fieldset",)},
@@ -374,13 +376,13 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
         return fieldsets
 
     def get_form(
-        self, request: HttpRequest, obj: Any | None = None, **kwargs: Any
+        self, request: HttpRequest, obj: _ModelT | None = None, **kwargs: Any
     ) -> type[forms.ModelForm]:
         kwargs = self._get_form_or_formset(request, obj, **kwargs)
         return super().get_form(request, obj, **kwargs)
 
     def get_fieldsets(
-        self, request: HttpRequest, obj: Any | None = None
+        self, request: HttpRequest, obj: _ModelT | None = None
     ) -> _ListOrTuple[tuple[str | None, dict[str, Any]]]:
         return self._get_fieldsets_pre_form_or_formset(request, obj) or self._group_fieldsets(
             self._get_fieldsets_post_form_or_formset(
@@ -389,41 +391,57 @@ class TranslationAdmin(TranslationBaseModelAdmin, admin.ModelAdmin):
         )
 
 
-class TranslationInlineModelAdmin(TranslationBaseModelAdmin, InlineModelAdmin):
+_ChildModelT = TypeVar("_ChildModelT", bound=Model)
+_ParentModelT = TypeVar("_ParentModelT", bound=Model)
+
+
+class TranslationInlineModelAdmin(
+    TranslationBaseModelAdmin[_ChildModelT], InlineModelAdmin[_ChildModelT, _ParentModelT]
+):
     def get_formset(
-        self, request: HttpRequest, obj: Any | None = None, **kwargs: Any
+        self, request: HttpRequest, obj: _ParentModelT | None = None, **kwargs: Any
     ) -> type[BaseInlineFormSet]:
         kwargs = self._get_form_or_formset(request, obj, **kwargs)
         return super().get_formset(request, obj, **kwargs)
 
-    def get_fieldsets(self, request: HttpRequest, obj: Any | None = None):
+    def get_fieldsets(self, request: HttpRequest, obj: _ChildModelT | None = None):
         # FIXME: If fieldsets are declared on an inline some kind of ghost
         # fieldset line with just the original model verbose_name of the model
         # is displayed above the new fieldsets.
         declared_fieldsets = self._get_fieldsets_pre_form_or_formset(request, obj)
         if declared_fieldsets:
             return declared_fieldsets
-        form = self.get_formset(request, obj, fields=None).form
+        form = self.get_formset(request, obj, fields=None).form  # type: ignore[arg-type]
         return self._get_fieldsets_post_form_or_formset(request, form, obj)
 
 
-class TranslationTabularInline(TranslationInlineModelAdmin, admin.TabularInline):
+class TranslationTabularInline(
+    TranslationInlineModelAdmin[_ChildModelT, _ParentModelT],
+    admin.TabularInline[_ChildModelT, _ParentModelT],
+):
     pass
 
 
-class TranslationStackedInline(TranslationInlineModelAdmin, admin.StackedInline):
+class TranslationStackedInline(
+    TranslationInlineModelAdmin[_ChildModelT, _ParentModelT],
+    admin.StackedInline[_ChildModelT, _ParentModelT],
+):
     pass
 
 
-class TranslationGenericTabularInline(TranslationInlineModelAdmin, GenericTabularInline):
+class TranslationGenericTabularInline(
+    TranslationInlineModelAdmin[_ChildModelT, _ParentModelT], GenericTabularInline
+):
     pass
 
 
-class TranslationGenericStackedInline(TranslationInlineModelAdmin, GenericStackedInline):
+class TranslationGenericStackedInline(
+    TranslationInlineModelAdmin[_ChildModelT, _ParentModelT], GenericStackedInline
+):
     pass
 
 
-class TabbedDjangoJqueryTranslationAdmin(TranslationAdmin):
+class TabbedDjangoJqueryTranslationAdmin(TranslationAdmin[_ModelT]):
     """
     Convenience class which includes the necessary media files for tabbed
     translation fields. Reuses Django's internal jquery version.
@@ -441,7 +459,7 @@ class TabbedDjangoJqueryTranslationAdmin(TranslationAdmin):
         }
 
 
-class TabbedExternalJqueryTranslationAdmin(TranslationAdmin):
+class TabbedExternalJqueryTranslationAdmin(TranslationAdmin[_ModelT]):
     """
     Convenience class which includes the necessary media files for tabbed
     translation fields. Loads recent jquery version from a cdn.
