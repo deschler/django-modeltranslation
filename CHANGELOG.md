@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.19.4](https://github.com/deschler/django-modeltranslation/compare/v0.19.3...v0.19.4) (2024-06-20)
+
+
+### Features
+
+* Add global `MODELTRANSLATION_REQUIRED_LANGUAGES` setting ([0bbdb5f](https://github.com/deschler/django-modeltranslation/commit/0bbdb5fe8fa053de2bc54d31b668b3621a9dda78)), closes [#743](https://github.com/deschler/django-modeltranslation/issues/743)
+
 ### [0.19.3](https://github.com/deschler/django-modeltranslation/compare/v0.19.2...v0.19.3) (2024-06-01)
 
 
