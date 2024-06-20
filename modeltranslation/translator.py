@@ -121,12 +121,12 @@ class TranslationOptions(metaclass=FieldsAggregationMetaClass):
         """
         # TODO: at the moment only required_languages is validated.
         # Maybe check other options as well?
-        if self.required_languages:
-            if isinstance(self.required_languages, (tuple, list)):
-                self._check_languages(self.required_languages)
+        if value := self.required_languages:
+            if isinstance(value, (tuple, list)):
+                self._check_languages(value)
             else:
-                self._check_languages(self.required_languages.keys(), extra=("default",))
-                for fieldnames in self.required_languages.values():
+                self._check_languages(value.keys(), extra=("default",))
+                for fieldnames in value.values():
                     if any(f not in self.all_fields for f in fieldnames):
                         raise ImproperlyConfigured(
                             "Fieldname in required_languages which is not in fields option."
