@@ -101,9 +101,9 @@ say it in code::
 Of course multiple inheritance and inheritance chains (A > B > C) also work as
 expected.
 
-However, if the base class is not abstract, inheriting the ``TranslationOptions`` will 
-cause errors, because the base ``TranslationOptions`` already took care of adding 
-fields to the model. The example below illustrates how to add translation fields to a 
+However, if the base class is not abstract, inheriting the ``TranslationOptions`` will
+cause errors, because the base ``TranslationOptions`` already took care of adding
+fields to the model. The example below illustrates how to add translation fields to a
 child model with a non-abstract base::
 
     from modeltranslation.translator import translator, TranslationOptions
@@ -119,7 +119,7 @@ child model with a non-abstract base::
     translator.register(NewsWithImage, NewsWithImageTranslationOptions)
 
 
-This will add the translated fields ``title`` and ``text`` to the ``News`` model and further add 
+This will add the translated fields ``title`` and ``text`` to the ``News`` model and further add
 the translated field ``image`` to the ``NewsWithImage`` model.
 
 .. note:: When upgrading from a previous modeltranslation version (<0.5), please
@@ -288,6 +288,11 @@ For German, all fields (both ``title`` and ``text``) are required; for all other
     the ``full_clean()`` model method.
 
     The required fields are still ``null=True``, though.
+
+.. versionadded:: 0.20
+
+To set required_languages for all models, use `MODELTRANSLATION_REQUIRED_LANGUAGES` setting,
+which accepts the same values as `required_languages` class variable.
 
 
 ``TranslationOptions`` attributes reference

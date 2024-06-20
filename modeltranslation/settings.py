@@ -21,11 +21,7 @@ if _default_language and _default_language not in AVAILABLE_LANGUAGES:
     raise ImproperlyConfigured("MODELTRANSLATION_DEFAULT_LANGUAGE not in LANGUAGES setting.")
 DEFAULT_LANGUAGE = _default_language or AVAILABLE_LANGUAGES[0]
 
-REQUIRED_LANGUAGES: _ListOrTuple[str] | dict[str, _ListOrTuple[str]] = getattr(
-    settings,
-    "MODELTRANSLATION_REQUIRED_LANGUAGES",
-    (),
-)
+REQUIRED_LANGUAGES: _ListOrTuple[str] = getattr(settings, "MODELTRANSLATION_REQUIRED_LANGUAGES", ())
 
 # Fixed base language for prepopulated fields (slugs)
 # (If not set, the current request language will be used)
