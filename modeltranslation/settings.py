@@ -3,7 +3,7 @@ from __future__ import annotations
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
-from ._typing import AutoPopulate
+from ._typing import AutoPopulate, _ListOrTuple
 
 TRANSLATION_FILES: tuple[str, ...] = tuple(
     getattr(settings, "MODELTRANSLATION_TRANSLATION_FILES", ())
@@ -20,6 +20,8 @@ _default_language: str | None = getattr(settings, "MODELTRANSLATION_DEFAULT_LANG
 if _default_language and _default_language not in AVAILABLE_LANGUAGES:
     raise ImproperlyConfigured("MODELTRANSLATION_DEFAULT_LANGUAGE not in LANGUAGES setting.")
 DEFAULT_LANGUAGE = _default_language or AVAILABLE_LANGUAGES[0]
+
+REQUIRED_LANGUAGES: _ListOrTuple[str] = getattr(settings, "MODELTRANSLATION_REQUIRED_LANGUAGES", ())
 
 # Fixed base language for prepopulated fields (slugs)
 # (If not set, the current request language will be used)

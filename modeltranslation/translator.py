@@ -102,7 +102,9 @@ class TranslationOptions(metaclass=FieldsAggregationMetaClass):
     ``related_fields`` contains names of reverse lookup fields.
     """
 
-    required_languages: ClassVar[_ListOrTuple[str] | dict[str, _ListOrTuple[str]]] = ()
+    required_languages: ClassVar[_ListOrTuple[str] | dict[str, _ListOrTuple[str]]] = (
+        mt_settings.REQUIRED_LANGUAGES
+    )
 
     def __init__(self, model: Model) -> None:
         """
