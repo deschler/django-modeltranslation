@@ -289,7 +289,7 @@ For German, all fields (both ``title`` and ``text``) are required; for all other
 
     The required fields are still ``null=True``, though.
 
-.. versionadded:: 0.20
+.. versionadded:: 0.19.4
 
 To set required_languages for all models, use `MODELTRANSLATION_REQUIRED_LANGUAGES` setting,
 which accepts the same values as `required_languages` class variable.
