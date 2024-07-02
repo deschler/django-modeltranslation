@@ -11,12 +11,12 @@ if sys.version_info >= (3, 11):
 else:
     from typing_extensions import Self, TypeAlias  # noqa: F401
 
-AutoPopulate: TypeAlias = "bool | Literal['all', 'default', 'required']"
+AutoPopulate: TypeAlias = bool | Literal['all', 'default', 'required']
 
 _K = TypeVar("_K")
 
 # See https://github.com/typeddjango/django-stubs/blob/082955/django-stubs/utils/datastructures.pyi#L12-L14
-_ListOrTuple: TypeAlias = "list[_K] | tuple[_K, ...]"
+_ListOrTuple: TypeAlias = list[_K] | tuple[_K, ...]
 
 
 # https://github.com/typeddjango/django-stubs/tree/master/django_stubs_ext
