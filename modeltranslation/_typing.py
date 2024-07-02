@@ -11,7 +11,7 @@ if sys.version_info >= (3, 11):
 else:
     from typing_extensions import Self, TypeAlias  # noqa: F401
 
-AutoPopulate: TypeAlias = bool | Literal['all', 'default', 'required']
+AutoPopulate: TypeAlias = "bool | Literal['all', 'default', 'required']"
 
 _K = TypeVar("_K")
 
