@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import sys
-from typing import Literal, TypeVar
+from typing import Literal, TypeVar, Union
 
 from django.contrib import admin
 from django.contrib.admin.options import BaseModelAdmin
@@ -16,7 +16,7 @@ AutoPopulate: TypeAlias = "bool | Literal['all', 'default', 'required']"
 _K = TypeVar("_K")
 
 # See https://github.com/typeddjango/django-stubs/blob/082955/django-stubs/utils/datastructures.pyi#L12-L14
-_ListOrTuple: TypeAlias = "list[_K] | tuple[_K, ...]"
+_ListOrTuple: TypeAlias = Union[list[_K], tuple[_K, ...]]
 
 
 # https://github.com/typeddjango/django-stubs/tree/master/django_stubs_ext
