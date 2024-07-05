@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.19.5](https://github.com/deschler/django-modeltranslation/compare/v0.19.4...v0.19.5) (2024-07-05)
+
+
+### Bug Fixes
+
+* **types:** Use Union instead of | for some types ([13af637](https://github.com/deschler/django-modeltranslation/commit/13af637d87dc9eca2775b46bf2b04da7e741c805)), closes [#744](https://github.com/deschler/django-modeltranslation/issues/744)
+
 ### [0.19.4](https://github.com/deschler/django-modeltranslation/compare/v0.19.3...v0.19.4) (2024-06-20)
 
 
