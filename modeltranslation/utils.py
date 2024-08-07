@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from itertools import chain
 from contextlib import contextmanager
 from typing import Any, TypeVar
 from collections.abc import Generator, Iterable, Iterator
@@ -45,11 +46,16 @@ def get_language_bidi(lang: str) -> bool:
     return lang_info["bidi"]
 
 
-def get_translation_fields(field: str) -> list[str]:
+def get_translation_fields(*fields: str) -> list[str]:
     """
-    Returns a list of localized fieldnames for a given field.
+    Returns a list of localized fieldnames for a given fields.
     """
-    return [build_localized_fieldname(field, lang) for lang in settings.AVAILABLE_LANGUAGES]
+    return list(
+        chain.from_iterable(
+            [build_localized_fieldname(field, lang) for lang in settings.AVAILABLE_LANGUAGES]
+            for field in fields
+        )
+    )
 
 
 def build_lang(lang: str) -> str:
