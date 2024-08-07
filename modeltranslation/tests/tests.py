@@ -2430,6 +2430,7 @@ class TranslationAdminTest(ModeltranslationTestBase):
         try:
             test = TestModelAdmin["my_attribute"]
             # don't know how to fail here?!
+            # as we should have a type error!
             assert True == False
         except TypeError:
             pass
