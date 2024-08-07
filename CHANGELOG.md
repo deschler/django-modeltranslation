@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.19.6](https://github.com/deschler/django-modeltranslation/compare/v0.19.5...v0.19.6) (2024-08-07)
+
+
+### Bug Fixes
+
+* Support multiple translation fields in `get_translation_fields` ([56c5784](https://github.com/deschler/django-modeltranslation/commit/56c578400fd6bd29bd8b088bc3e5ba9f6b4fa9a4))
+
 ### [0.19.5](https://github.com/deschler/django-modeltranslation/compare/v0.19.4...v0.19.5) (2024-07-05)
 
 
