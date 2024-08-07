@@ -2422,6 +2422,19 @@ class TranslationAdminTest(ModeltranslationTestBase):
         self.test_obj.delete()
         super().tearDown()
 
+    def test_admin_class_dict_access_raises_type_error(self):
+
+        class TestModelAdmin(admin.TranslationAdmin):
+            my_attribute = "default"
+
+        try:
+            test = TestModelAdmin["my_attribute"]
+            # don't know how to fail here?!
+            # as we should have a type error!
+            assert True == False
+        except TypeError:
+            pass
+
     def test_default_fields(self):
         class TestModelAdmin(admin.TranslationAdmin):
             pass
