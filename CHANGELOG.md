@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.19.7](https://github.com/deschler/django-modeltranslation/compare/v0.19.6...v0.19.7) (2024-08-12)
+
+
+### Features
+
+* add changelog to project urls in package metadata ([#752](https://github.com/deschler/django-modeltranslation/issues/752)) ([303c947](https://github.com/deschler/django-modeltranslation/commit/303c947930a3348bf4037617677dc89fb157e1e2))
+
 ### [0.19.6](https://github.com/deschler/django-modeltranslation/compare/v0.19.5...v0.19.6) (2024-08-07)
 
 
