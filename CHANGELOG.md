@@ -37,6 +37,10 @@ All notable changes to this project will be documented in this file. See [standa
 
 * **types:** Make admin classes generic as their super classes ([#737](https://github.com/deschler/django-modeltranslation/issues/737)) ([d2c16fe](https://github.com/deschler/django-modeltranslation/commit/d2c16feba9d9f00f16f9406e2a466cd0cc832433))
 
+### Breaking changes
+
+* Dropped support for python 3.8 and removed it from CI
+
 ### [0.19.2](https://github.com/deschler/django-modeltranslation/compare/v0.19.1...v0.19.2) (2024-05-27)
 
 ### [0.19.1](https://github.com/deschler/django-modeltranslation/compare/v0.19.0...v0.19.1) (2024-05-27)
