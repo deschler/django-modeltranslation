@@ -29,8 +29,13 @@ def monkeypatch() -> None:
         BaseModelAdmin,
     ]
 
+    def class_getitem(cls: type, key: str | type | TypeVar):
+        if isinstance(key, str) and hasattr(cls, key):
+            # Fix django-cms compatibility:
+            # https://github.com/django-cms/django-cms/issues/7948
+            raise KeyError(f"Key '{key}' found as attribute, use getattr to access it.")
+        return cls
+
     for class_ in classes:
         if not hasattr(class_, "__class_getitem__"):
-            class_.__class_getitem__ = classmethod(  # type: ignore[attr-defined]
-                lambda cls, *args, **kwargs: cls
-            )
+            class_.__class_getitem__ = classmethod(class_getitem)  # type: ignore[attr-defined]
