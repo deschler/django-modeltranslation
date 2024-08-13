@@ -36,6 +36,6 @@ def monkeypatch() -> None:
             raise KeyError(f"Key '{key}' found as attribute, use getattr to access it.")
         return cls
 
-    for class_ in classes:
-        if not hasattr(class_, "__class_getitem__"):
-            class_.__class_getitem__ = classmethod(class_getitem)  # type: ignore[attr-defined]
+    for cls in classes:
+        if not hasattr(cls, "__class_getitem__"):
+            cls.__class_getitem__ = classmethod(class_getitem)  # type: ignore[attr-defined]
