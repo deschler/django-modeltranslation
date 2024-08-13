@@ -37,5 +37,4 @@ def monkeypatch() -> None:
         return cls
 
     for cls in classes:
-        if not hasattr(cls, "__class_getitem__"):
-            cls.__class_getitem__ = classmethod(class_getitem)  # type: ignore[attr-defined]
+        cls.__class_getitem__ = classmethod(class_getitem)  # type: ignore[attr-defined]
