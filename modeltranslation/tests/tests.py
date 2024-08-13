@@ -2911,6 +2911,13 @@ class TranslationAdminTest(ModeltranslationTestBase):
         assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
         assert tuple(ma.get_form(request, self.test_obj).base_fields.keys()) == tuple(fields)
 
+    def test_class_attribute_access_raises_type_error(self):
+        class TestModelAdmin(admin.TranslationAdmin[models.TestModel]):
+            allow_children = True
+
+        with pytest.raises(KeyError):
+            TestModelAdmin["allow_children"]  # type: ignore
+
 
 class ThirdPartyAppIntegrationTest(ModeltranslationTestBase):
     """
