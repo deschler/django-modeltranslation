@@ -2,9 +2,11 @@ import os
 import warnings
 
 import django_stubs_ext
+from modeltranslation._typing import monkeypatch
 
 warnings.simplefilter("always", DeprecationWarning)
 django_stubs_ext.monkeypatch()
+monkeypatch()
 
 
 def _get_database_config():
