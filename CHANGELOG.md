@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.19.8](https://github.com/deschler/django-modeltranslation/compare/v0.19.7...v0.19.8) (2024-09-04)
+
+
+### Bug Fixes
+
+* Fix django-cms compatibility ([d420b6a](https://github.com/deschler/django-modeltranslation/commit/d420b6a9db87e133a34d0462af4c699b6debed96)), closes [#748](https://github.com/deschler/django-modeltranslation/issues/748)
+* Fix type error for Python 3.8 ([#754](https://github.com/deschler/django-modeltranslation/issues/754)) ([5cc37c2](https://github.com/deschler/django-modeltranslation/commit/5cc37c256f377f918e3f4b788b900a700a5f22db)), closes [#753](https://github.com/deschler/django-modeltranslation/issues/753)
+
 ### [0.19.7](https://github.com/deschler/django-modeltranslation/compare/v0.19.6...v0.19.7) (2024-08-12)
 
 
