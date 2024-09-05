@@ -21,7 +21,10 @@ def test_translation_admin():
     sys.version_info < (3, 10), 
     reason="get_type_hints fails on Python 3.9 despite future annotations",
 )
-def test_type_hints():
-    get_type_hints(translator.TranslationOptions)
-    get_type_hints(admin.TranslationAdmin)
-    get_type_hints(admin.TranslationInlineModelAdmin)
+@pytest.mark.parametrize("cls", [
+    translator.TranslationOptions,
+    admin.TranslationAdmin,
+    admin.TranslationInlineModelAdmin,
+])
+def test_type_hints(cls):
+    get_type_hints(cls)
