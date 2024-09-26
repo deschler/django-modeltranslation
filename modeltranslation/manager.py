@@ -603,7 +603,7 @@ class MultilingualQuerysetManager(models.Manager[_T]):
     get_queryset returns MultilingualQuerySet.
     """
 
-    def get_queryset(self) -> MultilingualQuerySet[_T]:
+    def get_queryset(self) -> QuerySet[_T]:
         qs = super().get_queryset()
         return self._patch_queryset(qs)
 
@@ -625,7 +625,7 @@ class MultilingualManager(MultilingualQuerysetManager[_T]):
     def raw_values(self, *args: Any, **kwargs: Any):
         return self.get_queryset().raw_values(*args, **kwargs)
 
-    def get_queryset(self) -> MultilingualQuerySet[_T]:
+    def get_queryset(self) -> QuerySet[_T]:
         """
         This method is repeated because some managers that don't use super() or alter queryset class
         may return queryset that is not subclass of MultilingualQuerySet.
