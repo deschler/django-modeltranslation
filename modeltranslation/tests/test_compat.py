@@ -7,6 +7,7 @@ class TestDjangoModelUtils:
     """
     Test case for https://github.com/deschler/django-modeltranslation/issues/760
     """
+
     def test_soft_deletable_model(self):
         try:
             from model_utils.models import SoftDeletableModel
