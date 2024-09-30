@@ -40,6 +40,7 @@ from modeltranslation.utils import build_localized_fieldname, parse_field
 # Re-export the decorator for convenience
 from modeltranslation.decorators import register
 
+from ._compat import is_hidden
 from ._typing import _ListOrTuple
 
 __all__ = [
@@ -599,7 +600,7 @@ class Translator:
                 setattr(model, field.get_attname(), desc)
 
                 # Set related field names on other model
-                if not field.remote_field.is_hidden():
+                if not is_hidden(field.remote_field):
                     other_opts = self._get_options_for_model(field.remote_field.model)
                     other_opts.related = True
                     other_opts.related_fields.append(field.related_query_name())

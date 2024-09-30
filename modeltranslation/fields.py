@@ -23,6 +23,7 @@ from modeltranslation.utils import (
 from modeltranslation.widgets import ClearableWidgetWrapper
 
 from ._typing import Self
+from ._compat import is_hidden
 
 SUPPORTED_FIELDS = (
     fields.CharField,
@@ -187,7 +188,7 @@ class TranslationField:
                 or self.remote_field.model == self.model
             ):
                 self.remote_field.related_name = "%s_rel_+" % self.name
-            elif self.remote_field.is_hidden():
+            elif is_hidden(self.remote_field):
                 # Even if the backwards relation is disabled, django internally uses it, need to use a language scoped related_name
                 self.remote_field.related_name = "_%s_%s_+" % (
                     self.model.__name__.lower(),
@@ -218,7 +219,7 @@ class TranslationField:
             if hasattr(self.remote_field.model._meta, "_related_objects_cache"):
                 del self.remote_field.model._meta._related_objects_cache
 
-        elif self.remote_field and not self.remote_field.is_hidden():
+        elif self.remote_field and not is_hidden(self.remote_field):
             current = self.remote_field.get_accessor_name()
             # Since fields cannot share the same rel object:
             self.remote_field = copy.copy(self.remote_field)
