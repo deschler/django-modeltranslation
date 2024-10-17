@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.19.10](https://github.com/deschler/django-modeltranslation/compare/v0.19.9...v0.19.10) (2024-10-17)
+
+
+### Bug Fixes
+
+* Fix indonesian language support ([a1106d1](https://github.com/deschler/django-modeltranslation/commit/a1106d1fe1a4484fd352e4b17ddebad55c3ecbcc)), closes [#763](https://github.com/deschler/django-modeltranslation/issues/763)
+
 ### [0.19.9](https://github.com/deschler/django-modeltranslation/compare/v0.19.8...v0.19.9) (2024-09-05)
 
 ### [0.19.8](https://github.com/deschler/django-modeltranslation/compare/v0.19.7...v0.19.8) (2024-09-04)
