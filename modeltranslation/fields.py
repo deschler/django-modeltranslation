@@ -490,15 +490,6 @@ class LanguageCacheSingleObjectDescriptor:
 
     accessor = None  # needs to be set on instance
 
-    @property
-    def cache_name(self) -> str:
-        """
-        Used in django 1.x
-        """
-        lang = get_language()
-        cache = build_localized_fieldname(self.accessor, lang)  # type: ignore[arg-type]
-        return "_%s_cache" % cache
-
     def get_cache_name(self) -> str:
         """
         Used in django > 2.x
