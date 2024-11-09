@@ -1024,20 +1024,17 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         # Check that the reverse accessors are created on the model:
         # Explicit related_name
         testmodel_fields = get_field_names(models.TestModel)
-        testmodel_methods = dir(models.TestModel)
-        assert "test_fks" in testmodel_fields
-        assert "test_fks_de" in testmodel_fields
-        assert "test_fks_en" in testmodel_fields
-        assert "test_fks" in testmodel_methods
-        assert "test_fks_de" in testmodel_methods
-        assert "test_fks_en" in testmodel_methods
+        testmodel_methods = set(dir(models.TestModel))
+
+        assert {"test_fks", "test_fks_de", "test_fks_en"} <= testmodel_fields
+        assert {"test_fks", "test_fks_de", "test_fks_en"} <= testmodel_methods
         # Implicit related_name: manager descriptor name != query field name
-        assert "foreignkeymodel" in testmodel_fields
-        assert "foreignkeymodel_de" in testmodel_fields
-        assert "foreignkeymodel_en" in testmodel_fields
-        assert "foreignkeymodel_set" in testmodel_methods
-        assert "foreignkeymodel_set_de" in testmodel_methods
-        assert "foreignkeymodel_set_en" in testmodel_methods
+        assert {"foreignkeymodel", "foreignkeymodel_de", "foreignkeymodel_en"} <= testmodel_fields
+        assert {
+            "foreignkeymodel_set",
+            "foreignkeymodel_set_de",
+            "foreignkeymodel_set_en",
+        } <= testmodel_methods
 
         # Check the German reverse accessor:
         assert fk_inst_both in instance.test_fks_de.all()
