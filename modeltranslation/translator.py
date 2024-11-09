@@ -477,6 +477,10 @@ def patch_related_object_descriptor_caching(ro_descriptor):
             """
             return build_localized_fieldname(self.get_accessor_name(), get_language())
 
+        @localized_cached_property
+        def accessor_name(self):
+            return self.get_accessor_name()
+
     ro_descriptor.related.__class__ = NewRelated
 
 
