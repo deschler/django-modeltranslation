@@ -2680,6 +2680,8 @@ class TranslationAdminTest(ModeltranslationTestBase):
         fields = ["test_de", "test_en"]
         for field in fields:
             widget = ma.get_form(request).base_fields.get(field).widget
+            # Django 5.1 Adds this attr, ignore it
+            widget.attrs.pop("data-context", None)
             assert {} == widget.attrs
             assert "class" in widget.widget.attrs.keys()
             assert "mt" in widget.widget.attrs["class"]
