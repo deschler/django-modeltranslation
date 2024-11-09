@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 def is_hidden(field: ForeignObjectRel) -> bool:
     return field.hidden
 
+
 def clear_ForeignObjectRel_caches(field: ForeignObjectRel):
     """
     Django 5.1 Introduced caching for `accessor_name` and `cache_name` props.
@@ -22,6 +23,7 @@ def clear_ForeignObjectRel_caches(field: ForeignObjectRel):
     caches = ("accessor_name", "cache_name")
     for name in caches:
         field.__dict__.pop(name, None)
+
 
 if django.VERSION <= (5, 1):
 

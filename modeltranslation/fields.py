@@ -126,7 +126,6 @@ class TranslationField:
         # Update the dict of this field with the content of the original one
         # This might be a bit radical?! Seems to work though...
         self.__dict__.update(translated_field.__dict__)
-        assert 'accessor_name' not in self.__dict__
 
         # Store the originally wrapped field for later
         self.translated_field = translated_field
