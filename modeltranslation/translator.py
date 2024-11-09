@@ -37,7 +37,6 @@ from modeltranslation.thread_context import auto_populate_mode
 from modeltranslation.utils import (
     build_localized_fieldname,
     parse_field,
-    localized_cached_property,
     get_language,
 )
 
@@ -470,18 +469,20 @@ def patch_related_object_descriptor_caching(ro_descriptor):
             """
             return self.cache_name
 
-        @localized_cached_property
+        @property
         def cache_name(self):
             """
             Used in django >= 5.1
             """
             return build_localized_fieldname(self.get_accessor_name(), get_language())
 
-        @localized_cached_property
+        @property
         def accessor_name(self):
             return self.get_accessor_name()
 
     ro_descriptor.related.__class__ = NewRelated
+    ro_descriptor.related.__dict__.pop("accessor_name", None)
+    ro_descriptor.related.__dict__.pop("cache_name", None)
 
 
 class Translator:

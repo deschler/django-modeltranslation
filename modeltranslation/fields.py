@@ -23,7 +23,7 @@ from modeltranslation.utils import (
 from modeltranslation.widgets import ClearableWidgetWrapper
 
 from ._typing import Self
-from ._compat import is_hidden
+from ._compat import is_hidden, clear_ForeignObjectRel_caches
 
 SUPPORTED_FIELDS = (
     fields.CharField,
@@ -126,6 +126,7 @@ class TranslationField:
         # Update the dict of this field with the content of the original one
         # This might be a bit radical?! Seems to work though...
         self.__dict__.update(translated_field.__dict__)
+        assert 'accessor_name' not in self.__dict__
 
         # Store the originally wrapped field for later
         self.translated_field = translated_field
@@ -173,6 +174,9 @@ class TranslationField:
         # Copy the verbose name and append a language suffix
         # (will show up e.g. in the admin).
         self.verbose_name = build_localized_verbose_name(translated_field.verbose_name, language)
+
+        if self.remote_field:
+            clear_ForeignObjectRel_caches(self.remote_field)
 
         # M2M support - <rewrite related_name> <patch intermediary model>
         if isinstance(self.translated_field, fields.related.ManyToManyField) and hasattr(

@@ -248,15 +248,3 @@ def build_localized_intermediary_model(
     translator.lazy_operation(lazy_register_model, intermediary_model, klass)
 
     return klass
-
-
-class localized_cached_property(cached_property):
-    _attrname: str | None = None
-
-    @property
-    def attrname(self) -> str | None:
-        return self._attrname and "-".join((self._attrname, get_language()))
-
-    @attrname.setter
-    def attrname(self, value: str | None):
-        self._attrname = value
