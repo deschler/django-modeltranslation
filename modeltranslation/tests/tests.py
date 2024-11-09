@@ -2682,9 +2682,10 @@ class TranslationAdminTest(ModeltranslationTestBase):
         ma = ForeignKeyModelModelAdmin(models.ForeignKeyModel, self.site)
         fields = ["test_de", "test_en"]
         for field in fields:
-            assert {} == ma.get_form(request).base_fields.get(field).widget.attrs
-            assert "class" in ma.get_form(request).base_fields.get(field).widget.widget.attrs.keys()
-            assert "mt" in ma.get_form(request).base_fields.get(field).widget.widget.attrs["class"]
+            widget = ma.get_form(request).base_fields.get(field).widget
+            assert {} == widget.attrs
+            assert "class" in widget.widget.attrs.keys()
+            assert "mt" in widget.widget.attrs["class"]
 
     def test_inline_fieldsets(self):
         class DataInline(admin.TranslationStackedInline):
