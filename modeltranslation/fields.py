@@ -482,17 +482,3 @@ class TranslatedManyToManyDescriptor:
         loc_field_name = build_localized_fieldname(self.field_name, get_language())
         loc_attname = instance._meta.get_field(loc_field_name).get_attname()
         setattr(instance, loc_attname, value)
-
-
-class LanguageCacheSingleObjectDescriptor:
-    """
-    A Mixin for RelatedObjectDescriptors which use current language in cache lookups.
-    """
-
-    accessor = None  # needs to be set on instance
-
-    def get_cache_name(self) -> str:
-        """
-        Used in django > 2.x
-        """
-        return build_localized_fieldname(self.accessor, get_language())  # type: ignore[arg-type]

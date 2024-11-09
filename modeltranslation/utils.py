@@ -4,7 +4,7 @@ from itertools import chain
 from contextlib import contextmanager
 from typing import Any, TypeVar
 from collections.abc import Generator, Iterable, Iterator
-
+from functools import cached_property
 from django.db import models
 from django.utils.encoding import force_str
 from django.utils.functional import lazy
@@ -248,3 +248,15 @@ def build_localized_intermediary_model(
     translator.lazy_operation(lazy_register_model, intermediary_model, klass)
 
     return klass
+
+
+class localized_cached_property(cached_property):
+    _attrname: str | None = None
+
+    @property
+    def attrname(self) -> str | None:
+        return self._attrname and "-".join((self._attrname, get_language()))
+
+    @attrname.setter
+    def attrname(self, value: str | None):
+        self._attrname = value
