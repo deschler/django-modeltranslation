@@ -936,90 +936,90 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         assert attname == col
 
     def test_translated_models_instance(self):
-        test_inst1 = models.TestModel(title_en="title1_en", title_de="title1_de")
-        test_inst1.save()
-        test_inst2 = models.TestModel(title_en="title2_en", title_de="title2_de")
-        test_inst2.save()
+        instance1 = models.TestModel(title_en="title1_en", title_de="title1_de")
+        instance1.save()
+        instance2 = models.TestModel(title_en="title2_en", title_de="title2_de")
+        instance2.save()
         inst = self.model()
 
         trans_real.activate("de")
-        inst.test = test_inst1
+        inst.test = instance1
         inst.optional = None
 
         trans_real.activate("en")
         # Test assigning relation by ID:
-        inst.optional_id = test_inst2.pk
+        inst.optional_id = instance2.pk
         inst.save()
 
         trans_real.activate("de")
-        assert inst.test_id == test_inst1.pk
+        assert inst.test_id == instance1.pk
         assert inst.test.title == "title1_de"
-        assert inst.test_de_id == test_inst1.pk
+        assert inst.test_de_id == instance1.pk
         assert inst.test_de.title == "title1_de"
         assert inst.optional is None
 
         # Test fallbacks:
         trans_real.activate("en")
         with default_fallback():
-            assert inst.test_id == test_inst1.pk
-            assert inst.test.pk == test_inst1.pk
+            assert inst.test_id == instance1.pk
+            assert inst.test.pk == instance1.pk
             assert inst.test.title == "title1_en"
 
         # Test English:
-        assert inst.optional_id == test_inst2.pk
+        assert inst.optional_id == instance2.pk
         assert inst.optional.title == "title2_en"
-        assert inst.optional_en_id == test_inst2.pk
+        assert inst.optional_en_id == instance2.pk
         assert inst.optional_en.title == "title2_en"
 
         # Test caching
-        inst.test_en = test_inst2
+        inst.test_en = instance2
         inst.save()
         trans_real.activate("de")
-        assert inst.test == test_inst1
+        assert inst.test == instance1
         trans_real.activate("en")
-        assert inst.test == test_inst2
+        assert inst.test == instance2
 
         # Check filtering in direct way + lookup spanning
         manager = self.model.objects
         trans_real.activate("de")
-        assert manager.filter(test=test_inst1).count() == 1
-        assert manager.filter(test_en=test_inst1).count() == 0
-        assert manager.filter(test_de=test_inst1).count() == 1
-        assert manager.filter(test=test_inst2).count() == 0
-        assert manager.filter(test_en=test_inst2).count() == 1
-        assert manager.filter(test_de=test_inst2).count() == 0
+        assert manager.filter(test=instance1).count() == 1
+        assert manager.filter(test_en=instance1).count() == 0
+        assert manager.filter(test_de=instance1).count() == 1
+        assert manager.filter(test=instance2).count() == 0
+        assert manager.filter(test_en=instance2).count() == 1
+        assert manager.filter(test_de=instance2).count() == 0
         assert manager.filter(test__title="title1_de").count() == 1
         assert manager.filter(test__title="title1_en").count() == 0
         assert manager.filter(test__title_en="title1_en").count() == 1
         trans_real.activate("en")
-        assert manager.filter(test=test_inst1).count() == 0
-        assert manager.filter(test_en=test_inst1).count() == 0
-        assert manager.filter(test_de=test_inst1).count() == 1
-        assert manager.filter(test=test_inst2).count() == 1
-        assert manager.filter(test_en=test_inst2).count() == 1
-        assert manager.filter(test_de=test_inst2).count() == 0
+        assert manager.filter(test=instance1).count() == 0
+        assert manager.filter(test_en=instance1).count() == 0
+        assert manager.filter(test_de=instance1).count() == 1
+        assert manager.filter(test=instance2).count() == 1
+        assert manager.filter(test_en=instance2).count() == 1
+        assert manager.filter(test_de=instance2).count() == 0
         assert manager.filter(test__title="title2_en").count() == 1
         assert manager.filter(test__title="title2_de").count() == 0
         assert manager.filter(test__title_de="title2_de").count() == 1
 
     def test_reverse_relations(self):
-        test_inst = models.TestModel(title_en="title_en", title_de="title_de")
-        test_inst.save()
+        instance = models.TestModel(title_en="title_en", title_de="title_de")
+        instance.save()
 
         # Instantiate many 'ForeignKeyModel' instances:
         fk_inst_both = self.model(
-            title_en="f_title_en", title_de="f_title_de", test_de=test_inst, test_en=test_inst
+            title_en="f_title_en", title_de="f_title_de", test_de=instance, test_en=instance
         )
         fk_inst_both.save()
         fk_inst_de = self.model(
-            title_en="f_title_en", title_de="f_title_de", test_de_id=test_inst.pk
+            title_en="f_title_en", title_de="f_title_de", test_de_id=instance.pk
         )
         fk_inst_de.save()
-        fk_inst_en = self.model(title_en="f_title_en", title_de="f_title_de", test_en=test_inst)
+        fk_inst_en = self.model(title_en="f_title_en", title_de="f_title_de", test_en=instance)
         fk_inst_en.save()
 
-        fk_option_de = self.model.objects.create(optional_de=test_inst)
-        fk_option_en = self.model.objects.create(optional_en=test_inst)
+        fk_option_de = self.model.objects.create(optional_de=instance)
+        fk_option_en = self.model.objects.create(optional_en=instance)
 
         # Check that the reverse accessors are created on the model:
         # Explicit related_name
@@ -1040,25 +1040,25 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         assert "foreignkeymodel_set_en" in testmodel_methods
 
         # Check the German reverse accessor:
-        assert fk_inst_both in test_inst.test_fks_de.all()
-        assert fk_inst_de in test_inst.test_fks_de.all()
-        assert fk_inst_en not in test_inst.test_fks_de.all()
+        assert fk_inst_both in instance.test_fks_de.all()
+        assert fk_inst_de in instance.test_fks_de.all()
+        assert fk_inst_en not in instance.test_fks_de.all()
 
         # Check the English reverse accessor:
-        assert fk_inst_both in test_inst.test_fks_en.all()
-        assert fk_inst_en in test_inst.test_fks_en.all()
-        assert fk_inst_de not in test_inst.test_fks_en.all()
+        assert fk_inst_both in instance.test_fks_en.all()
+        assert fk_inst_en in instance.test_fks_en.all()
+        assert fk_inst_de not in instance.test_fks_en.all()
 
         # Check the default reverse accessor:
         trans_real.activate("de")
-        assert fk_inst_de in test_inst.test_fks.all()
-        assert fk_inst_en not in test_inst.test_fks.all()
+        assert fk_inst_de in instance.test_fks.all()
+        assert fk_inst_en not in instance.test_fks.all()
         trans_real.activate("en")
-        assert fk_inst_en in test_inst.test_fks.all()
-        assert fk_inst_de not in test_inst.test_fks.all()
+        assert fk_inst_en in instance.test_fks.all()
+        assert fk_inst_de not in instance.test_fks.all()
 
         # Check implicit related_name reverse accessor:
-        assert fk_option_en in test_inst.foreignkeymodel_set.all()
+        assert fk_option_en in instance.foreignkeymodel_set.all()
 
         # Check filtering in reverse way + lookup spanning:
 
@@ -1090,23 +1090,23 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
 
         # Check assignment
         trans_real.activate("de")
-        test_inst2 = models.TestModel(title_en="title_en", title_de="title_de")
-        test_inst2.save()
-        test_inst2.test_fks.set((fk_inst_de, fk_inst_both))
-        test_inst2.test_fks_en.set((fk_inst_en, fk_inst_both))
+        instance2 = models.TestModel(title_en="title_en", title_de="title_de")
+        instance2.save()
+        instance2.test_fks.set((fk_inst_de, fk_inst_both))
+        instance2.test_fks_en.set((fk_inst_en, fk_inst_both))
 
-        assert fk_inst_both.test.pk == test_inst2.pk
-        assert fk_inst_both.test_id == test_inst2.pk
-        assert fk_inst_both.test_de == test_inst2
-        assert set(test_inst2.test_fks_de.all()) == set(test_inst2.test_fks.all())
-        assert fk_inst_both in test_inst2.test_fks.all()
-        assert fk_inst_de in test_inst2.test_fks.all()
-        assert fk_inst_en not in test_inst2.test_fks.all()
+        assert fk_inst_both.test.pk == instance2.pk
+        assert fk_inst_both.test_id == instance2.pk
+        assert fk_inst_both.test_de == instance2
+        assert set(instance2.test_fks_de.all()) == set(instance2.test_fks.all())
+        assert fk_inst_both in instance2.test_fks.all()
+        assert fk_inst_de in instance2.test_fks.all()
+        assert fk_inst_en not in instance2.test_fks.all()
         trans_real.activate("en")
-        assert set(test_inst2.test_fks_en.all()) == set(test_inst2.test_fks.all())
-        assert fk_inst_both in test_inst2.test_fks.all()
-        assert fk_inst_en in test_inst2.test_fks.all()
-        assert fk_inst_de not in test_inst2.test_fks.all()
+        assert set(instance2.test_fks_en.all()) == set(instance2.test_fks.all())
+        assert fk_inst_both in instance2.test_fks.all()
+        assert fk_inst_en in instance2.test_fks.all()
+        assert fk_inst_de not in instance2.test_fks.all()
 
     def test_reverse_lookup_with_filtered_queryset_manager(self):
         """
@@ -1115,23 +1115,23 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         """
         from modeltranslation.tests.models import FilteredManager
 
-        test_inst = models.FilteredTestModel(title_en="title_en", title_de="title_de")
-        test_inst.save()
+        instance = models.FilteredTestModel(title_en="title_en", title_de="title_de")
+        instance.save()
 
         assert not models.FilteredTestModel.objects.all().exists()
         assert models.FilteredTestModel.objects.__class__ == FilteredManager
         assert models.FilteredTestModel._meta.base_manager.__class__ == MultilingualManager
 
-        # # create objects with relations to test_inst
+        # # create objects with relations to instance
         fk_inst = models.ForeignKeyFilteredModel(
-            test=test_inst, title_en="f_title_en", title_de="f_title_de"
+            test=instance, title_en="f_title_en", title_de="f_title_de"
         )
         fk_inst.save()
         fk_inst.refresh_from_db()  # force to reset cached values
 
         assert models.ForeignKeyFilteredModel.objects.__class__ == MultilingualManager
         assert models.ForeignKeyFilteredModel._meta.base_manager.__class__ == MultilingualManager
-        assert fk_inst.test == test_inst
+        assert fk_inst.test == instance
 
     def test_non_translated_relation(self):
         non_de = models.NonTranslated.objects.create(title="title_de")
@@ -1406,28 +1406,28 @@ class ManyToManyFieldsTest(ModeltranslationTestBase):
         assert "manytomanyfieldmodel_en_set" in testmodel_methods
         assert "manytomanyfieldmodel_de_set" in testmodel_methods
 
-        test_inst = models.TestModel.objects.first()
+        instance = models.TestModel.objects.first()
         # Check the German reverse accessor:
-        assert inst_both in test_inst.m2m_test_ref_de.all()
-        assert inst_de in test_inst.m2m_test_ref_de.all()
-        assert inst_en not in test_inst.m2m_test_ref_de.all()
+        assert inst_both in instance.m2m_test_ref_de.all()
+        assert inst_de in instance.m2m_test_ref_de.all()
+        assert inst_en not in instance.m2m_test_ref_de.all()
 
         # Check the English reverse accessor:
-        assert inst_both in test_inst.m2m_test_ref_en.all()
-        assert inst_en in test_inst.m2m_test_ref_en.all()
-        assert inst_de not in test_inst.m2m_test_ref_en.all()
+        assert inst_both in instance.m2m_test_ref_en.all()
+        assert inst_en in instance.m2m_test_ref_en.all()
+        assert inst_de not in instance.m2m_test_ref_en.all()
 
         # Check the default reverse accessor:
         trans_real.activate("de")
-        assert inst_de in test_inst.m2m_test_ref.all()
-        assert inst_en not in test_inst.m2m_test_ref.all()
+        assert inst_de in instance.m2m_test_ref.all()
+        assert inst_en not in instance.m2m_test_ref.all()
         trans_real.activate("en")
-        assert inst_en in test_inst.m2m_test_ref.all()
-        assert inst_de not in test_inst.m2m_test_ref.all()
+        assert inst_en in instance.m2m_test_ref.all()
+        assert inst_de not in instance.m2m_test_ref.all()
 
         # Check implicit related_name reverse accessor:
         inst_en.through_model.set(testmodel_qs)
-        assert inst_en in test_inst.manytomanyfieldmodel_set.all()
+        assert inst_en in instance.manytomanyfieldmodel_set.all()
 
         # Check filtering in reverse way + lookup spanning:
 
@@ -1469,37 +1469,37 @@ class OneToOneFieldsTest(ForeignKeyFieldsTest):
         cls.model = models.OneToOneFieldModel
 
     def test_uniqueness(self):
-        test_inst1 = models.TestModel(title_en="title1_en", title_de="title1_de")
-        test_inst1.save()
+        instance1 = models.TestModel(title_en="title1_en", title_de="title1_de")
+        instance1.save()
         inst = self.model()
 
         trans_real.activate("de")
-        inst.test = test_inst1
+        inst.test = instance1
 
         trans_real.activate("en")
         # That's ok, since test_en is different than test_de
-        inst.test = test_inst1
+        inst.test = instance1
         inst.save()
 
         # But this violates uniqueness constraint
-        inst2 = self.model(test=test_inst1)
+        inst2 = self.model(test=instance1)
         with pytest.raises(IntegrityError):
             inst2.save()
 
     def test_reverse_relations(self):
-        test_inst = models.TestModel(title_en="title_en", title_de="title_de")
-        test_inst.save()
+        instance = models.TestModel(title_en="title_en", title_de="title_de")
+        instance.save()
 
         # Instantiate many 'OneToOneFieldModel' instances:
         fk_inst_de = self.model(
-            title_en="f_title_en", title_de="f_title_de", test_de_id=test_inst.pk
+            title_en="f_title_en", title_de="f_title_de", test_de_id=instance.pk
         )
         fk_inst_de.save()
-        fk_inst_en = self.model(title_en="f_title_en", title_de="f_title_de", test_en=test_inst)
+        fk_inst_en = self.model(title_en="f_title_en", title_de="f_title_de", test_en=instance)
         fk_inst_en.save()
 
-        fk_option_de = self.model.objects.create(optional_de=test_inst)
-        fk_option_en = self.model.objects.create(optional_en=test_inst)
+        fk_option_de = self.model.objects.create(optional_de=instance)
+        fk_option_en = self.model.objects.create(optional_en=instance)
 
         # Check that the reverse accessors are created on the model:
         # Explicit related_name
@@ -1520,19 +1520,19 @@ class OneToOneFieldsTest(ForeignKeyFieldsTest):
         assert "onetoonefieldmodel_en" in testmodel_methods
 
         # Check the German reverse accessor:
-        assert fk_inst_de == test_inst.test_o2o_de
+        assert fk_inst_de == instance.test_o2o_de
 
         # Check the English reverse accessor:
-        assert fk_inst_en == test_inst.test_o2o_en
+        assert fk_inst_en == instance.test_o2o_en
 
         # Check the default reverse accessor:
         trans_real.activate("de")
-        assert fk_inst_de == test_inst.test_o2o
+        assert fk_inst_de == instance.test_o2o
         trans_real.activate("en")
-        assert fk_inst_en == test_inst.test_o2o
+        assert fk_inst_en == instance.test_o2o
 
         # Check implicit related_name reverse accessor:
-        assert fk_option_en == test_inst.onetoonefieldmodel
+        assert fk_option_en == instance.onetoonefieldmodel
 
         # Check filtering in reverse way + lookup spanning:
         manager = models.TestModel.objects
@@ -1561,22 +1561,22 @@ class OneToOneFieldsTest(ForeignKeyFieldsTest):
 
         # Check assignment
         trans_real.activate("de")
-        test_inst2 = models.TestModel(title_en="title_en", title_de="title_de")
-        test_inst2.save()
-        test_inst2.test_o2o = fk_inst_de
-        test_inst2.test_o2o_en = fk_inst_en
+        instance2 = models.TestModel(title_en="title_en", title_de="title_de")
+        instance2.save()
+        instance2.test_o2o = fk_inst_de
+        instance2.test_o2o_en = fk_inst_en
 
-        assert fk_inst_de.test.pk == test_inst2.pk
-        assert fk_inst_de.test_id == test_inst2.pk
-        assert fk_inst_de.test_de == test_inst2
-        assert test_inst2.test_o2o_de == test_inst2.test_o2o
-        assert fk_inst_de == test_inst2.test_o2o
+        assert fk_inst_de.test.pk == instance2.pk
+        assert fk_inst_de.test_id == instance2.pk
+        assert fk_inst_de.test_de == instance2
+        assert instance2.test_o2o_de == instance2.test_o2o
+        assert fk_inst_de == instance2.test_o2o
         trans_real.activate("en")
-        assert fk_inst_en.test.pk == test_inst2.pk
-        assert fk_inst_en.test_id == test_inst2.pk
-        assert fk_inst_en.test_en == test_inst2
-        assert test_inst2.test_o2o_en == test_inst2.test_o2o
-        assert fk_inst_en == test_inst2.test_o2o
+        assert fk_inst_en.test.pk == instance2.pk
+        assert fk_inst_en.test_id == instance2.pk
+        assert fk_inst_en.test_en == instance2
+        assert instance2.test_o2o_en == instance2.test_o2o
+        assert fk_inst_en == instance2.test_o2o
 
     def test_non_translated_relation(self):
         non_de = models.NonTranslated.objects.create(title="title_de")
@@ -3081,8 +3081,8 @@ class TestManager(ModeltranslationTestBase):
         manager = models.ManagerTestModel.objects
         manager.create(title="more_de", visits_en=1, visits_de=2)
         instance_2 = manager.create(title="more_en", visits_en=2, visits_de=1)
-        latest_instance = manager.latest("id")
-        assert latest_instance == instance_2
+        lainstanceance = manager.latest("id")
+        assert lainstanceance == instance_2
 
     def assert_fallback(self, method, expected1, *args, **kwargs):
         transform = kwargs.pop("transform", lambda x: x)
