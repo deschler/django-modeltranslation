@@ -476,13 +476,7 @@ def patch_related_object_descriptor_caching(ro_descriptor):
             """
             return build_localized_fieldname(self.get_accessor_name(), get_language())
 
-        @property
-        def accessor_name(self):
-            return self.get_accessor_name()
-
     ro_descriptor.related.__class__ = NewRelated
-    ro_descriptor.related.__dict__.pop("accessor_name", None)
-    ro_descriptor.related.__dict__.pop("cache_name", None)
 
 
 class Translator:
