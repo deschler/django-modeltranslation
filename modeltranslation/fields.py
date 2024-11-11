@@ -23,6 +23,7 @@ from modeltranslation.utils import (
 from modeltranslation.widgets import ClearableWidgetWrapper
 
 from ._typing import Self
+from ._compat import is_hidden, clear_ForeignObjectRel_caches
 
 SUPPORTED_FIELDS = (
     fields.CharField,
@@ -173,6 +174,9 @@ class TranslationField:
         # (will show up e.g. in the admin).
         self.verbose_name = build_localized_verbose_name(translated_field.verbose_name, language)
 
+        if self.remote_field:
+            clear_ForeignObjectRel_caches(self.remote_field)
+
         # M2M support - <rewrite related_name> <patch intermediary model>
         if isinstance(self.translated_field, fields.related.ManyToManyField) and hasattr(
             self.remote_field, "through"
@@ -187,7 +191,7 @@ class TranslationField:
                 or self.remote_field.model == self.model
             ):
                 self.remote_field.related_name = "%s_rel_+" % self.name
-            elif self.remote_field.is_hidden():
+            elif is_hidden(self.remote_field):
                 # Even if the backwards relation is disabled, django internally uses it, need to use a language scoped related_name
                 self.remote_field.related_name = "_%s_%s_+" % (
                     self.model.__name__.lower(),
@@ -218,7 +222,7 @@ class TranslationField:
             if hasattr(self.remote_field.model._meta, "_related_objects_cache"):
                 del self.remote_field.model._meta._related_objects_cache
 
-        elif self.remote_field and not self.remote_field.is_hidden():
+        elif self.remote_field and not is_hidden(self.remote_field):
             current = self.remote_field.get_accessor_name()
             # Since fields cannot share the same rel object:
             self.remote_field = copy.copy(self.remote_field)
@@ -481,17 +485,3 @@ class TranslatedManyToManyDescriptor:
         loc_field_name = build_localized_fieldname(self.field_name, get_language())
         loc_attname = instance._meta.get_field(loc_field_name).get_attname()
         setattr(instance, loc_attname, value)
-
-
-class LanguageCacheSingleObjectDescriptor:
-    """
-    A Mixin for RelatedObjectDescriptors which use current language in cache lookups.
-    """
-
-    accessor = None  # needs to be set on instance
-
-    def get_cache_name(self) -> str:
-        """
-        Used in django > 2.x
-        """
-        return build_localized_fieldname(self.accessor, get_language())  # type: ignore[arg-type]

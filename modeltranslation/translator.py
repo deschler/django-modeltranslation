@@ -21,7 +21,6 @@ from django.utils.functional import cached_property
 from modeltranslation import settings as mt_settings
 from modeltranslation.fields import (
     NONE,
-    LanguageCacheSingleObjectDescriptor,
     TranslatedManyToManyDescriptor,
     TranslatedRelationIdDescriptor,
     TranslationFieldDescriptor,
@@ -35,11 +34,16 @@ from modeltranslation.manager import (
     rewrite_lookup_key,
 )
 from modeltranslation.thread_context import auto_populate_mode
-from modeltranslation.utils import build_localized_fieldname, parse_field
+from modeltranslation.utils import (
+    build_localized_fieldname,
+    parse_field,
+    get_language,
+)
 
 # Re-export the decorator for convenience
 from modeltranslation.decorators import register
 
+from ._compat import is_hidden
 from ._typing import _ListOrTuple
 
 __all__ = [
@@ -458,16 +462,21 @@ def patch_related_object_descriptor_caching(ro_descriptor):
     language-aware caching.
     """
 
-    class NewSingleObjectDescriptor(LanguageCacheSingleObjectDescriptor, ro_descriptor.__class__):
-        pass
+    class NewRelated(ro_descriptor.related.__class__):
+        def get_cache_name(self) -> str:
+            """
+            Used in django > 2.x
+            """
+            return self.cache_name
 
-    ro_descriptor.related.get_cache_name = partial(
-        NewSingleObjectDescriptor.get_cache_name,
-        ro_descriptor,
-    )
+        @property
+        def cache_name(self):
+            """
+            Used in django >= 5.1
+            """
+            return build_localized_fieldname(self.get_accessor_name(), get_language())
 
-    ro_descriptor.accessor = ro_descriptor.related.get_accessor_name()
-    ro_descriptor.__class__ = NewSingleObjectDescriptor
+    ro_descriptor.related.__class__ = NewRelated
 
 
 class Translator:
@@ -599,7 +608,7 @@ class Translator:
                 setattr(model, field.get_attname(), desc)
 
                 # Set related field names on other model
-                if not field.remote_field.is_hidden():
+                if not is_hidden(field.remote_field):
                     other_opts = self._get_options_for_model(field.remote_field.model)
                     other_opts.related = True
                     other_opts.related_fields.append(field.related_query_name())

@@ -4,7 +4,6 @@ from itertools import chain
 from contextlib import contextmanager
 from typing import Any, TypeVar
 from collections.abc import Generator, Iterable, Iterator
-
 from django.db import models
 from django.utils.encoding import force_str
 from django.utils.functional import lazy
