@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.19.11](https://github.com/deschler/django-modeltranslation/compare/v0.19.10...v0.19.11) (2024-11-11)
+
+
+### Features
+
+* Support django 5.1 ([#756](https://github.com/deschler/django-modeltranslation/issues/756)) ([7a60ca1](https://github.com/deschler/django-modeltranslation/commit/7a60ca10955a452448f0a34981713c6c632ca1db)), closes [#719](https://github.com/deschler/django-modeltranslation/issues/719)
+
 ### [0.19.10](https://github.com/deschler/django-modeltranslation/compare/v0.19.9...v0.19.10) (2024-10-17)
 
 
