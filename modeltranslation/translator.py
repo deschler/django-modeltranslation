@@ -79,7 +79,11 @@ class FieldsAggregationMetaClass(type):
     fields: Sequence[str]
 
     def __new__(cls, name: str, bases: tuple[type, ...], attrs: dict[str, Any]) -> type:
-        attrs["fields"] = set(attrs.get("fields", ()))
+        fields = attrs.get("fields", ())
+        if isinstance(fields, str):
+            attrs['fields'] = {fields}
+        else:
+            attrs["fields"] = set(fields)
         for base in bases:
             if isinstance(base, FieldsAggregationMetaClass):
                 attrs["fields"].update(base.fields)
