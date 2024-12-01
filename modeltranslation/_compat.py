@@ -1,10 +1,13 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable
 
 import django
+from typing import Iterable
+from typing import Optional
 
 if TYPE_CHECKING:
+    from django.db.models import QuerySet
     from django.db.models.fields.reverse_related import ForeignObjectRel
 
 
@@ -25,7 +28,46 @@ def clear_ForeignObjectRel_caches(field: ForeignObjectRel):
         field.__dict__.pop(name, None)
 
 
+def build_refresh_from_db(
+    old_refresh_from_db: Callable[
+        [Any, Optional[str], Optional[Iterable[str]], QuerySet[Any] | None], None
+    ],
+):
+    from modeltranslation.manager import append_translated
+
+    def refresh_from_db(
+        self: Any,
+        using: str | None = None,
+        fields: Iterable[str] | None = None,
+        from_queryset: QuerySet[Any] | None = None,
+    ) -> None:
+        if fields is not None:
+            fields = append_translated(self.__class__, fields)
+        return old_refresh_from_db(self, using, fields, from_queryset)
+
+    return refresh_from_db
+
+
 if django.VERSION <= (5, 1):
 
     def is_hidden(field: ForeignObjectRel) -> bool:
         return field.is_hidden()
+
+
+if django.VERSION <= (5, 0):
+    # Django versions below 5.0 do not have `from_queryset` argument.
+    def build_refresh_from_db(  # type: ignore[misc]
+        old_refresh_from_db: Callable[[Any, Optional[str], Optional[Iterable[str]]], None],
+    ):
+        from modeltranslation.manager import append_translated
+
+        def refresh_from_db(
+            self: Any,
+            using: str | None = None,
+            fields: Iterable[str] | None = None,
+        ) -> None:
+            if fields is not None:
+                fields = append_translated(self.__class__, fields)
+            return old_refresh_from_db(self, using, fields)
+
+        return refresh_from_db
