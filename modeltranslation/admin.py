@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import Any, TypeVar
+from typing import Any, TypeVar, TYPE_CHECKING
 from collections.abc import Iterable, Sequence
 
 from django import forms
@@ -26,6 +26,11 @@ from modeltranslation.utils import (
 from modeltranslation.widgets import ClearableWidgetWrapper
 from modeltranslation._typing import _ListOrTuple
 
+if TYPE_CHECKING:
+    # We depend here or `django-stubs` internal `_FieldsetSpec`,
+    # in case it changes, change import or define this internally.
+    from django.contrib.admin.options import _FieldsetSpec
+
 _ModelT = TypeVar("_ModelT", bound=Model)
 
 
@@ -40,7 +45,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin[_ModelT]):
 
     def _get_declared_fieldsets(
         self, request: HttpRequest, obj: _ModelT | None = None
-    ) -> _ListOrTuple[tuple[str | None, dict[str, Any]]] | None:
+    ) -> _FieldsetSpec | None:
         # Take custom modelform fields option into account
         if not self.fields and hasattr(self.form, "_meta") and self.form._meta.fields:
             self.fields = self.form._meta.fields  # type: ignore[assignment]
@@ -56,11 +61,18 @@ class TranslationBaseModelAdmin(BaseModelAdmin[_ModelT]):
             return [(None, {"fields": self.replace_orig_field(self.get_fields(request, obj))})]
         return None
 
+    def _patch_fieldsets(self, fieldsets: _FieldsetSpec) -> _FieldsetSpec:
+        fieldsets_new = list(fieldsets)
+        for name, dct in fieldsets:
+            if "fields" in dct:
+                dct["fields"] = self.replace_orig_field(dct["fields"])
+        return fieldsets_new
+
     def formfield_for_dbfield(
         self, db_field: Field, request: HttpRequest, **kwargs: Any
-    ) -> forms.Field:
-        field = super().formfield_for_dbfield(db_field, request, **kwargs)
-        self.patch_translation_field(db_field, field, request, **kwargs)
+    ) -> forms.Field | None:
+        if field := super().formfield_for_dbfield(db_field, request, **kwargs):
+            self.patch_translation_field(db_field, field, request, **kwargs)
         return field
 
     def patch_translation_field(
@@ -80,6 +92,8 @@ class TranslationBaseModelAdmin(BaseModelAdmin[_ModelT]):
             pass
         else:
             orig_formfield = self.formfield_for_dbfield(orig_field, request, **kwargs)
+            if orig_formfield is None:
+                return
             field.widget = deepcopy(orig_formfield.widget)
             attrs = field.widget.attrs
             # if any widget attrs are defined on the form they should be copied
@@ -185,17 +199,6 @@ class TranslationBaseModelAdmin(BaseModelAdmin[_ModelT]):
             option = option_new
         return option  # type: ignore[return-value]
 
-    def _patch_fieldsets(
-        self, fieldsets: _ListOrTuple[tuple[str | None, dict[str, Any]]]
-    ) -> _ListOrTuple[tuple[str | None, dict[str, Any]]]:
-        if fieldsets:
-            fieldsets_new = list(fieldsets)
-            for name, dct in fieldsets:
-                if "fields" in dct:
-                    dct["fields"] = self.replace_orig_field(dct["fields"])
-            fieldsets = fieldsets_new
-        return fieldsets
-
     def _patch_prepopulated_fields(self) -> None:
         def localize(sources: Sequence[str], lang: str) -> tuple[str, ...]:
             "Append lang suffix (if applicable) to field list"
@@ -244,7 +247,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin[_ModelT]):
 
     def _get_fieldsets_pre_form_or_formset(
         self, request: HttpRequest, obj: _ModelT | None = None
-    ) -> _ListOrTuple[tuple[str | None, dict[str, Any]]] | None:
+    ) -> _FieldsetSpec | None:
         """
         Generic get_fieldsets code, shared by
         TranslationAdmin and TranslationInlineModelAdmin.
@@ -382,9 +385,7 @@ class TranslationAdmin(TranslationBaseModelAdmin[_ModelT], admin.ModelAdmin[_Mod
         kwargs = self._get_form_or_formset(request, obj, **kwargs)
         return super().get_form(request, obj, **kwargs)
 
-    def get_fieldsets(
-        self, request: HttpRequest, obj: _ModelT | None = None
-    ) -> _ListOrTuple[tuple[str | None, dict[str, Any]]]:
+    def get_fieldsets(self, request: HttpRequest, obj: _ModelT | None = None) -> _FieldsetSpec:
         return self._get_fieldsets_pre_form_or_formset(request, obj) or self._group_fieldsets(
             self._get_fieldsets_post_form_or_formset(
                 request, self.get_form(request, obj, fields=None), obj
