@@ -30,7 +30,6 @@ from modeltranslation.fields import (
 from modeltranslation.manager import (
     MultilingualManager,
     MultilingualQuerysetManager,
-    append_translated,
     rewrite_lookup_key,
 )
 from modeltranslation.thread_context import auto_populate_mode
@@ -43,7 +42,7 @@ from modeltranslation.utils import (
 # Re-export the decorator for convenience
 from modeltranslation.decorators import register
 
-from ._compat import is_hidden
+from ._compat import is_hidden, build_refresh_from_db
 from ._typing import _ListOrTuple
 
 __all__ = [
@@ -374,16 +373,8 @@ def patch_refresh_from_db(model: type[Model]) -> None:
     """
     if not hasattr(model, "refresh_from_db"):
         return
-    old_refresh_from_db = model.refresh_from_db
 
-    def new_refresh_from_db(
-        self, using: str | None = None, fields: Iterable[str] | None = None
-    ) -> None:
-        if fields is not None:
-            fields = append_translated(self.__class__, fields)
-        return old_refresh_from_db(self, using, fields)
-
-    model.refresh_from_db = new_refresh_from_db
+    model.refresh_from_db = build_refresh_from_db(model.refresh_from_db)
 
 
 def delete_cache_fields(model: type[Model]) -> None:
