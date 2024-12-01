@@ -10,6 +10,8 @@ if TYPE_CHECKING:
     from django.db.models import QuerySet
     from django.db.models.fields.reverse_related import ForeignObjectRel
 
+_django_version = django.VERSION[:2]
+
 
 def is_hidden(field: ForeignObjectRel) -> bool:
     return field.hidden
@@ -48,14 +50,12 @@ def build_refresh_from_db(
     return refresh_from_db
 
 
-if django.VERSION <= (5, 1):
+if _django_version <= (5, 0):
 
     def is_hidden(field: ForeignObjectRel) -> bool:
         return field.is_hidden()
 
-
-if django.VERSION <= (5, 0):
-    # Django versions below 5.0 do not have `from_queryset` argument.
+    # Django versions below 5.1 do not have `from_queryset` argument.
     def build_refresh_from_db(  # type: ignore[misc]
         old_refresh_from_db: Callable[[Any, Optional[str], Optional[Iterable[str]]], None],
     ):
