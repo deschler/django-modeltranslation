@@ -376,3 +376,18 @@ Default: ``True``
 .. versionadded:: 0.6
 
 Control if :ref:`fallback <fallback>` (both language and value) will occur.
+
+
+``MODELTRANSLATION_BUILD_LOCALIZED_VERBOSE_NAME``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Default: ``None``
+
+.. versionadded:: 0.19
+
+Define a method to build a custom localized verbose name.
+The verbose name by default is the field name followed by a space and the language code in brackets.
+
+        def get_verbose_name(self, field_name, language):
+            return f"{language} - {field_name}"
+        MODELTRANSLATION_BUILD_LOCALIZED_VERBOSE_NAME = get_verbose_name

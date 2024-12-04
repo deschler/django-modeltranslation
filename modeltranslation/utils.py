@@ -72,6 +72,9 @@ def build_localized_fieldname(field_name: str, lang: str) -> str:
 def _build_localized_verbose_name(verbose_name: Any, lang: str) -> str:
     if lang == "id":
         lang = "ind"
+    custom_build_localized_verbose_name = settings.BUILD_LOCALIZED_VERBOSE_NAME
+    if custom_build_localized_verbose_name:
+        return custom_build_localized_verbose_name(verbose_name, lang)
     return force_str("%s [%s]") % (force_str(verbose_name), lang)
 
 
