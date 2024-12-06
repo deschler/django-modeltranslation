@@ -43,7 +43,7 @@ from modeltranslation.utils import (
 request = None
 
 # How many models are registered for tests.
-TEST_MODELS = 40
+TEST_MODELS = 41
 
 
 class reload_override_settings(override_settings):
@@ -275,6 +275,14 @@ class ModeltranslationTest(ModeltranslationTestBase):
     def test_verbose_name(self):
         verbose_name = models.TestModel._meta.get_field("title_de").verbose_name
         assert verbose_name == "title [de]"
+
+    def test_custom_verbose_name(self):
+        verbose_name = models.CustomVerboseNameModel._meta.get_field("title_de").verbose_name
+        assert verbose_name == "(de) title"
+
+    def test_custom_verbose_name_plural(self):
+        verbose_name = models.CustomVerboseNameModel._meta.get_field("title_de").verbose_name_plural
+        assert verbose_name == "(de) title"
 
     def test_descriptor_introspection(self):
         # See Django #8248

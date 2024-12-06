@@ -22,6 +22,10 @@ class UniqueNullableModel(models.Model):
     title = models.CharField(null=True, unique=True, max_length=255)
 
 
+class CustomVerboseNameModel(models.Model):
+    title = models.CharField(null=True, unique=True, max_length=255)
+
+
 # ######### Proxy model testing
 
 

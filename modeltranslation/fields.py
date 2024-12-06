@@ -16,7 +16,6 @@ from modeltranslation.thread_context import fallbacks_enabled
 from modeltranslation.utils import (
     build_localized_fieldname,
     build_localized_intermediary_model,
-    build_localized_verbose_name,
     get_language,
     resolution_order,
 )
@@ -172,7 +171,7 @@ class TranslationField:
 
         # Copy the verbose name and append a language suffix
         # (will show up e.g. in the admin).
-        self.verbose_name = build_localized_verbose_name(translated_field.verbose_name, language)
+        self.verbose_name = trans_opts.get_verbose_name(translated_field.verbose_name, language)
 
         if self.remote_field:
             clear_ForeignObjectRel_caches(self.remote_field)

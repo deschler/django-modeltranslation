@@ -37,6 +37,7 @@ from modeltranslation.utils import (
     build_localized_fieldname,
     parse_field,
     get_language,
+    build_localized_verbose_name,
 )
 
 # Re-export the decorator for convenience
@@ -168,6 +169,9 @@ class TranslationOptions(metaclass=FieldsAggregationMetaClass):
         Return name of all fields that can be used in filtering.
         """
         return list(self.all_fields.keys()) + self.related_fields
+
+    def get_verbose_name(self, verbose_name, language):
+        return build_localized_verbose_name(verbose_name, language)
 
     def __str__(self) -> str:
         local = tuple(self.local_fields.keys())
