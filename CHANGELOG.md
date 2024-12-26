@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.19.12](https://github.com/deschler/django-modeltranslation/compare/v0.19.11...v0.19.12) (2024-12-26)
+
+
+### Bug Fixes
+
+* Preserve `blank` value for optional fields ([f197adc](https://github.com/deschler/django-modeltranslation/commit/f197adc6674131dcc23aea0d0d4a8704d8e4cb7c))
+
 ### [0.19.11](https://github.com/deschler/django-modeltranslation/compare/v0.19.10...v0.19.11) (2024-11-11)
 
 
