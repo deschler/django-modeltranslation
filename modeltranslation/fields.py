@@ -139,9 +139,14 @@ class TranslationField:
             # TODO: Do we really want to enforce null *at all*? Shouldn't this
             # better honour the null setting of the translated field?
             self.null = True
+
+        # We preserve original blank value for translated fields,
+        # when they're in 'required_languages'.
+        # So they will be only required if original field itself was required.
+        original_blank = self.blank
         self.blank = True
 
-        # Take required_languages translation option into account
+        # Take required_languages translation option into account.
         trans_opts = translator.get_options_for_model(self.model)
         if trans_opts.required_languages:
             required_languages = trans_opts.required_languages
@@ -149,7 +154,7 @@ class TranslationField:
                 # All fields
                 if self.language in required_languages:
                     # self.null = False
-                    self.blank = False
+                    self.blank = original_blank
             else:
                 # Certain fields only
                 # Try current language - if not present, try 'default' key
@@ -161,7 +166,7 @@ class TranslationField:
                     # TODO: We might have to handle the whole thing through the
                     # FieldsAggregationMetaClass, as fields can be inherited.
                     # self.null = False
-                    self.blank = False
+                    self.blank = original_blank
 
         # Adjust the name of this field to reflect the language
         self.attname = build_localized_fieldname(self.translated_field.name, language)

@@ -282,6 +282,9 @@ class RequiredTranslationOptions(TranslationOptions):
     fields = ("non_req", "req", "req_reg", "req_en_reg")
     required_languages = {
         "en": (
+            # We include `non_req` field here, to test that it's `blank` attribute is preserved,
+            # even when languages is required.
+            "non_req",
             "req_reg",
             "req_en_reg",
         ),
