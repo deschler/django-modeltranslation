@@ -344,6 +344,12 @@ Classes inheriting from ``TranslationOptions`` can have following attributes def
         required_languages = ('en', 'de')
         required_languages = {'de': ('title','text'), 'default': ('title',)}
 
+.. attribute:: TranslationOptions.get_verbose_name
+
+    The verbose name by default is the field name followed by a space and the language code in brackets. This can be customized by implementing the ``get_verbose_name`` method.
+
+        def get_verbose_name(self, field_name, language):
+            return f"{language} - {field_name}"
 
 .. _supported_field_matrix:
 
