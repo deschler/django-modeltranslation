@@ -239,9 +239,25 @@ class TranslationBaseModelAdmin(BaseModelAdmin[_ModelT]):
             exclude.extend(self.form._meta.exclude)
         # If exclude is an empty list we pass None to be consistent with the
         # default on modelform_factory
-        exclude = self.replace_orig_field(exclude) or None
-        exclude = self._exclude_original_fields(exclude)
-        kwargs.update({"exclude": exclude})
+        updated_exclude = self.replace_orig_field(exclude) or None
+        # In order for BaseModelAdmin to show unique-contraint validation error,
+        # add the original translation fields to kwargs, and do not exclude the
+        # original translation fields.
+        if kwargs["fields"]:
+            original_fields = [
+                field for field in self.trans_opts.fields.keys() if field not in exclude
+            ]
+            kwargs["fields"].extend(original_fields)
+            kwargs.update(
+                {
+                    "exclude": list(set(exclude + updated_exclude))
+                    if updated_exclude
+                    else updated_exclude
+                }
+            )
+        else:
+            updated_exclude = self._exclude_original_fields(updated_exclude)
+            kwargs.update({"exclude": updated_exclude})
 
         return kwargs
 
