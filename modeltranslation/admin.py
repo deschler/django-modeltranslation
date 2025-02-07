@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from itertools import chain
 from typing import Any, TypeVar, TYPE_CHECKING
 from collections.abc import Iterable, Sequence
 
@@ -243,16 +244,36 @@ class TranslationBaseModelAdmin(BaseModelAdmin[_ModelT]):
         # In order for BaseModelAdmin to show unique-contraint validation error,
         # add the original translation fields to kwargs, and do not exclude the
         # original translation fields.
-        if kwargs["fields"]:
+        
+        if isinstance(self.trans_opts.fields, dict):
+            trans_ops_fields = self.trans_opts.fields.keys()
+        else:
+            trans_ops_fields = self.trans_opts.fields
+
+        # Copy default language field value into the original field.
+        if request.POST:
+            mutable_query_dict = request.POST.copy()
+            for field in trans_ops_fields:
+                default_lang_field = field + "_" + mt_settings.DEFAULT_LANGUAGE
+                if default_lang_field in mutable_query_dict.keys():
+                    if field not in mutable_query_dict.keys():
+                        mutable_query_dict.appendlist(
+                            field, mutable_query_dict.get(default_lang_field)
+                        )
+            request.POST = mutable_query_dict
+
+        if kwargs.get("fields"):
             original_fields = [
-                field for field in self.trans_opts.fields.keys() if field not in exclude
+                field for field in trans_ops_fields if field not in exclude
             ]
             kwargs["fields"].extend(original_fields)
             kwargs.update(
                 {
-                    "exclude": list(set(exclude + updated_exclude))
-                    if updated_exclude
-                    else updated_exclude
+                    "exclude": (
+                        list(set(chain(exclude, updated_exclude)))
+                        if updated_exclude
+                        else updated_exclude
+                    )
                 }
             )
         else:
