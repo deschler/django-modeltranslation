@@ -5,20 +5,22 @@ from django import forms
 from django.contrib.admin.sites import AdminSite
 from django.db.models import TextField
 from django.utils.translation import get_language, trans_real
+from django.test import TestCase
 
 from modeltranslation import admin, translator
 from modeltranslation.tests import models
 from modeltranslation.utils import (
     build_css_class,
 )
-from .tests import ModeltranslationTestBase, reload_override_settings
+
+from .tests import reload_override_settings
 
 # None of the following tests really depend on the content of the request,
 # so we'll just pass in None.
 request = None
 
 
-class TranslationAdminTest(ModeltranslationTestBase):
+class TranslationAdminTest(TestCase):
     def setUp(self):
         super().setUp()
         self.test_obj = models.TestModel.objects.create(title="Testtitle", text="Testtext")
