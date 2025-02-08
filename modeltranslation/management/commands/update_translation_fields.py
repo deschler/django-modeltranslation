@@ -31,8 +31,7 @@ class Command(BaseCommand):
             "--language",
             action="store",
             help=(
-                "Language translation field the be updated."
-                " Default language field if not provided"
+                "Language translation field the be updated. Default language field if not provided"
             ),
         )
 
