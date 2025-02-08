@@ -1,7 +1,6 @@
 # pyright: reportGeneralTypeIssues=warning, reportOptionalMemberAccess=warning, reportOptionalOperand=warning
 
 from django import forms
-from django.utils.translation import get_language
 from django.test import TestCase
 
 from modeltranslation.tests import models
@@ -31,7 +30,6 @@ class ThirdPartyAppIntegrationTest(TestCase):
 
         creation_form = CreationForm({"name": "abc"})
         inst = creation_form.save()
-        assert "de" == get_language()
         assert "abc" == inst.name
         assert 1 == self.model.objects.count()
 

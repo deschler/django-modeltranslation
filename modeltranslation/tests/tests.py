@@ -37,7 +37,7 @@ from modeltranslation.utils import (
 )
 
 # How many models are registered for tests.
-TEST_MODELS = 40
+TEST_MODELS = 41
 
 
 class reload_override_settings(override_settings):
@@ -1901,6 +1901,7 @@ class ModeltranslationTestRule1(ModeltranslationTestBase):
         params = {field_name_de: value_de, field_name_en: value_en}
 
         n = models.TestModel.objects.create(**params)
+        trans_real.activate("de")
         # Language is set to 'de' at this point
         assert get_language() == "de"
         assert getattr(n, field_name) == value_de

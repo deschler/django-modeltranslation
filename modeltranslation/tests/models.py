@@ -22,6 +22,19 @@ class UniqueNullableModel(models.Model):
     title = models.CharField(null=True, unique=True, max_length=255)
 
 
+class ModelWithConstraint(models.Model):
+    title = models.CharField(max_length=255)
+    sub_title = models.CharField(max_length=255)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["title", "sub_title"],
+                name="unique_fields",
+            )
+        ]
+
+
 # ######### Proxy model testing
 
 
