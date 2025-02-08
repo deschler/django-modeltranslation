@@ -272,9 +272,9 @@ class ModeltranslationTest(ModeltranslationTestBase):
 
     def test_descriptor_introspection(self):
         # See Django #8248
-        assert isinstance(
-            models.TestModel.title.__doc__, str
-        ), "Descriptor accessed on class should return itself."
+        assert isinstance(models.TestModel.title.__doc__, str), (
+            "Descriptor accessed on class should return itself."
+        )
 
     def test_fields_hashes(self):
         opts = models.TestModel._meta
@@ -3300,19 +3300,19 @@ class InheritedPermissionTestCase(ModeltranslationTestBase):
 
         from .models import InheritedPermission
 
-        assert not isinstance(
-            Permission.objects, MultilingualManager
-        ), "Permission is using MultilingualManager"
-        assert isinstance(
-            InheritedPermission.objects, MultilingualManager
-        ), "InheritedPermission is not using MultilingualManager"
+        assert not isinstance(Permission.objects, MultilingualManager), (
+            "Permission is using MultilingualManager"
+        )
+        assert isinstance(InheritedPermission.objects, MultilingualManager), (
+            "InheritedPermission is not using MultilingualManager"
+        )
 
         # This happens at initialization time, depending on the models
         # initialized.
         Permission._meta._expire_cache()
 
-        assert not isinstance(
-            Permission.objects, MultilingualManager
-        ), "Permission is using MultilingualManager"
+        assert not isinstance(Permission.objects, MultilingualManager), (
+            "Permission is using MultilingualManager"
+        )
         user = User.objects.create(username="123", is_active=True)
         user.has_perm("test_perm")

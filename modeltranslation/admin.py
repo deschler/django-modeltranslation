@@ -329,8 +329,7 @@ class TranslationAdmin(TranslationBaseModelAdmin[_ModelT], admin.ModelAdmin[_Mod
             untranslated_fields = [
                 f.name
                 for f in fields
-                if
-                (
+                if (
                     # Exclude the primary key field
                     f is not self.opts.auto_field
                     # Exclude non-editable fields
