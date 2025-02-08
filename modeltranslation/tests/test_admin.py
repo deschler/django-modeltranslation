@@ -5,7 +5,7 @@ from django import forms
 from django.contrib.admin.sites import AdminSite
 from django.db.models import TextField
 from django.utils.translation import get_language, trans_real
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
 
 from modeltranslation import admin, translator
 from modeltranslation.tests import models
@@ -15,16 +15,13 @@ from modeltranslation.utils import (
 
 from .tests import reload_override_settings
 
-# None of the following tests really depend on the content of the request,
-# so we'll just pass in None.
-request = None
-
 
 class TranslationAdminTest(TestCase):
     def setUp(self):
         super().setUp()
         self.test_obj = models.TestModel.objects.create(title="Testtitle", text="Testtext")
         self.site = AdminSite()
+        self.request = RequestFactory().get("/")
 
     def tearDown(self):
         self.test_obj.delete()
@@ -35,7 +32,7 @@ class TranslationAdminTest(TestCase):
             pass
 
         ma = TestModelAdmin(models.TestModel, self.site)
-        assert tuple(ma.get_form(request).base_fields.keys()) == (
+        assert tuple(ma.get_form(self.request).base_fields.keys()) == (
             "title_de",
             "title_en",
             "text_de",
@@ -67,8 +64,8 @@ class TranslationAdminTest(TestCase):
             "dynamic_default_de",
             "dynamic_default_en",
         ]
-        assert ma.get_fieldsets(request) == [(None, {"fields": fields})]
-        assert ma.get_fieldsets(request, self.test_obj) == [(None, {"fields": fields})]
+        assert ma.get_fieldsets(self.request) == [(None, {"fields": fields})]
+        assert ma.get_fieldsets(self.request, self.test_obj) == [(None, {"fields": fields})]
 
     def test_field_arguments(self):
         class TestModelAdmin(admin.TranslationAdmin):
@@ -76,8 +73,8 @@ class TranslationAdminTest(TestCase):
 
         ma = TestModelAdmin(models.TestModel, self.site)
         fields = ["title_de", "title_en"]
-        assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
-        assert tuple(ma.get_form(request, self.test_obj).base_fields.keys()) == tuple(fields)
+        assert tuple(ma.get_form(self.request).base_fields.keys()) == tuple(fields)
+        assert tuple(ma.get_form(self.request, self.test_obj).base_fields.keys()) == tuple(fields)
 
     def test_field_arguments_restricted_on_form(self):
         # Using `fields`.
@@ -86,16 +83,16 @@ class TranslationAdminTest(TestCase):
 
         ma = TestModelAdmin(models.TestModel, self.site)
         fields = ["title_de", "title_en"]
-        assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
-        assert tuple(ma.get_form(request, self.test_obj).base_fields.keys()) == tuple(fields)
+        assert tuple(ma.get_form(self.request).base_fields.keys()) == tuple(fields)
+        assert tuple(ma.get_form(self.request, self.test_obj).base_fields.keys()) == tuple(fields)
 
         # Using `fieldsets`.
         class TestModelAdmin(admin.TranslationAdmin):
             fieldsets = [(None, {"fields": ["title"]})]
 
         ma = TestModelAdmin(models.TestModel, self.site)
-        assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
-        assert tuple(ma.get_form(request, self.test_obj).base_fields.keys()) == tuple(fields)
+        assert tuple(ma.get_form(self.request).base_fields.keys()) == tuple(fields)
+        assert tuple(ma.get_form(self.request, self.test_obj).base_fields.keys()) == tuple(fields)
 
         # Using `exclude`.
         class TestModelAdmin(admin.TranslationAdmin):
@@ -103,15 +100,15 @@ class TranslationAdminTest(TestCase):
 
         ma = TestModelAdmin(models.TestModel, self.site)
         fields = ["title_de", "title_en", "text_de", "text_en"]
-        assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
+        assert tuple(ma.get_form(self.request).base_fields.keys()) == tuple(fields)
 
         # You can also pass a tuple to `exclude`.
         class TestModelAdmin(admin.TranslationAdmin):
             exclude = ("url", "email", "dynamic_default")
 
         ma = TestModelAdmin(models.TestModel, self.site)
-        assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
-        assert tuple(ma.get_form(request, self.test_obj).base_fields.keys()) == tuple(fields)
+        assert tuple(ma.get_form(self.request).base_fields.keys()) == tuple(fields)
+        assert tuple(ma.get_form(self.request, self.test_obj).base_fields.keys()) == tuple(fields)
 
         # Using `fields` and `exclude`.
         class TestModelAdmin(admin.TranslationAdmin):
@@ -119,7 +116,7 @@ class TranslationAdminTest(TestCase):
             exclude = ["url"]
 
         ma = TestModelAdmin(models.TestModel, self.site)
-        assert tuple(ma.get_form(request).base_fields.keys()) == ("title_de", "title_en")
+        assert tuple(ma.get_form(self.request).base_fields.keys()) == ("title_de", "title_en")
 
         # Using `fields` and `readonly_fields`.
         class TestModelAdmin(admin.TranslationAdmin):
@@ -127,7 +124,7 @@ class TranslationAdminTest(TestCase):
             readonly_fields = ["url"]
 
         ma = TestModelAdmin(models.TestModel, self.site)
-        assert tuple(ma.get_form(request).base_fields.keys()) == ("title_de", "title_en")
+        assert tuple(ma.get_form(self.request).base_fields.keys()) == ("title_de", "title_en")
 
         # Using `readonly_fields`.
         # Note: readonly fields are not included in the form.
@@ -135,7 +132,7 @@ class TranslationAdminTest(TestCase):
             readonly_fields = ["title"]
 
         ma = TestModelAdmin(models.TestModel, self.site)
-        assert tuple(ma.get_form(request).base_fields.keys()) == (
+        assert tuple(ma.get_form(self.request).base_fields.keys()) == (
             "text_de",
             "text_en",
             "url_de",
@@ -155,7 +152,7 @@ class TranslationAdminTest(TestCase):
             )
 
         ma = TestModelAdmin(models.TestModel, self.site)
-        assert tuple(ma.get_form(request).base_fields.keys()) == (
+        assert tuple(ma.get_form(self.request).base_fields.keys()) == (
             "title_de",
             "title_en",
             "url_de",
@@ -170,8 +167,8 @@ class TranslationAdminTest(TestCase):
 
         ma = TestModelAdmin(models.TestModel, self.site)
         fields = ["email_de", "email_en", "title_de", "title_en", "url_de", "url_en"]
-        assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
-        assert tuple(ma.get_form(request, self.test_obj).base_fields.keys()) == tuple(fields)
+        assert tuple(ma.get_form(self.request).base_fields.keys()) == tuple(fields)
+        assert tuple(ma.get_form(self.request, self.test_obj).base_fields.keys()) == tuple(fields)
 
     def test_field_arguments_restricted_on_custom_form(self):
         # Using `fields`.
@@ -185,8 +182,8 @@ class TranslationAdminTest(TestCase):
 
         ma = TestModelAdmin(models.TestModel, self.site)
         fields = ["url_de", "url_en", "email_de", "email_en"]
-        assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
-        assert tuple(ma.get_form(request, self.test_obj).base_fields.keys()) == tuple(fields)
+        assert tuple(ma.get_form(self.request).base_fields.keys()) == tuple(fields)
+        assert tuple(ma.get_form(self.request, self.test_obj).base_fields.keys()) == tuple(fields)
 
         # Using `exclude`.
         class TestModelForm(forms.ModelForm):
@@ -199,8 +196,8 @@ class TranslationAdminTest(TestCase):
 
         ma = TestModelAdmin(models.TestModel, self.site)
         fields = ["title_de", "title_en", "text_de", "text_en"]
-        assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
-        assert tuple(ma.get_form(request, self.test_obj).base_fields.keys()) == tuple(fields)
+        assert tuple(ma.get_form(self.request).base_fields.keys()) == tuple(fields)
+        assert tuple(ma.get_form(self.request, self.test_obj).base_fields.keys()) == tuple(fields)
 
         # If both, the custom form an the ModelAdmin define an `exclude`
         # option, the ModelAdmin wins. This is Django behaviour.
@@ -210,8 +207,8 @@ class TranslationAdminTest(TestCase):
 
         ma = TestModelAdmin(models.TestModel, self.site)
         fields = ["title_de", "title_en", "text_de", "text_en", "email_de", "email_en"]
-        assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
-        assert tuple(ma.get_form(request, self.test_obj).base_fields.keys()) == tuple(fields)
+        assert tuple(ma.get_form(self.request).base_fields.keys()) == tuple(fields)
+        assert tuple(ma.get_form(self.request, self.test_obj).base_fields.keys()) == tuple(fields)
 
         # Same for `fields`.
         class TestModelForm(forms.ModelForm):
@@ -225,8 +222,8 @@ class TranslationAdminTest(TestCase):
 
         ma = TestModelAdmin(models.TestModel, self.site)
         fields = ["email_de", "email_en"]
-        assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
-        assert tuple(ma.get_form(request, self.test_obj).base_fields.keys()) == tuple(fields)
+        assert tuple(ma.get_form(self.request).base_fields.keys()) == tuple(fields)
+        assert tuple(ma.get_form(self.request, self.test_obj).base_fields.keys()) == tuple(fields)
 
     def test_model_form_widgets(self):
         class TestModelForm(forms.ModelForm):
@@ -244,14 +241,16 @@ class TranslationAdminTest(TestCase):
 
         ma = TestModelAdmin(models.TestModel, self.site)
         fields = ["text_de", "text_en"]
-        assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
-        assert tuple(ma.get_form(request, self.test_obj).base_fields.keys()) == tuple(fields)
+        assert tuple(ma.get_form(self.request).base_fields.keys()) == tuple(fields)
+        assert tuple(ma.get_form(self.request, self.test_obj).base_fields.keys()) == tuple(fields)
 
         for field in fields:
-            assert "myprop" in ma.get_form(request).base_fields.get(field).widget.attrs.keys()
+            assert "myprop" in ma.get_form(self.request).base_fields.get(field).widget.attrs.keys()
             assert (
                 "myval"
-                in ma.get_form(request, self.test_obj).base_fields.get(field).widget.attrs.values()
+                in ma.get_form(self.request, self.test_obj)
+                .base_fields.get(field)
+                .widget.attrs.values()
             )
 
     def test_widget_ordering_via_formfield_for_dbfield(self):
@@ -262,18 +261,20 @@ class TranslationAdminTest(TestCase):
                 if isinstance(db_field, TextField):
                     kwargs["widget"] = forms.Textarea(attrs={"myprop": "myval"})
                     return db_field.formfield(**kwargs)
-                return super().formfield_for_dbfield(db_field, request, **kwargs)
+                return super().formfield_for_dbfield(db_field, self.request, **kwargs)
 
         ma = TestModelAdmin(models.TestModel, self.site)
         fields = ["text_de", "text_en"]
-        assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
-        assert tuple(ma.get_form(request, self.test_obj).base_fields.keys()) == tuple(fields)
+        assert tuple(ma.get_form(self.request).base_fields.keys()) == tuple(fields)
+        assert tuple(ma.get_form(self.request, self.test_obj).base_fields.keys()) == tuple(fields)
 
         for field in fields:
-            assert "myprop" in ma.get_form(request).base_fields.get(field).widget.attrs.keys()
+            assert "myprop" in ma.get_form(self.request).base_fields.get(field).widget.attrs.keys()
             assert (
                 "myval"
-                in ma.get_form(request, self.test_obj).base_fields.get(field).widget.attrs.values()
+                in ma.get_form(self.request, self.test_obj)
+                .base_fields.get(field)
+                .widget.attrs.values()
             )
 
     def test_widget_classes_appended_by_formfield_for_dbfield(self):
@@ -290,7 +291,7 @@ class TranslationAdminTest(TestCase):
         ma = ForeignKeyModelModelAdmin(models.ForeignKeyModel, self.site)
         fields = ["test_de", "test_en"]
         for field in fields:
-            widget = ma.get_form(request).base_fields.get(field).widget
+            widget = ma.get_form(self.request).base_fields.get(field).widget
             # Django 5.1 Adds this attr, ignore it
             widget.attrs.pop("data-context", None)
             assert {} == widget.attrs
@@ -318,16 +319,18 @@ class TranslationAdminTest(TestCase):
         fieldsets = [("Test", {"fields": ["data_de", "data_en"]})]
 
         try:
-            ma_fieldsets = ma.get_inline_instances(request)[0].get_fieldsets(request)
+            ma_fieldsets = ma.get_inline_instances(self.request)[0].get_fieldsets(self.request)
         except AttributeError:  # Django 1.3 fallback
-            ma_fieldsets = ma.inlines[0](models.TestModel, self.site).get_fieldsets(request)
+            ma_fieldsets = ma.inlines[0](models.TestModel, self.site).get_fieldsets(self.request)
         assert ma_fieldsets == fieldsets
 
         try:
-            ma_fieldsets = ma.get_inline_instances(request)[0].get_fieldsets(request, self.test_obj)
+            ma_fieldsets = ma.get_inline_instances(self.request)[0].get_fieldsets(
+                self.request, self.test_obj
+            )
         except AttributeError:  # Django 1.3 fallback
             ma_fieldsets = ma.inlines[0](models.TestModel, self.site).get_fieldsets(
-                request, self.test_obj
+                self.request, self.test_obj
             )
         assert ma_fieldsets == fieldsets
 
@@ -379,8 +382,8 @@ class TranslationAdminTest(TestCase):
         maa = MultitableModelAAdmin(models.MultitableModelA, self.site)
         mab = MultitableModelBAdmin(models.MultitableModelB, self.site)
 
-        assert tuple(maa.get_form(request).base_fields.keys()) == ("titlea_de", "titlea_en")
-        assert tuple(mab.get_form(request).base_fields.keys()) == (
+        assert tuple(maa.get_form(self.request).base_fields.keys()) == ("titlea_de", "titlea_en")
+        assert tuple(mab.get_form(self.request).base_fields.keys()) == (
             "titlea_de",
             "titlea_en",
             "titleb_de",
@@ -395,8 +398,8 @@ class TranslationAdminTest(TestCase):
 
         ma = GroupFieldsetsModelAdmin(models.GroupFieldsetsModel, self.site)
         fields = ["title_de", "title_en"]
-        assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
-        assert tuple(ma.get_form(request, self.test_obj).base_fields.keys()) == tuple(fields)
+        assert tuple(ma.get_form(self.request).base_fields.keys()) == tuple(fields)
+        assert tuple(ma.get_form(self.request, self.test_obj).base_fields.keys()) == tuple(fields)
 
         # Now set group_fieldsets only
         class GroupFieldsetsModelAdmin(admin.TranslationAdmin):
@@ -411,8 +414,8 @@ class TranslationAdminTest(TestCase):
             ("Title", {"classes": ("mt-fieldset",), "fields": ["title_de", "title_en"]}),
             ("Text", {"classes": ("mt-fieldset",), "fields": ["text_de", "text_en"]}),
         ]
-        assert ma.get_fieldsets(request) == fieldsets
-        assert ma.get_fieldsets(request, self.test_obj) == fieldsets
+        assert ma.get_fieldsets(self.request) == fieldsets
+        assert ma.get_fieldsets(self.request, self.test_obj) == fieldsets
 
         # Verify that other options are still taken into account
 
@@ -426,8 +429,8 @@ class TranslationAdminTest(TestCase):
             ("Title", {"classes": ("mt-fieldset",), "fields": ["title_de", "title_en"]}),
             ("Text", {"classes": ("mt-fieldset",), "fields": ["text_de", "text_en"]}),
         ]
-        assert ma.get_fieldsets(request) == fieldsets
-        assert ma.get_fieldsets(request, self.test_obj) == fieldsets
+        assert ma.get_fieldsets(self.request) == fieldsets
+        assert ma.get_fieldsets(self.request, self.test_obj) == fieldsets
 
         # Exclude a translation field
         class GroupFieldsetsModelAdmin(admin.TranslationAdmin):
@@ -439,8 +442,8 @@ class TranslationAdminTest(TestCase):
             ("", {"fields": ["email"]}),
             ("Title", {"classes": ("mt-fieldset",), "fields": ["title_de", "title_en"]}),
         ]
-        assert ma.get_fieldsets(request) == fieldsets
-        assert ma.get_fieldsets(request, self.test_obj) == fieldsets
+        assert ma.get_fieldsets(self.request) == fieldsets
+        assert ma.get_fieldsets(self.request, self.test_obj) == fieldsets
 
     def test_prepopulated_fields(self):
         trans_real.activate("de")
@@ -519,8 +522,8 @@ class TranslationAdminTest(TestCase):
 
         ma = ProxyTestModelAdmin(models.ProxyTestModel, self.site)
         fields = ["title_de", "title_en"]
-        assert tuple(ma.get_form(request).base_fields.keys()) == tuple(fields)
-        assert tuple(ma.get_form(request, self.test_obj).base_fields.keys()) == tuple(fields)
+        assert tuple(ma.get_form(self.request).base_fields.keys()) == tuple(fields)
+        assert tuple(ma.get_form(self.request, self.test_obj).base_fields.keys()) == tuple(fields)
 
     def test_class_attribute_access_raises_type_error(self):
         # Test for django-cms compatibility
