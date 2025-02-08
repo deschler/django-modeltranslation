@@ -2,12 +2,12 @@
 
 from django import forms
 from django.utils.translation import get_language
+from django.test import TestCase
 
 from modeltranslation.tests import models
-from .tests import ModeltranslationTestBase
 
 
-class ThirdPartyAppIntegrationTest(ModeltranslationTestBase):
+class ThirdPartyAppIntegrationTest(TestCase):
     """
     This test case and a test case below have identical tests. The models they test have the same
     definition - but in this case the model is not registered for translation and in the other
