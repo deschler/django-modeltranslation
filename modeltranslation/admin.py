@@ -245,7 +245,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin[_ModelT]):
             data = request.POST.copy()
             for field in self.trans_opts.fields:
                 default_lang_field = build_localized_fieldname(field, mt_settings.DEFAULT_LANGUAGE)
-                if default_lang_field in data.keys():
+                if default_lang_field in data:
                     value = data.get(default_lang_field)
                     if field not in data.keys() and value:
                         data.appendlist(field, value)
