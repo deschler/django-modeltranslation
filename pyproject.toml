@@ -24,6 +24,7 @@ pytest-django = "*"
 django-stubs = "^5.0.2"
 mypy = "*"
 build = "*"
+pillow = "^11.1.0"
 
 [tool.poetry.group.lsp]
 optional = true

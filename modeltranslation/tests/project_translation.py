@@ -1,10 +1,8 @@
-from modeltranslation.translator import TranslationOptions, translator
+from modeltranslation import translator
 
-from .test_app.models import Other
+from .test_app import models
 
 
-class OtherTranslationOptions(TranslationOptions):
+@translator.register(models.Other)
+class OtherTranslationOptions(translator.TranslationOptions):
     fields = ("name",)
-
-
-translator.register(Other, OtherTranslationOptions)
