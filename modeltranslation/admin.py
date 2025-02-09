@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from itertools import chain
 from typing import Any, TypeVar, TYPE_CHECKING
 from collections.abc import Iterable, Sequence
 
@@ -257,15 +256,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin[_ModelT]):
         if kwargs.get("fields"):
             original_fields = [field for field in self.trans_opts.fields if field not in exclude]
             kwargs["fields"].extend(original_fields)
-            kwargs.update(
-                {
-                    "exclude": (
-                        list(set(chain(exclude, updated_exclude)))
-                        if updated_exclude
-                        else updated_exclude
-                    )
-                }
-            )
+            kwargs.update({"exclude": (updated_exclude and list({*exclude, *updated_exclude}))})
         else:
             updated_exclude = self._exclude_original_fields(updated_exclude)
             kwargs.update({"exclude": updated_exclude})
