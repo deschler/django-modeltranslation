@@ -45,6 +45,15 @@ class TranslationAdminTest(TestCase):
             "dynamic_default_en",
         )
 
+    def test_model_with_constraint_fields(self):
+        ma = admin.TranslationAdmin(models.ModelWithConstraint, self.site)
+
+        assert tuple(ma.get_form(self.request).base_fields.keys()) == (
+            "title",
+            "sub_title_de",
+            "sub_title_en",
+        )
+
     def test_default_fieldsets(self):
         class TestModelAdmin(admin.TranslationAdmin):
             pass
