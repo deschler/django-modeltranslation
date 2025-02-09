@@ -13,7 +13,6 @@ from django.forms.models import BaseInlineFormSet
 from django.http.request import HttpRequest
 
 from modeltranslation import settings as mt_settings
-from modeltranslation.fields import TranslationField
 from modeltranslation.translator import translator
 from modeltranslation.utils import (
     build_css_class,
@@ -264,26 +263,6 @@ class TranslationBaseModelAdmin(BaseModelAdmin[_ModelT]):
         base_fields = self.replace_orig_field(form.base_fields.keys())
         fields = list(base_fields) + list(self.get_readonly_fields(request, obj))
         return [(None, {"fields": self.replace_orig_field(fields)})]
-
-    def get_translation_field_excludes(
-        self, exclude_languages: list[str] | None = None
-    ) -> tuple[TranslationField, ...]:
-        """
-        Returns a tuple of translation field names to exclude based on
-        `exclude_languages` arg.
-        TODO: Currently unused?
-        """
-        if exclude_languages is None:
-            exclude_languages = []
-        excl_languages = []
-        if exclude_languages:
-            excl_languages = exclude_languages
-        exclude = []
-        for orig_fieldname, translation_fields in self.trans_opts.all_fields.items():
-            for tfield in translation_fields:
-                if tfield.language in excl_languages and tfield not in exclude:
-                    exclude.append(tfield)
-        return tuple(exclude)
 
     def get_readonly_fields(
         self, request: HttpRequest, obj: _ModelT | None = None
