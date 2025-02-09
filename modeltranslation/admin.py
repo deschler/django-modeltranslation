@@ -243,15 +243,14 @@ class TranslationBaseModelAdmin(BaseModelAdmin[_ModelT]):
         updated_exclude = self.replace_orig_field(exclude) or None
         # Copy default language field value into the original field.
         if request.POST:
-            mutable_query_dict = request.POST.copy()
+            data = request.POST.copy()
             for field in self.trans_opts.fields:
                 default_lang_field = field + "_" + mt_settings.DEFAULT_LANGUAGE
-                if default_lang_field in mutable_query_dict.keys():
-                    if field not in mutable_query_dict.keys():
-                        mutable_query_dict.appendlist(
-                            field, mutable_query_dict.get(default_lang_field)
-                        )
-            request.POST = mutable_query_dict
+                if default_lang_field in data.keys():
+                    value = data.get(default_lang_field)
+                    if field not in data.keys() and value:
+                        data.appendlist(field, value)
+            request.POST = data  # type: ignore[assignment]
         # In order for BaseModelAdmin to show unique-constraint validation error,
         # add the original translation fields to kwargs, and do not exclude the
         # original translation fields.
