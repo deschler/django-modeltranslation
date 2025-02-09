@@ -6,5 +6,5 @@ from . import models
 
 
 @admin.register(models.ModelWithConstraint)
-class UniqueNullableModelAdmin(TranslationAdmin):
+class ModelWithConstraintAdmin(TranslationAdmin):
     pass
