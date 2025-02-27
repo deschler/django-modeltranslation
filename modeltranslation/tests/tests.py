@@ -426,6 +426,13 @@ class ModeltranslationTest(ModeltranslationTestBase):
         assert n.title == ""  # Falling back to default field value
         assert n.text == translation.FallbackModel2TranslationOptions.fallback_values["text"]
 
+    def test_fallback_with_null(self):
+        instance = models.FallbackModel.objects.create(title=None, title_en="title_en", title_de="title_de")
+        trans_real.activate("en")
+        assert instance.title == "title_en"
+        trans_real.activate("de")
+        assert instance.title == "title_de"
+
     def _compare_instances(self, x, y, field):
         assert getattr(x, field) == getattr(y, field), "Constructor diff on field %s." % field
 
