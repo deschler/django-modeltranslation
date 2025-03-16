@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+from pprint import pprint, pformat
 from copy import deepcopy
 from typing import Any, TypeVar, TYPE_CHECKING
 from collections.abc import Iterable, Sequence
@@ -42,7 +42,11 @@ class TranslationBaseModelAdmin(BaseModelAdmin[_ModelT]):
         self.trans_opts = translator.get_options_for_model(self.model)
         self._patch_prepopulated_fields()
 
-    def _get_declared_fieldsets(
+    def get_fieldsets(self, request, obj=None):
+        fieldsets = super().get_fieldsets(request, obj)
+        return self._patch_fieldsets(fieldsets)
+
+    def __get_declared_fieldsets(
         self, request: HttpRequest, obj: _ModelT | None = None
     ) -> _FieldsetSpec | None:
         # Take custom modelform fields option into account
@@ -64,7 +68,8 @@ class TranslationBaseModelAdmin(BaseModelAdmin[_ModelT]):
         fieldsets_new = list(fieldsets)
         for name, dct in fieldsets:
             if "fields" in dct:
-                dct["fields"] = self.replace_orig_field(dct["fields"])
+                dct["fields"] = self.replace_orig_field(dct["fields"], preserve_originals=True)
+        pprint(fieldsets_new)
         return fieldsets_new
 
     def formfield_for_dbfield(
@@ -151,7 +156,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin[_ModelT]):
         else:
             return field.widget
 
-    def replace_orig_field(self, option: Iterable[str | Sequence[str]]) -> _ListOrTuple[str]:
+    def replace_orig_field(self, option: Iterable[str | Sequence[str]], preserve_originals = False) -> _ListOrTuple[str]:
         """
         Replaces each original field in `option` that is registered for
         translation by its translation fields.
@@ -178,15 +183,23 @@ class TranslationBaseModelAdmin(BaseModelAdmin[_ModelT]):
         """
         if option:
             option_new = list(option)
+
+            def insert_at(opt):
+                index = option_new.index(opt)
+                where = 1 if preserve_originals else 0
+                return slice(index + where, index + 1)
+
             for opt in option:
                 if opt in self.trans_opts.all_fields:
-                    index = option_new.index(opt)
-                    option_new[index : index + 1] = get_translation_fields(opt)  # type: ignore[arg-type]
+                    translated_field_names = get_translation_fields(opt)
+                    if any(name for name in translated_field_names if name in option):
+                        # This set is already processed
+                        return option
+                    option_new[insert_at(opt)] = translated_field_names  # type: ignore[arg-type]
                 elif isinstance(opt, (tuple, list)) and (
                     [o for o in opt if o in self.trans_opts.all_fields]
                 ):
-                    index = option_new.index(opt)
-                    option_new[index : index + 1] = self.replace_orig_field(opt)
+                    option_new[insert_at(opt)] = self.replace_orig_field(opt)
             option = option_new
         return option  # type: ignore[return-value]
 
@@ -228,44 +241,26 @@ class TranslationBaseModelAdmin(BaseModelAdmin[_ModelT]):
             # Take the custom ModelForm's Meta.exclude into account only if the
             # ModelAdmin doesn't define its own.
             exclude.extend(self.form._meta.exclude)
-        # If exclude is an empty list we pass None to be consistent with the
-        # default on modelform_factory
 
         # FIXME: idea
         # We need to somehow exclude original fields, but preserve them for validation
         # Make them readonly via widgets? Hidden via widgets?
 
-        exclude = self.replace_orig_field(exclude) or None
-        exclude = self._exclude_original_fields(exclude)
-        kwargs.update({"exclude": exclude})
+        exclude = self.replace_orig_field(exclude)
+        #exclude = self._exclude_original_fields(exclude)
+        kwargs.update({
+            "exclude": exclude or None,
+            "widgets": {field_name: forms.HiddenInput() for field_name in self.trans_opts.all_fields.keys()} or None,
+        })
+        print("_get_form_or_formset->kwargs:", pformat(kwargs))
 
         return kwargs
 
-    def _exclude_original_fields(self, exclude: _ListOrTuple[str] | None = None) -> tuple[str, ...]:
+    def _exclude_original_fields(self, exclude: _ListOrTuple[str]) -> tuple[str, ...]:
         return (
-            *(() if exclude is None else exclude),
+            *exclude,
             *self.trans_opts.all_fields.keys(),
         )
-
-    def _get_fieldsets_pre_form_or_formset(
-        self, request: HttpRequest, obj: _ModelT | None = None
-    ) -> _FieldsetSpec | None:
-        """
-        Generic get_fieldsets code, shared by
-        TranslationAdmin and TranslationInlineModelAdmin.
-        """
-        return self._get_declared_fieldsets(request, obj)
-
-    def _get_fieldsets_post_form_or_formset(
-        self, request: HttpRequest, form: type[forms.ModelForm], obj: _ModelT | None = None
-    ) -> list:
-        """
-        Generic get_fieldsets code, shared by
-        TranslationAdmin and TranslationInlineModelAdmin.
-        """
-        base_fields = self.replace_orig_field(form.base_fields.keys())
-        fields = list(base_fields) + list(self.get_readonly_fields(request, obj))
-        return [(None, {"fields": self.replace_orig_field(fields)})]
 
     def get_readonly_fields(
         self, request: HttpRequest, obj: _ModelT | None = None
@@ -366,13 +361,6 @@ class TranslationAdmin(TranslationBaseModelAdmin[_ModelT], admin.ModelAdmin[_Mod
         kwargs = self._get_form_or_formset(request, obj, **kwargs)
         return super().get_form(request, obj, **kwargs)
 
-    def get_fieldsets(self, request: HttpRequest, obj: _ModelT | None = None) -> _FieldsetSpec:
-        return self._get_fieldsets_pre_form_or_formset(request, obj) or self._group_fieldsets(
-            self._get_fieldsets_post_form_or_formset(
-                request, self.get_form(request, obj, fields=None), obj
-            )
-        )
-
 
 _ChildModelT = TypeVar("_ChildModelT", bound=Model)
 _ParentModelT = TypeVar("_ParentModelT", bound=Model)
@@ -386,16 +374,6 @@ class TranslationInlineModelAdmin(
     ) -> type[BaseInlineFormSet]:
         kwargs = self._get_form_or_formset(request, obj, **kwargs)
         return super().get_formset(request, obj, **kwargs)
-
-    def get_fieldsets(self, request: HttpRequest, obj: _ChildModelT | None = None):
-        # FIXME: If fieldsets are declared on an inline some kind of ghost
-        # fieldset line with just the original model verbose_name of the model
-        # is displayed above the new fieldsets.
-        declared_fieldsets = self._get_fieldsets_pre_form_or_formset(request, obj)
-        if declared_fieldsets:
-            return declared_fieldsets
-        form = self.get_formset(request, obj, fields=None).form  # type: ignore[arg-type]
-        return self._get_fieldsets_post_form_or_formset(request, form, obj)
 
 
 class TranslationTabularInline(
