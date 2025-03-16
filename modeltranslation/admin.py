@@ -238,27 +238,9 @@ class TranslationBaseModelAdmin(BaseModelAdmin[_ModelT]):
             exclude.extend(self.form._meta.exclude)
         # If exclude is an empty list we pass None to be consistent with the
         # default on modelform_factory
-        updated_exclude = self.replace_orig_field(exclude) or None
-        # Copy default language field value into the original field.
-        if request.POST:
-            data = request.POST.copy()
-            for field in self.trans_opts.fields:
-                default_lang_field = build_localized_fieldname(field, mt_settings.DEFAULT_LANGUAGE)
-                if default_lang_field in data:
-                    value = data.get(default_lang_field)
-                    if field not in data.keys() and value:
-                        data.appendlist(field, value)
-            request.POST = data  # type: ignore[assignment]
-        # In order for BaseModelAdmin to show unique-constraint validation error,
-        # add the original translation fields to kwargs, and do not exclude the
-        # original translation fields.
-        if kwargs.get("fields"):
-            original_fields = [field for field in self.trans_opts.fields if field not in exclude]
-            kwargs["fields"].extend(original_fields)
-            kwargs.update({"exclude": (updated_exclude and list({*exclude, *updated_exclude}))})
-        else:
-            updated_exclude = self._exclude_original_fields(updated_exclude)
-            kwargs.update({"exclude": updated_exclude})
+        exclude = self.replace_orig_field(exclude) or None
+        exclude = self._exclude_original_fields(exclude)
+        kwargs.update({"exclude": exclude})
 
         return kwargs
 

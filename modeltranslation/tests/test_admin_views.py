@@ -20,6 +20,6 @@ def test_create_duplicate(admin_client: Client):
         },
     )
 
-    error_msg = "Model with constraint with this Title and Sub title already exists."
+    error_msg = "Model with constraint with this Title and Sub title [en] already exists."
     assert error_msg in response.context["errors"][0]
     assert response.status_code == 200

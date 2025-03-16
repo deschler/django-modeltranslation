@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from functools import partial
 from typing import Any, Callable, ClassVar, cast
 from collections.abc import Collection, Iterable, Sequence
@@ -14,10 +15,12 @@ from django.db.models import (
     OneToOneField,
     options,
 )
+from django.db.models import UniqueConstraint
 from django.db.models.base import ModelBase
 from django.db.models.signals import post_init
 from django.utils.functional import cached_property
 
+from modeltranslation.utils import get_translation_fields
 from modeltranslation import settings as mt_settings
 from modeltranslation.fields import (
     NONE,
@@ -317,6 +320,33 @@ def patch_constructor(model: type[Model]) -> None:
     model.__init__ = new_init
 
 
+def patch_constraints(model: type[Model], opts: TranslationOptions) -> None:
+    def add_unique_together():
+        for constraint in model._meta.unique_together:
+            for field_name in opts.fields:
+                if field_name in constraint:
+                    new_constraint = list(constraint)
+                    for translated_name in get_translation_fields(field_name):
+                        new_constraint[constraint.index(field_name)] = translated_name
+                        yield new_constraint
+
+    def add_constraints():
+        for c in model._meta.constraints:
+            if isinstance(c, UniqueConstraint):
+                for field_name in opts.fields:
+                    if field_name in c.fields:
+                        for translated_name in get_translation_fields(field_name):
+                            new_constraint = deepcopy(c)
+                            new_fields = list(new_constraint.fields)
+                            new_fields[new_fields.index(field_name)] = translated_name
+                            new_constraint.name += f"-{translated_name}"
+                            new_constraint.fields = new_fields
+                            yield new_constraint
+
+    model._meta.unique_together += tuple(add_unique_together())  # type: ignore[operator]
+    model._meta.constraints += tuple(add_constraints())
+
+
 def delete_mt_init(sender: type[Model], instance: Model, **kwargs: Any) -> None:
     if hasattr(instance, "_mt_init"):
         del instance._mt_init
@@ -560,6 +590,9 @@ class Translator:
 
         # Patch __init__ to rewrite fields
         patch_constructor(model)
+
+        # Patch constraints to correctly handle new fields
+        patch_constraints(model, opts)
 
         # Connect signal for model
         post_init.connect(delete_mt_init, sender=model)
