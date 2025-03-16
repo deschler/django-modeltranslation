@@ -151,14 +151,6 @@ class TranslationBaseModelAdmin(BaseModelAdmin[_ModelT]):
         else:
             return field.widget
 
-    def _exclude_original_fields(self, exclude: _ListOrTuple[str] | None = None) -> tuple[str, ...]:
-        if exclude is None:
-            exclude = tuple()
-        if exclude:
-            exclude_new = tuple(exclude)
-            return exclude_new + tuple(self.trans_opts.all_fields.keys())
-        return tuple(self.trans_opts.all_fields.keys())
-
     def replace_orig_field(self, option: Iterable[str | Sequence[str]]) -> _ListOrTuple[str]:
         """
         Replaces each original field in `option` that is registered for
@@ -238,11 +230,22 @@ class TranslationBaseModelAdmin(BaseModelAdmin[_ModelT]):
             exclude.extend(self.form._meta.exclude)
         # If exclude is an empty list we pass None to be consistent with the
         # default on modelform_factory
+
+        # FIXME: idea
+        # We need to somehow exclude original fields, but preserve them for validation
+        # Make them readonly via widgets? Hidden via widgets?
+
         exclude = self.replace_orig_field(exclude) or None
         exclude = self._exclude_original_fields(exclude)
         kwargs.update({"exclude": exclude})
 
         return kwargs
+
+    def _exclude_original_fields(self, exclude: _ListOrTuple[str] | None = None) -> tuple[str, ...]:
+        return (
+            *(() if exclude is None else exclude),
+            *self.trans_opts.all_fields.keys(),
+        )
 
     def _get_fieldsets_pre_form_or_formset(
         self, request: HttpRequest, obj: _ModelT | None = None
@@ -361,17 +364,7 @@ class TranslationAdmin(TranslationBaseModelAdmin[_ModelT], admin.ModelAdmin[_Mod
         self, request: HttpRequest, obj: _ModelT | None = None, **kwargs: Any
     ) -> type[forms.ModelForm]:
         kwargs = self._get_form_or_formset(request, obj, **kwargs)
-        form = super().get_form(request, obj, **kwargs)
-
-        translated_fields = self.trans_opts.fields
-
-        class ValidationFixedForm(form):  # type: ignore[misc,valid-type]
-            def _get_validation_exclusions(self) -> set[str]:
-                exclusions = super()._get_validation_exclusions()
-                # Keep translated original fields in validation
-                return exclusions.difference(translated_fields)
-
-        return ValidationFixedForm
+        return super().get_form(request, obj, **kwargs)
 
     def get_fieldsets(self, request: HttpRequest, obj: _ModelT | None = None) -> _FieldsetSpec:
         return self._get_fieldsets_pre_form_or_formset(request, obj) or self._group_fieldsets(
