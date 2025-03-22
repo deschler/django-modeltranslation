@@ -11,7 +11,7 @@ authors = [{ name = "Peter Eschler", email = "peschler@gmail.com" }]
 maintainers = [
     { name = "Sergiy Tereshchenko", email = "serg.partizan+modeltranslation@gmail.com" },
 ]
-license = {text = "New BSD"}
+license = "BSD-3-Clause"
 requires-python = "<4,>=3.9"
 dependencies = [
     "Django>=4.2",
@@ -27,7 +27,6 @@ classifiers = [
     "Environment :: Web Environment",
     "Intended Audience :: Developers",
     "Framework :: Django",
-    "License :: OSI Approved :: BSD License",
 ]
 [project.urls]
 "Homepage" = "https://github.com/deschler/django-modeltranslation"
