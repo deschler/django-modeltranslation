@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.19.13](https://github.com/deschler/django-modeltranslation/compare/v0.19.12...v0.19.13) (2025-03-22)
+
+
+### Features
+
+* Add another test model and set up django-admin ([063eb16](https://github.com/deschler/django-modeltranslation/commit/063eb16f544b3e273a2cf7478bb8983e6b4942c4))
+
+
+### Bug Fixes
+
+* Add add unique constraints on all translated fields ([2c0ae62](https://github.com/deschler/django-modeltranslation/commit/2c0ae623055287590b5a727da522dde30cd26566)), closes [#261](https://github.com/deschler/django-modeltranslation/issues/261)
+
 ### [0.19.12](https://github.com/deschler/django-modeltranslation/compare/v0.19.11...v0.19.12) (2024-12-26)
 
 
