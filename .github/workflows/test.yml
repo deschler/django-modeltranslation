@@ -37,7 +37,7 @@ jobs:
           make typecheck
       - name: Test package install
         run: |
-          python setup.py sdist
+          python -m build
           pip install dist/*
 
   Test:
