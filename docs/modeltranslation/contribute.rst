@@ -67,7 +67,7 @@ suite and report any failures or errors.
 .. code-block:: console
 
     $ pip install uv
-    $ uv sync --group dev --group lsp
+    $ uv sync --group dev --group lsp --no-install-project
     $ uv run pytest
 
 Non trivial changes and new features should always be accompanied by a unittest.
