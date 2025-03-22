@@ -1,5 +1,5 @@
 release:
-	standard-version
+	commit-and-tag-version
 
 publish: clean
 	python -m build
