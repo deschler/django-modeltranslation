@@ -7,7 +7,10 @@ name = "django-modeltranslation"
 dynamic = ["version"]
 description = "Translates Django models using a registration approach."
 readme = "README.rst"
-authors = [{ name = "Peter Eschler", email = "peschler@gmail.com" }]
+authors = [
+    { name = "Peter Eschler", email = "peschler@gmail.com" },
+    { name = "Dirk Eschler", email = "eschler@gmail.com" },
+]
 maintainers = [
     { name = "Sergiy Tereshchenko", email = "serg.partizan+modeltranslation@gmail.com" },
 ]
