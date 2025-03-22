@@ -163,8 +163,7 @@ wheels = [
 
 [[package]]
 name = "django-modeltranslation"
-version = "0.19.9"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "django", version = "4.2.20", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
     { name = "django", version = "5.1.7", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
