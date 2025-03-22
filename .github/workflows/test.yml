@@ -26,7 +26,7 @@ jobs:
           enable-cache: true
           python-version: ${{ matrix.python }}
       - name: Install deps
-        run: uv --sync --group dev
+        run: uv sync --group dev
       - name: Run linters
         run: |
           source .venv/bin/activate
