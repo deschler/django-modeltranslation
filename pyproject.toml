@@ -1,16 +1,58 @@
 [project]
 name = "django-modeltranslation"
-version = "0.19.9"
+dynamic = ["version"]
 description = "Translates Django models using a registration approach."
+readme = "README.rst"
 authors = [{ name = "Peter Eschler", email = "peschler@gmail.com" }]
 maintainers = [
     { name = "Serhii Tereshchenko", email = "serg.partizan@gmail.com" },
 ]
+license = {text = "New BSD"}
 requires-python = "<4,>=3.9"
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+    "Environment :: Web Environment",
+    "Intended Audience :: Developers",
+    "Framework :: Django",
+    "License :: OSI Approved :: BSD License",
+]
 dependencies = [
     "django>=4.2",
     "typing-extensions>=4.0.1; python_version < \"3.11\"",
 ]
+[project.urls]
+"Homepage" = "https://github.com/deschler/django-modeltranslation"
+"Source" = "https://github.com/deschler/django-modeltranslation"
+"Documentation" = "https://django-modeltranslation.readthedocs.org/en/latest"
+"Mailing List" = "http://groups.google.com/group/django-modeltranslation"
+"Changelog" = "https://github.com/deschler/django-modeltranslation/blob/master/CHANGELOG.md"
+
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = [
+    "modeltranslation",
+    "modeltranslation.management",
+    "modeltranslation.management.commands",
+]
+
+[tool.setuptools.package-data]
+modeltranslation = [
+    "static/modeltranslation/css/*.css",
+    "static/modeltranslation/js/*.js",
+    "py.typed",
+]
+
+[tool.setuptools.dynamic]
+version = {file = "VERSION"}
 
 [dependency-groups]
 dev = [
