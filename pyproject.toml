@@ -1,44 +1,39 @@
-[tool.poetry]
+[project]
 name = "django-modeltranslation"
-version = "0.19.0"
+version = "0.19.9"
 description = "Translates Django models using a registration approach."
-authors = ["Peter Eschler <peschler@gmail.com>"]
-maintainers = ["Serhii Tereshchenko <serg.partizan@gmail.com>"]
-packages = [
-    { include = "modeltranslation" },
+authors = [{ name = "Peter Eschler", email = "peschler@gmail.com" }]
+maintainers = [
+    { name = "Serhii Tereshchenko", email = "serg.partizan@gmail.com" },
+]
+requires-python = "<4,>=3.9"
+dependencies = [
+    "django>=4.2",
+    "typing-extensions>=4.0.1; python_version < \"3.11\"",
 ]
 
-[tool.poetry.dependencies]
-python = ">=3.9,<4"
-django = ">=4.2"
-typing-extensions = {version = ">=4.0.1", python = "<3.11"}
-
-[tool.poetry.group.dev.dependencies]
-ruff = "*"
-pdbpp = "*"
-parameterized = "*"
-pytest-cov = "*"
-pytest = "*"
-pytest-sugar = "*"
-pytest-django = "*"
-django-stubs = "^5.0.2"
-mypy = "*"
-build = "*"
-pillow = "^11.1.0"
-
-[tool.poetry.group.lsp]
-optional = true
-
-[tool.poetry.group.lsp.dependencies]
-python-lsp-server = {extras = ["rope"], version = "^1.11.0"}
-pylsp-mypy = "^0.6.8"
+[dependency-groups]
+dev = [
+    "ruff",
+    "pdbpp",
+    "parameterized",
+    "pytest-cov",
+    "pytest",
+    "pytest-sugar",
+    "pytest-django",
+    "django-stubs<6.0.0,>=5.0.2",
+    "mypy",
+    "build",
+    "pillow",
+]
+lsp = ["python-lsp-server[rope]", "pylsp-mypy"]
 
 [tool.ruff]
 line-length = 100
 target-version = "py39"
 [tool.ruff.lint]
 ignore = [
-    "E501",   # line length is handled by formatter
+    "E501", # line length is handled by formatter
 ]
 
 [tool.ruff.lint.pyflakes]
@@ -57,23 +52,20 @@ warn_unused_ignores = true
 warn_redundant_casts = true
 warn_unused_configs = true
 show_error_context = true
-exclude = [
-    'tests/migrations/',
-    'tests/urls.py',
-]
+exclude = ['tests/migrations/', 'tests/urls.py']
 disable_error_code = ["method-assign"]
 plugins = ["mypy_django_plugin.main"]
 
 [[tool.mypy.overrides]]
-module  = ["modeltranslation.fields"]
+module = ["modeltranslation.fields"]
 disable_error_code = ["attr-defined", "has-type", "misc"]
 
 [[tool.mypy.overrides]]
-module  = ["modeltranslation.admin"]
+module = ["modeltranslation.admin"]
 disable_error_code = ["override", "attr-defined"]
 
 [[tool.mypy.overrides]]
-module  = ["modeltranslation.translator"]
+module = ["modeltranslation.translator"]
 disable_error_code = ["override", "attr-defined"]
 
 [[tool.mypy.overrides]]

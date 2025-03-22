@@ -18,23 +18,23 @@ jobs:
         python: ["3.10"]
     steps:
       - uses: actions/checkout@v4
-      - name: Install poetry
-        run: pipx install 'poetry~=1.8'
+      - name: Install uv
+        run: pipx install 'uv~=0.6.9'
       - name: Set up Python ${{ matrix.python }}
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python }}
-          cache: 'poetry'
-          cache-dependency-path: 'poetry.lock'
+          cache: 'uv'
+          cache-dependency-path: 'uv.lock'
       - name: Install deps
-        run: poetry install --sync --no-root
+        run: uv --sync --group dev
       - name: Run linters
         run: |
-          source $(poetry env info --path)/bin/activate
+          source .venv/bin/activate
           make lint
       - name: Run type checking
         run: |
-          source $(poetry env info --path)/bin/activate
+          source .venv/bin/activate
           make typecheck
       - name: Test package install
         run: |
