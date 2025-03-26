@@ -60,15 +60,15 @@ Unittests
 
 To test Modeltranslation, you can use the comprehensive test suite that comes
 with the package. First, make sure you have installed the project's requirements
-using Poetry. Once the requirements are installed,
+using uv. Once the requirements are installed,
 you can run the tests using pytest. This will run all of the tests in the test
 suite and report any failures or errors.
 
 .. code-block:: console
 
-    $ pip install poetry
-    $ poetry install
-    $ poetry run pytest
+    $ pip install uv
+    $ uv sync --group dev --group lsp --no-install-project
+    $ uv run pytest
 
 Non trivial changes and new features should always be accompanied by a unittest.
 Pull requests which add unittests for uncovered code or rare edge cases are also
