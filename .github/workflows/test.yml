@@ -18,8 +18,6 @@ jobs:
         python: ["3.10"]
     steps:
       - uses: actions/checkout@v4
-      - name: Install uv
-        run: pipx install 'uv~=0.6.9'
       - name: Set up Python ${{ matrix.python }}
         uses: astral-sh/setup-uv@v5
         with:
@@ -37,7 +35,7 @@ jobs:
           make typecheck
       - name: Test package install
         run: |
-          python -m build
+          python -m build --installer uv
           pip install dist/*.whl
           pip install dist/*.tar.gz
   Test:
