@@ -43,13 +43,15 @@ jobs:
     strategy:
       matrix:
         python: ["3.9", "3.10", "3.11", "3.12", "3.13"]
-        django: ["4.2", "5.0", "5.1"]
+        django: ["4.2", "5.0", "5.1", "5.2"]
         database: ["sqlite", "postgres", "mysql"]
         exclude:
           - python: 3.9
             django: 5.0
           - python: 3.9
             django: 5.1
+          - python: 3.9
+            django: 5.2
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       DJANGO: ${{ matrix.django }}
