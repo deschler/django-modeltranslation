@@ -2,12 +2,6 @@
 Modeltranslation
 ================
 
-.. image:: https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg
-   :target: https://stand-with-ukraine.pp.ua
-   :alt: Stand With Ukraine
-
------
-
 .. image:: http://img.shields.io/coveralls/deschler/django-modeltranslation.svg?style=flat-square
     :target: https://coveralls.io/r/deschler/django-modeltranslation
 
