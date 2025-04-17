@@ -325,8 +325,8 @@ def patch_constraints(model: type[Model], opts: TranslationOptions) -> None:
         for constraint in model._meta.unique_together:
             for field_name in opts.fields:
                 if field_name in constraint:
-                    new_constraint = list(constraint)
                     for translated_name in get_translation_fields(field_name):
+                        new_constraint = list(constraint)
                         new_constraint[constraint.index(field_name)] = translated_name
                         yield new_constraint
 
