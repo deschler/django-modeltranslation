@@ -1,10 +1,12 @@
 release:
 	commit-and-tag-version
 
-publish: clean
-	python -m build --installer uv
+publish: build
 	twine upload dist/*
 	git push --follow-tags
+
+build: clean
+	python -m build --installer uv
 
 clean:
 	rm -rf dist
