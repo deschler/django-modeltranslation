@@ -1,6 +1,18 @@
 # Changelog
 
-All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
+
+## [0.19.14](https://github.com/deschler/django-modeltranslation/compare/v0.19.13...v0.19.14) (2025-04-20)
+
+
+### Features
+
+* **dev:** Migrate project to uv ([#783](https://github.com/deschler/django-modeltranslation/issues/783)) ([b188f37](https://github.com/deschler/django-modeltranslation/commit/b188f37aaed6b4aa7bc9dd63201f3176bba4bbfc))
+
+
+### Bug Fixes
+
+* Fix duplicate constraint generation ([#789](https://github.com/deschler/django-modeltranslation/issues/789)) ([236ddec](https://github.com/deschler/django-modeltranslation/commit/236ddec46531f29a457a1b9f810323d5262d3835)), closes [#785](https://github.com/deschler/django-modeltranslation/issues/785)
 
 ### [0.19.13](https://github.com/deschler/django-modeltranslation/compare/v0.19.12...v0.19.13) (2025-03-22)
 
