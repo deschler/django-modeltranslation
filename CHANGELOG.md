@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.19.15-beta.1](https://github.com/deschler/django-modeltranslation/compare/v0.19.15-beta.0...v0.19.15-beta.1) (2025-04-20)
+
 ## [0.19.15-beta.0](https://github.com/deschler/django-modeltranslation/compare/v0.19.14...v0.19.15-beta.0) (2025-04-20)
 
 ## [0.19.14](https://github.com/deschler/django-modeltranslation/compare/v0.19.13...v0.19.14) (2025-04-20)
