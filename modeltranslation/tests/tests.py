@@ -273,9 +273,12 @@ class ModeltranslationTest(ModeltranslationTestBase):
     def test_custom_verbose_name(self):
         def get_verbose_name(verbose_name, language):
             return f"({language}) {verbose_name}"
-        with reload_override_settings(MODELTRANSLATION_BUILD_LOCALIZED_VERBOSE_NAME=get_verbose_name):
-          verbose_name = models.TestModel._meta.get_field("title_de").verbose_name
-          assert verbose_name == "(de) title"
+
+        with reload_override_settings(
+            MODELTRANSLATION_BUILD_LOCALIZED_VERBOSE_NAME=get_verbose_name
+        ):
+            verbose_name = models.TestModel._meta.get_field("title_de").verbose_name
+            assert verbose_name == "(de) title"
 
     def test_descriptor_introspection(self):
         # See Django #8248
