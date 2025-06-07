@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.19.15](https://github.com/deschler/django-modeltranslation/compare/v0.19.15-beta.1...v0.19.15) (2025-06-07)
+
+
+### Features
+
+* add ability to set a custom verbose name ([#770](https://github.com/deschler/django-modeltranslation/issues/770)) ([1491b05](https://github.com/deschler/django-modeltranslation/commit/1491b05ea813a1b0c3c4c31e03b4877671f7bf5d))
+
 ## [0.19.15-beta.1](https://github.com/deschler/django-modeltranslation/compare/v0.19.15-beta.0...v0.19.15-beta.1) (2025-04-20)
 
 ## [0.19.15-beta.0](https://github.com/deschler/django-modeltranslation/compare/v0.19.14...v0.19.15-beta.0) (2025-04-20)
