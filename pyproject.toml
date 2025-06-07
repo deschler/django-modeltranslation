@@ -44,7 +44,7 @@ dev = [
     "pytest-sugar",
     "pytest-django",
     "django-stubs<6.0.0,>=5.0.2",
-    "mypy",
+    "mypy<1.15",
     "build",
     "pillow",
 ]
