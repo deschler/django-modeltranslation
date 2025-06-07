@@ -15,7 +15,7 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     strategy:
       matrix:
-        python: ["3.10"]
+        python: ["3.13"]
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python }}
