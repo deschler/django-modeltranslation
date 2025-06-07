@@ -17,3 +17,9 @@ lint:
 
 typecheck:
 	mypy --pretty modeltranslation
+
+sync:
+	uv sync --group dev --group lsp --no-install-project
+
+test:
+	uv run --no-sync pytest

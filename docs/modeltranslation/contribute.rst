@@ -67,8 +67,8 @@ suite and report any failures or errors.
 .. code-block:: console
 
     $ pip install uv
-    $ uv sync --group dev --group lsp --no-install-project
-    $ uv run pytest
+    $ make sync
+    $ make test
 
 Non trivial changes and new features should always be accompanied by a unittest.
 Pull requests which add unittests for uncovered code or rare edge cases are also
