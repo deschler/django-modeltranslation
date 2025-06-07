@@ -1,6 +1,6 @@
 {
   "include": ["."],
-  "pythonVersion": "3.8",
+  "pythonVersion": "3.9",
   "pythonPlatform": "Linux",
   "useLibraryCodeForTypes": true,
   "strictListInference": true,
