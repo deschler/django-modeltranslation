@@ -5,7 +5,6 @@ from contextlib import contextmanager
 from typing import Any, TypeVar
 from collections.abc import Generator, Iterable, Iterator
 from django.db import models
-from django.utils.encoding import force_str
 from django.utils.functional import lazy
 from django.utils.translation import get_language as _get_language
 from django.utils.translation import get_language_info
@@ -72,7 +71,7 @@ def build_localized_fieldname(field_name: str, lang: str) -> str:
 def _build_localized_verbose_name(verbose_name: Any, lang: str) -> str:
     if lang == "id":
         lang = "ind"
-    return force_str("%s [%s]") % (force_str(verbose_name), lang)
+    return settings.BUILD_LOCALIZED_VERBOSE_NAME(verbose_name, lang)
 
 
 build_localized_verbose_name = lazy(_build_localized_verbose_name, str)

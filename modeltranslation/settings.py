@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Callable
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
@@ -75,6 +76,12 @@ for key, value in FALLBACK_LANGUAGES.items():
 ENABLE_FALLBACKS: bool = getattr(settings, "MODELTRANSLATION_ENABLE_FALLBACKS", True)
 
 LOADDATA_RETAIN_LOCALE: bool = getattr(settings, "MODELTRANSLATION_LOADDATA_RETAIN_LOCALE", True)
+
+BUILD_LOCALIZED_VERBOSE_NAME: Callable[[str, str], str] = getattr(
+    settings,
+    "MODELTRANSLATION_BUILD_LOCALIZED_VERBOSE_NAME",
+    lambda verbose_name, lang: f"{verbose_name} [{lang}]",
+)
 
 JQUERY_URL: str = getattr(
     settings,
