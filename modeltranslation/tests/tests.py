@@ -5,7 +5,7 @@ import os
 import shutil
 import sys
 from decimal import Decimal
-
+from modeltranslation.translator import TranslationOptions
 import pytest
 from django import forms
 from django.apps import apps as django_apps
@@ -2344,6 +2344,12 @@ class ModelInheritanceFieldAggregationTest(ModeltranslationTestBase):
         assert "titled" in clsb.fields
         assert "titlee" in clsb.fields
         assert 5 == len(clsb.fields)  # there are no repetitions
+
+    def test_str_instead_of_tuple(self):
+        with pytest.raises(ImproperlyConfigured):
+
+            class ModelOptions(TranslationOptions):
+                fields = "titlea"
 
 
 class UpdateCommandTest(ModeltranslationTestBase):

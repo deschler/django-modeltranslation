@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from textwrap import dedent
 from copy import deepcopy
 from functools import partial
 from typing import Any, Callable, ClassVar, cast
@@ -81,7 +82,14 @@ class FieldsAggregationMetaClass(type):
     def __new__(cls, name: str, bases: tuple[type, ...], attrs: dict[str, Any]) -> type:
         fields = attrs.get("fields", ())
         if isinstance(fields, str):
-            attrs['fields'] = {fields}
+            raise ImproperlyConfigured(
+                dedent(f"""`fields` property should be list or tuple, received `str`.
+
+                Hint: Replace with:
+
+                    fields = ("{fields}", )
+                """)
+            )
         else:
             attrs["fields"] = set(fields)
         for base in bases:
