@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.19.16](https://github.com/deschler/django-modeltranslation/compare/v0.19.15...v0.19.16) (2025-07-13)
+
+
+### Bug Fixes
+
+* Raise `ImproperlyConfigured` error when fields provided as a string ([d44a6b8](https://github.com/deschler/django-modeltranslation/commit/d44a6b8ef5ba035b14331b74cbc83e42a3c52f74))
+
 ## [0.19.15](https://github.com/deschler/django-modeltranslation/compare/v0.19.15-beta.1...v0.19.15) (2025-06-07)
 
 
