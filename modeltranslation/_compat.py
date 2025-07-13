@@ -53,7 +53,7 @@ def build_refresh_from_db(
 if _django_version <= (5, 0):
 
     def is_hidden(field: ForeignObjectRel) -> bool:
-        return field.is_hidden()
+        return field.is_hidden()  # type: ignore[attr-defined]
 
     # Django versions below 5.1 do not have `from_queryset` argument.
     def build_refresh_from_db(  # type: ignore[misc]

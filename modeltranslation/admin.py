@@ -47,7 +47,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin[_ModelT]):
     ) -> _FieldsetSpec | None:
         # Take custom modelform fields option into account
         if not self.fields and hasattr(self.form, "_meta") and self.form._meta.fields:
-            self.fields = self.form._meta.fields  # type: ignore[assignment]
+            self.fields = self.form._meta.fields  # type: ignore[misc]
         # takes into account non-standard add_fieldsets attribute used by UserAdmin
         fieldsets = (
             self.add_fieldsets
@@ -218,7 +218,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin[_ModelT]):
             else:
                 lang = mt_settings.PREPOPULATE_LANGUAGE or get_language()
                 prepopulated_fields[dest] = localize(sources, lang)
-        self.prepopulated_fields = prepopulated_fields
+        self.prepopulated_fields = prepopulated_fields  # type: ignore[misc]
 
     def _get_form_or_formset(
         self, request: HttpRequest, obj: Model | None, **kwargs: Any
@@ -292,7 +292,7 @@ class TranslationAdmin(TranslationBaseModelAdmin[_ModelT], admin.ModelAdmin[_Mod
                     translation_fields = get_translation_fields(field)
                     editable_new[index : index + 1] = translation_fields
                     display_new[display_index : display_index + 1] = translation_fields
-            self.list_editable = editable_new
+            self.list_editable = editable_new  # type: ignore[misc]
             self.list_display = display_new
 
     def _group_fieldsets(self, fieldsets: list) -> list:
