@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.19.17](https://github.com/deschler/django-modeltranslation/compare/v0.19.16...v0.19.17) (2025-09-14)
+
+
+### Bug Fixes
+
+* Fix patching unique_together for migrations ([5765725](https://github.com/deschler/django-modeltranslation/commit/57657256b33af17a34598a7cd3ca16f981bd0298)), closes [#785](https://github.com/deschler/django-modeltranslation/issues/785)
+
 ## [0.19.16](https://github.com/deschler/django-modeltranslation/compare/v0.19.15...v0.19.16) (2025-07-13)
 
 
