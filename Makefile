@@ -23,3 +23,7 @@ sync:
 
 test:
 	uv run --no-sync pytest
+
+recreate-migrations:
+	rm modeltranslation/tests/migrations/0*.py
+	PYTHONPATH="." uv run --no-sync django-admin makemigrations tests
