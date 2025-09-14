@@ -357,6 +357,10 @@ def patch_constraints(model: type[Model], opts: TranslationOptions) -> None:
 
     model._meta.unique_together += tuple(add_unique_together())  # type: ignore[operator]
     model._meta.constraints += tuple(add_constraints())
+    # `unique_together` needs `original_attrs` to be set, for this changes to appear in migrations.
+    for attr_name in ("unique_together",):
+        if value := getattr(model._meta, attr_name):
+            model._meta.original_attrs[attr_name] = value
 
 
 def delete_mt_init(sender: type[Model], instance: Model, **kwargs: Any) -> None:

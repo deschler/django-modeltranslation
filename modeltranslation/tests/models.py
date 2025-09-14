@@ -27,6 +27,7 @@ class ModelWithConstraint(models.Model):
     sub_title = models.CharField(max_length=255)
 
     class Meta:
+        unique_together = (("title", "sub_title"),)
         constraints = [
             models.UniqueConstraint(
                 fields=["title", "sub_title"],
