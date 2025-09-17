@@ -26,4 +26,4 @@ test:
 
 recreate-migrations:
 	rm modeltranslation/tests/migrations/0*.py
-	PYTHONPATH="." uv run --no-sync django-admin makemigrations tests
+	PYTHONPATH="." uv run --no-sync django-admin makemigrations tests --settings=modeltranslation.tests.settings
