@@ -1,4 +1,3 @@
-import sys
 from typing import get_type_hints
 
 import pytest
@@ -17,10 +16,6 @@ def test_translation_admin():
         pass
 
 
-@pytest.mark.skipif(
-    sys.version_info < (3, 10),
-    reason="get_type_hints fails on Python 3.9 despite future annotations",
-)
 @pytest.mark.parametrize(
     "cls",
     [

@@ -27,7 +27,7 @@ def check_mode(
     if value == "0" or value.lower() == "false":
         value = False  # type: ignore[assignment]
     if value not in ALLOWED:
-        raise ValueError("%s option can be only one of: %s" % (opt_str, ALLOWED_FOR_PRINT))
+        raise ValueError("{} option can be only one of: {}".format(opt_str, ALLOWED_FOR_PRINT))
     setattr(namespace or parser.values, option.dest, value)  # type: ignore[attr-defined]
 
 

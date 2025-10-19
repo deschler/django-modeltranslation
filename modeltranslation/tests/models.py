@@ -160,7 +160,7 @@ class CustomThroughModel(models.Model):
 
     @property
     def test_property(self):
-        return "%s_%s" % (self.__class__.__name__, self.rel_1_id)
+        return "{}_{}".format(self.__class__.__name__, self.rel_1_id)
 
     def test_method(self):
         return self.rel_1_id + 1

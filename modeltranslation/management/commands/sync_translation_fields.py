@@ -82,7 +82,7 @@ class Command(BaseCommand):
         for model in models:
             db_table = model._meta.db_table
             model_name = model._meta.model_name
-            model_full_name = "%s.%s" % (model._meta.app_label, model_name)
+            model_full_name = "{}.{}".format(model._meta.app_label, model_name)
             opts = translator.get_options_for_model(model)
             for field_name, fields in opts.local_fields.items():
                 # Take `db_column` attribute into account
@@ -144,7 +144,7 @@ class Command(BaseCommand):
             col_type = f.db_type(connection=connection)
             field_sql = [style.SQL_FIELD(qn(f.column)), style.SQL_COLTYPE(col_type)]  # type: ignore[arg-type]
             # column creation
-            stmt = "ALTER TABLE %s ADD COLUMN %s" % (qn(db_table), " ".join(field_sql))
+            stmt = "ALTER TABLE {} ADD COLUMN {}".format(qn(db_table), " ".join(field_sql))
             if not f.null:
                 stmt += " " + style.SQL_KEYWORD("NOT NULL")
             sql_output.append(stmt + ";")

@@ -3,7 +3,8 @@ from __future__ import annotations
 from textwrap import dedent
 from copy import deepcopy
 from functools import partial
-from typing import Any, Callable, ClassVar, cast
+from typing import Any, ClassVar, cast
+from collections.abc import Callable
 from collections.abc import Collection, Iterable, Sequence
 
 from django.core.exceptions import ImproperlyConfigured
@@ -187,7 +188,7 @@ class TranslationOptions(metaclass=FieldsAggregationMetaClass):
     def __str__(self) -> str:
         local = tuple(self.local_fields.keys())
         inherited = tuple(set(self.all_fields.keys()) - set(local))
-        return "%s: %s + %s" % (self.__class__.__name__, local, inherited)
+        return "{}: {} + {}".format(self.__class__.__name__, local, inherited)
 
 
 class MultilingualOptions(options.Options):
@@ -256,7 +257,7 @@ def patch_manager_class(manager):
             def deconstruct(self):
                 return (
                     False,  # as_manager
-                    "%s.%s" % (self._old_module, self._old_class),  # manager_class
+                    "{}.{}".format(self._old_module, self._old_class),  # manager_class
                     None,  # qs_class
                     self._constructor_args[0],  # args
                     self._constructor_args[1],  # kwargs

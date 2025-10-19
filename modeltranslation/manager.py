@@ -117,7 +117,7 @@ def append_lookup_key(model: type[Model], lookup_key: str) -> set[str]:
             rest = append_lookup_key(transmodel, pieces[1])
             fields = {"__".join(pr) for pr in itertools.product(fields, rest)}
         else:
-            fields = {"%s__%s" % (f, pieces[1]) for f in fields}
+            fields = {"{}__{}".format(f, pieces[1]) for f in fields}
     return fields
 
 
