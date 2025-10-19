@@ -198,7 +198,7 @@ class TranslationField:
                 self.remote_field.related_name = "%s_rel_+" % self.name
             elif is_hidden(self.remote_field):
                 # Even if the backwards relation is disabled, django internally uses it, need to use a language scoped related_name
-                self.remote_field.related_name = "_%s_%s_+" % (
+                self.remote_field.related_name = "_{}_{}_+".format(
                     self.model.__name__.lower(),
                     self.name,
                 )
@@ -210,7 +210,7 @@ class TranslationField:
                         self.related_query_name(), self.language
                     )
                     self.related_query_name = lambda: loc_related_query_name
-                    self.remote_field.related_name = "%s_set" % (
+                    self.remote_field.related_name = "{}_set".format(
                         build_localized_fieldname(self.model.__name__.lower(), language),
                     )
                 else:

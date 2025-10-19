@@ -1,15 +1,12 @@
 from __future__ import annotations
 
-import sys
 from typing import Literal, TypeVar, Union
 
 from django.contrib import admin
 from django.contrib.admin.options import BaseModelAdmin
 
-if sys.version_info >= (3, 11):
-    from typing import Self, TypeAlias  # noqa: F401
-else:
-    from typing_extensions import Self, TypeAlias  # noqa: F401
+from typing_extensions import Self  # noqa: F401
+from typing import TypeAlias
 
 AutoPopulate: TypeAlias = "bool | Literal['all', 'default', 'required']"
 

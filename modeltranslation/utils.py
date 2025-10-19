@@ -65,7 +65,7 @@ def build_lang(lang: str) -> str:
 
 
 def build_localized_fieldname(field_name: str, lang: str) -> str:
-    return str("%s_%s" % (field_name, build_lang(lang)))
+    return str("{}_{}".format(field_name, build_lang(lang)))
 
 
 def _build_localized_verbose_name(verbose_name: Any, lang: str) -> str:
@@ -79,7 +79,7 @@ build_localized_verbose_name = lazy(_build_localized_verbose_name, str)
 
 def _join_css_class(bits: list[str], offset: int) -> str:
     if "-".join(bits[-offset:]) in settings.AVAILABLE_LANGUAGES + ["en-us", "ind"]:
-        return "%s-%s" % ("_".join(bits[: len(bits) - offset]), "_".join(bits[-offset:]))
+        return "{}-{}".format("_".join(bits[: len(bits) - offset]), "_".join(bits[-offset:]))
     return ""
 
 
@@ -112,10 +112,10 @@ def build_css_class(localized_fieldname: str, prefix: str = ""):
             # 'foo_bar_de' --> 'foo_bar-de',
             # 'foo_bar_baz_de' --> 'foo_bar_baz-de'
             css_class = _join_css_class(bits, 1)
-    return "%s-%s" % (prefix, css_class) if prefix else css_class
+    return "{}-{}".format(prefix, css_class) if prefix else css_class
 
 
-def unique(seq: Iterable[_T]) -> Generator[_T, None, None]:
+def unique(seq: Iterable[_T]) -> Generator[_T]:
     """
     Returns a generator yielding unique sequence members in order
 

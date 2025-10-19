@@ -81,7 +81,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin[_ModelT]):
             if field.required:
                 field.required = False
                 field.blank = True
-                self._orig_was_required["%s.%s" % (db_field.model._meta, db_field.name)] = True
+                self._orig_was_required["{}.{}".format(db_field.model._meta, db_field.name)] = True
 
         # For every localized field copy the widget from the original field
         # and add a css class to identify a modeltranslation widget.
@@ -131,7 +131,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin[_ModelT]):
                 # Add another css class to identify a default modeltranslation widget
                 css_classes.append("mt-default")
                 if orig_formfield.required or self._orig_was_required.get(
-                    "%s.%s" % (orig_field.model._meta, orig_field.name)
+                    "{}.{}".format(orig_field.model._meta, orig_field.name)
                 ):
                     # In case the original form field was required, make the
                     # default translation field required instead.

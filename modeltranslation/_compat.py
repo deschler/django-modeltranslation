@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
+from collections.abc import Callable
 
 import django
-from typing import Iterable
-from typing import Optional
+from collections.abc import Iterable
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet
@@ -32,7 +32,7 @@ def clear_ForeignObjectRel_caches(field: ForeignObjectRel):
 
 def build_refresh_from_db(
     old_refresh_from_db: Callable[
-        [Any, Optional[str], Optional[Iterable[str]], QuerySet[Any] | None], None
+        [Any, str | None, Iterable[str] | None, QuerySet[Any] | None], None
     ],
 ):
     from modeltranslation.manager import append_translated
@@ -57,7 +57,7 @@ if _django_version <= (5, 0):
 
     # Django versions below 5.1 do not have `from_queryset` argument.
     def build_refresh_from_db(  # type: ignore[misc]
-        old_refresh_from_db: Callable[[Any, Optional[str], Optional[Iterable[str]]], None],
+        old_refresh_from_db: Callable[[Any, str | None, Iterable[str] | None], None],
     ):
         from modeltranslation.manager import append_translated
 
