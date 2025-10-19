@@ -11,17 +11,18 @@ maintainers = [
     { name = "Sergiy Tereshchenko", email = "serg.partizan+modeltranslation@gmail.com" },
 ]
 license = "BSD-3-Clause"
-requires-python = "<4,>=3.9"
+requires-python = "<4,>=3.10"
 dependencies = [
-    "Django>=4.2",
-    "typing-extensions>=4.0.1; python_version < \"3.11\"",
+    "Django>=5.1",
+    "typing-extensions>=4.0.1",
 ]
 classifiers = [
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Operating System :: OS Independent",
     "Environment :: Web Environment",
     "Intended Audience :: Developers",
@@ -43,8 +44,8 @@ dev = [
     "pytest",
     "pytest-sugar",
     "pytest-django",
-    "django-stubs<6.0.0,>=5.0.2",
-    "mypy<1.15",
+    "django-stubs<6.0.0,>=5.1.0",
+    "mypy",
     "build",
     "pillow",
 ]
@@ -52,7 +53,7 @@ lsp = ["python-lsp-server[rope]", "pylsp-mypy"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py39"
+target-version = "py310"
 [tool.ruff.lint]
 ignore = [
     "E501", # line length is handled by formatter
@@ -68,7 +69,7 @@ extend-generics = [
 ]
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.10"
 incremental = true
 warn_unused_ignores = true
 warn_redundant_casts = true
