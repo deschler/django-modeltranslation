@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.19.18](https://github.com/deschler/django-modeltranslation/compare/v0.19.17...v0.19.18) (2025-10-19)
+
+
+### Features
+
+* Drop python 3.9; add Python 3.14 ([7a33372](https://github.com/deschler/django-modeltranslation/commit/7a333727619925ba8b35c61889f028cd4a984c1f))
+
 ## [0.19.17](https://github.com/deschler/django-modeltranslation/compare/v0.19.16...v0.19.17) (2025-09-14)
 
 
