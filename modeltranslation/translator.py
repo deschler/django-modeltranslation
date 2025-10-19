@@ -356,7 +356,7 @@ def patch_constraints(model: type[Model], opts: TranslationOptions) -> None:
                             yield new_constraint
 
     model._meta.unique_together += tuple(add_unique_together())  # type: ignore[operator]
-    model._meta.constraints += tuple(add_constraints())
+    model._meta.constraints += tuple(add_constraints())  # type: ignore[operator]
     # `unique_together` needs `original_attrs` to be set, for this changes to appear in migrations.
     for attr_name in ("unique_together",):
         if value := getattr(model._meta, attr_name):

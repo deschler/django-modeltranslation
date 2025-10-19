@@ -47,7 +47,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin[_ModelT]):
     ) -> _FieldsetSpec | None:
         # Take custom modelform fields option into account
         if not self.fields and hasattr(self.form, "_meta") and self.form._meta.fields:
-            self.fields = self.form._meta.fields  # type: ignore[misc]
+            self.fields = self.form._meta.fields  # type: ignore[assignment,misc]
         # takes into account non-standard add_fieldsets attribute used by UserAdmin
         fieldsets = (
             self.add_fieldsets
@@ -57,14 +57,14 @@ class TranslationBaseModelAdmin(BaseModelAdmin[_ModelT]):
         if fieldsets:
             return self._patch_fieldsets(fieldsets)
         elif self.fields:
-            return [(None, {"fields": self.replace_orig_field(self.get_fields(request, obj))})]
+            return [(None, {"fields": self.replace_orig_field(self.get_fields(request, obj))})]  # type: ignore[typeddict-item]
         return None
 
     def _patch_fieldsets(self, fieldsets: _FieldsetSpec) -> _FieldsetSpec:
         fieldsets_new = list(fieldsets)
         for name, dct in fieldsets:
             if "fields" in dct:
-                dct["fields"] = self.replace_orig_field(dct["fields"])
+                dct["fields"] = self.replace_orig_field(dct["fields"])  # type: ignore[typeddict-item]
         return fieldsets_new
 
     def formfield_for_dbfield(
