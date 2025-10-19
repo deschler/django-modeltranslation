@@ -13,7 +13,7 @@ jobs:
       - name: Set up Python
         uses: astral-sh/setup-uv@v5
         with:
-          python-version: "3.10"
+          python-version: "3.14"
       - name: Build artifacts
         run: |
           uvx --from build python -m build --installer uv
