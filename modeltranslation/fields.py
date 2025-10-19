@@ -85,7 +85,7 @@ def create_translation_field(model: type[Model], field_name: str, lang: str, emp
 
 
 def field_factory(baseclass: type[fields.Field]) -> type[TranslationField]:
-    class TranslationFieldSpecific(TranslationField, baseclass):  # type: ignore[valid-type, misc]
+    class TranslationFieldSpecific(TranslationField, baseclass):  # type: ignore[valid-type]
         pass
 
     # Reflect baseclass name of returned subclass
