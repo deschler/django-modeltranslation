@@ -444,6 +444,16 @@ def _delete_cache_fields(model: type[Model]) -> None:
         model._meta._expire_cache()
 
 
+def _delete_cached_col(model: type[Model]) -> None:
+    """
+    In some cases we need to clean up `cached_col` cached_property on fields.
+
+    Refs https://github.com/deschler/django-modeltranslation/issues/593
+    """
+    for field in model._meta.get_fields():
+        field.__dict__.pop("cached_col", None)
+
+
 def populate_translation_fields(sender: type[Model], kwargs: Any):
     """
     When models are created or loaded from fixtures, replicates values
@@ -585,6 +595,8 @@ class Translator:
         # Mark the object explicitly as registered -- registry caches
         # options of all models, registered or not.
         opts.registered = True
+
+        _delete_cached_col(model)
 
         # Add translation fields to the model.
         if model._meta.proxy:
