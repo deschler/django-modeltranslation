@@ -376,7 +376,9 @@ class MultilingualQuerySet(QuerySet[_T]):
 
     update.alters_data = True
 
-    def _update(self, values: list[tuple[Field, type[Model] | None, Any]], returning_fields=None) -> CursorWrapper:
+    def _update(
+        self, values: list[tuple[Field, type[Model] | None, Any]], returning_fields=None
+    ) -> CursorWrapper:
         """
         This method is called in .save() method to update an existing record.
         Here we force to update translation fields as well if the original
@@ -395,10 +397,10 @@ class MultilingualQuerySet(QuerySet[_T]):
                 translation_values.append((translatable_field, model, value))
 
         values += translation_values
-        
+
         if _django_version < (6, 0):
             return super()._update(values)
-        
+
         return super()._update(values, returning_fields)
 
     # This method was not present in django-linguo
