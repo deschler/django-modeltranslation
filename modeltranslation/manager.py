@@ -24,6 +24,7 @@ from django.db.models.query import QuerySet, ValuesIterable
 from django.db.models.utils import create_namedtuple_class
 from django.utils.tree import Node
 
+from modeltranslation._compat import _django_version
 from modeltranslation._typing import Self, AutoPopulate
 from modeltranslation.fields import TranslationField
 from modeltranslation.thread_context import auto_populate_mode
@@ -394,6 +395,10 @@ class MultilingualQuerySet(QuerySet[_T]):
                 translation_values.append((translatable_field, model, value))
 
         values += translation_values
+        
+        if _django_version < (6, 0):
+            return super()._update(values)
+        
         return super()._update(values, returning_fields)
 
     # This method was not present in django-linguo
