@@ -82,7 +82,19 @@ class NonTranslated(models.Model):
     title = models.CharField(gettext_lazy("title"), max_length=255)
 
 
-class ForeignKeyModel(models.Model):
+class AbstractWithForeignKeyModel(models.Model):
+    test_in_abstract = models.ForeignKey(
+        "tests.TestModel",
+        null=True,
+        related_name="test_fks",
+        on_delete=models.CASCADE,
+    )
+
+    class Meta:
+        abstract = True
+
+
+class ForeignKeyModel(AbstractWithForeignKeyModel, models.Model):
     title = models.CharField(gettext_lazy("title"), max_length=255)
     test = models.ForeignKey(
         TestModel,
@@ -90,7 +102,7 @@ class ForeignKeyModel(models.Model):
         related_name="test_fks",
         on_delete=models.CASCADE,
     )
-    optional = models.ForeignKey(TestModel, blank=True, null=True, on_delete=models.CASCADE)
+    optional = models.ForeignKey("tests.TestModel", blank=True, null=True, on_delete=models.CASCADE)
     hidden = models.ForeignKey(
         TestModel,
         blank=True,

@@ -79,8 +79,18 @@ class FileFieldsModelTranslationOptions(TranslationOptions):
 # ######### Foreign Key / OneToOneField / ManytoManyField testing
 
 
+@register(models.AbstractWithForeignKeyModel)
+class AbstractWithForeignKeyModelTranslationOptions(TranslationOptions):
+    fields = (
+        "test_in_abstract",
+    )
+
+
 @register(models.ForeignKeyModel)
-class ForeignKeyModelTranslationOptions(TranslationOptions):
+class ForeignKeyModelTranslationOptions(
+    AbstractWithForeignKeyModelTranslationOptions,
+    TranslationOptions
+):
     fields = (
         "title",
         "test",
