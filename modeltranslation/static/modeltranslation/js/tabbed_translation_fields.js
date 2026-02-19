@@ -520,10 +520,16 @@ var google, django, gettext;
           .filter(":parents(.tabular)")
           .filter(":parents(.empty-form)"),
       });
-      MainSwitch.init(
-        grouper.groupedTranslations,
-        createTabs(grouper.groupedTranslations)
-      );
+	  
+      // Initalize MainSwitch
+      const tabs = createTabs(grouper.groupedTranslations);
+      MainSwitch.init(grouper.groupedTranslations, tabs);
+      // Set active language as page language
+      const idx = MainSwitch.languages.indexOf(document.documentElement.lang);
+      if (idx >= 0) {
+        MainSwitch.$select.val(idx);
+        MainSwitch.activateTab(tabs);
+      }
 
       // Note: The add another functionality in admin is injected through inline javascript,
       // here we have to run after that (and after all other ready events just to be sure).
