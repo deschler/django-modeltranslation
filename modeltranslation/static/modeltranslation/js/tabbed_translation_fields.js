@@ -520,12 +520,16 @@ var google, django, gettext;
           .filter(":parents(.tabular)")
           .filter(":parents(.empty-form)"),
       });
-	  
-      // Initalize MainSwitch
+      
+      // Initialize MainSwitch
       const tabs = createTabs(grouper.groupedTranslations);
       MainSwitch.init(grouper.groupedTranslations, tabs);
       // Set active language as page language
-      const idx = MainSwitch.languages.indexOf(document.documentElement.lang);
+      let lang = document.documentElement.lang.replace(/-/g, "_");
+      if (lang === "id") {
+        lang = "ind";
+      }
+      const idx = MainSwitch.languages.indexOf(lang);
       if (idx >= 0) {
         MainSwitch.$select.val(idx);
         MainSwitch.activateTab(tabs);
