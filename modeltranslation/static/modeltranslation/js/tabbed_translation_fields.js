@@ -465,10 +465,19 @@ var google, django, gettext;
       });
       return tabs;
     }
+    
+    function getDocumentLang() {
+      let lang = document.documentElement.lang.replace(/-/g, "_");
+      if (lang === "id") {
+        lang = "ind";
+      }
+      return lang
+    }
 
     var MainSwitch = {
       languages: [],
       $select: $("<select id='modeltranslation-main-switch' class='modeltranslation-switch'>"),
+      $document_language: getDocumentLang(),
 
       init: function (groupedTranslations, tabs) {
         var self = this;
@@ -480,19 +489,22 @@ var google, django, gettext;
           });
         });
         $.each(this.languages, function (idx, language) {
+        var isSelected = language.toLowerCase() === self.$document_language.toLowerCase() ? " selected"  : "";
           self.$select.append(
             $(
               '<option value="' +
                 idx +
-                '">' +
+                '"' +
+                isSelected +
+                ">" +
                 language.replace("_", "-") +
                 "</option>"
             )
           );
         });
         this.update(tabs);
+		this.activateTab(tabs);
         selectors["mainHeader"]().append("&nbsp;").append(self.$select);
-
       },
 
       update: function (tabs) {
@@ -520,20 +532,10 @@ var google, django, gettext;
           .filter(":parents(.tabular)")
           .filter(":parents(.empty-form)"),
       });
-      
-      // Initialize MainSwitch
-      const tabs = createTabs(grouper.groupedTranslations);
-      MainSwitch.init(grouper.groupedTranslations, tabs);
-      // Set active language as page language
-      let lang = document.documentElement.lang.replace(/-/g, "_");
-      if (lang === "id") {
-        lang = "ind";
-      }
-      const idx = MainSwitch.languages.indexOf(lang);
-      if (idx >= 0) {
-        MainSwitch.$select.val(idx);
-        MainSwitch.activateTab(tabs);
-      }
+      MainSwitch.init(
+        grouper.groupedTranslations,
+        createTabs(grouper.groupedTranslations)
+      );
 
       // Note: The add another functionality in admin is injected through inline javascript,
       // here we have to run after that (and after all other ready events just to be sure).
