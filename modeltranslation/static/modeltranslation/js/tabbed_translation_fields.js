@@ -4,6 +4,7 @@ var google, django, gettext;
 
 (function () {
   var jQuery = window.jQuery || $ || django.jQuery;
+  const MODELTRANSLATION_AUTO_SELECT_CURRENT_LANGUAGE = window.MODELTRANSLATION_AUTO_SELECT_CURRENT_LANGUAGE ?? true;
 
   /* Add a new selector to jQuery that excludes parent items which match a given selector */
   jQuery.expr[":"].parents = function (a, i, m) {
@@ -476,8 +477,8 @@ var google, django, gettext;
 
     var MainSwitch = {
       languages: [],
+      document_language: getDocumentLang(),
       $select: $("<select id='modeltranslation-main-switch' class='modeltranslation-switch'>"),
-      $document_language: getDocumentLang(),
 
       init: function (groupedTranslations, tabs) {
         var self = this;
@@ -489,7 +490,10 @@ var google, django, gettext;
           });
         });
         $.each(this.languages, function (idx, language) {
-        var isSelected = language.toLowerCase() === self.$document_language.toLowerCase() ? " selected"  : "";
+          var isSelected = MODELTRANSLATION_AUTO_SELECT_CURRENT_LANGUAGE 
+            && language.toLowerCase() === self.document_language.toLowerCase() 
+            ? " selected" 
+            : "";
           self.$select.append(
             $(
               '<option value="' +
@@ -503,7 +507,7 @@ var google, django, gettext;
           );
         });
         this.update(tabs);
-		this.activateTab(tabs);
+        this.activateTab(tabs);
         selectors["mainHeader"]().append("&nbsp;").append(self.$select);
       },
 

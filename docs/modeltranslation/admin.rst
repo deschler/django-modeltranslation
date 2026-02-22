@@ -333,3 +333,21 @@ setting::
 
     class NewsAdmin(TranslationAdmin):
         both_empty_values_fields = ('title', 'text')
+
+
+Admin pages automatic language activation
+-------------
+
+.. versionadded:: 0.20
+
+From this version onward, Modeltranslation in admin pages automatically activates
+to document language instead of first language of the list.
+
+In order to revert back to previous behaviour,
+customize your admin base page (i.e. ``admin/base_site.html``) adding this:
+
+.. code-block:: html
+
+    <script>
+        window.MODELTRANSLATION_AUTO_SELECT_CURRENT_LANGUAGE = false
+    </script>
