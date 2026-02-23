@@ -336,7 +336,7 @@ setting::
 
 
 Admin pages automatic language activation
--------------
+*****************************************
 
 .. versionadded:: 0.20
 

@@ -4,7 +4,6 @@ var google, django, gettext;
 
 (function () {
   var jQuery = window.jQuery || $ || django.jQuery;
-  const MODELTRANSLATION_AUTO_SELECT_CURRENT_LANGUAGE = window.MODELTRANSLATION_AUTO_SELECT_CURRENT_LANGUAGE ?? true;
 
   /* Add a new selector to jQuery that excludes parent items which match a given selector */
   jQuery.expr[":"].parents = function (a, i, m) {
@@ -212,7 +211,7 @@ var google, django, gettext;
         var tabsContainer = $("<div></div>"),
           tabsList = $(`<ul class='${selectors["tabUlClass"]}'></ul>`),
           insertionPoint,
-          activeTab = 0;
+          activeTab = getActiveTabIndex(lang);
         tabsContainer.append(tabsList);
         $.each(lang, function (lang, el) {
           var container = selectors["tabContainer"](el),
@@ -407,7 +406,7 @@ var google, django, gettext;
         var tabsContainer = $("<td></td>"),
           tabsList = $("<ul></ul>"),
           insertionPoint,
-          activeTab = 0;
+          activeTab = getActiveTabIndex(lang);
         tabsContainer.append(tabsList);
 
         $.each(lang, function (lang, el) {
@@ -466,18 +465,9 @@ var google, django, gettext;
       });
       return tabs;
     }
-    
-    function getDocumentLang() {
-      let lang = document.documentElement.lang.replace(/-/g, "_");
-      if (lang === "id") {
-        lang = "ind";
-      }
-      return lang
-    }
 
     var MainSwitch = {
       languages: [],
-      document_language: getDocumentLang(),
       $select: $("<select id='modeltranslation-main-switch' class='modeltranslation-switch'>"),
 
       init: function (groupedTranslations, tabs) {
@@ -490,24 +480,17 @@ var google, django, gettext;
           });
         });
         $.each(this.languages, function (idx, language) {
-          var isSelected = MODELTRANSLATION_AUTO_SELECT_CURRENT_LANGUAGE 
-            && language.toLowerCase() === self.document_language.toLowerCase() 
-            ? " selected" 
-            : "";
           self.$select.append(
             $(
               '<option value="' +
                 idx +
-                '"' +
-                isSelected +
-                ">" +
+                '">' +
                 language.replace("_", "-") +
                 "</option>"
             )
           );
         });
         this.update(tabs);
-        this.activateTab(tabs);
         selectors["mainHeader"]().append("&nbsp;").append(self.$select);
       },
 
@@ -563,3 +546,23 @@ var google, django, gettext;
     }
   });
 })();
+
+
+function getActiveTabIndex($lang) {
+  if (window.MODELTRANSLATION_AUTO_SELECT_CURRENT_LANGUAGE ?? true) {
+    const documentLang = getDocumentLang().toLowerCase();
+    const idx = Object.keys($lang).findIndex(l => l == documentLang);
+    return idx !== -1 ? idx : 0;
+  } else {
+    return 0
+  }
+}
+
+
+function getDocumentLang() {
+  let lang = document.documentElement.lang.replace(/-/g, "_");
+  if (lang === "id") {
+    lang = "ind";
+  }
+  return lang
+}
