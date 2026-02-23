@@ -363,22 +363,29 @@ def patch_constraints(model: type[Model], opts: TranslationOptions) -> None:
         if value := getattr(model._meta, attr_name):
             model._meta.original_attrs[attr_name] = value
 
+
 def patch_indexes(model: type[Model], opts: TranslationOptions) -> None:
     def add_indexes():
         for idx in model._meta.indexes:
             if isinstance(idx, Index):
-                for field_name in opts.fields:
-                    if field_name in idx.fields:
-                        for translated_name in get_translation_fields(field_name):
-                            new_index = deepcopy(idx)
-                            new_fields = list(new_index.fields)
-                            new_fields[new_fields.index(field_name)] = translated_name
-                            if new_index.name:
-                                new_index.name += f"-{translated_name}"
-                            new_index.fields = new_fields
-                            yield new_index
+                translatable_fields_in_index = []
+                for field_name in idx.fields:
+                    if field_name in opts.fields:
+                        translatable_fields_in_index.append(field_name)
+                if translatable_fields_in_index:
+                    for lang in mt_settings.AVAILABLE_LANGUAGES:
+                        new_index = deepcopy(idx)
+                        new_fields = list(new_index.fields)
+                        for field_name in translatable_fields_in_index:
+                            new_fields[new_fields.index(field_name)] = build_localized_fieldname(
+                                field_name, lang
+                            )
+                        new_index.fields = new_fields
+                        new_index.name += f"-{lang}"
+                        yield new_index
 
     model._meta.indexes += list(add_indexes())  # type: ignore[operator]
+
 
 def delete_mt_init(sender: type[Model], instance: Model, **kwargs: Any) -> None:
     if hasattr(instance, "_mt_init"):
@@ -626,7 +633,7 @@ class Translator:
 
         # Patch constraints to correctly handle new fields
         patch_constraints(model, opts)
-        
+
         # Patch indexes to correctly handle new fields
         patch_indexes(model, opts)
 
