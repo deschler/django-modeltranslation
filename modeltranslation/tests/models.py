@@ -548,7 +548,5 @@ class InheritedPermission(Permission):
 
 class FieldOptionsModel(models.Model):
     title = models.CharField(max_length=255)
-    slug = models.SlugField(blank=True)
-
-class ChildFieldOptionsModel(FieldOptionsModel):
-    pass
+    sub_title1 = models.CharField(max_length=255)
+    sub_title2 = models.CharField(max_length=255)

@@ -97,9 +97,9 @@ class FieldsAggregationMetaClass(type):
             if isinstance(base, FieldsAggregationMetaClass):
                 attrs["fields"].update(base.fields)
         attrs["fields"] = tuple(attrs["fields"])
-        
+
         merged_field_options: dict = {}
-        for base in reversed(bases): # parent first so child overrides
+        for base in reversed(bases):  # parent first so child overrides
             if isinstance(base, FieldsAggregationMetaClass):
                 for field_name, lang_map in getattr(base, "field_options", {}).items():
                     merged_field_options.setdefault(field_name, {}).update(lang_map)

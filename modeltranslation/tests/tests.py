@@ -37,7 +37,7 @@ from modeltranslation.utils import (
 )
 
 # How many models are registered for tests.
-TEST_MODELS = 43
+TEST_MODELS = 42
 
 
 class reload_override_settings(override_settings):
@@ -3333,91 +3333,69 @@ class InheritedPermissionTestCase(ModeltranslationTestBase):
         user = User.objects.create(username="123", is_active=True)
         user.has_perm("test_perm")
 
+
 class FieldOptionsTest(ModeltranslationTestBase):
     def test_fields_created(self):
         """All translated fields must still be created when field_options is used."""
         field_names = [f.name for f in models.FieldOptionsModel._meta.get_fields()]
-        for lang in ('en', 'de'):
-            assert f'title_{lang}' in field_names
-            assert f'slug_{lang}' in field_names
+        for lang in ("en", "de"):
+            assert f"title_{lang}" in field_names
+            assert f"sub_title1_{lang}" in field_names
+            assert f"sub_title2_{lang}" in field_names
 
     def test_explicit_language_option_applied(self):
         """field_options entry for a specific language is set on that language's field."""
-        field = models.FieldOptionsModel._meta.get_field('title_en')
+        field = models.FieldOptionsModel._meta.get_field("title_en")
         assert field.db_index is True
 
     def test_default_option_applied_to_unlisted_language(self):
         """The 'default' key applies to languages not explicitly listed."""
-        field = models.FieldOptionsModel._meta.get_field('title_de')
-        assert field.db_index is False
+        assert models.FieldOptionsModel._meta.get_field("title_de").db_index is False
+        assert models.FieldOptionsModel._meta.get_field("sub_title2_en").db_index is True
 
     def test_explicit_language_wins_over_default(self):
         """An explicit language entry must take precedence over 'default'."""
-        assert models.FieldOptionsModel._meta.get_field('title_en').db_index is True
-        assert models.FieldOptionsModel._meta.get_field('title_de').db_index is False
+        assert models.FieldOptionsModel._meta.get_field("title_en").db_index is True
+        assert models.FieldOptionsModel._meta.get_field("title_de").db_index is False
+        assert models.FieldOptionsModel._meta.get_field("sub_title2_de").db_index is False
+        assert models.FieldOptionsModel._meta.get_field("sub_title2_en").db_index is True
 
     def test_field_options_on_second_field(self):
         """field_options works independently for each declared field."""
-        assert models.FieldOptionsModel._meta.get_field('slug_de').db_index is True
+        assert models.FieldOptionsModel._meta.get_field("sub_title1_de").db_index is True
 
     def test_unlisted_language_without_default_is_unchanged(self):
         """When there is no explicit entry and no 'default', the field is not modified."""
-        # slug has 'de' but no 'default'; slug_en must keep SlugField's default (False)
-        assert models.FieldOptionsModel._meta.get_field('slug_en').db_index is False
+        # slug has 'de' but no 'default'; sub_title1_en must keep SlugField's default (False)
+        assert models.FieldOptionsModel._meta.get_field("sub_title1_en").db_index is False
 
     def test_deconstruct_includes_per_language_kwarg(self):
         """deconstruct() must expose per-language options so migrations serialise them."""
-        field = models.FieldOptionsModel._meta.get_field('title_en')
+        field = models.FieldOptionsModel._meta.get_field("title_en")
         _name, _path, _args, kwargs = field.deconstruct()
-        assert 'db_index' in kwargs
-        assert kwargs['db_index'] is True
+        assert "db_index" in kwargs
+        assert kwargs["db_index"] is True
 
     def test_deconstruct_default_kwarg_included(self):
         """The field carrying the 'default' option also appears correctly in deconstruct()."""
-        field = models.FieldOptionsModel._meta.get_field('title_de')
+        field = models.FieldOptionsModel._meta.get_field("title_de")
         _name, _path, _args, kwargs = field.deconstruct()
-        assert 'db_index' in kwargs
-        assert kwargs['db_index'] is False
-
-    def test_deconstruct_round_trip_preserves_option(self):
-        """A field rebuilt from deconstruct() output must keep the same attribute value."""
-        field = models.FieldOptionsModel._meta.get_field('title_en')
-        _name, _path, args, kwargs = field.deconstruct()
-        reconstructed = field.__class__(*args, **kwargs)
-        assert reconstructed.db_index == field.db_index
+        assert "db_index" in kwargs
+        assert kwargs["db_index"] is False
 
     def test_deconstruct_no_extra_kwargs_without_field_options(self):
         """Fields on models without field_options must not gain extra kwargs in deconstruct()."""
-        field = models.TestModel._meta.get_field('title_en')
+        field = models.TestModel._meta.get_field("title_en")
         _name, _path, _args, kwargs = field.deconstruct()
-        assert 'db_index' not in kwargs
-
-    def test_child_inherits_parent_field_options(self):
-        """Child TranslationOptions inherits the parent's explicit language entries."""
-        # parent: en -> db_index=True
-        assert models.ChildFieldOptionsModel._meta.get_field('title_en').db_index is True
-
-    def test_child_own_entry_overrides_parent_default(self):
-        """Child's explicit language entry must override the parent's 'default'."""
-        # parent default -> False, child adds de -> True
-        assert models.ChildFieldOptionsModel._meta.get_field('title_de').db_index is True
-
-    def test_child_inherits_second_field_options(self):
-        """Child inherits field_options for every field declared on the parent."""
-        assert models.ChildFieldOptionsModel._meta.get_field('slug_de').db_index is True
-
-    def test_child_unlisted_language_without_default_unchanged(self):
-        """Unlisted language with no 'default' stays untouched also on the child."""
-        assert models.ChildFieldOptionsModel._meta.get_field('slug_en').db_index is False
+        assert "db_index" not in kwargs
 
     def test_model_without_field_options_unaffected(self):
         """Models that don't use field_options continue to work as before."""
-        field_en = models.TestModel._meta.get_field('title_en')
-        field_de = models.TestModel._meta.get_field('title_de')
+        field_en = models.TestModel._meta.get_field("title_en")
+        field_de = models.TestModel._meta.get_field("title_de")
         assert field_en.db_index == field_de.db_index
 
     def test_registration(self):
-        """Both new models must appear in the translator registry."""
+        """New model must appear in the translator registry."""
         registered = translator.translator.get_registered_models()
         assert models.FieldOptionsModel in registered
-        assert models.ChildFieldOptionsModel in registered

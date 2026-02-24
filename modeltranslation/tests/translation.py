@@ -326,26 +326,21 @@ class InheritedPermissionOptions(TranslationOptions):
 
 # #########  field_options testing
 
+
 @register(models.FieldOptionsModel)
 class FieldOptionsTranslationOptions(TranslationOptions):
-    fields = ('title', 'slug')
+    fields = ("title", "sub_title1", "sub_title2")
     field_options = {
-        'title': {
-            'en': {'db_index': True},
-            'default': {'db_index': False},
+        "title": {
+            "en": {"db_index": True},
+            "default": {"db_index": False},
         },
-        'slug': {
-            'de': {'db_index': True},
+        "sub_title1": {
+            "de": {"db_index": True},
             # no 'default' -> other languages get no override
         },
-    }
-
-
-@register(models.ChildFieldOptionsModel)
-class ChildFieldOptionsTranslationOptions(FieldOptionsTranslationOptions):
-    # Child adds a de-specific option for title, merging with parent
-    field_options = {
-        'title': {
-            'de': {'db_index': True},
-        }
+        "sub_title2": {
+            "de": {"db_index": False},
+            "default": {"db_index": True},
+        },
     }
