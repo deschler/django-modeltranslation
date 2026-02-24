@@ -45,7 +45,7 @@ class ModelWithIndex(models.Model):
         indexes = [
             models.Index(fields=["title"], name="idx_title"),
             models.Index(fields=["title", "sub_title"], name="idx_title_sub_title"),
-            # models.Index(fields=["sub_title"]),
+            models.Index(fields=["sub_title"]),
             models.Index(fields=["email"], name="idx_email"),
         ]
 

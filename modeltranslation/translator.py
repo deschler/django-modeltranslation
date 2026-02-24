@@ -3,6 +3,7 @@ from __future__ import annotations
 from textwrap import dedent
 from copy import deepcopy
 from functools import partial
+from warnings import warn
 from typing import Any, ClassVar, cast
 from collections.abc import Callable
 from collections.abc import Collection, Iterable, Sequence
@@ -374,14 +375,22 @@ def patch_indexes(model: type[Model], opts: TranslationOptions) -> None:
                         translatable_fields_in_index.append(field_name)
                 if translatable_fields_in_index:
                     for lang in mt_settings.AVAILABLE_LANGUAGES:
-                        new_index = deepcopy(idx)
-                        new_fields = list(new_index.fields)
+                        path, args, kwargs = idx.deconstruct()
+                        new_fields = list(kwargs["fields"])
                         for field_name in translatable_fields_in_index:
                             new_fields[new_fields.index(field_name)] = build_localized_fieldname(
                                 field_name, lang
                             )
-                        new_index.fields = new_fields
-                        new_index.name += f"-{lang}"
+                        kwargs["fields"] = new_fields
+                        kwargs["name"] = idx.name + f"-{lang}"
+                        new_index = Index(*args, **kwargs)
+                        if len(new_index.name) > 30:
+                            warn(
+                                f"Index name '{new_index.name}' exceeds 30 characters and will be regenerated.",
+                                UserWarning,
+                                stacklevel=3,
+                            )
+                            new_index.set_name_with_model(model)
                         yield new_index
 
     model._meta.indexes += list(add_indexes())  # type: ignore[operator]

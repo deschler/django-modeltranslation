@@ -938,14 +938,14 @@ class IndexPatchingTests(ModeltranslationTestBase):
         assert any("en" in n for n in names)
         assert any("de" in n for n in names)
 
-    # def test_unnamed_index_on_translated_field_is_expanded(self):
-    # fields = self._index_fields(models.ModelWithIndex)
-    # assert ("sub_title_en",) in fields
-    # assert ("sub_title_de",) in fields
-    # assert ("sub_title",) in fields
+    def test_unnamed_index_on_translated_field_is_expanded(self):
+        fields = self._index_fields(models.ModelWithIndex)
+        assert ("sub_title_en",) in fields
+        assert ("sub_title_de",) in fields
+        assert ("sub_title",) in fields
 
     def test_total_index_count_is_correct(self):
-        assert len(models.ModelWithIndex._meta.indexes) == 7
+        assert len(models.ModelWithIndex._meta.indexes) == 10
 
 
 class ForeignKeyFieldsTest(ModeltranslationTestBase):
