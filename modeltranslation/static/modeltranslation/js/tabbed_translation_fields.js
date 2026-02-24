@@ -211,7 +211,7 @@ var google, django, gettext;
         var tabsContainer = $("<div></div>"),
           tabsList = $(`<ul class='${selectors["tabUlClass"]}'></ul>`),
           insertionPoint,
-          activeTab = 0;
+          activeTab = getActiveTabIndex(lang);
         tabsContainer.append(tabsList);
         $.each(lang, function (lang, el) {
           var container = selectors["tabContainer"](el),
@@ -406,7 +406,7 @@ var google, django, gettext;
         var tabsContainer = $("<td></td>"),
           tabsList = $("<ul></ul>"),
           insertionPoint,
-          activeTab = 0;
+          activeTab = getActiveTabIndex(lang);
         tabsContainer.append(tabsList);
 
         $.each(lang, function (lang, el) {
@@ -492,7 +492,6 @@ var google, django, gettext;
         });
         this.update(tabs);
         selectors["mainHeader"]().append("&nbsp;").append(self.$select);
-
       },
 
       update: function (tabs) {
@@ -547,3 +546,23 @@ var google, django, gettext;
     }
   });
 })();
+
+
+function getActiveTabIndex($lang) {
+  if (window.MODELTRANSLATION_AUTO_SELECT_CURRENT_LANGUAGE ?? true) {
+    const documentLang = getDocumentLang().toLowerCase();
+    const idx = Object.keys($lang).findIndex(l => l == documentLang);
+    return idx !== -1 ? idx : 0;
+  } else {
+    return 0
+  }
+}
+
+
+function getDocumentLang() {
+  let lang = document.documentElement.lang.replace(/-/g, "_");
+  if (lang === "id") {
+    lang = "ind";
+  }
+  return lang
+}
