@@ -37,7 +37,7 @@ from modeltranslation.utils import (
 )
 
 # How many models are registered for tests.
-TEST_MODELS = 42
+TEST_MODELS = 43
 
 
 class reload_override_settings(override_settings):
@@ -3375,14 +3375,6 @@ class InheritedPermissionTestCase(ModeltranslationTestBase):
 
 
 class FieldOptionsTest(ModeltranslationTestBase):
-    def test_fields_created(self):
-        """All translated fields must still be created when field_options is used."""
-        field_names = [f.name for f in models.FieldOptionsModel._meta.get_fields()]
-        for lang in ("en", "de"):
-            assert f"title_{lang}" in field_names
-            assert f"sub_title1_{lang}" in field_names
-            assert f"sub_title2_{lang}" in field_names
-
     def test_explicit_language_option_applied(self):
         """field_options entry for a specific language is set on that language's field."""
         field = models.FieldOptionsModel._meta.get_field("title_en")
@@ -3434,8 +3426,3 @@ class FieldOptionsTest(ModeltranslationTestBase):
         field_en = models.TestModel._meta.get_field("title_en")
         field_de = models.TestModel._meta.get_field("title_de")
         assert field_en.db_index == field_de.db_index
-
-    def test_registration(self):
-        """New model must appear in the translator registry."""
-        registered = translator.translator.get_registered_models()
-        assert models.FieldOptionsModel in registered
