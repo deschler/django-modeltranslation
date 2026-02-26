@@ -36,6 +36,20 @@ class ModelWithConstraint(models.Model):
         ]
 
 
+class ModelWithIndex(models.Model):
+    title = models.CharField(max_length=255)
+    sub_title = models.CharField(max_length=255)
+    email = models.EmailField(blank=True, null=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["title"], name="idx_title"),
+            models.Index(fields=["title", "sub_title"], name="idx_title_sub_title"),
+            models.Index(fields=["sub_title"]),
+            models.Index(fields=["email"], name="idx_email"),
+        ]
+
+
 # ######### Proxy model testing
 
 

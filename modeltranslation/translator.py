@@ -3,6 +3,7 @@ from __future__ import annotations
 from textwrap import dedent
 from copy import deepcopy
 from functools import partial
+from warnings import warn
 from typing import Any, ClassVar, cast
 from collections.abc import Callable
 from collections.abc import Collection, Iterable, Sequence
@@ -17,7 +18,7 @@ from django.db.models import (
     OneToOneField,
     options,
 )
-from django.db.models import UniqueConstraint
+from django.db.models import Index, UniqueConstraint
 from django.db.models.base import ModelBase
 from django.db.models.signals import post_init
 from django.utils.functional import cached_property
@@ -364,6 +365,37 @@ def patch_constraints(model: type[Model], opts: TranslationOptions) -> None:
             model._meta.original_attrs[attr_name] = value
 
 
+def patch_indexes(model: type[Model], opts: TranslationOptions) -> None:
+    def add_indexes():
+        for idx in model._meta.indexes:
+            if isinstance(idx, Index):
+                translatable_fields_in_index = []
+                for field_name in idx.fields:
+                    if field_name in opts.fields:
+                        translatable_fields_in_index.append(field_name)
+                if translatable_fields_in_index:
+                    for lang in mt_settings.AVAILABLE_LANGUAGES:
+                        path, args, kwargs = idx.deconstruct()
+                        new_fields = list(kwargs["fields"])
+                        for field_name in translatable_fields_in_index:
+                            new_fields[new_fields.index(field_name)] = build_localized_fieldname(
+                                field_name, lang
+                            )
+                        kwargs["fields"] = new_fields
+                        kwargs["name"] = idx.name + f"-{lang}"
+                        new_index = Index(*args, **kwargs)
+                        if len(new_index.name) > 30:
+                            warn(
+                                f"Index name '{new_index.name}' exceeds 30 characters and will be regenerated.",
+                                UserWarning,
+                                stacklevel=3,
+                            )
+                            new_index.set_name_with_model(model)
+                        yield new_index
+
+    model._meta.indexes += list(add_indexes())  # type: ignore[operator]
+
+
 def delete_mt_init(sender: type[Model], instance: Model, **kwargs: Any) -> None:
     if hasattr(instance, "_mt_init"):
         del instance._mt_init
@@ -610,6 +642,9 @@ class Translator:
 
         # Patch constraints to correctly handle new fields
         patch_constraints(model, opts)
+
+        # Patch indexes to correctly handle new fields
+        patch_indexes(model, opts)
 
         # Connect signal for model
         post_init.connect(delete_mt_init, sender=model)
