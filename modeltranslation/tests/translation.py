@@ -27,9 +27,7 @@ class UniqueNullableTranslationOptions(TranslationOptions):
 @register(models.ModelWithConstraint)
 class ModelWithConstrainTranslationOptions(TranslationOptions):
     fields = (
-        "title1",
-        "title2",
-        "title3",
+        "title",
         "sub_title1",
         "sub_title2",
     )

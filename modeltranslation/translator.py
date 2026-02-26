@@ -356,25 +356,37 @@ def patch_constructor(model: type[Model]) -> None:
 def patch_constraints(model: type[Model], opts: TranslationOptions) -> None:
     def add_unique_together():
         for constraint in model._meta.unique_together:
-            for field_name in opts.fields:
-                if field_name in constraint:
-                    for translated_name in get_translation_fields(field_name):
-                        new_constraint = list(constraint)
-                        new_constraint[constraint.index(field_name)] = translated_name
-                        yield new_constraint
+            translatable_fields_in_constraint = []
+            for field_name in constraint:
+                if field_name in opts.fields:
+                    translatable_fields_in_constraint.append(field_name)
+            if translatable_fields_in_constraint:
+                for lang in mt_settings.AVAILABLE_LANGUAGES:
+                    new_constraint = list(constraint)
+                    for field_name in translatable_fields_in_constraint:
+                        new_constraint[new_constraint.index(field_name)] = (
+                            build_localized_fieldname(field_name, lang)
+                        )
+                    yield tuple(new_constraint)
 
     def add_constraints():
         for c in model._meta.constraints:
             if isinstance(c, UniqueConstraint):
-                for field_name in opts.fields:
-                    if field_name in c.fields:
-                        for translated_name in get_translation_fields(field_name):
-                            new_constraint = deepcopy(c)
-                            new_fields = list(new_constraint.fields)
-                            new_fields[new_fields.index(field_name)] = translated_name
-                            new_constraint.name += f"-{translated_name}"
-                            new_constraint.fields = new_fields
-                            yield new_constraint
+                translatable_fields_in_constraint = []
+                for field_name in c.fields:
+                    if field_name in opts.fields:
+                        translatable_fields_in_constraint.append(field_name)
+                if translatable_fields_in_constraint:
+                    for lang in mt_settings.AVAILABLE_LANGUAGES:
+                        path, args, kwargs = c.deconstruct()
+                        new_fields = list(kwargs["fields"])
+                        for field_name in translatable_fields_in_constraint:
+                            new_fields[new_fields.index(field_name)] = build_localized_fieldname(
+                                field_name, lang
+                            )
+                        kwargs["fields"] = new_fields
+                        kwargs["name"] = c.name + f"-{lang}"
+                        yield UniqueConstraint(*args, **kwargs)
 
     model._meta.unique_together += tuple(add_unique_together())  # type: ignore[operator]
     model._meta.constraints += tuple(add_constraints())  # type: ignore[operator]

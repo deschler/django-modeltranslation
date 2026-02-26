@@ -16,7 +16,7 @@ from django.core.files.storage import default_storage
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.db import IntegrityError
-from django.db.models import CharField, Count, F, Q, Value
+from django.db.models import CharField, Count, F, Q, UniqueConstraint, Value
 from django.db.models.functions import Cast, Concat
 from django.test import TestCase, TransactionTestCase
 from django.test.utils import override_settings
@@ -906,6 +906,122 @@ class FileFieldsTest(ModeltranslationTestBase):
             assert isinstance(inst.file2, FieldFile)
             assert inst.file.name == "foo"
             assert inst.file2.name == "bar"
+
+
+class ConstraintPatchingTests(ModeltranslationTestBase):
+    def _unique_together(self, model):
+        return list(model._meta.unique_together)
+
+    def _constraint_fields(self, model):
+        return [tuple(c.fields) for c in model._meta.constraints if isinstance(c, UniqueConstraint)]
+
+    def _constraint_names(self, model):
+        return {c.name for c in model._meta.constraints if isinstance(c, UniqueConstraint)}
+
+    def test_unique_together_translated_fields_are_expanded(self):
+        unique_together = self._unique_together(models.ModelWithConstraint)
+        assert ("title", "sub_title1") in unique_together
+        assert ("title_en", "sub_title1_en") in unique_together
+        assert ("title_de", "sub_title1_de") in unique_together
+
+    def test_unique_together_expands_per_language(self):
+        unique_together = self._unique_together(models.ModelWithConstraint)
+        assert ("title_en", "sub_title1_en") in unique_together
+        assert ("title_de", "sub_title1_de") in unique_together
+
+    def test_unique_together_total_count_is_correct(self):
+        # 1 original + 1 per language (en, de)
+        assert len(models.ModelWithConstraint._meta.unique_together) == 3
+
+    def test_single_field_constraint_is_expanded(self):
+        fields = self._constraint_fields(models.ModelWithConstraint)
+        assert ("title",) in fields
+        assert ("title_en",) in fields
+        assert ("title_de",) in fields
+
+    def test_single_field_constraint_names_contain_language_code(self):
+        names = self._constraint_names(models.ModelWithConstraint)
+        assert "unique_sfield-en" in names
+        assert "unique_sfield-de" in names
+
+    def test_multi_field_constraint_both_translated_is_expanded(self):
+        fields = self._constraint_fields(models.ModelWithConstraint)
+        assert ("title", "sub_title2") in fields
+        assert ("title_en", "sub_title2_en") in fields
+        assert ("title_de", "sub_title2_de") in fields
+
+    def test_multi_field_constraint_names_contain_language_code(self):
+        names = self._constraint_names(models.ModelWithConstraint)
+        assert "unique_mfields-en" in names
+        assert "unique_mfields-de" in names
+
+    def test_multi_field_constraint_produces_one_constraint_per_language(self):
+        fields = self._constraint_fields(models.ModelWithConstraint)
+        assert ("title_en", "sub_title2_de") not in fields
+        assert ("title_de", "sub_title2_en") not in fields
+
+    def test_partial_translated_constraint_is_expanded(self):
+        fields = self._constraint_fields(models.ModelWithConstraint)
+        assert ("title", "email") in fields
+        assert ("title_en", "email") in fields
+        assert ("title_de", "email") in fields
+
+    def test_partial_translated_constraint_non_translated_field_is_unchanged(self):
+        fields = self._constraint_fields(models.ModelWithConstraint)
+        assert ("title_en", "email_en") not in fields
+        assert ("title_de", "email_de") not in fields
+
+    def test_partial_translated_constraint_names_contain_language_code(self):
+        names = self._constraint_names(models.ModelWithConstraint)
+        assert "unique_partfield-en" in names
+        assert "unique_partfield-de" in names
+
+    def test_total_constraint_count_is_correct(self):
+        # unique_sfield:    1 original + 2 languages = 3
+        # unique_mfields:   1 original + 2 languages = 3
+        # unique_partfield: 1 original + 2 languages = 3
+        # total = 9
+        assert len(models.ModelWithConstraint._meta.constraints) == 9
+
+
+class IndexPatchingTests(ModeltranslationTestBase):
+    def _index_fields(self, model):
+        return [tuple(idx.fields) for idx in model._meta.indexes]
+
+    def _index_names(self, model):
+        return {idx.name for idx in model._meta.indexes if idx.name}
+
+    def test_translated_field_index_is_expanded(self):
+        fields = self._index_fields(models.ModelWithIndex)
+        assert ("title",) in fields
+        assert ("title_en",) in fields
+        assert ("title_de",) in fields
+
+    def test_multi_field_index_both_translated_is_expanded(self):
+        fields = self._index_fields(models.ModelWithIndex)
+        assert ("title", "sub_title") in fields
+        assert ("title_en", "sub_title_en") in fields
+        assert ("title_de", "sub_title_de") in fields
+
+    def test_non_translated_field_index_is_unchanged(self):
+        fields = self._index_fields(models.ModelWithIndex)
+        names = self._index_names(models.ModelWithIndex)
+        assert ("email",) in fields
+        assert "idx_email" in names
+
+    def test_expanded_index_names_contain_language_code(self):
+        names = self._index_names(models.ModelWithIndex)
+        assert any("en" in n for n in names)
+        assert any("de" in n for n in names)
+
+    def test_unnamed_index_on_translated_field_is_expanded(self):
+        fields = self._index_fields(models.ModelWithIndex)
+        assert ("sub_title_en",) in fields
+        assert ("sub_title_de",) in fields
+        assert ("sub_title",) in fields
+
+    def test_total_index_count_is_correct(self):
+        assert len(models.ModelWithIndex._meta.indexes) == 10
 
 
 class ForeignKeyFieldsTest(ModeltranslationTestBase):
