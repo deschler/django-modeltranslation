@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("auth", "0013_group_name_de_group_name_en"),
+        ("auth", "0001_initial"),
     ]
 
     operations = [
