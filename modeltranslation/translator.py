@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from textwrap import dedent
-from copy import deepcopy
 from functools import partial
 from warnings import warn
 from typing import Any, ClassVar, cast
@@ -23,7 +22,6 @@ from django.db.models.base import ModelBase
 from django.db.models.signals import post_init
 from django.utils.functional import cached_property
 
-from modeltranslation.utils import get_translation_fields
 from modeltranslation import settings as mt_settings
 from modeltranslation.fields import (
     NONE,
