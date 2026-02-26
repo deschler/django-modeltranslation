@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.19.19](https://github.com/deschler/django-modeltranslation/compare/v0.19.18...v0.19.19) (2025-12-15)
+
+
+### Bug Fixes
+
+* Add  returning_fields argument  to  MultilingualQuerySet._update method for Django 6.0 compatibility ([#803](https://github.com/deschler/django-modeltranslation/issues/803)) ([36187e7](https://github.com/deschler/django-modeltranslation/commit/36187e778baef6fa2e1ca13328e704cc170cba06))
+
 ## [0.19.18](https://github.com/deschler/django-modeltranslation/compare/v0.19.17...v0.19.18) (2025-10-19)
 
 

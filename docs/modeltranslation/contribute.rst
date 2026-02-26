@@ -21,17 +21,37 @@ Use [Convential commits](https://www.conventionalcommits.org/en/v1.0.0/) for com
     `help.github.com`_ for details).
 
 
+Contributing LLM-generated Code
+*******************************
+
+Using LLM is generally discouraged. But if you really want to, doulbe check everything,
+make sure you understand the changes and test it yourself.
+
+PR must clearly state that LLM was involved in writing the code.
+
+Use the following commits to mark LLM-generated code.
+
+.. code-block:: console
+
+    git commit --author 'Your Model Name <model@privider.example.com>'
+
+
+And if you change generated code, commit it as yourself later.
+
 Coding Style
 ************
 
 Please make sure that your code follows the `PEP 8`_ style guide. The only
 exception we make is to allow a maximum line length of 100. Furthermore
 your code has to validate against `ruff`_. It is recommended to use
-`ruff`_ which combines all the checks, and `ruff format` for code formatting.
+`ruff`_ which combines all the checks, and ``ruff format`` for code formatting.
 
 .. code-block:: console
 
     $ make lint
+
+We have ``.pre-commit-config.yml`` in place, and you can use ``pre-commit install``
+to add it to your git hooks.
 
 The ``# noqa`` marks for `ruff`_ should be used sparsely.
 
