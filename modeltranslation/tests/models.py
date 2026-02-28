@@ -23,16 +23,28 @@ class UniqueNullableModel(models.Model):
 
 
 class ModelWithConstraint(models.Model):
-    title = models.CharField(max_length=255)
-    sub_title = models.CharField(max_length=255)
+    title1 = models.CharField(max_length=255)
+    title2 = models.CharField(max_length=255)
+    title3 = models.CharField(max_length=255)
+    sub_title1 = models.CharField(max_length=255)
+    sub_title2 = models.CharField(max_length=255)
+    email = models.EmailField(blank=True, null=True)
 
     class Meta:
-        unique_together = (("title", "sub_title"),)
+        unique_together = (("title1", "sub_title1"),)
         constraints = [
             models.UniqueConstraint(
-                fields=["title", "sub_title"],
-                name="unique_fields",
-            )
+                fields=["title2"],
+                name="unique_sfield",
+            ),
+            models.UniqueConstraint(
+                fields=["title3", "sub_title2"],
+                name="unique_mfields",
+            ),
+            models.UniqueConstraint(
+                fields=["title3", "email"],
+                name="unique_partfield",
+            ),
         ]
 
 

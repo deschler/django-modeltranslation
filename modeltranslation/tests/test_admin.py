@@ -49,9 +49,17 @@ class TranslationAdminTest(TestCase):
         ma = admin.TranslationAdmin(models.ModelWithConstraint, self.site)
 
         assert tuple(ma.get_form(self.request).base_fields.keys()) == (
-            "title",
-            "sub_title_de",
-            "sub_title_en",
+            "title1_de",
+            "title1_en",
+            "title2_de",
+            "title2_en",
+            "title3_de",
+            "title3_en",
+            "sub_title1_de",
+            "sub_title1_en",
+            "sub_title2_de",
+            "sub_title2_en",
+            "email",
         )
 
     def test_default_fieldsets(self):
