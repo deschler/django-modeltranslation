@@ -550,8 +550,17 @@ class ModelY(AbstractModelY):
     pass
 
 
-# Non-abstract base models whose Manager is not allowed to be overwritten
+# #########  Non-abstract base models whose Manager is not allowed to be overwritten
 
 
 class InheritedPermission(Permission):
     translated_var = models.CharField(max_length=255)
+
+
+# #########  field_options testing
+
+
+class FieldOptionsModel(models.Model):
+    title = models.CharField(max_length=255)
+    sub_title1 = models.CharField(max_length=255)
+    sub_title2 = models.CharField(max_length=255)

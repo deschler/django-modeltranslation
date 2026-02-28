@@ -327,3 +327,25 @@ class GroupTranslationOptions(TranslationOptions):
 class InheritedPermissionOptions(TranslationOptions):
     fields = ("translated_var",)
     required_languages = [x[0] for x in settings.LANGUAGES]
+
+
+# #########  field_options testing
+
+
+@register(models.FieldOptionsModel)
+class FieldOptionsTranslationOptions(TranslationOptions):
+    fields = ("title", "sub_title1", "sub_title2")
+    field_options = {
+        "title": {
+            "en": {"db_index": True},
+            "default": {"db_index": False},
+        },
+        "sub_title1": {
+            "de": {"db_index": True},
+            # no 'default' -> other languages get no override
+        },
+        "sub_title2": {
+            "de": {"db_index": False},
+            "default": {"db_index": True},
+        },
+    }

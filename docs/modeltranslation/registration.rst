@@ -295,6 +295,76 @@ To set required_languages for all models, use `MODELTRANSLATION_REQUIRED_LANGUAG
 which accepts the same values as `required_languages` class variable.
 
 
+.. _field_options:
+
+Per-Language Field Options (``field_options``)
+==============================================
+
+.. versionadded:: (0.20)
+
+By default, modeltranslation generates one translation field per language by
+cloning the original field.  Some database-level attributes (most notably
+``db_collation``) make linguistic sense only for a specific language, so
+copying the base-field's value to every generated field is semantically
+incorrect.
+
+``field_options`` lets you pass arbitrary keyword arguments to the generated
+field objects on a per-language basis, without having to write manual
+``AlterField`` migrations afterwards.
+
+Basic usage
+-----------
+
+Declare ``field_options`` as a class attribute on your ``TranslationOptions`` subclass::
+
+    class NewsTranslationOptions(TranslationOptions):
+        fields = ('title', 'text')
+        field_options = {
+            'title': {
+                'en': {'db_collation': 'en-x-icu'},
+                'de': {'db_collation': 'de-x-icu'},
+            },
+        }
+
+The ``'default'`` key
+---------------------
+
+If you want the same kwargs for every language except a few, use the special
+``'default'`` key.  It acts as a fallback for any language that does not have
+its own explicit entry::
+
+    field_options = {
+        'title': {
+            'de': {'db_collation': 'de-x-icu'},
+            'default': {'db_collation': 'und-x-icu'},  # all other languages
+        },
+    }
+
+Explicit language entries always win over ``'default'``.
+
+Multiple kwargs
+---------------
+
+Any attribute that can be set on a Django model field after construction is
+accepted.  You can combine several in one entry::
+
+    field_options = {
+        'title': {
+            'de': {
+                'db_collation': 'de-x-icu',
+                'db_comment': 'German title with ICU collation',
+            },
+        },
+    }
+
+Language code format
+--------------------
+
+Language codes in ``field_options`` must match the values in your
+``LANGUAGES`` / ``MODELTRANSLATION_LANGUAGES`` setting exactly (e.g. ``'pt-br'``
+or ``'pt_BR'`` depending on your configuration).
+
+
 ``TranslationOptions`` attributes reference
 -------------------------------------------
 
@@ -343,6 +413,19 @@ Classes inheriting from ``TranslationOptions`` can have following attributes def
 
         required_languages = ('en', 'de')
         required_languages = {'de': ('title','text'), 'default': ('title',)}
+        
+.. attribute:: TranslationOptions.field_options
+
+    Pass arbitrary keyword arguments to the generated field objects
+    on a per-language basis. See :ref:`_field_options`. ::
+
+        field_options = {
+            'title': {
+                'it': {'db_collation': 'it-x-icu'},
+                'en': {'db_collation': 'en-x-icu'},
+                'de': {'db_collation': 'de-x-icu'},
+            }
+        }
 
 
 .. _supported_field_matrix:

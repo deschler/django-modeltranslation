@@ -98,6 +98,17 @@ class FieldsAggregationMetaClass(type):
             if isinstance(base, FieldsAggregationMetaClass):
                 attrs["fields"].update(base.fields)
         attrs["fields"] = tuple(attrs["fields"])
+
+        merged_field_options: dict = {}
+        for base in reversed(bases):  # parent first so child overrides
+            if isinstance(base, FieldsAggregationMetaClass):
+                for field_name, lang_map in getattr(base, "field_options", {}).items():
+                    merged_field_options.setdefault(field_name, {}).update(lang_map)
+        # child class's own declaration wins
+        for field_name, lang_map in attrs.get("field_options", {}).items():
+            merged_field_options.setdefault(field_name, {}).update(lang_map)
+        attrs["field_options"] = merged_field_options
+
         return super().__new__(cls, name, bases, attrs)
 
 
@@ -125,6 +136,7 @@ class TranslationOptions(metaclass=FieldsAggregationMetaClass):
     required_languages: ClassVar[_ListOrTuple[str] | dict[str, _ListOrTuple[str]]] = (
         mt_settings.REQUIRED_LANGUAGES
     )
+    field_options: ClassVar[dict[str, dict[str, dict[str, object]]]] = {}
 
     def __init__(self, model: type[Model]) -> None:
         """
@@ -208,13 +220,20 @@ def add_translation_fields(model: type[Model], opts: TranslationOptions) -> None
     Adds newly created translation fields to the given translation options.
     """
     model_empty_values = getattr(opts, "empty_values", NONE)
+    model_field_options = getattr(opts, "field_options", {})
     for field_name in opts.local_fields.keys():
         field_empty_value = parse_field(model_empty_values, field_name, NONE)
+        per_field_opts = model_field_options.get(field_name, {})
         for lang in mt_settings.AVAILABLE_LANGUAGES:
             # Create a dynamic translation field
             translation_field = create_translation_field(
                 model=model, field_name=field_name, lang=lang, empty_value=field_empty_value
             )
+            # Apply language-specific (or default) kwargs
+            lang_kwargs = per_field_opts.get(lang, per_field_opts.get("default", {}))
+            for attr, value in lang_kwargs.items():
+                setattr(translation_field, attr, value)
+            translation_field._field_options_kwargs = lang_kwargs.copy()
             # Construct the name for the localized field
             localized_field_name = build_localized_fieldname(field_name, lang)
             # Check if the model already has a field by that name

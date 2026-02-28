@@ -342,6 +342,7 @@ class TranslationField:
             kwargs.update({"null": True})
         if "db_column" in kwargs:
             kwargs["db_column"] = self.db_column
+        kwargs.update(getattr(self, "_field_options_kwargs", {}))
         return self.name, path, args, kwargs
 
     def clone(self) -> Self:

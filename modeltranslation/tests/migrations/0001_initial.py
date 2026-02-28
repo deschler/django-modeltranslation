@@ -269,6 +269,38 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
+            name="FieldOptionsModel",
+            fields=[
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=255)),
+                ("title_de", models.CharField(max_length=255, null=True)),
+                (
+                    "title_en",
+                    models.CharField(db_index=True, max_length=255, null=True),
+                ),
+                ("sub_title1", models.CharField(max_length=255)),
+                (
+                    "sub_title1_de",
+                    models.CharField(db_index=True, max_length=255, null=True),
+                ),
+                ("sub_title1_en", models.CharField(max_length=255, null=True)),
+                ("sub_title2", models.CharField(max_length=255)),
+                ("sub_title2_de", models.CharField(max_length=255, null=True)),
+                (
+                    "sub_title2_en",
+                    models.CharField(db_index=True, max_length=255, null=True),
+                ),
+            ],
+        ),
+        migrations.CreateModel(
             name="FileFieldsModel",
             fields=[
                 (
