@@ -31,6 +31,12 @@ class TestIndexPatching:
         assert any("en" in n for n in names)
         assert any("de" in n for n in names)
 
+    def test_unnamed_index_on_translated_field_is_expanded(self):
+        fields = self._index_fields(models.ModelWithIndex)
+        assert ("sub_title_en",) in fields
+        assert ("sub_title_de",) in fields
+        assert ("sub_title",) in fields
+
     def test_indexes_preserves_subclass(self):
         idx_custom = [
             idx for idx in models.ModelWithIndex._meta.indexes if idx.name.startswith("idx_custom")
