@@ -62,12 +62,20 @@ class TestConstraints:
         assert "unique_partfield-en" in names
         assert "unique_partfield-de" in names
 
+    def test_constraints_preserves_subclass(self):
+        constraints_custom = [
+            c
+            for c in models.ModelWithConstraint._meta.constraints
+            if c.name.startswith("unique_custom")
+        ]
+        assert all(type(c) is models.CustomUniqueConstraint for c in constraints_custom)
+
     def test_total_constraint_count_is_correct(self):
         # unique_sfield:    1 original + 2 languages = 3
         # unique_mfields:   1 original + 2 languages = 3
         # unique_partfield: 1 original + 2 languages = 3
-        # total = 9
-        assert len(models.ModelWithConstraint._meta.constraints) == 9
+        # custom:           1 original + 2 languages = 3
+        assert len(models.ModelWithConstraint._meta.constraints) == 12
 
     def _unique_together(self, model):
         return list(model._meta.unique_together)

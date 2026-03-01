@@ -22,10 +22,15 @@ class UniqueNullableModel(models.Model):
     title = models.CharField(null=True, unique=True, max_length=255)
 
 
+class CustomUniqueConstraint(models.UniqueConstraint):
+    pass
+
+
 class ModelWithConstraint(models.Model):
     title1 = models.CharField(max_length=255)
     title2 = models.CharField(max_length=255)
     title3 = models.CharField(max_length=255)
+    title4 = models.CharField(max_length=255)
     sub_title1 = models.CharField(max_length=255)
     sub_title2 = models.CharField(max_length=255)
     email = models.EmailField(blank=True, null=True)
@@ -45,7 +50,15 @@ class ModelWithConstraint(models.Model):
                 fields=["title3", "email"],
                 name="unique_partfield",
             ),
+            CustomUniqueConstraint(
+                fields=["title4", "email"],
+                name="unique_custom",
+            ),
         ]
+
+
+class CustomIndex(models.Index):
+    pass
 
 
 class ModelWithIndex(models.Model):
@@ -59,6 +72,7 @@ class ModelWithIndex(models.Model):
             models.Index(fields=["title", "sub_title"], name="idx_title_sub_title"),
             models.Index(fields=["sub_title"]),
             models.Index(fields=["email"], name="idx_email"),
+            CustomIndex(fields=["title", "email"], name="idx_custom"),
         ]
 
 

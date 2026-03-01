@@ -55,6 +55,8 @@ class TranslationAdminTest(TestCase):
             "title2_en",
             "title3_de",
             "title3_en",
+            "title4_de",
+            "title4_en",
             "sub_title1_de",
             "sub_title1_en",
             "sub_title2_de",

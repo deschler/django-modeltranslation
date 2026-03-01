@@ -384,7 +384,7 @@ def patch_constraints(model: type[Model], opts: TranslationOptions) -> None:
                             )
                         kwargs["fields"] = new_fields
                         kwargs["name"] = c.name + f"-{lang}"
-                        yield UniqueConstraint(*args, **kwargs)
+                        yield c.__class__(*args, **kwargs)
 
     model._meta.unique_together += tuple(add_unique_together())  # type: ignore[operator]
     model._meta.constraints += tuple(add_constraints())  # type: ignore[operator]
@@ -412,7 +412,7 @@ def patch_indexes(model: type[Model], opts: TranslationOptions) -> None:
                             )
                         kwargs["fields"] = new_fields
                         kwargs["name"] = idx.name + f"-{lang}"
-                        new_index = Index(*args, **kwargs)
+                        new_index = idx.__class__(*args, **kwargs)
                         if len(new_index.name) > 30:
                             warn(
                                 f"Index name '{new_index.name}' exceeds 30 characters and will be regenerated.",

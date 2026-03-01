@@ -37,5 +37,16 @@ class TestIndexPatching:
         assert ("sub_title_de",) in fields
         assert ("sub_title",) in fields
 
+    def test_indexes_preserves_subclass(self):
+        idx_custom = [
+            idx for idx in models.ModelWithIndex._meta.indexes if idx.name.startswith("idx_custom")
+        ]
+        assert all(type(idx) is models.CustomIndex for idx in idx_custom)
+
     def test_total_index_count_is_correct(self):
-        assert len(models.ModelWithIndex._meta.indexes) == 10
+        # idx_title:           1 original + 2 languages = 3
+        # idx_title_sub_title: 1 original + 2 languages = 3
+        # sub_title:           1 original + 2 languages = 3
+        # email:               1 original               = 1
+        # custom:              1 original + 2 languages = 3
+        assert len(models.ModelWithIndex._meta.indexes) == 13
