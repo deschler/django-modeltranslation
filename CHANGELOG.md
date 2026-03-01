@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.20.2](https://github.com/deschler/django-modeltranslation/compare/v0.20.1...v0.20.2) (2026-03-01)
+
+
+### Bug Fixes
+
+* Fix issue when subclass of Index or UniqueConstraint is used ([#813](https://github.com/deschler/django-modeltranslation/issues/813)) ([2b75033](https://github.com/deschler/django-modeltranslation/commit/2b7503323816a31c6717547beb3ad973b43e5de6))
+
 ## [0.20.1](https://github.com/deschler/django-modeltranslation/compare/v0.20.0...v0.20.1) (2026-03-01)
 
 ## [0.20.0](https://github.com/deschler/django-modeltranslation/compare/v0.19.19...v0.20.0) (2026-03-01)
