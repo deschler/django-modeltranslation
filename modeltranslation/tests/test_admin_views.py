@@ -5,7 +5,6 @@ from django.test import Client
 from django.urls import reverse
 
 from modeltranslation.tests.models import ModelWithConstraint
-import pytest
 
 
 @pytest.mark.parametrize(
