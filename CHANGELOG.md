@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.20.0](https://github.com/deschler/django-modeltranslation/compare/v0.19.19...v0.20.0) (2026-03-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* Indexes will be recreated. See https://github.com/deschler/django-modeltranslation/pull/811 for details.
+
+### Features
+
+* Add `field_options` to `TranslationOptions` for per-language field kwargs ([#805](https://github.com/deschler/django-modeltranslation/issues/805)) ([#809](https://github.com/deschler/django-modeltranslation/issues/809)) ([5ac1714](https://github.com/deschler/django-modeltranslation/commit/5ac1714774880f42484d6f2cdaca663e8525a9e4))
+* Add support for indexes ([#808](https://github.com/deschler/django-modeltranslation/issues/808)) ([515ff25](https://github.com/deschler/django-modeltranslation/commit/515ff253ee168839df306070d661742d8a7a47fd))
+
+
+### Bug Fixes
+
+* Clean cached_col on model registration ([#795](https://github.com/deschler/django-modeltranslation/issues/795)) ([e63d2c0](https://github.com/deschler/django-modeltranslation/commit/e63d2c0dc02560c4c8ec4a4ac556d517305e5fca)), closes [#593](https://github.com/deschler/django-modeltranslation/issues/593)
+* Fix unique constraints per language ([#811](https://github.com/deschler/django-modeltranslation/issues/811)) ([c49c415](https://github.com/deschler/django-modeltranslation/commit/c49c415c7a340127f632557293a38d65c5ac03c4))
+* Select active language tab based on page language ([#807](https://github.com/deschler/django-modeltranslation/issues/807)) ([9319a77](https://github.com/deschler/django-modeltranslation/commit/9319a77e8ab4579a013b04b462e8985656e75426))
+
 ## [0.19.19](https://github.com/deschler/django-modeltranslation/compare/v0.19.18...v0.19.19) (2025-12-15)
 
 
