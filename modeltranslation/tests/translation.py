@@ -30,6 +30,7 @@ class ModelWithConstrainTranslationOptions(TranslationOptions):
         "title1",
         "title2",
         "title3",
+        "title4",
         "sub_title1",
         "sub_title2",
     )
