@@ -7,7 +7,8 @@ All notable changes to this project will be documented in this file. See [commit
 
 ### ⚠ BREAKING CHANGES
 
-* Indexes will be recreated. See https://github.com/deschler/django-modeltranslation/pull/811 for details.
+* Unique indexes will be recreated. See https://github.com/deschler/django-modeltranslation/pull/811 for details.
+* Migration may fail if you had duplicates in your data. See https://github.com/deschler/django-modeltranslation/pull/811#issuecomment-3979736925
 
 ### Features
 
