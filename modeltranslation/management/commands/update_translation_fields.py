@@ -1,7 +1,7 @@
 from typing import Any
 
 from django.core.management.base import BaseCommand, CommandParser, CommandError
-from django.db.models import F, ManyToManyField, Q
+from django.db.models import F, ManyToManyField, Q, JSONField
 
 from modeltranslation.settings import AVAILABLE_LANGUAGES, DEFAULT_LANGUAGE
 from modeltranslation.translator import translator
@@ -84,6 +84,14 @@ class Command(BaseCommand):
                 # We'll only update fields which do not have an existing value
                 q = Q(**{f"{def_lang_fieldname}__isnull": True})
                 field = model._meta.get_field(field_name)
+                
+                # Add JSON-specific checks only if this is a JSONField
+                if isinstance(field, JSONField):
+                    default_value = field.default() if callable(field.default) else field.default
+                    # Handle both empty dict and list cases
+                    if isinstance(default_value, (dict, list)):
+                        q |= Q(**{def_lang_fieldname: default_value})
+                 
                 if isinstance(field, ManyToManyField):
                     trans_field = getattr(model, def_lang_fieldname)
                     if not trans_field.through.objects.exists():
