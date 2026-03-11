@@ -469,6 +469,7 @@ var google, django, gettext;
     var MainSwitch = {
       languages: [],
       $select: $("<select id='modeltranslation-main-switch' class='modeltranslation-switch'>"),
+
       init: function (languages, tabs) {
         var self = this;
         $.each(languages, function (idx, language) {
