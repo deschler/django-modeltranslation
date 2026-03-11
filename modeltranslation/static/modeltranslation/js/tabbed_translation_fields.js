@@ -503,18 +503,6 @@ var google, django, gettext;
       },
     };
 
-    var getLanguages = function(mtFields) {
-      let languages = [];
-      $.each(mtFields, function (_idx, el) {
-          const ids = $(el).attr("id").split("_");
-          const lang = ids[ids.length - 1];
-          if ($.inArray(lang, languages) < 0) {
-            languages.push(lang);
-          }
-        });
-      return languages;
-    }
-
     if ($("body").hasClass("change-form")) {
       // Group normal fields and fields in (existing) stacked inlines
       var grouper = new TranslationFieldGrouper({
@@ -549,6 +537,19 @@ var google, django, gettext;
         });
       });
     }
+
+    function getLanguages (mtFields) {
+      let languages = [];
+      $.each(mtFields, function (_idx, el) {
+          const ids = $(el).attr("id").split("_");
+          const lang = ids[ids.length - 1];
+          if ($.inArray(lang, languages) < 0) {
+            languages.push(lang);
+          }
+        });
+      return languages;
+    }
+
   });
 })();
 
