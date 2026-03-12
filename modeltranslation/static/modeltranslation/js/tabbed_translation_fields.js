@@ -512,7 +512,7 @@ var google, django, gettext;
           .filter(":parents(.tabular)")
           .filter(":parents(.empty-form)"),
       });
-      var languages = getLanguages($(".mt").filter("input, textarea, select, iframe, div"));
+      var languages = getLanguages($(".mt").filter("input, textarea, select"));
       MainSwitch.init(
         languages,
         createTabs(grouper.groupedTranslations)
