@@ -14,6 +14,7 @@ license = "BSD-3-Clause"
 requires-python = "<4,>=3.10"
 dependencies = [
     "Django>=5.1",
+    "django-stubs-ext<6.0.0,>=5.1.0",
     "typing-extensions>=4.0.1",
 ]
 classifiers = [
