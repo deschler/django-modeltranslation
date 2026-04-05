@@ -470,16 +470,9 @@ var google, django, gettext;
       languages: [],
       $select: $("<select id='modeltranslation-main-switch' class='modeltranslation-switch'>"),
 
-      init: function (groupedTranslations, tabs) {
+      init: function (languages, tabs) {
         var self = this;
-        $.each(groupedTranslations, function (id, languages) {
-          $.each(languages, function (lang) {
-            if ($.inArray(lang, self.languages) < 0) {
-              self.languages.push(lang);
-            }
-          });
-        });
-        $.each(this.languages, function (idx, language) {
+        $.each(languages, function (idx, language) {
           self.$select.append(
             $(
               '<option value="' +
@@ -519,8 +512,9 @@ var google, django, gettext;
           .filter(":parents(.tabular)")
           .filter(":parents(.empty-form)"),
       });
+      var languages = getLanguages($(".mt").filter("input, textarea, select"));
       MainSwitch.init(
-        grouper.groupedTranslations,
+        languages,
         createTabs(grouper.groupedTranslations)
       );
 
@@ -544,6 +538,19 @@ var google, django, gettext;
         });
       });
     }
+
+    function getLanguages (mtFields) {
+      let languages = [];
+      $.each(mtFields, function (_idx, el) {
+          const ids = $(el).attr("id").split("_");
+          const lang = ids[ids.length - 1];
+          if ($.inArray(lang, languages) < 0) {
+            languages.push(lang);
+          }
+        });
+      return languages;
+    }
+
   });
 })();
 
