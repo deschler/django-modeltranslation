@@ -155,6 +155,8 @@ class OtherFieldsModelTranslationOptions(TranslationOptions):
         "datetime",
         "time",
         "json",
+        "json_with_default_dict",
+        "json_with_default_list",
     )
 
 
