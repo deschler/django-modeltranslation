@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.20.3](https://github.com/deschler/django-modeltranslation/compare/v0.20.2...v0.20.3) (2026-04-14)
+
+
+### Bug Fixes
+
+* Collect languages for `MainSwitch` from all modeltranslation fields ([#814](https://github.com/deschler/django-modeltranslation/issues/814)) ([b3a072f](https://github.com/deschler/django-modeltranslation/commit/b3a072fe3fe2b0c6f8ca5c0be26fa31eaa9ebf9b))
+* Fix json fields not being updated using update_translation_fields if they have default value ([#818](https://github.com/deschler/django-modeltranslation/issues/818)) ([c91c059](https://github.com/deschler/django-modeltranslation/commit/c91c0595bee2fa20ae91e5d0fd5c7409e84288b5))
+
 ## [0.20.2](https://github.com/deschler/django-modeltranslation/compare/v0.20.1...v0.20.2) (2026-03-01)
 
 
