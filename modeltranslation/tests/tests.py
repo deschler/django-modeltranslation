@@ -2419,6 +2419,56 @@ class UpdateCommandTest(ModeltranslationTestBase):
         assert instance["json_de"] == {"foo": "bar"}
         assert instance["json_en"] is None
 
+    def test_update_command_with_json_field_with_default_dict(self):
+        """
+        Test that the update_translation_fields command works with JSON fields that have a default dict
+        """
+        instance_pk = models.OtherFieldsModel.objects.create(
+            json_with_default_dict={"foo": "bar"}
+        ).pk
+        models.OtherFieldsModel.objects.all().rewrite(False).update(json_with_default_dict_de={})
+
+        instance = models.OtherFieldsModel.objects.filter(pk=instance_pk).raw_values()[0]
+
+        assert instance["json_with_default_dict"] == {"foo": "bar"}
+        assert instance["json_with_default_dict_de"] == {}
+        assert instance["json_with_default_dict_en"] == {}
+
+        call_command(
+            "update_translation_fields", "tests", model_name="OtherFieldsModel", verbosity=0
+        )
+
+        instance = models.OtherFieldsModel.objects.filter(pk=instance_pk).raw_values()[0]
+
+        assert instance["json_with_default_dict"] == {"foo": "bar"}
+        assert instance["json_with_default_dict_de"] == {"foo": "bar"}
+        assert instance["json_with_default_dict_en"] == {}
+
+    def test_update_command_with_json_field_with_default_list(self):
+        """
+        Test that the update_translation_fields command works with JSON fields that have a default list
+        """
+        instance_pk = models.OtherFieldsModel.objects.create(
+            json_with_default_list=(["foo", "bar"])
+        ).pk
+        models.OtherFieldsModel.objects.all().rewrite(False).update(json_with_default_list_de=[])
+
+        instance = models.OtherFieldsModel.objects.filter(pk=instance_pk).raw_values()[0]
+
+        assert instance["json_with_default_list"] == ["foo", "bar"]
+        assert instance["json_with_default_list_de"] == []
+        assert instance["json_with_default_list_en"] == []
+
+        call_command(
+            "update_translation_fields", "tests", model_name="OtherFieldsModel", verbosity=0
+        )
+
+        instance = models.OtherFieldsModel.objects.filter(pk=instance_pk).raw_values()[0]
+
+        assert instance["json_with_default_list"] == ["foo", "bar"]
+        assert instance["json_with_default_list_de"] == ["foo", "bar"]
+        assert instance["json_with_default_list_en"] == []
+
 
 class TestManager(ModeltranslationTestBase):
     def setUp(self):

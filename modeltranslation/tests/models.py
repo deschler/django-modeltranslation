@@ -231,6 +231,8 @@ class OtherFieldsModel(models.Model):
     time = models.TimeField(blank=True, null=True)
     genericip = models.GenericIPAddressField(blank=True, null=True)
     json = models.JSONField(blank=True, null=True)
+    json_with_default_dict = models.JSONField(default=dict)
+    json_with_default_list = models.JSONField(default=list)
 
 
 class FancyDescriptor:
