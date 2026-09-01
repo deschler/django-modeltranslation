@@ -312,11 +312,9 @@ class MultilingualQuerySet(QuerySet[_T]):
             return q
         if isinstance(q, Node):
             q.children = list(map(self._rewrite_f, q.children))  # type: ignore[arg-type]
-        # Django >= 1.8
-        if hasattr(q, "lhs"):
-            q.lhs = self._rewrite_f(q.lhs)
-        if hasattr(q, "rhs"):
-            q.rhs = self._rewrite_f(q.rhs)
+            return q
+        if hasattr(q, "get_source_expressions") and hasattr(q, "set_source_expressions"):
+            q.set_source_expressions(list(map(self._rewrite_f, q.get_source_expressions())))
         return q
 
     def _rewrite_filter_or_exclude(self, args: Any, kwargs: Any) -> tuple[Any, Any]:
