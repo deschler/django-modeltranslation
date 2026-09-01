@@ -17,7 +17,7 @@ from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.db import IntegrityError
 from django.db.models import CharField, Count, F, Q, Value
-from django.db.models.functions import Cast, Concat
+from django.db.models.functions import Cast, Concat, Length
 from django.test import TestCase, TransactionTestCase
 from django.test.utils import override_settings
 from django.utils.translation import get_language, override, trans_real
@@ -2547,6 +2547,18 @@ class TestManager(ModeltranslationTestBase):
             n = models.ManagerTestModel.objects.all()[0]
             assert n.visits_en == 11
             assert n.visits_de == 22
+
+    def test_update_with_transform(self):
+        """
+        update() should not crash on Transform expressions (e.g. Length()),
+        whose .lhs is a read-only property. Regression test for #819.
+        """
+        models.ManagerTestModel.objects.create(title_en="abc", title_de="de")
+
+        assert "en" == get_language()
+        models.ManagerTestModel.objects.update(visits=Length("title"))
+        n = models.ManagerTestModel.objects.all()[0]
+        assert n.visits_en == 3
 
     def test_order_by(self):
         """Check that field names are rewritten in order_by keys."""
