@@ -2,6 +2,7 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.20.4](https://github.com/deschler/django-modeltranslation/compare/v0.20.3...v0.20.4) (2026-09-03)
 ## [0.20.3](https://github.com/deschler/django-modeltranslation/compare/v0.20.2...v0.20.3) (2026-04-14)
 
 
