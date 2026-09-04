@@ -562,7 +562,7 @@ var google, django, gettext;
     function getLanguages (mtFields) {
       let languages = [];
       $.each(mtFields, function (_idx, el) {
-        $.each($(el).attr("class").split(" "), function (_idx, cls) {
+        $.each(($(el).attr("class") || "").split(" "), function (_idx, cls) {
           if (cls.substring(0, TranslationField.cssPrefix.length) === TranslationField.cssPrefix) {
             var tfield = new TranslationField({ el: el, cls: cls });
             if ($.inArray(tfield.lang, languages) < 0) {

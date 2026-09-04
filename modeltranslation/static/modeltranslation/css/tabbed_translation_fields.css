@@ -49,7 +49,7 @@ backward compatibility:
     align-items: flex-end;
     row-gap: 2px;
 }
-.ui-tabs .ui-tabs-nav li { margin: 0; }
+.ui-tabs .ui-tabs-nav li { margin: 0; float: none; position: static; top: 0; }
 .ui-tabs .ui-tabs-nav li.required { font-weight: bold; }
 .ui-tabs .ui-tabs-nav li a {
     border: 1px solid var(--border-color, #CCCCCC);
