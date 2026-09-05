@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.20.5](https://github.com/deschler/django-modeltranslation/compare/v0.20.4...v0.20.5) (2026-09-05)
+
+### Bug Fixes
+
+* Support dark mode and fix language selector in tabbed translation fields ([#821](https://github.com/deschler/django-modeltranslation/issues/821)) ([e474462](https://github.com/deschler/django-modeltranslation/commit/e47446247a6ab18f6ab7665af3dcacc70e16ef08))
 ## [0.20.4](https://github.com/deschler/django-modeltranslation/compare/v0.20.3...v0.20.4) (2026-09-03)
 ## [0.20.3](https://github.com/deschler/django-modeltranslation/compare/v0.20.2...v0.20.3) (2026-04-14)
 
