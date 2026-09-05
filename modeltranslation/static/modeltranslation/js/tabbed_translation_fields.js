@@ -39,6 +39,17 @@ var google, django, gettext;
 
     const selectors = selectorMapping[detectTemplate()];
 
+    function getLanguageDisplayName(lang) {
+      var langTag = lang.replace("_", "-");
+      var displayLocale = document.documentElement.lang || langTag;
+      try {
+        var name = new Intl.DisplayNames([displayLocale], { type: "language" }).of(langTag);
+        return name.charAt(0).toUpperCase() + name.slice(1);
+      } catch (e) {
+        return langTag;
+      }
+    }
+
     var TranslationField = function (options) {
       this.el = options.el;
       this.cls = options.cls;
@@ -242,7 +253,9 @@ var google, django, gettext;
           tab = $(
             `<li class='${selectors["tabLiClass"]} ` +
               (label.hasClass("required") ? "required" : "") + "'" +
-              `><a class="${selectors["tabAClass"]}" href="#` +
+              `><a class="${selectors["tabAClass"]}" title="` +
+              getLanguageDisplayName(lang) +
+              `" href="#` +
               tabId +
               '">' +
               lang.replace("_", "-") +
@@ -444,7 +457,9 @@ var google, django, gettext;
           $tab = $(
             "<li" +
               ($(el).hasClass("mt-default") ? ' class="required"' : "") +
-              '><a href="#' +
+              '><a title="' +
+              getLanguageDisplayName(lang) +
+              '" href="#' +
               tabId +
               '">' +
               lang.replace("_", "-") +
@@ -492,6 +507,11 @@ var google, django, gettext;
         this.$select.change(function () {
           $.each(tabs, function (idx, tab) {
             tab.tabs("option", "active", parseInt(self.$select.val(), 10));
+          });
+        });
+        $.each(tabs, function (idx, tab) {
+          tab.on("tabsactivate", function (event, ui) {
+            self.$select.val(ui.newTab.index());
           });
         });
       },
@@ -542,12 +562,15 @@ var google, django, gettext;
     function getLanguages (mtFields) {
       let languages = [];
       $.each(mtFields, function (_idx, el) {
-          const ids = $(el).attr("id").split("_");
-          const lang = ids[ids.length - 1];
-          if ($.inArray(lang, languages) < 0) {
-            languages.push(lang);
+        $.each(($(el).attr("class") || "").split(" "), function (_idx, cls) {
+          if (cls.substring(0, TranslationField.cssPrefix.length) === TranslationField.cssPrefix) {
+            var tfield = new TranslationField({ el: el, cls: cls });
+            if ($.inArray(tfield.lang, languages) < 0) {
+              languages.push(tfield.lang);
+            }
           }
         });
+      });
       return languages;
     }
 
