@@ -2532,6 +2532,19 @@ class TestManager(ModeltranslationTestBase):
             assert 1 == models.ManagerTestModel.objects.filter(Q(title="de") | Q(pk=42)).count()
             assert 0 == models.ManagerTestModel.objects.filter(Q(title="en") | Q(pk=42)).count()
 
+    def test_q_with_f(self):
+        """Test if F expressions inside Q objects are rewritten."""
+        manager = models.ManagerTestModel.objects
+        manager.create(visits_en=1, visits_de=2)
+
+        assert "en" == get_language()
+        assert 1 == manager.filter(Q(visits=F("visits"))).count()
+        assert 0 == manager.filter(Q(visits=F("visits") + 1) | Q(pk=42)).count()
+
+        with override("de"):
+            assert 1 == manager.filter(Q(visits=F("visits"))).count()
+            assert 0 == manager.filter(Q(visits=F("visits") + 1) | Q(pk=42)).count()
+
     def test_f(self):
         """Test if F queries are rewritten."""
         n = models.ManagerTestModel.objects.create(visits_en=1, visits_de=2)

@@ -297,7 +297,7 @@ class MultilingualQuerySet(QuerySet[_T]):
     def _rewrite_q(self, q: Node | tuple[str, Any]) -> Any:
         """Rewrite field names inside Q call."""
         if isinstance(q, tuple) and len(q) == 2:
-            return rewrite_lookup_key(self.model, q[0]), q[1]
+            return rewrite_lookup_key(self.model, q[0]), self._rewrite_f(q[1])
         if isinstance(q, Node):
             q.children = list(map(self._rewrite_q, q.children))  # type: ignore[arg-type]
         return q
