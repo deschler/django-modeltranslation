@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.20.6](https://github.com/deschler/django-modeltranslation/compare/v0.20.5...v0.20.6) (2026-09-07)
+
+### Bug Fixes
+
+* Rewrite F() expressions inside Q objects ([3a67e47](https://github.com/deschler/django-modeltranslation/commit/3a67e47eb0ac20f6464f062986f19a2ccc5c309e))
 ## [0.20.5](https://github.com/deschler/django-modeltranslation/compare/v0.20.4...v0.20.5) (2026-09-05)
 
 ### Bug Fixes
