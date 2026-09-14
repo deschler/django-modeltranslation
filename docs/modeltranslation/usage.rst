@@ -124,7 +124,9 @@ These manager methods perform rewriting:
 - ``update()``
 - ``only()``, ``defer()``
 - ``values()``, ``values_list()``, with :ref:`fallback <fallback>` mechanism
-- ``dates()``
+- ``dates()``, ``datetimes()``
+- ``annotate()``, for keyword arguments only; an expression that puts a literal before
+  a translated field needs an explicit ``output_field``, as it already does with ``F()``
 - ``select_related()``
 - ``create()``, with optional auto-population_ feature
 

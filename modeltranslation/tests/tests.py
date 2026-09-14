@@ -10,14 +10,14 @@ import pytest
 from django import forms
 from django.apps import apps as django_apps
 from django.conf import settings as django_settings
-from django.core.exceptions import ImproperlyConfigured, ValidationError
+from django.core.exceptions import FieldError, ImproperlyConfigured, ValidationError
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.db import IntegrityError
 from django.db.models import CharField, Count, F, Q, Value
-from django.db.models.functions import Cast, Concat, Length
+from django.db.models.functions import Cast, Coalesce, Concat, Length, Lower
 from django.test import TestCase, TransactionTestCase
 from django.test.utils import override_settings
 from django.utils.translation import get_language, override, trans_real
@@ -1858,6 +1858,28 @@ class OtherFieldsTest(ModeltranslationTestBase):
             datetime.date(2013, 1, 1),
         ]
 
+    def test_datetimes_queryset(self):
+        """Test if datetimes() uses the translation field of the current language."""
+        Model = models.OtherFieldsModel
+
+        # setUp activates "de", so the rows are created under "en" on purpose:
+        # that leaves the untranslated column holding the English values.
+        with override("en"):
+            Model.objects.create(
+                datetime_en=datetime.datetime(2015, 9, 2, 0, 0),
+                datetime_de=datetime.datetime(2005, 9, 2, 0, 0),
+            )
+            Model.objects.create(
+                datetime_en=datetime.datetime(2014, 8, 3, 0, 0),
+                datetime_de=datetime.datetime(2004, 8, 3, 0, 0),
+            )
+
+        with override("de"):
+            assert list(Model.objects.datetimes("datetime", "year", "DESC")) == [
+                datetime.datetime(2005, 1, 1, 0, 0),
+                datetime.datetime(2004, 1, 1, 0, 0),
+            ]
+
     def test_descriptors(self):
         # Descriptor store ints in database and returns string of 'a' of that length
         inst = models.DescriptorModel()
@@ -3253,6 +3275,60 @@ class TestManager(ModeltranslationTestBase):
             )[0]
             == 2
         )
+
+    def test_annotate_nested_expressions(self):
+        """Test if annotating with a function wrapping a field is language-aware."""
+        models.TestModel.objects.create(title_en="title_en", title_de="title_de")
+
+        with override("de"):
+            assert (
+                models.TestModel.objects.annotate(custom_title=Lower("title")).values_list(
+                    "custom_title", flat=True
+                )[0]
+                == "title_de"
+            )
+            assert (
+                models.TestModel.objects.annotate(
+                    custom_title=Coalesce(F("title"), Value("fallback"))
+                ).values_list("custom_title", flat=True)[0]
+                == "title_de"
+            )
+            assert (
+                models.TestModel.objects.annotate(
+                    custom_title=Concat(Lower("title"), Value("!"))
+                ).values_list("custom_title", flat=True)[0]
+                == "title_de!"
+            )
+
+    def test_annotate_literal_before_translated_field(self):
+        """Test if a literal before a translated field needs an explicit output_field."""
+        models.TestModel.objects.create(title_en="title_en", title_de="title_de")
+
+        with override("de"):
+            assert (
+                models.TestModel.objects.annotate(
+                    custom_title=Concat(Value("prefix: "), Lower("title"), output_field=CharField())
+                ).values_list("custom_title", flat=True)[0]
+                == "prefix: title_de"
+            )
+            with pytest.raises(FieldError):
+                list(
+                    models.TestModel.objects.annotate(
+                        custom_title=Concat(Value("prefix: "), Lower("title"))
+                    ).values_list("custom_title", flat=True)
+                )
+
+    def test_annotate_keyword_aggregate(self):
+        """Test if an aggregate passed as a keyword argument counts the current language."""
+        models.TestModel.objects.create(title_en="title_en", title_de="title_de")
+        models.TestModel.objects.create(title_en="untranslated", title_de=None)
+
+        with override("de"):
+            assert [1, 0] == list(
+                models.TestModel.objects.annotate(translated=Count("title"))
+                .order_by("pk")
+                .values_list("translated", flat=True)
+            )
 
 
 class TranslationModelFormTest(ModeltranslationTestBase):
