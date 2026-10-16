@@ -2414,6 +2414,40 @@ class UpdateCommandTest(ModeltranslationTestBase):
         assert "initial" == obj1.title_en
         assert "already" == obj2.title_en
 
+    @parameterized.expand([("test",), ("through_model",), ("trans_through_model",)])
+    def test_update_command_many_to_many(self, field_name):
+        instance = models.ManyToManyFieldModel.objects.create(title="source")
+        related = models.TestModel.objects.create(title="related")
+        field = models.ManyToManyFieldModel._meta.get_field(field_name)
+        original_through = field.remote_field.through
+        original_through.objects.create(
+            **{
+                field.m2m_field_name() + "_id": instance.pk,
+                field.m2m_reverse_field_name() + "_id": related.pk,
+            }
+        )
+
+        call_command(
+            "update_translation_fields",
+            "tests",
+            "ManyToManyFieldModel",
+            language="en",
+            verbosity=0,
+        )
+
+        translated = getattr(instance, field_name + "_en")
+        assert list(translated.values_list("pk", flat=True)) == [related.pk]
+        assert getattr(instance, field_name + "_de").count() == 0
+        # An already populated translation must not be copied again.
+        call_command(
+            "update_translation_fields",
+            "tests",
+            "ManyToManyFieldModel",
+            language="en",
+            verbosity=0,
+        )
+        assert translated.count() == 1
+
     def test_update_command_invalid_language_param(self):
         with pytest.raises(CommandError):
             call_command("update_translation_fields", language="xx", verbosity=0)

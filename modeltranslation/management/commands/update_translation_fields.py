@@ -1,7 +1,7 @@
-from typing import Any
+from typing import Any, cast
 
 from django.core.management.base import BaseCommand, CommandParser, CommandError
-from django.db.models import F, ManyToManyField, Q, JSONField
+from django.db.models import F, ManyToManyField, Model, Q, JSONField
 
 from modeltranslation.settings import AVAILABLE_LANGUAGES, DEFAULT_LANGUAGE
 from modeltranslation.translator import translator
@@ -95,12 +95,13 @@ class Command(BaseCommand):
                 if isinstance(field, ManyToManyField):
                     trans_field = getattr(model, def_lang_fieldname)
                     if not trans_field.through.objects.exists():
-                        field_names = [f.name for f in trans_field.through._meta.fields]
+                        original_through = cast(type[Model], field.remote_field.through)
+                        field_names = [f.attname for f in trans_field.through._meta.fields]
                         trans_field.through.objects.bulk_create(
                             trans_field.through(
-                                **{f: v for f, v in dict(inst.__dict__) if f in field_names}
+                                **{f: v for f, v in inst.__dict__.items() if f in field_names}
                             )
-                            for inst in getattr(model, field_name).through.objects.all()
+                            for inst in original_through._default_manager.all()
                         )
                     continue
                 if field.empty_strings_allowed:  # type: ignore[union-attr]
