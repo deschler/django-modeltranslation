@@ -17,6 +17,7 @@ Here comes the ``TranslationModelForm`` which strip out all translation fields::
     class MyForm(TranslationModelForm):
         class Meta:
             model = News
+            fields = ('title', 'text')
 
 Such a form will contain only original fields (title, text - see :ref:`example <registration>`).
 Of course, upon saving, provided values would be set on proper attributes, depending on the user

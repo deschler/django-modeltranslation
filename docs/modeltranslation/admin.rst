@@ -108,7 +108,7 @@ In a more complex setup the original ``EntryAdmin`` might override
 
 .. code-block:: python
 
-    class EntryAdmin(model.Admin):
+    class EntryAdmin(admin.ModelAdmin):
         def formfield_for_dbfield(self, db_field, **kwargs):
             # does some funky stuff with the formfield here
 
@@ -203,7 +203,7 @@ Bringing it all together our code might look like this:
 .. code-block:: python
 
     from django.contrib import admin
-    from news.admin import ImageInline
+    from news.admin import ImageInline, NewsAdmin
     from news.models import Image, News
     from modeltranslation.admin import TranslationAdmin, TranslationGenericStackedInline
 
@@ -219,7 +219,7 @@ Bringing it all together our code might look like this:
             return field
 
     admin.site.unregister(News)
-    admin.site.register(News, NewsAdmin)
+    admin.site.register(News, TranslatedNewsAdmin)
 
 
 Using Tabbed Translation Fields

@@ -89,14 +89,14 @@ When dealing with abstract base classes, this can be handy::
     class NewsWithImageTranslationOptions(AbstractNewsTranslationOptions):
         fields = ('image',)
 
-    translator.register(News, NewsTranslationOptions)
+    translator.register(News, AbstractNewsTranslationOptions)
     translator.register(NewsWithImage, NewsWithImageTranslationOptions)
 
 The above example adds the fields ``title`` and ``text`` from the
 ``AbstractNewsTranslationOptions`` class to ``NewsWithImageTranslationOptions``, or to
 say it in code::
 
-    assert NewsWithImageTranslationOptions.fields == ('title', 'text', 'image')
+    assert set(NewsWithImageTranslationOptions.fields) == {'title', 'text', 'image'}
 
 Of course multiple inheritance and inheritance chains (A > B > C) also work as
 expected.
@@ -132,11 +132,12 @@ Changes Automatically Applied to the Model Class
 ------------------------------------------------
 
 After registering the ``News`` model for translation a SQL dump of the news
-app will look like this:
+app will look like this (using ``sqlmigrate`` after creating an initial
+migration):
 
 .. code-block:: console
 
-    $ ./manage.py sqlall news
+    $ python manage.py sqlmigrate news 0001
     BEGIN;
     CREATE TABLE `news_news` (
         `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
@@ -148,7 +149,6 @@ app will look like this:
         `text_en` longtext NULL,
     )
     ;
-    CREATE INDEX `news_news_page_id` ON `news_news` (`page_id`);
     COMMIT;
 
 Note the ``title_de``, ``title_en``, ``text_de`` and ``text_en`` fields which
@@ -192,18 +192,13 @@ the ``models.py`` should contain only bare models and model related logic.
 Committing fields to database
 *****************************
 
-If you are starting a fresh project and have considered your translation needs
-in the beginning then simply sync your database (``./manage.py syncdb`` or
-``./manage.py schemamigration myapp --initial`` if using South)
-and you are ready to use the translated models.
+For both fresh projects and existing models, create and apply Django migrations
+to add the translation fields. See :ref:`migrations` for the commands.
 
-In case you are translating an existing project and your models have already
-been synced to the database you will need to alter the tables in your database
-and add these additional translation fields. If you are using South, you're
-done: simply create a new migration (South will detect newly added translation
-fields) and apply it. If not, you can use a little helper:
-:ref:`commands-sync_translation_fields` which can execute schema-ALTERing SQL
-to add new fields. Use either of these two solutions, not both.
+The :ref:`commands-sync_translation_fields` helper can also execute
+schema-ALTERing SQL to add missing translation fields, but does not create
+migration files. Do not use it to apply schema changes already managed by
+Django migrations.
 
 If you are adding translation fields to a third-party app,
 things get more complicated. In order to be able to update the app in the future,
@@ -236,7 +231,7 @@ should do a migration whenever one of the following changes have been made to
 your project:
 
 - Added or removed a language through ``settings.LANGUAGES`` or
-  ``settings.MODELTRANSLATION LANGUAGES``.
+  ``settings.MODELTRANSLATION_LANGUAGES``.
 - Registered or unregistered a field through ``TranslationOptions.fields``.
 
 It doesn't matter if you are starting a fresh project or change an existing
