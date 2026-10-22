@@ -298,6 +298,8 @@ class MultilingualQuerySet(QuerySet[_T]):
         if isinstance(q, tuple) and len(q) == 2:
             return rewrite_lookup_key(self.model, q[0]), self._rewrite_f(q[1])
         if isinstance(q, Node):
+            # Rewrite a copy: the caller may reuse the same Q object in another language.
+            q = q.copy()
             q.children = list(map(self._rewrite_q, q.children))  # type: ignore[arg-type]
         return q
 
@@ -305,14 +307,20 @@ class MultilingualQuerySet(QuerySet[_T]):
     def _rewrite_f(self, q: models.F | Node) -> models.F | Node:
         """
         Rewrite field names inside F call.
+
+        Returns a rewritten copy and leaves ``q`` untouched, because the caller
+        may reuse the same expression in another language.
         """
         if isinstance(q, models.F):
+            q = q.copy()
             q.name = rewrite_lookup_key(self.model, q.name)
             return q
         if isinstance(q, Node):
+            q = q.copy()
             q.children = list(map(self._rewrite_f, q.children))  # type: ignore[arg-type]
             return q
         if hasattr(q, "get_source_expressions") and hasattr(q, "set_source_expressions"):
+            q = q.copy()
             q.set_source_expressions(list(map(self._rewrite_f, q.get_source_expressions())))
         return q
 
@@ -320,10 +328,11 @@ class MultilingualQuerySet(QuerySet[_T]):
         if not self._rewrite:
             return args, kwargs
         args = tuple(map(self._rewrite_q, args))
-        for key, val in list(kwargs.items()):
-            new_key = rewrite_lookup_key(self.model, key)
-            del kwargs[key]
-            kwargs[new_key] = self._rewrite_f(val)
+        # Build a new dict: complex_filter() passes in the caller's own dict,
+        # e.g. the limit_choices_to of a ForeignKey.
+        kwargs = {
+            rewrite_lookup_key(self.model, key): self._rewrite_f(val) for key, val in kwargs.items()
+        }
         return args, kwargs
 
     def _filter_or_exclude(self, negate: bool, args: Any, kwargs: Any) -> Self:

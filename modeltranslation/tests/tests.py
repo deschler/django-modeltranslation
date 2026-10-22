@@ -2595,6 +2595,35 @@ class TestManager(ModeltranslationTestBase):
         n = models.ManagerTestModel.objects.all()[0]
         assert n.visits_en == 3
 
+    def test_reuse_arguments_across_languages(self):
+        """
+        Test that Q objects, expressions and lookup dicts are not rewritten in place,
+        so the same object gives language-aware results when reused in another language.
+        """
+        manager = models.ManagerTestModel.objects
+        manager.create(title_en="en", title_de="de", visits_en=1, visits_de=2)
+        q = Q(title="en")
+        visits = F("visits")
+        lower_title = Lower("title")
+        # complex_filter() receives the caller's dict, e.g. a ForeignKey's limit_choices_to.
+        lookups = {"title": "en"}
+
+        assert "en" == get_language()
+        assert 1 == manager.filter(q).count()
+        assert 1 == manager.filter(visits=visits).count()
+        assert ["en"] == list(manager.annotate(t=lower_title).values_list("t", flat=True))
+        assert 1 == manager.complex_filter(lookups).count()
+
+        with override("de"):
+            assert 0 == manager.filter(q).count()
+            assert 1 == manager.filter(visits=visits).count()
+            assert ["de"] == list(manager.annotate(t=lower_title).values_list("t", flat=True))
+            assert 0 == manager.complex_filter(lookups).count()
+
+        assert Q(title="en") == q
+        assert F("visits") == visits
+        assert {"title": "en"} == lookups
+
     def test_order_by(self):
         """Check that field names are rewritten in order_by keys."""
         manager = models.ManagerTestModel.objects
