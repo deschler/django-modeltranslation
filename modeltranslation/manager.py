@@ -8,9 +8,9 @@ https://github.com/zmathew/django-linguo
 from __future__ import annotations
 
 import itertools
+from collections.abc import Container, Iterable, Iterator, Sequence
 from functools import reduce
 from typing import Any, Literal, TypeVar, cast, overload
-from collections.abc import Container, Iterator, Sequence, Iterable
 
 from django.contrib.admin.utils import get_model_from_relation
 from django.core.exceptions import FieldDoesNotExist
@@ -19,12 +19,18 @@ from django.db.backends.utils import CursorWrapper
 from django.db.models import Field, Model
 from django.db.models.expressions import Col
 from django.db.models.lookups import Lookup
-from django.db.models.query import QuerySet, ValuesIterable
+from django.db.models.query import (
+    FlatValuesListIterable,
+    NamedValuesListIterable,
+    QuerySet,
+    ValuesIterable,
+    ValuesListIterable,
+)
 from django.db.models.utils import create_namedtuple_class
 from django.utils.tree import Node
 
 from modeltranslation._compat import _django_version
-from modeltranslation._typing import Self, AutoPopulate
+from modeltranslation._typing import AutoPopulate, Self
 from modeltranslation.fields import TranslationField
 from modeltranslation.thread_context import auto_populate_mode
 from modeltranslation.utils import (
@@ -520,20 +526,25 @@ class MultilingualQuerySet(QuerySet[_T]):
         return super().annotate(*args, **kwargs)
 
 
-class FallbackValuesIterable(ValuesIterable):
+class _FallbackValuesMixin:
     queryset: MultilingualQuerySet[Model]
+    chunked_fetch: bool
+    chunk_size: int
 
     class X:
         # This stupid class is needed as object use __slots__ and has no __dict__.
         pass
 
-    def __iter__(self) -> Iterator[dict[str, Any]]:
+    def _fallback_values(self) -> Iterator[dict[str, Any]]:
         instance = self.X()
 
         fields = self.queryset.original_fields
         fields += tuple(f for f in self.queryset.query.annotation_select if f not in fields)
 
-        for row in super().__iter__():
+        rows = ValuesIterable(
+            self.queryset, chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+        )
+        for row in rows:
             instance.__dict__.update(row)
             for key in self.queryset.translation_fields:
                 row[key] = getattr(self.queryset.model, key).__get__(instance, None)
@@ -541,25 +552,30 @@ class FallbackValuesIterable(ValuesIterable):
             yield {k: row[k] for k in fields}
 
 
-class FallbackValuesListIterable(FallbackValuesIterable):
+class FallbackValuesIterable(_FallbackValuesMixin, ValuesIterable):
+    def __iter__(self) -> Iterator[dict[str, Any]]:
+        return self._fallback_values()
+
+
+class FallbackValuesListIterable(_FallbackValuesMixin, ValuesListIterable):
     def __iter__(self) -> Iterator[tuple[Any, ...]]:
-        for row in super().__iter__():
+        for row in self._fallback_values():
             yield tuple(row.values())
 
 
-class FallbackNamedValuesListIterable(FallbackValuesIterable):
+class FallbackNamedValuesListIterable(_FallbackValuesMixin, NamedValuesListIterable):
     def __iter__(self) -> Iterator[tuple[Any, ...]]:
-        for row in super().__iter__():
+        for row in self._fallback_values():
             names, values = row.keys(), row.values()
             tuple_class = create_namedtuple_class(*names)
             new = tuple.__new__
             yield new(tuple_class, values)
 
 
-class FallbackFlatValuesListIterable(FallbackValuesListIterable):
+class FallbackFlatValuesListIterable(_FallbackValuesMixin, FlatValuesListIterable):
     def __iter__(self) -> Iterator[Any]:
-        for row in super().__iter__():
-            yield row[0]
+        for row in self._fallback_values():
+            yield next(iter(row.values()))
 
 
 @overload
