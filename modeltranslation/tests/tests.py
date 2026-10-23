@@ -5,7 +5,7 @@ import os
 import shutil
 import sys
 from decimal import Decimal
-from modeltranslation.translator import TranslationOptions
+
 import pytest
 from django import forms
 from django.apps import apps as django_apps
@@ -18,17 +18,24 @@ from django.core.management.base import CommandError
 from django.db import IntegrityError
 from django.db.models import CharField, Count, F, Q, Value
 from django.db.models.functions import Cast, Coalesce, Concat, Length, Lower
+from django.db.models.query import (
+    FlatValuesListIterable,
+    NamedValuesListIterable,
+    ValuesIterable,
+    ValuesListIterable,
+)
 from django.test import TestCase, TransactionTestCase
 from django.test.utils import override_settings
 from django.utils.translation import get_language, override, trans_real
 from parameterized import parameterized  # type: ignore[import-untyped]
 
-from modeltranslation import translator
 from modeltranslation import settings as mt_settings
+from modeltranslation import translator
 from modeltranslation.forms import TranslationModelForm
 from modeltranslation.manager import MultilingualManager
 from modeltranslation.models import autodiscover
 from modeltranslation.tests import models, translation
+from modeltranslation.translator import TranslationOptions
 from modeltranslation.utils import (
     auto_populate,
     build_lang,
@@ -2673,6 +2680,27 @@ class TestManager(ModeltranslationTestBase):
 
         self.assert_fallback(manager.values, "fallback", "title", transform=lambda x: x["title"])
         self.assert_fallback(manager.values_list, ("fallback", "fallback"), "title", "text")
+
+    def test_values_iterables_match_django(self):
+        manager = models.ManagerTestModel.objects
+        manager.create(title_en="", title_de="de")
+        with default_fallback():
+            cases = [
+                (manager.values("title"), ValuesIterable, {"title": "de"}),
+                (manager.values_list("title"), ValuesListIterable, ("de",)),
+                (manager.values_list("title", flat=True), FlatValuesListIterable, "de"),
+                (manager.values_list("title", named=True), NamedValuesListIterable, ("de",)),
+            ]
+            for queryset, native_class, expected in cases:
+                with self.subTest(native_class=native_class):
+                    assert issubclass(queryset._iterable_class, native_class)
+                    if native_class is not ValuesIterable:
+                        assert not issubclass(queryset._iterable_class, ValuesIterable)
+                    with self.assertNumQueries(1):
+                        rows = list(queryset.iterator(chunk_size=1))
+                    assert rows == [expected]
+                    if native_class is NamedValuesListIterable:
+                        assert rows[0].title == "de"
 
     def test_values(self):
         manager = models.ManagerTestModel.objects
