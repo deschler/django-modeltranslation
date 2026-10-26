@@ -2421,10 +2421,11 @@ class UpdateCommandTest(ModeltranslationTestBase):
         field = models.ManyToManyFieldModel._meta.get_field(field_name)
         original_through = field.remote_field.through
         original_through.objects.create(
+            pk=1000,
             **{
                 field.m2m_field_name() + "_id": instance.pk,
                 field.m2m_reverse_field_name() + "_id": related.pk,
-            }
+            },
         )
 
         call_command(
@@ -2436,6 +2437,7 @@ class UpdateCommandTest(ModeltranslationTestBase):
         )
 
         translated = getattr(instance, field_name + "_en")
+        assert translated.through._default_manager.get().pk != 1000
         assert list(translated.values_list("pk", flat=True)) == [related.pk]
         assert getattr(instance, field_name + "_de").count() == 0
         # An already populated translation must not be copied again.
