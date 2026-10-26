@@ -559,7 +559,7 @@ def populate_translation_fields(sender: type[Model], kwargs: Any):
                 kwargs.setdefault(default, val)
             elif populate == "required":
                 default = build_localized_fieldname(key, mt_settings.DEFAULT_LANGUAGE)
-                if not sender._meta.get_field(key).null:  # type: ignore[union-attr]
+                if not sender._meta.get_field(key).null:
                     kwargs.setdefault(default, val)
             else:
                 raise AttributeError("Unknown population mode '%s'." % populate)

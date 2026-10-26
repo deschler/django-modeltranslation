@@ -103,7 +103,7 @@ class Command(BaseCommand):
                             for inst in getattr(model, field_name).through.objects.all()
                         )
                     continue
-                if field.empty_strings_allowed:  # type: ignore[union-attr]
+                if field.empty_strings_allowed:
                     q |= Q(**{def_lang_fieldname: ""})
 
                 model._default_manager.filter(q).rewrite(False).order_by().update(  # type: ignore[attr-defined]
