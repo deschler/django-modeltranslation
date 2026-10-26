@@ -160,7 +160,7 @@ def get_fields_to_translatable_models(model: type[Model]) -> dict[str, type[Mode
             # In that case the 'related_model' attribute is set to None
             # so it is necessary to check for this value before trying to
             # get translatable fields.
-            related_model = get_model_from_relation(f)  # type: ignore[arg-type]
+            related_model = get_model_from_relation(f)
             if get_translatable_fields_for_model(related_model) is not None:
                 results.append((f.name, related_model))
     _F2TM_CACHE[model] = dict(results)
@@ -203,7 +203,9 @@ class MultilingualQuerySet(QuerySet[_T]):
                 # it can be rewritten. Otherwise sql.compiler will grab it directly from _meta
                 ordering = []
                 for key in self.model._meta.ordering:
-                    ordering.append(rewrite_order_lookup_key(self.model, key))
+                    ordering.append(
+                        rewrite_order_lookup_key(self.model, key) if isinstance(key, str) else key
+                    )
                 self.query.add_ordering(*ordering)
 
     def __reduce__(self):

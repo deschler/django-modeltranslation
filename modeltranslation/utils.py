@@ -232,7 +232,7 @@ def build_localized_intermediary_model(
         (models.Model,),
         {
             **{k: v for k, v in dict(intermediary_model.__dict__).items() if k != "_meta"},
-            **{f.name: f.clone() for f in intermediary_model._meta.fields},  # type: ignore[attr-defined]
+            **{f.name: f.clone() for f in intermediary_model._meta.fields},
             "Meta": meta,
         },
     )

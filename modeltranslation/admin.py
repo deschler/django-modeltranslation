@@ -231,7 +231,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin[_ModelT]):
             exclude = []
         else:
             exclude = list(exclude)
-        exclude.extend(self.get_readonly_fields(request, obj))  # type: ignore[arg-type]
+        exclude.extend(self.get_readonly_fields(request, obj))
         if not exclude and hasattr(self.form, "_meta") and self.form._meta.exclude:
             # Take the custom ModelForm's Meta.exclude into account only if the
             # ModelAdmin doesn't define its own.
@@ -265,7 +265,7 @@ class TranslationBaseModelAdmin(BaseModelAdmin[_ModelT]):
         return [(None, {"fields": self.replace_orig_field(fields)})]
 
     def get_readonly_fields(
-        self, request: HttpRequest, obj: _ModelT | None = None
+        self, request: HttpRequest, obj: Model | None = None
     ) -> _ListOrTuple[str]:
         """
         Hook to specify custom readonly fields.
@@ -304,7 +304,7 @@ class TranslationAdmin(TranslationBaseModelAdmin[_ModelT], admin.ModelAdmin[_Mod
             flattened_fieldsets = flatten_fieldsets(fieldsets)
 
             # Create a fieldset to group each translated field's localized fields
-            fields = sorted(f for f in self.opts.get_fields() if f.concrete)  # type: ignore[type-var]
+            fields = sorted(f for f in self.opts.get_fields() if f.concrete)
             untranslated_fields = [
                 f.name
                 for f in fields
@@ -380,7 +380,7 @@ class TranslationInlineModelAdmin(
 ):
     def get_formset(
         self, request: HttpRequest, obj: _ParentModelT | None = None, **kwargs: Any
-    ) -> type[BaseInlineFormSet]:
+    ) -> type[BaseInlineFormSet[_ChildModelT, _ParentModelT, forms.ModelForm[_ChildModelT]]]:
         kwargs = self._get_form_or_formset(request, obj, **kwargs)
         return super().get_formset(request, obj, **kwargs)
 
