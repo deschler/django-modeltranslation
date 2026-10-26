@@ -94,10 +94,12 @@ class Command(BaseCommand):
 
                 if isinstance(field, ManyToManyField):
                     trans_field = getattr(model, def_lang_fieldname)
-                    if not trans_field.through.objects.exists():
+                    if not trans_field.through._default_manager.exists():
                         original_through = cast(type[Model], field.remote_field.through)
-                        field_names = [f.attname for f in trans_field.through._meta.fields]
-                        trans_field.through.objects.bulk_create(
+                        field_names = [
+                            f.attname for f in trans_field.through._meta.fields if not f.primary_key
+                        ]
+                        trans_field.through._default_manager.bulk_create(
                             trans_field.through(
                                 **{f: v for f, v in inst.__dict__.items() if f in field_names}
                             )
