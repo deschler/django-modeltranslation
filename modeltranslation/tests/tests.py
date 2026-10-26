@@ -2447,6 +2447,9 @@ class UpdateCommandTest(ModeltranslationTestBase):
             verbosity=0,
         )
         assert translated.count() == 1
+        # Copied rows must not block new ones (e.g. stale pk sequence).
+        translated.add(models.TestModel.objects.create(title="other"))
+        assert translated.count() == 2
 
     def test_update_command_invalid_language_param(self):
         with pytest.raises(CommandError):
