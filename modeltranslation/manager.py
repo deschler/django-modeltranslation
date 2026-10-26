@@ -311,16 +311,17 @@ class MultilingualQuerySet(QuerySet[_T]):
         Returns a rewritten copy and leaves ``q`` untouched, because the caller
         may reuse the same expression in another language.
         """
+        if not isinstance(q, (models.F, Node)) and not (
+            hasattr(q, "get_source_expressions") and hasattr(q, "set_source_expressions")
+        ):
+            # A plain value, such as a string or a list, has nothing to rewrite.
+            return q
+        q = q.copy()
         if isinstance(q, models.F):
-            q = q.copy()
             q.name = rewrite_lookup_key(self.model, q.name)
-            return q
-        if isinstance(q, Node):
-            q = q.copy()
+        elif isinstance(q, Node):
             q.children = list(map(self._rewrite_f, q.children))  # type: ignore[arg-type]
-            return q
-        if hasattr(q, "get_source_expressions") and hasattr(q, "set_source_expressions"):
-            q = q.copy()
+        else:
             q.set_source_expressions(list(map(self._rewrite_f, q.get_source_expressions())))
         return q
 
