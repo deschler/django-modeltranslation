@@ -15,7 +15,7 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     strategy:
       matrix:
-        python: ["3.10"]
+        python: ["3.11"]
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python }}
@@ -42,16 +42,18 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python: ["3.10", "3.11", "3.12", "3.13", "3.14"]
-        django: ["5.1", "5.2", "6.0"]
+        python: ["3.11", "3.12", "3.13", "3.14", "3.15"]
+        django: ["5.2", "6.0", "6.1"]
         database: ["sqlite", "postgres", "mysql"]
         exclude:
-          - python: "3.14"
-            django: "5.1"
-          - python: "3.10"
+          - python: "3.15"
+            django: "5.2"
+          - python: "3.15"
             django: "6.0"
           - python: "3.11"
             django: "6.0"
+          - python: "3.11"
+            django: "6.1"
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       DJANGO: ${{ matrix.django }}

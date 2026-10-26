@@ -11,18 +11,18 @@ maintainers = [
     { name = "Sergiy Tereshchenko", email = "serg.partizan+modeltranslation@gmail.com" },
 ]
 license = "BSD-3-Clause"
-requires-python = "<4,>=3.10"
+requires-python = "<4,>=3.11"
 dependencies = [
-    "Django>=5.1",
+    "Django>=5.2",
     "typing-extensions>=4.0.1",
 ]
 classifiers = [
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
     "Operating System :: OS Independent",
     "Environment :: Web Environment",
     "Intended Audience :: Developers",
@@ -53,7 +53,7 @@ lsp = ["python-lsp-server[rope]", "pylsp-mypy"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py310"
+target-version = "py311"
 [tool.ruff.lint]
 ignore = [
     "E501", # line length is handled by formatter
@@ -69,7 +69,7 @@ extend-generics = [
 ]
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 incremental = true
 warn_unused_ignores = true
 warn_redundant_casts = true
