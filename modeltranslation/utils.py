@@ -11,6 +11,7 @@ from django.utils.translation import get_language_info
 
 from modeltranslation import settings
 from modeltranslation.thread_context import (
+    _mt_thread_context,
     fallbacks_enabled,
     set_auto_populate,
     set_enable_fallbacks,
@@ -166,11 +167,12 @@ def auto_populate(mode: AutoPopulate = "all") -> Iterator[None]:
         with auto_populate('required'):
             call_command('loaddata', 'fixture.json')
     """
+    previous = _mt_thread_context.auto_populate
     set_auto_populate(mode)
     try:
         yield
     finally:
-        set_auto_populate(None)
+        set_auto_populate(previous)
 
 
 @contextmanager
@@ -187,11 +189,12 @@ def fallbacks(enable: bool | None = True) -> Iterator[None]:
     processing or check if there is a value for the current language (not
     knowing the language)
     """
+    previous = _mt_thread_context.enable_fallbacks
     set_enable_fallbacks(enable)
     try:
         yield
     finally:
-        set_enable_fallbacks(None)
+        set_enable_fallbacks(previous)
 
 
 def parse_field(setting: Any | dict[str, Any], field_name: str, default: Any) -> Any:
