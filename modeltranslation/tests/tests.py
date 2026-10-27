@@ -769,6 +769,18 @@ class FallbackTests(ModeltranslationTestBase):
                 with override("en"):
                     assert m.title == ""  # '' is the default
 
+    def test_fallbacks_nested(self):
+        with reload_override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=self.test_fallback):
+            m = models.TestModel(title="foo")
+            with fallbacks(False):
+                with fallbacks(True):
+                    with override("en"):
+                        assert m.title == "foo"
+                with override("en"):
+                    assert m.title == ""  # outer fallbacks(False) still applies
+            with override("en"):
+                assert m.title == "foo"  # back to the setting
+
     def test_fallback_undefined(self):
         """
         Checks if a sensible value is considered undefined and triggers
@@ -3032,6 +3044,32 @@ class TestManager(ModeltranslationTestBase):
         assert m1 == m2
         assert "aaa" == m1.title_en
         assert "aaa" == m1.title_de
+
+    def test_auto_populate_survives_create(self):
+        """
+        ``create()`` inside ``auto_populate`` keeps the mode for later saves.
+        """
+        qs = models.ManagerTestModel.objects
+        with auto_populate(True):
+            m1 = qs.create(title="foo")
+            m2 = qs.create(title="bar")
+        assert "foo" == m1.title_de
+        assert "bar" == m2.title_de
+        with auto_populate(True):
+            qs.get_or_create(title="baz")
+            m3 = qs.create(title="qux")
+        assert "qux" == m3.title_de
+
+    def test_auto_populate_nested(self):
+        qs = models.ManagerTestModel.objects
+        with auto_populate(True):
+            with auto_populate(False):
+                m1 = qs.create(title="foo")
+            m2 = qs.create(title="bar")
+        assert m1.title_de is None
+        assert "bar" == m2.title_de
+        m3 = qs.create(title="baz")
+        assert m3.title_de is None
 
     def test_fixture_population(self):
         """
