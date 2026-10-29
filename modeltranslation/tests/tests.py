@@ -1187,6 +1187,23 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         assert manager.filter(test_fks__title="f_title_de").count() == 0
         assert manager.filter(test_fks__title_de="f_title_de").count() == 1
 
+    def test_delete_target_of_set_null_relation(self):
+        # Regression test for #823: deleting the target of a translated
+        # SET_NULL foreign key must clear every column, not raise IntegrityError.
+        for lang in ("de", "en"):
+            with override(lang):
+                test_inst = models.TestModel.objects.create(title="title")
+                fk_inst = self.model.objects.create(set_null_de=test_inst, set_null_en=test_inst)
+                fk_inst.refresh_from_db()
+                assert fk_inst.__dict__["set_null_id"] == test_inst.pk
+
+                test_inst.delete()
+
+                fk_inst.refresh_from_db()
+                assert fk_inst.__dict__["set_null_id"] is None
+                assert fk_inst.set_null_de_id is None
+                assert fk_inst.set_null_en_id is None
+
     def test_indonesian(self):
         field = models.ForeignKeyModel._meta.get_field("test")
         assert field.attname != build_localized_fieldname(field.name, "id")

@@ -1387,6 +1387,36 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
+                    "set_null",
+                    models.OneToOneField(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="test_o2o_set_null",
+                        to="tests.testmodel",
+                    ),
+                ),
+                (
+                    "set_null_de",
+                    models.OneToOneField(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="test_o2o_set_null",
+                        to="tests.testmodel",
+                    ),
+                ),
+                (
+                    "set_null_en",
+                    models.OneToOneField(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="test_o2o_set_null",
+                        to="tests.testmodel",
+                    ),
+                ),
+                (
                     "test",
                     models.OneToOneField(
                         null=True,
@@ -1568,6 +1598,36 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
+                        to="tests.testmodel",
+                    ),
+                ),
+                (
+                    "set_null",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="test_fks_set_null",
+                        to="tests.testmodel",
+                    ),
+                ),
+                (
+                    "set_null_de",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="test_fks_set_null",
+                        to="tests.testmodel",
+                    ),
+                ),
+                (
+                    "set_null_en",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="test_fks_set_null",
                         to="tests.testmodel",
                     ),
                 ),

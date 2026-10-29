@@ -17,8 +17,9 @@ from django.db.models import (
     OneToOneField,
     options,
 )
-from django.db.models import Index, UniqueConstraint
+from django.db.models import Index, Q, UniqueConstraint
 from django.db.models.base import ModelBase
+from django.db.models.deletion import Collector
 from django.db.models.signals import post_init
 from django.utils.functional import cached_property
 
@@ -33,6 +34,7 @@ from modeltranslation.fields import (
 )
 from modeltranslation.manager import (
     MultilingualManager,
+    MultilingualQuerySet,
     MultilingualQuerysetManager,
     rewrite_lookup_key,
 )
@@ -586,6 +588,32 @@ def patch_related_object_descriptor_caching(ro_descriptor):
             return build_localized_fieldname(self.get_accessor_name(), get_language())
 
     ro_descriptor.related.__class__ = NewRelated
+
+
+def patch_collector_related_objects() -> None:
+    """
+    Django's deletion Collector finds related rows through ``_base_manager``, using real
+    field names (like ``test__in`` and ``test_en__in``), then updates them with
+    ``update(test=None)`` for SET_NULL. Lookup rewriting would turn ``test`` into the
+    current language field, so the original column would never be found or cleared,
+    and deleting the target fails with IntegrityError (#823).
+    """
+    old_related_objects = Collector.related_objects
+
+    def related_objects(self, related_model, related_fields, objs):
+        queryset = related_model._base_manager.using(self.using)
+        if not isinstance(queryset, MultilingualQuerySet):
+            return old_related_objects(self, related_model, related_fields, objs)
+        predicate = Q.create(
+            [(f"{related_field.name}__in", objs) for related_field in related_fields],
+            connector=Q.OR,
+        )
+        return queryset.rewrite(False).filter(predicate)
+
+    Collector.related_objects = related_objects
+
+
+patch_collector_related_objects()
 
 
 class Translator:
