@@ -68,8 +68,8 @@ fields) and provides SQL statements to alter tables. You should run this command
 a new language to your ``settings.LANGUAGES`` or a new field to the ``TranslationOptions`` of
 a registered model.
 
-However, if you are using South in your project, in most cases it's recommended to use migration
-instead of ``sync_translation_fields``. See :ref:`db-fields` for detailed info and use cases.
+In most cases, use Django migrations instead of ``sync_translation_fields``.
+See :ref:`migrations` for details.
 
 
 The ``loaddata`` Command

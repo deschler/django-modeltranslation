@@ -51,7 +51,7 @@ Get a source tarball from `pypi`_, unpack, then install with:
 
 .. code-block:: console
 
-    $ python setup.py install
+    $ python -m pip install .
 
 .. note:: As an alternative, if you don't want to mess with any packaging tool,
           unpack the tarball and copy/move the modeltranslation directory
@@ -78,8 +78,8 @@ in detail in the following sections:
 
 5. Sync the database using ``python manage.py makemigrations`` and ``python manage.py migrate``.
 
-   .. note:: This only applies if the models registered in ``translation.py`` haven't been
-             synced to the database before. If they have, please read :ref:`db-fields`.
+   This also applies when adding translations to existing models; see
+   :ref:`db-fields`.
 
 
 Configuration
