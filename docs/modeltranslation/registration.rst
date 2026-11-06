@@ -220,8 +220,8 @@ values from existing database fields, you can use the
 
 .. _migrations:
 
-Migrations (Django 1.7)
-^^^^^^^^^^^^^^^^^^^^^^^
+Migrations
+^^^^^^^^^^
 
 .. versionadded:: 0.8
 
@@ -240,10 +240,6 @@ one, it's always:
 1. ``python manage.py makemigrations`` to create a new migration with
    the added or removed fields.
 2. ``python manage.py migrate`` to apply the changes.
-
-.. As opposed to the statement made in :ref:`db-fields`, using the
-.. :ref:`sync_translation_fields <commands-sync_translation_fields>`
-.. management command together with the new migration system is not recommended.
 
 .. note::
     Support for migrations is implemented through
