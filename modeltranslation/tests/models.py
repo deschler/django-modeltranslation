@@ -154,6 +154,16 @@ class ForeignKeyModel(models.Model):
     )
 
 
+class ForeignKeySetNullModel(models.Model):
+    test = models.ForeignKey(
+        TestModel,
+        blank=True,
+        null=True,
+        related_name="test_set_null_fks",
+        on_delete=models.SET_NULL,
+    )
+
+
 class OneToOneFieldModel(models.Model):
     title = models.CharField(gettext_lazy("title"), max_length=255)
     test = models.OneToOneField(

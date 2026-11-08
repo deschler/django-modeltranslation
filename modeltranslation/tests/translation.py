@@ -102,6 +102,11 @@ class ForeignKeyModelTranslationOptions(TranslationOptions):
     )
 
 
+@register(models.ForeignKeySetNullModel)
+class ForeignKeySetNullModelTranslationOptions(TranslationOptions):
+    fields = ("test",)
+
+
 @register(models.OneToOneFieldModel)
 class OneToOneFieldModelTranslationOptions(TranslationOptions):
     fields = (

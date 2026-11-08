@@ -15,10 +15,12 @@ from django.db.models import (
     ManyToManyField,
     Model,
     OneToOneField,
+    QuerySet,
     options,
 )
-from django.db.models import Index, UniqueConstraint
+from django.db.models import Index, Q, UniqueConstraint
 from django.db.models.base import ModelBase
+from django.db.models.deletion import Collector
 from django.db.models.signals import post_init
 from django.utils.functional import cached_property
 
@@ -33,6 +35,7 @@ from modeltranslation.fields import (
 )
 from modeltranslation.manager import (
     MultilingualManager,
+    MultilingualQuerySet,
     MultilingualQuerysetManager,
     rewrite_lookup_key,
 )
@@ -210,6 +213,40 @@ class MultilingualOptions(options.Options):
         return manager
 
 
+def patch_deletion_collector() -> None:
+    """
+    Make Django's deletion collector query related rows without field name rewriting.
+
+    The collector handles ``on_delete`` for every foreign key column separately, the
+    original one included. Its queries go through the (patched) base manager, which
+    would rewrite the original column to the translation column of the active
+    language, so the original column was never matched, nulled or cascaded.
+    """
+    original_related_objects = Collector.related_objects
+    if getattr(original_related_objects, "_modeltranslation_patched", False):
+        return
+
+    def related_objects(
+        self: Collector,
+        related_model: type[Model],
+        related_fields: Iterable[Field],
+        objs: Any,
+    ) -> QuerySet[Model]:
+        if not isinstance(related_model._meta, MultilingualOptions):
+            return original_related_objects(self, related_model, related_fields, objs)
+        qs = related_model._base_manager.using(self.using)
+        if isinstance(qs, MultilingualQuerySet):
+            qs = qs.rewrite(False)
+        predicate = Q.create(
+            [(f"{related_field.name}__in", objs) for related_field in related_fields],
+            connector=Q.OR,
+        )
+        return qs.filter(predicate)
+
+    related_objects._modeltranslation_patched = True
+    Collector.related_objects = related_objects
+
+
 def add_translation_fields(model: type[Model], opts: TranslationOptions) -> None:
     """
     Monkey patches the original model class to provide additional fields for
@@ -331,6 +368,7 @@ def add_manager(model: type[Model]) -> None:
 
     model._meta.__class__ = MultilingualOptions
     model._meta._expire_cache()
+    patch_deletion_collector()
 
 
 def patch_constructor(model: type[Model]) -> None:
