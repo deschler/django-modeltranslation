@@ -44,7 +44,7 @@ from modeltranslation.utils import (
 )
 
 # How many models are registered for tests.
-TEST_MODELS = 43
+TEST_MODELS = 44
 
 
 class reload_override_settings(override_settings):
@@ -1196,6 +1196,40 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
         assert build_lang("en_en") == "en_en"
         assert build_lang("en-en") == "en_en"
         assert build_lang("id") == "ind"
+
+    @parameterized.expand([("de",), ("en",)])
+    def test_delete_referenced_object_set_null(self, lang):
+        # Deleting the referenced object must clear the original column as well as
+        # every translation column, whatever language is active (#823).
+        model = models.ForeignKeySetNullModel
+        trans_real.activate(lang)
+        target = models.TestModel.objects.create(title_de="target", title_en="target")
+        inst = model.objects.create(test_de=target, test_en=target)
+        assert model.objects.rewrite(False).values_list("test", "test_de", "test_en").get(
+            pk=inst.pk
+        ) == (target.pk, target.pk, target.pk)
+
+        target.delete()
+
+        assert model.objects.rewrite(False).values_list("test", "test_de", "test_en").get(
+            pk=inst.pk
+        ) == (None, None, None)
+
+    @parameterized.expand([("de",), ("en",)])
+    def test_delete_object_referenced_by_one_translation_set_null(self, lang):
+        model = models.ForeignKeySetNullModel
+        trans_real.activate(lang)
+        target_de = models.TestModel.objects.create(title_de="de", title_en="de")
+        target_en = models.TestModel.objects.create(title_de="en", title_en="en")
+        inst = model.objects.create(test_de=target_de, test_en=target_en)
+        original = model.objects.rewrite(False).values_list("test", flat=True).get(pk=inst.pk)
+        deleted_pk = target_de.pk
+
+        target_de.delete()
+
+        assert model.objects.rewrite(False).values_list("test", "test_de", "test_en").get(
+            pk=inst.pk
+        ) == (None if original == deleted_pk else original, None, target_en.pk)
 
 
 class ManyToManyFieldsTest(ModeltranslationTestBase):

@@ -1611,6 +1611,50 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
+            name="ForeignKeySetNullModel",
+            fields=[
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "test",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="test_set_null_fks",
+                        to="tests.testmodel",
+                    ),
+                ),
+                (
+                    "test_de",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="test_set_null_fks",
+                        to="tests.testmodel",
+                    ),
+                ),
+                (
+                    "test_en",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="test_set_null_fks",
+                        to="tests.testmodel",
+                    ),
+                ),
+            ],
+        ),
+        migrations.CreateModel(
             name="CustomThroughModel_en",
             fields=[
                 (
