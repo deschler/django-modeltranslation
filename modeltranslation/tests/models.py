@@ -152,6 +152,13 @@ class ForeignKeyModel(models.Model):
         related_name="test_fks_un",
         on_delete=models.CASCADE,
     )
+    set_null = models.ForeignKey(
+        TestModel,
+        blank=True,
+        null=True,
+        related_name="test_fks_set_null",
+        on_delete=models.SET_NULL,
+    )
 
 
 class OneToOneFieldModel(models.Model):
@@ -170,6 +177,13 @@ class OneToOneFieldModel(models.Model):
         null=True,
         related_name="test_o2o",
         on_delete=models.CASCADE,
+    )
+    set_null = models.OneToOneField(
+        TestModel,
+        blank=True,
+        null=True,
+        related_name="test_o2o_set_null",
+        on_delete=models.SET_NULL,
     )
 
 

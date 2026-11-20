@@ -7,5 +7,7 @@ class ModeltranslationConfig(AppConfig):
 
     def ready(self) -> None:
         from modeltranslation.models import handle_translation_registrations
+        from modeltranslation.translator import patch_collector_related_objects
 
+        patch_collector_related_objects()
         handle_translation_registrations()

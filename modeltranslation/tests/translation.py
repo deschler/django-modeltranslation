@@ -99,6 +99,7 @@ class ForeignKeyModelTranslationOptions(TranslationOptions):
         "optional",
         "hidden",
         "non",
+        "set_null",
     )
 
 
@@ -109,6 +110,7 @@ class OneToOneFieldModelTranslationOptions(TranslationOptions):
         "test",
         "optional",
         "non",
+        "set_null",
     )
 
 
