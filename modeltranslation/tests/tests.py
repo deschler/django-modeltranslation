@@ -1204,6 +1204,16 @@ class ForeignKeyFieldsTest(ModeltranslationTestBase):
                 assert fk_inst.set_null_de_id is None
                 assert fk_inst.set_null_en_id is None
 
+    def test_collector_patch_applies_once(self):
+        # The Collector patch is applied by the app's ready(), and a second call
+        # must not wrap it again.
+        from django.db.models.deletion import Collector
+
+        patched = Collector.related_objects
+        assert getattr(patched, "_modeltranslation_patched", False)
+        translator.patch_collector_related_objects()
+        assert Collector.related_objects is patched
+
     def test_indonesian(self):
         field = models.ForeignKeyModel._meta.get_field("test")
         assert field.attname != build_localized_fieldname(field.name, "id")

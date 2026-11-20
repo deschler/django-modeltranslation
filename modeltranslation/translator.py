@@ -597,7 +597,11 @@ def patch_collector_related_objects() -> None:
     ``update(test=None)`` for SET_NULL. Lookup rewriting would turn ``test`` into the
     current language field, so the original column would never be found or cleared,
     and deleting the target fails with IntegrityError (#823).
+
+    Called once from ``ModeltranslationConfig.ready()``. Calling it again does nothing.
     """
+    if getattr(Collector.related_objects, "_modeltranslation_patched", False):
+        return
     old_related_objects = Collector.related_objects
 
     def related_objects(self, related_model, related_fields, objs):
@@ -610,10 +614,8 @@ def patch_collector_related_objects() -> None:
         )
         return queryset.rewrite(False).filter(predicate)
 
+    related_objects._modeltranslation_patched = True
     Collector.related_objects = related_objects
-
-
-patch_collector_related_objects()
 
 
 class Translator:
